@@ -13,6 +13,7 @@ import { FilterPanel } from './components/FilterPanel';
 import { ProblemGrid } from './components/ProblemGrid';
 import { ProblemDetail } from './components/ProblemDetail';
 import { ProgressDashboard } from './components/ProgressDashboard';
+import { SearchModal } from './components/SearchModal';
 import {
   Sparkles,
   BookOpen,
@@ -37,6 +38,9 @@ export function App() {
   // Selected problem for detailed view modal
   const [selectedProblem, setSelectedProblem] = useState<DSAProblem | null>(null);
 
+  // Search Command Palette Modal state
+  const [isSearchModalOpen, setIsSearchModalOpen] = useState(false);
+
   // Custom Hooks
   const {
     solvedIds,
@@ -60,11 +64,21 @@ export function App() {
     setBookmarkedIds,
   } = useBookmarks();
 
-  // Handle global shortcut key (Press '/' to search, 'Escape' to close modal)
+  // Handle global shortcut keys ('/' or Cmd/Ctrl+K to open search, 'Escape' to close)
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
+      const activeTag = (document.activeElement as HTMLElement)?.tagName;
+      const isInputActive = activeTag === 'INPUT' || activeTag === 'TEXTAREA' || activeTag === 'SELECT';
+
       if (e.key === 'Escape') {
         setSelectedProblem(null);
+        setIsSearchModalOpen(false);
+      } else if (
+        (e.key === '/' && !isInputActive) ||
+        ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k')
+      ) {
+        e.preventDefault();
+        setIsSearchModalOpen(true);
       }
     };
     window.addEventListener('keydown', handleKeyDown);
@@ -146,12 +160,7 @@ export function App() {
         solvedCount={solvedCount}
         totalCount={totalCount}
         bookmarkedCount={bookmarkedCount}
-        onOpenSearch={() => {
-          setActiveTab('problems');
-          setTimeout(() => {
-            window.scrollTo({ top: 300, behavior: 'smooth' });
-          }, 50);
-        }}
+        onOpenSearch={() => setIsSearchModalOpen(true)}
       />
 
       {/* Main Content Area */}
@@ -268,6 +277,8 @@ export function App() {
               onClearFilters={handleClearFilters}
               activeFilterCount={activeFilterCount}
               totalFilteredCount={filteredProblems.length}
+              searchQuery={searchQuery}
+              onSearchChange={setSearchQuery}
             />
 
             {/* Problems Grid */}
@@ -402,6 +413,14 @@ export function App() {
           }}
         />
       )}
+
+      {/* Global Quick Search / Command Palette Modal */}
+      <SearchModal
+        isOpen={isSearchModalOpen}
+        onClose={() => setIsSearchModalOpen(false)}
+        problems={PROBLEMS}
+        onSelectProblem={(problem) => setSelectedProblem(problem)}
+      />
 
       {/* Footer */}
       <footer className="border-t border-white/5 bg-[#080B14]/90 py-8 px-4 sm:px-6 lg:px-8 text-center text-xs text-slate-500 font-mono">

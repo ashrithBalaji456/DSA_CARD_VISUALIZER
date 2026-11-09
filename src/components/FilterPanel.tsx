@@ -4,6 +4,8 @@ import {
   SlidersHorizontal,
   Layers,
   ArrowUpDown,
+  Search,
+  X,
 } from 'lucide-react';
 import type { Difficulty, SortOption, StatusFilter } from '../types/problem';
 import { CATEGORIES } from '../data/categories';
@@ -21,6 +23,8 @@ interface Props {
   onClearFilters: () => void;
   activeFilterCount: number;
   totalFilteredCount: number;
+  searchQuery?: string;
+  onSearchChange?: (q: string) => void;
 }
 
 export const FilterPanel: React.FC<Props> = ({
@@ -35,6 +39,8 @@ export const FilterPanel: React.FC<Props> = ({
   onClearFilters,
   activeFilterCount,
   totalFilteredCount,
+  searchQuery = '',
+  onSearchChange,
 }) => {
   const categoryOptions = [
     { value: 'all', label: 'All Categories (20)' },
@@ -78,6 +84,29 @@ export const FilterPanel: React.FC<Props> = ({
             <span>Clear All Filters</span>
           </button>
         )}
+      </div>
+
+      {/* Live Search Input inside FilterPanel */}
+      <div className="mb-4">
+        <div className="relative flex items-center bg-black/40 border border-white/10 rounded-xl px-3.5 py-2.5 focus-within:border-indigo-500/60 focus-within:ring-2 focus-within:ring-indigo-500/20 transition-all">
+          <Search className="w-4 h-4 text-indigo-400 shrink-0 mr-2.5" />
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => onSearchChange?.(e.target.value)}
+            placeholder="Search problems by title, #number, pattern, or keyword..."
+            className="w-full bg-transparent text-xs sm:text-sm text-white placeholder-slate-400 outline-none"
+          />
+          {searchQuery && (
+            <button
+              onClick={() => onSearchChange?.('')}
+              className="text-xs text-slate-400 hover:text-white p-1 rounded hover:bg-white/10 cursor-pointer"
+              title="Clear search"
+            >
+              <X className="w-3.5 h-3.5" />
+            </button>
+          )}
+        </div>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">

@@ -114,12 +114,12 @@ export const Header: React.FC<Props> = ({
           {onOpenSearch && (
             <button
               onClick={onOpenSearch}
-              className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs text-slate-300 bg-white/[0.04] border border-white/10 hover:border-indigo-500/40 hover:text-white transition-all group cursor-pointer active:scale-95"
-              title="Quick Search"
+              className="flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs text-slate-300 bg-white/[0.05] border border-white/10 hover:border-indigo-500/50 hover:bg-white/[0.09] hover:text-white transition-all group cursor-pointer active:scale-95 shadow-sm"
+              title="Search problems (Press '/' or Ctrl+K)"
             >
               <Search className="w-3.5 h-3.5 text-slate-400 group-hover:text-indigo-400 transition-colors" />
               <span className="hidden sm:inline">Search...</span>
-              <kbd className="hidden sm:inline text-[10px] bg-white/10 px-1.5 py-0.5 rounded text-slate-400 border border-white/10">
+              <kbd className="hidden sm:inline text-[10px] bg-white/10 px-1.5 py-0.5 rounded text-slate-400 border border-white/10 font-mono">
                 /
               </kbd>
             </button>
