@@ -57,7 +57,7 @@ export const Header: React.FC<Props> = ({
         {/* Logo */}
         <button
           onClick={() => handleNavClick('dashboard')}
-          className="flex items-center gap-3 group text-left transition-all"
+          className="flex items-center gap-3 group text-left transition-all cursor-pointer active:scale-95"
         >
           <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 via-violet-600 to-blue-500 p-0.5 shadow-lg shadow-indigo-500/20 group-hover:shadow-indigo-500/35 transition-all">
             <div className="w-full h-full bg-[#080B14] rounded-[10px] flex items-center justify-center">
@@ -86,10 +86,10 @@ export const Header: React.FC<Props> = ({
               <button
                 key={item.id}
                 onClick={() => handleNavClick(item.id)}
-                className={`flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-medium transition-all duration-200 relative ${
+                className={`flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-medium transition-all duration-200 relative cursor-pointer active:scale-95 select-none ${
                   isActive
                     ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/30'
-                    : 'text-slate-300 hover:text-white hover:bg-white/[0.05]'
+                    : 'text-slate-300 hover:text-white hover:bg-white/[0.08]'
                 }`}
               >
                 <Icon className="w-3.5 h-3.5" />
@@ -114,7 +114,7 @@ export const Header: React.FC<Props> = ({
           {onOpenSearch && (
             <button
               onClick={onOpenSearch}
-              className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs text-slate-300 bg-white/[0.04] border border-white/10 hover:border-indigo-500/40 hover:text-white transition-all group"
+              className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs text-slate-300 bg-white/[0.04] border border-white/10 hover:border-indigo-500/40 hover:text-white transition-all group cursor-pointer active:scale-95"
               title="Quick Search"
             >
               <Search className="w-3.5 h-3.5 text-slate-400 group-hover:text-indigo-400 transition-colors" />
@@ -128,7 +128,7 @@ export const Header: React.FC<Props> = ({
           {/* Solved Badge Pill */}
           <div
             onClick={() => handleNavClick('progress')}
-            className="cursor-pointer hidden sm:flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-medium hover:bg-emerald-500/15 transition-all"
+            className="cursor-pointer active:scale-95 select-none hidden sm:flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-medium hover:bg-emerald-500/20 transition-all"
             title="Solved Problems"
           >
             <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />

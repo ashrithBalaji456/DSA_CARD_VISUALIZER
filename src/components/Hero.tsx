@@ -88,7 +88,7 @@ export const Hero: React.FC<Props> = ({
         {/* Total Problems */}
         <div
           onClick={() => onSelectFilter && onSelectFilter('all')}
-          className="cursor-pointer glass-card rounded-2xl p-4 flex flex-col justify-between group hover:border-indigo-500/40 transition-all"
+          className="cursor-pointer active:scale-95 select-none glass-card rounded-2xl p-4 flex flex-col justify-between group hover:border-indigo-500/40 transition-all"
         >
           <div className="flex items-center justify-between text-slate-400 mb-2">
             <span className="text-xs font-medium">Total Problems</span>
@@ -103,7 +103,7 @@ export const Hero: React.FC<Props> = ({
         {/* Solved Problems */}
         <div
           onClick={() => onSelectFilter && onSelectFilter('solved')}
-          className="cursor-pointer glass-card rounded-2xl p-4 flex flex-col justify-between group hover:border-emerald-500/40 transition-all"
+          className="cursor-pointer active:scale-95 select-none glass-card rounded-2xl p-4 flex flex-col justify-between group hover:border-emerald-500/40 transition-all"
         >
           <div className="flex items-center justify-between text-slate-400 mb-2">
             <span className="text-xs font-medium">Solved</span>
@@ -118,7 +118,7 @@ export const Hero: React.FC<Props> = ({
         {/* Unsolved Problems */}
         <div
           onClick={() => onSelectFilter && onSelectFilter('unsolved')}
-          className="cursor-pointer glass-card rounded-2xl p-4 flex flex-col justify-between group hover:border-amber-500/40 transition-all"
+          className="cursor-pointer active:scale-95 select-none glass-card rounded-2xl p-4 flex flex-col justify-between group hover:border-amber-500/40 transition-all"
         >
           <div className="flex items-center justify-between text-slate-400 mb-2">
             <span className="text-xs font-medium">Remaining</span>
@@ -133,7 +133,7 @@ export const Hero: React.FC<Props> = ({
         {/* Bookmarked Problems */}
         <div
           onClick={() => onSelectFilter && onSelectFilter('bookmarked')}
-          className="cursor-pointer glass-card rounded-2xl p-4 flex flex-col justify-between group hover:border-purple-500/40 transition-all"
+          className="cursor-pointer active:scale-95 select-none glass-card rounded-2xl p-4 flex flex-col justify-between group hover:border-purple-500/40 transition-all"
         >
           <div className="flex items-center justify-between text-slate-400 mb-2">
             <span className="text-xs font-medium">Bookmarked</span>

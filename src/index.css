@@ -17,6 +17,23 @@
     overflow-x: hidden;
     min-height: 100vh;
   }
+
+  /* Ensure all buttons, links, and clickable elements always show hand pointer */
+  button,
+  [role="button"],
+  a,
+  select,
+  summary {
+    cursor: pointer !important;
+  }
+
+  /* Tactile click feel across the whole app */
+  button:not(:disabled):active,
+  [role="button"]:not([aria-disabled="true"]):active,
+  a:active {
+    transform: scale(0.96);
+    transition: transform 0.08s ease;
+  }
 }
 
 /* Glassmorphism utility classes */

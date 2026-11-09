@@ -54,7 +54,7 @@ export const FilterPanel: React.FC<Props> = ({
         {activeFilterCount > 0 && (
           <button
             onClick={onClearFilters}
-            className="flex items-center gap-1.5 text-xs text-rose-300 hover:text-rose-200 bg-rose-500/10 border border-rose-500/20 px-3 py-1.5 rounded-lg hover:bg-rose-500/20 transition-all self-start lg:self-auto"
+            className="flex items-center gap-1.5 text-xs text-rose-300 hover:text-rose-200 bg-rose-500/10 border border-rose-500/20 px-3 py-1.5 rounded-lg hover:bg-rose-500/20 transition-all self-start lg:self-auto cursor-pointer active:scale-95"
           >
             <RotateCcw className="w-3 h-3" />
             <span>Clear All Filters</span>
@@ -73,7 +73,7 @@ export const FilterPanel: React.FC<Props> = ({
               <button
                 key={diff}
                 onClick={() => onDifficultyChange(diff)}
-                className={`flex-1 py-1.5 text-xs font-medium rounded-lg transition-all ${
+                className={`flex-1 py-1.5 text-xs font-medium rounded-lg transition-all cursor-pointer active:scale-95 select-none ${
                   selectedDifficulty === diff
                     ? diff === 'Easy'
                       ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 shadow-sm'
@@ -106,7 +106,7 @@ export const FilterPanel: React.FC<Props> = ({
               <button
                 key={st.id}
                 onClick={() => onStatusChange(st.id as StatusFilter)}
-                className={`flex-1 py-1.5 text-xs font-medium rounded-lg transition-all ${
+                className={`flex-1 py-1.5 text-xs font-medium rounded-lg transition-all cursor-pointer active:scale-95 select-none ${
                   selectedStatus === st.id
                     ? 'bg-indigo-600 text-white shadow-sm'
                     : 'text-slate-400 hover:text-white hover:bg-white/5'

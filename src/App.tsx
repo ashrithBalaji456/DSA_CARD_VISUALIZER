@@ -235,12 +235,19 @@ export function App() {
               </div>
 
               {activeCategoryObj && (
-                <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-indigo-500/15 border border-indigo-500/30 text-indigo-300 text-xs self-start sm:self-auto">
+                <div
+                  onClick={() => setSelectedCategory('all')}
+                  className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-indigo-500/15 border border-indigo-500/30 text-indigo-300 text-xs self-start sm:self-auto cursor-pointer hover:bg-indigo-500/25 active:scale-95 transition-all select-none"
+                  title="Click to remove category filter"
+                >
                   <span className="text-slate-400">Category:</span>
                   <span className="font-semibold">{activeCategoryObj.name}</span>
                   <button
-                    onClick={() => setSelectedCategory('all')}
-                    className="ml-1 text-slate-400 hover:text-white"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setSelectedCategory('all');
+                    }}
+                    className="ml-1 text-slate-400 hover:text-white cursor-pointer"
                   >
                     ✕
                   </button>

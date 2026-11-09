@@ -23,7 +23,7 @@ export const CategoryCard: React.FC<Props> = ({
   return (
     <div
       onClick={() => onSelect(category.id)}
-      className={`cursor-pointer rounded-2xl p-4 transition-all duration-300 relative group flex flex-col justify-between ${
+      className={`cursor-pointer active:scale-95 select-none rounded-2xl p-4 transition-all duration-300 relative group flex flex-col justify-between ${
         isSelected
           ? 'bg-indigo-600/20 border-2 border-indigo-500 shadow-lg shadow-indigo-500/20'
           : 'glass-card hover:-translate-y-1'

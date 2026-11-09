@@ -54,7 +54,7 @@ export const ProblemCard: React.FC<Props> = ({
                 e.stopPropagation();
                 onToggleBookmark(problem.id);
               }}
-              className={`p-1.5 rounded-lg border transition-all ${
+              className={`p-1.5 rounded-lg border transition-all cursor-pointer active:scale-90 ${
                 isBookmarked
                   ? 'bg-purple-500/20 border-purple-500/40 text-purple-400'
                   : 'bg-white/[0.03] border-white/10 text-slate-400 hover:text-white hover:bg-white/10'
@@ -71,7 +71,7 @@ export const ProblemCard: React.FC<Props> = ({
                 e.stopPropagation();
                 onToggleSolved(problem.id);
               }}
-              className={`p-1.5 rounded-lg border transition-all ${
+              className={`p-1.5 rounded-lg border transition-all cursor-pointer active:scale-90 ${
                 isSolved
                   ? 'bg-emerald-500/20 border-emerald-500/40 text-emerald-400'
                   : 'bg-white/[0.03] border-white/10 text-slate-400 hover:text-emerald-400 hover:bg-white/10'
@@ -105,7 +105,7 @@ export const ProblemCard: React.FC<Props> = ({
                 e.stopPropagation();
                 onSelectCategory?.(cat);
               }}
-              className="text-[11px] px-2 py-0.5 rounded-md bg-white/[0.04] border border-white/[0.08] text-slate-300 hover:border-indigo-400/40 hover:text-indigo-300 transition-colors"
+              className="text-[11px] px-2 py-0.5 rounded-md bg-white/[0.04] border border-white/[0.08] text-slate-300 hover:border-indigo-400/40 hover:text-indigo-300 transition-colors cursor-pointer active:scale-95"
             >
               {cat}
             </button>
@@ -138,7 +138,7 @@ export const ProblemCard: React.FC<Props> = ({
             target="_blank"
             rel="noopener noreferrer"
             onClick={(e) => e.stopPropagation()}
-            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-xs font-medium bg-white/[0.04] border border-white/10 text-slate-300 hover:text-white hover:border-amber-500/40 hover:bg-amber-500/10 transition-all"
+            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-xs font-medium bg-white/[0.04] border border-white/10 text-slate-300 hover:text-white hover:border-amber-500/40 hover:bg-amber-500/10 transition-all cursor-pointer active:scale-95 select-none"
             title="Open on LeetCode in new browser tab"
           >
             <span className="text-amber-400 font-bold font-mono text-[11px]">LC</span>
@@ -151,7 +151,7 @@ export const ProblemCard: React.FC<Props> = ({
             <a
               href={problem.visualizerUrl}
               onClick={(e) => e.stopPropagation()}
-              className="flex-1 flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold bg-gradient-to-r from-cyan-600 via-indigo-600 to-violet-600 hover:from-cyan-500 hover:to-violet-500 text-white shadow-md shadow-indigo-600/25 hover:shadow-cyan-500/35 transition-all group/btn"
+              className="flex-1 flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold bg-gradient-to-r from-cyan-600 via-indigo-600 to-violet-600 hover:from-cyan-500 hover:to-violet-500 text-white shadow-md shadow-indigo-600/25 hover:shadow-cyan-500/35 transition-all group/btn cursor-pointer active:scale-95 select-none"
               title="Open full interactive visualizer page"
             >
               <Sparkles className="w-3 h-3 text-cyan-200" />
@@ -161,7 +161,7 @@ export const ProblemCard: React.FC<Props> = ({
           ) : (
             <button
               onClick={() => onExplore(problem)}
-              className="flex-1 flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium bg-indigo-600/90 hover:bg-indigo-600 text-white shadow-md shadow-indigo-600/20 hover:shadow-indigo-600/40 transition-all group/btn"
+              className="flex-1 flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium bg-indigo-600/90 hover:bg-indigo-600 text-white shadow-md shadow-indigo-600/20 hover:shadow-indigo-600/40 transition-all group/btn cursor-pointer active:scale-95 select-none"
             >
               <span>Open Problem</span>
               <ArrowRight className="w-3 h-3 group-hover/btn:translate-x-0.5 transition-transform" />
@@ -175,7 +175,7 @@ export const ProblemCard: React.FC<Props> = ({
                 e.stopPropagation();
                 onExplore(problem);
               }}
-              className="p-1.5 rounded-xl bg-white/[0.04] border border-white/10 text-slate-400 hover:text-white hover:bg-white/10 transition-all"
+              className="p-1.5 rounded-xl bg-white/[0.04] border border-white/10 text-slate-400 hover:text-white hover:bg-white/10 transition-all cursor-pointer active:scale-95 select-none"
               title="Quick problem overview & notes"
             >
               <Info className="w-3.5 h-3.5" />
