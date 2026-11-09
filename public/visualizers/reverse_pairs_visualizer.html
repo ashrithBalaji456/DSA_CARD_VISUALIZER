@@ -1,0 +1,1477 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Reverse Pairs Visualizer - LeetCode 493</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=Inter:wght@300;400;500;600;700&display=swap');
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: radial-gradient(circle at 15% 15%, #0f172a 0%, #030712 100%);
+      color: #e2e8f0;
+      min-height: 100vh;
+    }
+
+    .code-font {
+      font-family: 'Fira Code', monospace;
+    }
+
+    .glass-panel {
+      background: rgba(15, 23, 42, 0.75);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.6);
+    }
+
+    .glass-button {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      backdrop-filter: blur(12px);
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .glass-button:hover:not(:disabled) {
+      background: rgba(255, 255, 255, 0.14);
+      border-color: rgba(255, 255, 255, 0.25);
+      transform: translateY(-1px);
+    }
+    .glass-button:active:not(:disabled) {
+      transform: translateY(1px);
+    }
+    .glass-button:disabled {
+      opacity: 0.35;
+      cursor: not-allowed;
+    }
+
+    .code-line {
+      transition: all 0.2s ease;
+      border-left: 3px solid transparent;
+      padding: 2px 10px;
+    }
+    .code-line.active-line {
+      background: rgba(56, 189, 248, 0.16);
+      border-left: 3px solid #38bdf8;
+      color: #ffffff;
+      box-shadow: inset 0 0 16px rgba(56, 189, 248, 0.12);
+    }
+
+    /* Custom scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: rgba(15, 23, 42, 0.5);
+    }
+    ::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.15);
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(255, 255, 255, 0.28);
+    }
+
+    @keyframes matchPulse {
+      0%, 100% { transform: scale(1); filter: drop-shadow(0 0 8px rgba(16, 185, 129, 0.6)); }
+      50% { transform: scale(1.06); filter: drop-shadow(0 0 16px rgba(16, 185, 129, 0.9)); }
+    }
+    .match-anim {
+      animation: matchPulse 0.5s ease-in-out;
+    }
+  </style>
+</head>
+<body class="p-4 sm:p-6 lg:p-8 flex flex-col items-center justify-start min-h-screen">
+
+  <!-- Ambient Glow Orbs -->
+  <div class="fixed top-12 left-1/4 w-96 h-96 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none -z-10"></div>
+  <div class="fixed bottom-20 right-1/4 w-96 h-96 bg-amber-500/10 rounded-full blur-3xl pointer-events-none -z-10"></div>
+  <div class="fixed top-1/2 left-2/3 w-80 h-80 bg-purple-500/10 rounded-full blur-3xl pointer-events-none -z-10"></div>
+
+  <!-- MAIN WRAPPER -->
+  <div class="w-full max-w-7xl flex flex-col gap-6">
+
+    <!-- TOP GLASS CONTROLS DECK -->
+    <header class="glass-panel rounded-2xl p-4 sm:p-5 flex flex-col gap-4 sticky top-4 z-50">
+      <div class="flex flex-wrap items-center justify-between gap-4">
+
+        <!-- Title & Subtitle -->
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-cyan-500 via-indigo-500 to-amber-500 flex items-center justify-center shadow-lg shadow-cyan-500/20 text-white font-bold text-lg">
+            <i class="fa-solid fa-arrows-split-up-and-left text-amber-300"></i>
+          </div>
+          <div>
+            <h1 class="text-lg sm:text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white via-slate-200 to-slate-400">
+              Reverse Pairs Visualizer
+            </h1>
+            <p class="text-xs text-slate-400 flex items-center gap-2">
+              <span class="inline-block w-2 h-2 rounded-full bg-cyan-400 animate-pulse"></span>
+              LeetCode 493 • Divide & Conquer (Merge Sort) • &Omicron;(N log N) Time
+            </p>
+          </div>
+        </div>
+
+        <!-- Center Controls: Reset, Prev, Play/Stop, Next -->
+        <div class="flex items-center gap-2 sm:gap-3 bg-black/30 p-1.5 rounded-xl border border-white/5">
+          <button id="btnReset" class="glass-button text-slate-300 hover:text-white px-3 py-2 rounded-lg text-sm flex items-center gap-1.5" title="Reset to Start">
+            <i class="fa-solid fa-rotate-left"></i>
+            <span class="hidden sm:inline">Reset</span>
+          </button>
+          <button id="btnPrev" class="glass-button text-slate-300 hover:text-white px-3 py-2 rounded-lg text-sm flex items-center gap-1.5" title="Previous Step (Left Arrow)">
+            <i class="fa-solid fa-backward-step"></i>
+            <span class="hidden sm:inline">Prev</span>
+          </button>
+          <button id="btnPlay" class="glass-button bg-cyan-500/20 text-cyan-300 hover:bg-cyan-500/30 border-cyan-500/40 px-4 py-2 rounded-lg text-sm font-semibold flex items-center gap-2 shadow-lg shadow-cyan-500/10" title="Start / Stop (Spacebar)">
+            <i class="fa-solid fa-play" id="playIcon"></i>
+            <span id="playText">Start</span>
+          </button>
+          <button id="btnNext" class="glass-button text-slate-300 hover:text-white px-3 py-2 rounded-lg text-sm flex items-center gap-1.5" title="Next Step (Right Arrow)">
+            <span class="hidden sm:inline">Next</span>
+            <i class="fa-solid fa-forward-step"></i>
+          </button>
+        </div>
+
+        <!-- Speed & Audio Controls & DSA Atlas Return Link -->
+        <div class="flex items-center gap-2">
+          <a href="/" class="glass-button px-3 py-2 rounded-xl text-xs font-semibold text-slate-300 hover:text-white flex items-center gap-1.5 border border-white/10 hover:border-indigo-500/40 bg-white/5 shrink-0 transition-all active:scale-95 cursor-pointer" title="Return to DSA Atlas Library">
+            <i class="fa-solid fa-arrow-left text-indigo-400"></i>
+            <span>DSA Atlas</span>
+          </a>
+          <div class="flex items-center bg-black/30 rounded-xl p-1 border border-white/5 text-xs text-slate-400">
+            <span class="px-2 py-1"><i class="fa-solid fa-gauge-high mr-1"></i>Speed</span>
+            <button class="speed-btn px-2 py-1 rounded-lg hover:text-white" data-speed="1400">0.5x</button>
+            <button class="speed-btn px-2 py-1 rounded-lg bg-cyan-500/30 text-cyan-300 font-semibold" data-speed="750">1x</button>
+            <button class="speed-btn px-2 py-1 rounded-lg hover:text-white" data-speed="350">2x</button>
+            <button class="speed-btn px-2 py-1 rounded-lg hover:text-white" data-speed="150">4x</button>
+          </div>
+          <button id="btnAudio" class="glass-button p-2.5 rounded-xl text-slate-400 hover:text-cyan-300" title="Toggle Synthesized Audio">
+            <i class="fa-solid fa-volume-high" id="audioIcon"></i>
+          </button>
+        </div>
+
+      </div>
+
+      <!-- Scrubber Slider & Step Status Bar -->
+      <div class="flex flex-col sm:flex-row items-center gap-3 pt-1 border-t border-white/5">
+        <div class="flex items-center gap-2 text-xs text-slate-400 w-full sm:w-auto shrink-0">
+          <span id="stepCounterBadge" class="code-font px-2.5 py-1 rounded-md bg-white/5 border border-white/10 text-cyan-300">
+            Step: 0 / 0
+          </span>
+          <span id="phaseBadge" class="px-2.5 py-1 rounded-md bg-cyan-500/20 border border-cyan-500/30 text-cyan-300 font-semibold">
+            Ready
+          </span>
+          <span id="totalPairsBadge" class="px-2.5 py-1 rounded-md bg-emerald-500/20 border border-emerald-500/30 text-emerald-300 font-bold">
+            Total Reverse Pairs: 0
+          </span>
+        </div>
+        <div class="w-full flex items-center gap-3">
+          <input type="range" id="stepScrubber" min="0" max="0" value="0" class="w-full h-1.5 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-cyan-400">
+        </div>
+      </div>
+    </header>
+
+    <!-- PRESETS & CUSTOM INPUT ROW -->
+    <section class="glass-panel rounded-2xl p-4 flex flex-wrap items-center justify-between gap-4">
+      <div class="flex flex-wrap items-center gap-3">
+        <label for="presetSelect" class="text-xs uppercase font-semibold text-slate-400 tracking-wider flex items-center gap-1.5">
+          <i class="fa-solid fa-list-check text-cyan-400"></i> Presets:
+        </label>
+        <select id="presetSelect" class="bg-black/50 border border-white/10 text-xs sm:text-sm text-slate-200 rounded-xl px-3 py-2 outline-none focus:border-cyan-500/50">
+          <option value="0">1: LeetCode Ex 1 ([1, 3, 2, 3, 1] &rarr; 2)</option>
+          <option value="1">2: LeetCode Ex 2 ([2, 4, 3, 5, 1] &rarr; 3)</option>
+          <option value="2">3: Reverse Sorted ([5, 4, 3, 2, 1] &rarr; 4)</option>
+          <option value="3">4: Already Sorted ([1, 2, 3, 4, 5] &rarr; 0)</option>
+          <option value="4">5: 32-Bit Overflow Trap ([2147483647, 2147483647, 1073741823] &rarr; 2)</option>
+          <option value="5">6: Two Elements Valid ([6, 2] &rarr; 1)</option>
+          <option value="6">7: Two Elements Boundary ([4, 2] &rarr; 0, 4 not &gt; 2*2)</option>
+          <option value="7">8: Negative Range ([-5, -2, -5, -2] &rarr; 0)</option>
+          <option value="8">9: Mixed Positive/Negative ([8, -4, 2, -2] &rarr; 4)</option>
+          <option value="9">10: Single Element ([1] &rarr; 0)</option>
+        </select>
+      </div>
+
+      <div class="flex items-center gap-2 flex-grow max-w-md">
+        <input type="text" id="customInput" placeholder="e.g. 1, 3, 2, 3, 1" class="w-full bg-black/40 border border-white/10 rounded-xl px-3 py-1.5 text-xs text-slate-200 outline-none focus:border-cyan-400">
+        <button id="btnApplyCustom" class="glass-button text-xs px-3 py-2 rounded-xl text-cyan-300 font-semibold shrink-0">
+          Load
+        </button>
+      </div>
+    </section>
+
+    <!-- MAIN VISUAL STAGE & JAVA CODE SECTION -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+      <!-- LEFT: VISUALIZATION ARENA (7 Cols) -->
+      <section class="lg:col-span-7 flex flex-col gap-6">
+
+        <!-- Live Scope & Variable HUD Cards -->
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+
+          <!-- Low & Mid Bounds -->
+          <div class="glass-panel rounded-xl p-3 flex flex-col justify-between border-cyan-500/20">
+            <span class="text-[11px] text-slate-400 uppercase font-semibold flex items-center justify-between">
+              Left Subarray [low..mid]
+              <span class="w-2 h-2 rounded-full bg-cyan-400"></span>
+            </span>
+            <div class="flex items-baseline gap-2 mt-2">
+              <span id="varLeftRange" class="code-font text-lg font-bold text-cyan-300">0 .. 2</span>
+            </div>
+            <span id="varLeftSub" class="text-[10px] text-slate-500 mt-1">low: 0, mid: 2</span>
+          </div>
+
+          <!-- Mid+1 & High Bounds -->
+          <div class="glass-panel rounded-xl p-3 flex flex-col justify-between border-amber-500/20">
+            <span class="text-[11px] text-slate-400 uppercase font-semibold flex items-center justify-between">
+              Right Subarray [mid+1..high]
+              <span class="w-2 h-2 rounded-full bg-amber-400"></span>
+            </span>
+            <div class="flex items-baseline gap-2 mt-2">
+              <span id="varRightRange" class="code-font text-lg font-bold text-amber-300">3 .. 4</span>
+            </div>
+            <span id="varRightSub" class="text-[10px] text-slate-500 mt-1">mid+1: 3, high: 4</span>
+          </div>
+
+          <!-- Active Comparison / Pointers -->
+          <div class="glass-panel rounded-xl p-3 flex flex-col justify-between border-purple-500/20">
+            <span class="text-[11px] text-slate-400 uppercase font-semibold flex items-center justify-between">
+              Active Pointers
+              <i class="fa-solid fa-arrows-left-right text-purple-400"></i>
+            </span>
+            <div id="varPointers" class="code-font text-base font-bold text-purple-300 mt-2">left: -, right: -</div>
+            <span id="varPointersSub" class="text-[10px] text-slate-500 mt-1">countPairs comparison</span>
+          </div>
+
+          <!-- Running Count of Reverse Pairs -->
+          <div class="glass-panel rounded-xl p-3 flex flex-col justify-between border-emerald-500/20">
+            <span class="text-[11px] text-slate-400 uppercase font-semibold flex items-center justify-between">
+              Total Reverse Pairs
+              <i class="fa-solid fa-trophy text-emerald-400"></i>
+            </span>
+            <div id="varTotalCount" class="code-font text-2xl font-black text-emerald-300 mt-1">0</div>
+            <span id="varTotalCountSub" class="text-[10px] text-slate-500 mt-0.5">Found so far</span>
+          </div>
+
+        </div>
+
+        <!-- NEW: MERGE SORT RECURSION & MERGE TREE ARENA -->
+        <div class="glass-panel rounded-2xl p-4 sm:p-5 flex flex-col gap-3">
+          <div class="flex flex-wrap items-center justify-between gap-2 pb-2 border-b border-white/5">
+            <div class="flex items-center gap-2">
+              <span class="w-2.5 h-2.5 rounded-full bg-cyan-400 animate-pulse"></span>
+              <span class="font-bold text-xs uppercase tracking-wider text-slate-200 flex items-center gap-1.5">
+                <i class="fa-solid fa-sitemap text-cyan-400"></i>
+                Divide &amp; Conquer Recursion Tree
+              </span>
+            </div>
+            <div class="flex items-center gap-2 text-[11px]">
+              <span class="flex items-center gap-1 text-slate-400"><span class="w-2 h-2 rounded-full bg-cyan-400 inline-block"></span> Dividing</span>
+              <span class="flex items-center gap-1 text-slate-400"><span class="w-2 h-2 rounded-full bg-amber-400 inline-block"></span> Counting Pairs</span>
+              <span class="flex items-center gap-1 text-slate-400"><span class="w-2 h-2 rounded-full bg-emerald-400 inline-block"></span> Merged</span>
+              <span class="flex items-center gap-1 text-slate-400"><span class="w-2 h-2 rounded-full bg-slate-500 inline-block"></span> Pass-through (Untouched)</span>
+            </div>
+          </div>
+
+          <!-- Tree Stage with SVG connectors & Nodes -->
+          <div class="relative w-full overflow-x-auto min-h-[220px] max-h-[340px] bg-black/40 rounded-xl border border-white/5 p-3 flex flex-col justify-between items-center" id="treeScrollContainer">
+            <svg id="treeSvgLinks" class="absolute inset-0 w-full h-full pointer-events-none z-0"></svg>
+            <div id="treeLevelsContainer" class="relative z-10 w-full flex flex-col justify-between gap-5 my-auto">
+              <!-- Dynamically populated recursion levels and nodes -->
+            </div>
+          </div>
+
+          <!-- Tree Insight Banner explaining untouched lines -->
+          <div class="p-2.5 bg-cyan-950/20 border border-cyan-500/20 rounded-xl flex items-center justify-between text-[11px] text-slate-300">
+            <span class="flex items-center gap-2">
+              <i class="fa-solid fa-circle-question text-cyan-400"></i>
+              <span><b>Why untouched lines occur:</b> Odd-length segments produce single-element leaves (size 1) earlier than others. They hit the base case (<code class="font-mono text-cyan-300">low &gt;= high</code>) immediately and pass down untouched until their sibling branch catches up.</span>
+            </span>
+          </div>
+        </div>
+
+        <!-- 1. Array Stage: nums[] with Division & Pointer Highlighting -->
+        <div class="glass-panel rounded-2xl p-5 flex flex-col gap-4">
+          <div class="flex items-center justify-between text-xs pb-2 border-b border-white/5">
+            <span class="font-semibold text-slate-300 uppercase tracking-wider flex items-center gap-1.5">
+              <i class="fa-solid fa-layer-group text-cyan-400"></i>
+              Primary Array: <span class="code-font text-slate-400">nums[]</span>
+            </span>
+            <div class="flex items-center gap-3 text-[11px]">
+              <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded bg-cyan-500/30 border border-cyan-400 inline-block"></span> Left Half</span>
+              <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded bg-amber-500/30 border border-amber-400 inline-block"></span> Right Half</span>
+              <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded bg-emerald-500/30 border border-emerald-400 inline-block"></span> Reverse Pair</span>
+            </div>
+          </div>
+
+          <!-- Interactive Array Tiles Container -->
+          <div id="numsArrayContainer" class="flex flex-wrap gap-2.5 p-3 min-h-[92px] bg-black/30 rounded-xl border border-white/5 items-center justify-start">
+            <!-- Dynamically populated number cards with pointer hats -->
+          </div>
+
+          <!-- Comparison Inspection Card -->
+          <div id="comparisonBox" class="p-3 rounded-xl bg-white/5 border border-white/10 text-xs flex flex-col sm:flex-row items-center justify-between gap-3">
+            <div class="flex items-center gap-2">
+              <i id="comparisonIcon" class="fa-solid fa-circle-info text-cyan-400 text-sm"></i>
+              <span id="comparisonText" class="text-slate-300">Ready to execute. Click Start or Next to begin counting reverse pairs.</span>
+            </div>
+            <div id="conditionBadge" class="hidden text-xs code-font px-2.5 py-1 rounded bg-black/40 border border-white/10 text-slate-300 font-semibold shrink-0">
+              <!-- (long)nums[left] > 2L * nums[right] -->
+            </div>
+          </div>
+        </div>
+
+        <!-- 2. Auxiliary Array Stage: temp[] (Buffer for Merge Phase) -->
+        <div class="glass-panel rounded-2xl p-4 flex flex-col gap-3">
+          <div class="flex items-center justify-between text-xs pb-1 border-b border-white/5">
+            <span class="font-semibold text-slate-300 uppercase tracking-wider flex items-center gap-1.5">
+              <i class="fa-solid fa-clone text-indigo-400"></i>
+              Auxiliary Buffer: <span class="code-font text-slate-400">temp[]</span>
+            </span>
+            <span id="mergeStatusText" class="text-slate-400 text-[11px]">Ready for merge steps</span>
+          </div>
+
+          <div id="tempArrayContainer" class="flex flex-wrap gap-2 p-2.5 min-h-[58px] bg-black/30 rounded-xl border border-white/5 items-center">
+            <!-- Dynamically populated temp buffer tiles -->
+          </div>
+        </div>
+
+        <!-- 3. Certified Reverse Pairs Discovered Showcase -->
+        <div class="glass-panel rounded-2xl p-4 flex flex-col gap-3">
+          <div class="flex items-center justify-between text-xs pb-2 border-b border-white/5">
+            <span class="font-semibold text-slate-300 uppercase tracking-wider flex items-center gap-1.5">
+              <i class="fa-solid fa-link text-emerald-400"></i>
+              Certified Reverse Pairs Catalog: <span class="code-font text-slate-400">nums[i] &gt; 2 &times; nums[j]</span> (where i &lt; j)
+            </span>
+            <span id="pairCounterPill" class="px-2 py-0.5 rounded text-[11px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+              0 Pairs Found
+            </span>
+          </div>
+
+          <div id="pairsListContainer" class="flex flex-wrap gap-2 min-h-[46px] p-2.5 bg-black/30 rounded-xl border border-white/5 items-center">
+            <span class="text-xs text-slate-500 italic">No reverse pairs discovered yet.</span>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- RIGHT: JAVA CODE CONTAINER WITH SYNCHRONIZED LINE HIGHLIGHTING (5 Cols) -->
+      <section class="lg:col-span-5 flex flex-col gap-4">
+        
+        <div class="glass-panel rounded-2xl p-4 flex flex-col h-full">
+          <div class="flex items-center justify-between pb-3 border-b border-white/10 text-xs">
+            <div class="flex items-center gap-2">
+              <div class="flex gap-1.5">
+                <span class="w-3 h-3 rounded-full bg-rose-500/80 inline-block"></span>
+                <span class="w-3 h-3 rounded-full bg-amber-500/80 inline-block"></span>
+                <span class="w-3 h-3 rounded-full bg-emerald-500/80 inline-block"></span>
+              </div>
+              <span class="code-font text-slate-300 font-semibold ml-2">Solution.java</span>
+            </div>
+            <span class="text-[11px] text-cyan-400 bg-cyan-500/10 px-2 py-0.5 rounded border border-cyan-500/20 code-font">
+              Merge Sort &bull; countPairs()
+            </span>
+          </div>
+
+          <!-- Code Box with Line Numbers -->
+          <div id="codeContainer" class="code-font text-xs sm:text-[13px] leading-relaxed text-slate-300 py-3 overflow-y-auto max-h-[580px] flex-grow select-none">
+            <div class="code-line" id="line1"><span class="text-slate-500 mr-2"> 1</span><span class="text-indigo-400 font-semibold">class</span> <span class="text-amber-300">Solution</span> {</div>
+            <div class="code-line" id="line2"><span class="text-slate-500 mr-2"> 2</span>    <span class="text-indigo-400 font-semibold">public int</span> <span class="text-cyan-300">reversePairs</span>(<span class="text-indigo-400">int</span>[] nums) {</div>
+            <div class="code-line" id="line3"><span class="text-slate-500 mr-2"> 3</span>        <span class="text-indigo-400 font-semibold">int</span>[] temp = <span class="text-indigo-400 font-semibold">new int</span>[nums.length];</div>
+            <div class="code-line" id="line4"><span class="text-slate-500 mr-2"> 4</span>        <span class="text-indigo-400 font-semibold">return</span> mergeSort(nums, temp, <span class="text-rose-400">0</span>, nums.length - <span class="text-rose-400">1</span>);</div>
+            <div class="code-line" id="line5"><span class="text-slate-500 mr-2"> 5</span>    }</div>
+            <div class="code-line" id="line6"><span class="text-slate-500 mr-2"> 6</span></div>
+            <div class="code-line" id="line7"><span class="text-slate-500 mr-2"> 7</span>    <span class="text-indigo-400 font-semibold">private int</span> <span class="text-cyan-300">mergeSort</span>(<span class="text-indigo-400">int</span>[] nums, <span class="text-indigo-400">int</span>[] temp, <span class="text-indigo-400">int</span> low, <span class="text-indigo-400">int</span> high) {</div>
+            <div class="code-line" id="line8"><span class="text-slate-500 mr-2"> 8</span>        <span class="text-indigo-400 font-semibold">if</span> (low &gt;= high) {</div>
+            <div class="code-line" id="line9"><span class="text-slate-500 mr-2"> 9</span>            <span class="text-indigo-400 font-semibold">return</span> <span class="text-rose-400">0</span>;</div>
+            <div class="code-line" id="line10"><span class="text-slate-500 mr-2">10</span>        }</div>
+            <div class="code-line" id="line11"><span class="text-slate-500 mr-2">11</span>        <span class="text-indigo-400 font-semibold">int</span> mid = low + (high - low) / <span class="text-rose-400">2</span>;</div>
+            <div class="code-line" id="line12"><span class="text-slate-500 mr-2">12</span>        <span class="text-indigo-400 font-semibold">int</span> count = <span class="text-rose-400">0</span>;</div>
+            <div class="code-line" id="line13"><span class="text-slate-500 mr-2">13</span>        count += mergeSort(nums, temp, low, mid);</div>
+            <div class="code-line" id="line14"><span class="text-slate-500 mr-2">14</span>        count += mergeSort(nums, temp, mid + <span class="text-rose-400">1</span>, high);</div>
+            <div class="code-line" id="line15"><span class="text-slate-500 mr-2">15</span>        count += countPairs(nums, low, mid, high);</div>
+            <div class="code-line" id="line16"><span class="text-slate-500 mr-2">16</span>        merge(nums, temp, low, mid, high);</div>
+            <div class="code-line" id="line17"><span class="text-slate-500 mr-2">17</span>        <span class="text-indigo-400 font-semibold">return</span> count;</div>
+            <div class="code-line" id="line18"><span class="text-slate-500 mr-2">18</span>    }</div>
+            <div class="code-line" id="line19"><span class="text-slate-500 mr-2">19</span></div>
+            <div class="code-line" id="line20"><span class="text-slate-500 mr-2">20</span>    <span class="text-indigo-400 font-semibold">private int</span> <span class="text-cyan-300">countPairs</span>(<span class="text-indigo-400">int</span>[] nums, <span class="text-indigo-400">int</span> low, <span class="text-indigo-400">int</span> mid, <span class="text-indigo-400">int</span> high) {</div>
+            <div class="code-line" id="line21"><span class="text-slate-500 mr-2">21</span>        <span class="text-indigo-400 font-semibold">int</span> right = mid + <span class="text-rose-400">1</span>;</div>
+            <div class="code-line" id="line22"><span class="text-slate-500 mr-2">22</span>        <span class="text-indigo-400 font-semibold">int</span> count = <span class="text-rose-400">0</span>;</div>
+            <div class="code-line" id="line23"><span class="text-slate-500 mr-2">23</span>        <span class="text-indigo-400 font-semibold">for</span> (<span class="text-indigo-400">int</span> left = low; left &lt;= mid; left++) {</div>
+            <div class="code-line" id="line24"><span class="text-slate-500 mr-2">24</span>            <span class="text-indigo-400 font-semibold">while</span> (right &lt;= high &amp;&amp;</div>
+            <div class="code-line" id="line25"><span class="text-slate-500 mr-2">25</span>                   (<span class="text-indigo-400">long</span>) nums[left] &gt; <span class="text-amber-400">2L</span> * nums[right]) {</div>
+            <div class="code-line" id="line26"><span class="text-slate-500 mr-2">26</span>                right++;</div>
+            <div class="code-line" id="line27"><span class="text-slate-500 mr-2">27</span>            }</div>
+            <div class="code-line" id="line28"><span class="text-slate-500 mr-2">28</span>            count += right - (mid + <span class="text-rose-400">1</span>);</div>
+            <div class="code-line" id="line29"><span class="text-slate-500 mr-2">29</span>        }</div>
+            <div class="code-line" id="line30"><span class="text-slate-500 mr-2">30</span>        <span class="text-indigo-400 font-semibold">return</span> count;</div>
+            <div class="code-line" id="line31"><span class="text-slate-500 mr-2">31</span>    }</div>
+            <div class="code-line" id="line32"><span class="text-slate-500 mr-2">32</span></div>
+            <div class="code-line" id="line33"><span class="text-slate-500 mr-2">33</span>    <span class="text-indigo-400 font-semibold">private void</span> <span class="text-cyan-300">merge</span>(<span class="text-indigo-400">int</span>[] nums, <span class="text-indigo-400">int</span>[] temp, <span class="text-indigo-400">int</span> low, <span class="text-indigo-400">int</span> mid, <span class="text-indigo-400">int</span> high) {</div>
+            <div class="code-line" id="line34"><span class="text-slate-500 mr-2">34</span>        <span class="text-indigo-400 font-semibold">int</span> i = low, j = mid + <span class="text-rose-400">1</span>, k = low;</div>
+            <div class="code-line" id="line35"><span class="text-slate-500 mr-2">35</span>        <span class="text-indigo-400 font-semibold">while</span> (i &lt;= mid &amp;&amp; j &lt;= high) {</div>
+            <div class="code-line" id="line36"><span class="text-slate-500 mr-2">36</span>            <span class="text-indigo-400 font-semibold">if</span> (nums[i] &lt;= nums[j]) temp[k++] = nums[i++];</div>
+            <div class="code-line" id="line37"><span class="text-slate-500 mr-2">37</span>            <span class="text-indigo-400 font-semibold">else</span> temp[k++] = nums[j++];</div>
+            <div class="code-line" id="line38"><span class="text-slate-500 mr-2">38</span>        }</div>
+            <div class="code-line" id="line39"><span class="text-slate-500 mr-2">39</span>        <span class="text-indigo-400 font-semibold">while</span> (i &lt;= mid) temp[k++] = nums[i++];</div>
+            <div class="code-line" id="line40"><span class="text-slate-500 mr-2">40</span>        <span class="text-indigo-400 font-semibold">while</span> (j &lt;= high) temp[k++] = nums[j++];</div>
+            <div class="code-line" id="line41"><span class="text-slate-500 mr-2">41</span>        <span class="text-indigo-400 font-semibold">for</span> (<span class="text-indigo-400">int</span> x = low; x &lt;= high; x++) nums[x] = temp[x];</div>
+            <div class="code-line" id="line42"><span class="text-slate-500 mr-2">42</span>    }</div>
+            <div class="code-line" id="line43"><span class="text-slate-500 mr-2">43</span>}</div>
+          </div>
+
+          <!-- Step Narrative Live Box -->
+          <div class="mt-3 p-3 bg-black/40 border border-white/5 rounded-xl flex items-start gap-2.5">
+            <i class="fa-solid fa-circle-info text-cyan-400 mt-0.5 text-xs"></i>
+            <div class="text-xs text-slate-300 leading-relaxed" id="stepDescription">
+              Ready to execute Divide & Conquer Merge Sort. Click <b>Start</b> or <b>Next</b> to begin.
+            </div>
+          </div>
+
+        </div>
+
+      </section>
+
+    </div>
+
+    <!-- BOTTOM SECTION: LEETCODE 493 PROBLEM STATEMENT & ARCHITECTURAL SUMMARY -->
+    <footer class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-2">
+
+      <!-- Problem Statement Card -->
+      <div class="glass-panel rounded-2xl p-5 flex flex-col gap-3">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <span class="text-rose-400 font-bold"><i class="fa-solid fa-certificate mr-1"></i>493. Reverse Pairs</span>
+            <span class="px-2 py-0.5 rounded text-[11px] font-semibold bg-rose-500/20 text-rose-300 border border-rose-500/30">Hard</span>
+          </div>
+          <span class="text-xs text-slate-400 font-mono">LeetCode</span>
+        </div>
+
+        <p class="text-xs text-slate-300 leading-relaxed">
+          Given an integer array <code class="font-mono text-slate-300">nums</code>, return the number of <b>reverse pairs</b> in the array.
+          <br><br>
+          A <b>reverse pair</b> is defined as a pair <code class="font-mono text-cyan-300">(i, j)</code> such that:
+          <br>
+          &bull; <code class="font-mono text-slate-300">0 &le; i &lt; j &lt; nums.length</code> and
+          <br>
+          &bull; <code class="font-mono text-emerald-400 font-semibold">nums[i] &gt; 2 &times; nums[j]</code>
+        </p>
+
+        <div class="space-y-2 pt-2 border-t border-white/5 text-xs text-slate-300">
+          <div class="bg-black/30 p-2.5 rounded-lg border border-white/5 font-mono">
+            <span class="text-slate-400">Example 1:</span><br>
+            <b>Input:</b> nums = [1, 3, 2, 3, 1]<br>
+            <b>Output:</b> <span class="text-emerald-400 font-bold">2</span><br>
+            <span class="text-slate-400 text-[11px]">&bull; (1, 4) &rarr; nums[1]=3 &gt; 2*nums[4]=2<br>&bull; (3, 4) &rarr; nums[3]=3 &gt; 2*nums[4]=2</span>
+          </div>
+          <div class="bg-black/30 p-2.5 rounded-lg border border-white/5 font-mono">
+            <span class="text-slate-400">Example 2:</span><br>
+            <b>Input:</b> nums = [2, 4, 3, 5, 1]<br>
+            <b>Output:</b> <span class="text-emerald-400 font-bold">3</span><br>
+            <span class="text-slate-400 text-[11px]">&bull; (1, 4) &rarr; 4 &gt; 2*1<br>&bull; (2, 4) &rarr; 3 &gt; 2*1<br>&bull; (3, 4) &rarr; 5 &gt; 2*1</span>
+          </div>
+        </div>
+
+        <div class="text-[11px] text-slate-400">
+          <b>Constraints:</b> <code class="font-mono text-slate-300">1 &le; nums.length &le; 5 &times; 10<sup>4</sup></code>, <code class="font-mono text-slate-300">-2<sup>31</sup> &le; nums[i] &le; 2<sup>31</sup> - 1</code>.
+        </div>
+      </div>
+
+      <!-- Architectural & Complexity Summary Card -->
+      <div class="glass-panel rounded-2xl p-5 flex flex-col gap-3">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <span class="text-cyan-400 font-bold"><i class="fa-solid fa-brain mr-1"></i>Algorithm Architectural Insights</span>
+          </div>
+          <span class="px-2 py-0.5 rounded text-[11px] font-semibold bg-cyan-500/20 text-cyan-300 border border-cyan-500/30">Divide & Conquer</span>
+        </div>
+
+        <div class="space-y-3 text-xs text-slate-300 leading-relaxed">
+          <div class="p-3 bg-cyan-950/20 border border-cyan-500/20 rounded-xl">
+            <b class="text-cyan-300 flex items-center gap-1.5 mb-1">
+              <i class="fa-solid fa-forward-step"></i> Monotonic Pointer Advance in countPairs:
+            </b>
+            Because both the left half <code class="font-mono text-cyan-300">[low..mid]</code> and right half <code class="font-mono text-amber-300">[mid+1..high]</code> are already sorted recursively, as <code class="font-mono">left</code> increases, <code class="font-mono">nums[left]</code> is non-decreasing. Therefore, <code class="font-mono">right</code> never needs to reset back to <code class="font-mono">mid + 1</code>. This makes counting pairs strictly <code class="font-mono text-cyan-300">&Omicron;(high - low)</code> linear per merge step!
+          </div>
+
+          <div class="p-3 bg-amber-950/20 border border-amber-500/20 rounded-xl">
+            <b class="text-amber-300 flex items-center gap-1.5 mb-1">
+              <i class="fa-solid fa-shield-halved"></i> 64-Bit Casting Guard ((long) nums[left] &gt; 2L * nums[right]):
+            </b>
+            If <code class="font-mono">nums[right] &ge; 1,073,741,824</code> or <code class="font-mono">&le; -1,073,741,825</code>, multiplying by <code class="font-mono">2</code> overflows standard 32-bit signed integers. Casting to <code class="font-mono">long</code> and multiplying with <code class="font-mono">2L</code> prevents overflow bugs.
+          </div>
+
+          <div class="grid grid-cols-2 gap-3 pt-1">
+            <div class="p-2.5 bg-black/30 rounded-lg border border-white/5">
+              <span class="text-[11px] text-slate-400 uppercase font-semibold">Time Complexity</span>
+              <div class="text-sm font-bold text-emerald-400 font-mono mt-0.5">&Omicron;(N log N)</div>
+              <p class="text-[10px] text-slate-400 mt-0.5">log N recurrence levels, each taking &Omicron;(N) for countPairs and merge.</p>
+            </div>
+            <div class="p-2.5 bg-black/30 rounded-lg border border-white/5">
+              <span class="text-[11px] text-slate-400 uppercase font-semibold">Space Complexity</span>
+              <div class="text-sm font-bold text-cyan-400 font-mono mt-0.5">&Omicron;(N)</div>
+              <p class="text-[10px] text-slate-400 mt-0.5">One auxiliary array temp[] of size N, plus &Omicron;(log N) recursion call stack.</p>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+    </footer>
+
+  </div>
+
+  <!-- JAVASCRIPT SIMULATION LOGIC -->
+  <script>
+    // PRESETS
+    const PRESETS = [
+      { name: "1: LeetCode Ex 1 ([1, 3, 2, 3, 1] -> 2)", nums: [1, 3, 2, 3, 1] },
+      { name: "2: LeetCode Ex 2 ([2, 4, 3, 5, 1] -> 3)", nums: [2, 4, 3, 5, 1] },
+      { name: "3: Reverse Sorted ([5, 4, 3, 2, 1] -> 4)", nums: [5, 4, 3, 2, 1] },
+      { name: "4: Already Sorted ([1, 2, 3, 4, 5] -> 0)", nums: [1, 2, 3, 4, 5] },
+      { name: "5: 32-Bit Overflow Trap ([2147483647, 2147483647, 1073741823] -> 2)", nums: [2147483647, 2147483647, 1073741823] },
+      { name: "6: Two Elements Valid ([6, 2] -> 1)", nums: [6, 2] },
+      { name: "7: Two Elements Boundary ([4, 2] -> 0, 4 not > 2*2)", nums: [4, 2] },
+      { name: "8: Negative Range ([-5, -2, -5, -2] -> 0)", nums: [-5, -2, -5, -2] },
+      { name: "9: Mixed Positive/Negative ([8, -4, 2, -2] -> 4)", nums: [8, -4, 2, -2] },
+      { name: "10: Single Element ([1] -> 0)", nums: [1] }
+    ];
+
+    // APPLICATION STATE
+    let currentNums = [...PRESETS[0].nums];
+    let steps = [];
+    let currentStepIdx = 0;
+    let isPlaying = false;
+    let playInterval = null;
+    let playSpeed = 750; // ms per step
+    let audioEnabled = true;
+
+    // AUDIO SYNTHESIZER
+    let audioCtx = null;
+    function initAudio() {
+      if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      }
+    }
+    function playBeep(freq = 440, type = 'sine', duration = 0.08, vol = 0.05) {
+      if (!audioEnabled) return;
+      try {
+        initAudio();
+        if (audioCtx.state === 'suspended') {
+          audioCtx.resume();
+        }
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = type;
+        osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+        gain.gain.setValueAtTime(vol, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + duration);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + duration);
+      } catch (e) {}
+    }
+
+    // DOM ELEMENTS
+    const btnPlay = document.getElementById('btnPlay');
+    const playIcon = document.getElementById('playIcon');
+    const playText = document.getElementById('playText');
+    const btnPrev = document.getElementById('btnPrev');
+    const btnNext = document.getElementById('btnNext');
+    const btnReset = document.getElementById('btnReset');
+    const btnAudio = document.getElementById('btnAudio');
+    const audioIcon = document.getElementById('audioIcon');
+    const presetSelect = document.getElementById('presetSelect');
+    const customInput = document.getElementById('customInput');
+    const btnApplyCustom = document.getElementById('btnApplyCustom');
+    const stepScrubber = document.getElementById('stepScrubber');
+    const stepCounterBadge = document.getElementById('stepCounterBadge');
+    const phaseBadge = document.getElementById('phaseBadge');
+    const totalPairsBadge = document.getElementById('totalPairsBadge');
+
+    const varLeftRange = document.getElementById('varLeftRange');
+    const varLeftSub = document.getElementById('varLeftSub');
+    const varRightRange = document.getElementById('varRightRange');
+    const varRightSub = document.getElementById('varRightSub');
+    const varPointers = document.getElementById('varPointers');
+    const varPointersSub = document.getElementById('varPointersSub');
+    const varTotalCount = document.getElementById('varTotalCount');
+    const varTotalCountSub = document.getElementById('varTotalCountSub');
+
+    const treeLevelsContainer = document.getElementById('treeLevelsContainer');
+    const treeSvgLinks = document.getElementById('treeSvgLinks');
+
+    const numsArrayContainer = document.getElementById('numsArrayContainer');
+    const comparisonBox = document.getElementById('comparisonBox');
+    const comparisonIcon = document.getElementById('comparisonIcon');
+    const comparisonText = document.getElementById('comparisonText');
+    const conditionBadge = document.getElementById('conditionBadge');
+
+    const tempArrayContainer = document.getElementById('tempArrayContainer');
+    const mergeStatusText = document.getElementById('mergeStatusText');
+    const pairCounterPill = document.getElementById('pairCounterPill');
+    const pairsListContainer = document.getElementById('pairsListContainer');
+
+    const codeContainer = document.getElementById('codeContainer');
+    const stepDescription = document.getElementById('stepDescription');
+
+    // STEP GENERATOR: Simulates Reverse Pairs MergeSort step-by-step
+    function generateSteps(rawNums) {
+      const generated = [];
+      const n = rawNums.length;
+      const nums = [...rawNums];
+      const temp = new Array(n).fill(null);
+      let cumulativePairs = 0;
+      const discoveredPairs = []; // Stores objects { i, j, valI, valJ }
+
+      // Step 1: Entry
+      generated.push({
+        line: 2,
+        phase: "Entry",
+        nums: [...nums],
+        temp: [...temp],
+        low: 0,
+        high: n - 1,
+        mid: -1,
+        left: -1,
+        right: -1,
+        activePair: null,
+        discoveredPairs: [],
+        cumulativePairs: 0,
+        desc: `Called <span class="code-font text-cyan-300">reversePairs(nums)</span> with size n = ${n}. Initializing temp buffer and starting mergeSort.`,
+        soundFreq: 340
+      });
+
+      if (n === 0) {
+        generated.push({
+          line: 4,
+          phase: "Complete",
+          nums: [...nums],
+          temp: [...temp],
+          low: -1,
+          high: -1,
+          mid: -1,
+          left: -1,
+          right: -1,
+          activePair: null,
+          discoveredPairs: [],
+          cumulativePairs: 0,
+          desc: `Array is empty. Return 0.`,
+          soundFreq: 400
+        });
+        return generated;
+      }
+
+      function simMergeSort(low, high) {
+        if (low >= high) {
+          generated.push({
+            line: 8,
+            phase: "Base Case",
+            nums: [...nums],
+            temp: [...temp],
+            low,
+            high,
+            mid: -1,
+            left: -1,
+            right: -1,
+            activePair: null,
+            discoveredPairs: [...discoveredPairs],
+            cumulativePairs,
+            desc: `Base case reached for segment [${low}..${high}]: single element is trivially sorted. Returns 0.`,
+            soundFreq: 380
+          });
+          return;
+        }
+
+        const mid = low + Math.floor((high - low) / 2);
+
+        generated.push({
+          line: 11,
+          phase: "Divide Segment",
+          nums: [...nums],
+          temp: [...temp],
+          low,
+          high,
+          mid,
+          left: -1,
+          right: -1,
+          activePair: null,
+          discoveredPairs: [...discoveredPairs],
+          cumulativePairs,
+          desc: `Dividing segment [${low}..${high}] at <span class="code-font text-purple-300 font-bold">mid = ${mid}</span>. Left: [${low}..${mid}], Right: [${mid + 1}..${high}].`,
+          soundFreq: 420
+        });
+
+        // Left Half Recursion
+        simMergeSort(low, mid);
+
+        // Right Half Recursion
+        simMergeSort(mid + 1, high);
+
+        // COUNT PAIRS: countPairs(nums, low, mid, high)
+        generated.push({
+          line: 15,
+          phase: "Enter countPairs",
+          nums: [...nums],
+          temp: [...temp],
+          low,
+          high,
+          mid,
+          left: low,
+          right: mid + 1,
+          activePair: null,
+          discoveredPairs: [...discoveredPairs],
+          cumulativePairs,
+          desc: `Calling <span class="code-font text-cyan-300 font-bold">countPairs(nums, ${low}, ${mid}, ${high})</span> across left sorted [${low}..${mid}] and right sorted [${mid + 1}..${high}].`,
+          soundFreq: 500
+        });
+
+        let right = mid + 1;
+        let countInStep = 0;
+
+        for (let left = low; left <= mid; left++) {
+          const valLeft = nums[left];
+
+          generated.push({
+            line: 23,
+            phase: "Inspect Left Element",
+            nums: [...nums],
+            temp: [...temp],
+            low,
+            high,
+            mid,
+            left,
+            right,
+            activePair: null,
+            discoveredPairs: [...discoveredPairs],
+            cumulativePairs,
+            desc: `Testing <span class="code-font text-cyan-300 font-bold">left = ${left}</span> (nums[${left}] = ${valLeft}) against right elements starting from right = ${right}.`,
+            soundFreq: 540
+          });
+
+          // While loop
+          while (right <= high) {
+            const valRight = nums[right];
+            const doubleRight = 2 * valRight;
+            const isPair = (valLeft > doubleRight);
+
+            generated.push({
+              line: 25,
+              phase: "Evaluate Condition",
+              nums: [...nums],
+              temp: [...temp],
+              low,
+              high,
+              mid,
+              left,
+              right,
+              activePair: isPair ? { i: left, j: right, valI: valLeft, valJ: valRight } : null,
+              discoveredPairs: [...discoveredPairs],
+              cumulativePairs,
+              evalData: {
+                left,
+                right,
+                valLeft,
+                valRight,
+                doubleRight,
+                isPair
+              },
+              desc: `Evaluating condition: <span class="code-font text-slate-200">(long) nums[${left}] (${valLeft}) &gt; 2L * nums[${right}] (${doubleRight})</span> &rarr; <b>${isPair ? '<span class="text-emerald-400">TRUE</span>' : '<span class="text-rose-400">FALSE</span>'}</b>.`,
+              soundFreq: isPair ? 680 : 360
+            });
+
+            if (isPair) {
+              right++;
+              generated.push({
+                line: 26,
+                phase: "Advance Right Pointer",
+                nums: [...nums],
+                temp: [...temp],
+                low,
+                high,
+                mid,
+                left,
+                right,
+                activePair: { i: left, j: right - 1, valI: valLeft, valJ: nums[right - 1] },
+                discoveredPairs: [...discoveredPairs],
+                cumulativePairs,
+                desc: `Condition holds! Advanced <span class="code-font text-amber-300 font-bold">right++ &rarr; ${right}</span>.`,
+                soundFreq: 720
+              });
+            } else {
+              break;
+            }
+          }
+
+          const addedPairs = right - (mid + 1);
+          countInStep += addedPairs;
+
+          // Register newly discovered pairs for this left element
+          for (let r = mid + 1; r < right; r++) {
+            if (!discoveredPairs.some(p => p.i === left && p.j === r)) {
+              discoveredPairs.push({ i: left, j: r, valI: nums[left], valJ: nums[r] });
+            }
+          }
+
+          cumulativePairs += addedPairs;
+
+          generated.push({
+            line: 28,
+            phase: "Add Pairs Count",
+            nums: [...nums],
+            temp: [...temp],
+            low,
+            high,
+            mid,
+            left,
+            right,
+            activePair: null,
+            discoveredPairs: [...discoveredPairs],
+            cumulativePairs,
+            desc: `For <span class="code-font text-cyan-300">left = ${left}</span>: All elements in right range [${mid + 1}..${right - 1}] qualify (${addedPairs} pairs). Added to count: <span class="code-font text-emerald-400 font-bold">+${addedPairs}</span> (Cumulative: ${cumulativePairs}).`,
+            soundFreq: addedPairs > 0 ? 820 : 460
+          });
+        }
+
+        // MERGE STEP: merge(nums, temp, low, mid, high)
+        generated.push({
+          line: 16,
+          phase: "Enter Merge",
+          nums: [...nums],
+          temp: [...temp],
+          low,
+          high,
+          mid,
+          left: -1,
+          right: -1,
+          activePair: null,
+          discoveredPairs: [...discoveredPairs],
+          cumulativePairs,
+          desc: `Pairs counted for segment [${low}..${high}]. Now executing <span class="code-font text-cyan-300 font-bold">merge(nums, temp, ${low}, ${mid}, ${high})</span> to sort segment.`,
+          soundFreq: 520
+        });
+
+        let i = low;
+        let j = mid + 1;
+        let k = low;
+
+        while (i <= mid && j <= high) {
+          if (nums[i] <= nums[j]) {
+            temp[k] = nums[i];
+            generated.push({
+              line: 36,
+              phase: "Merge Pick Left",
+              nums: [...nums],
+              temp: [...temp],
+              low,
+              high,
+              mid,
+              left: i,
+              right: j,
+              k,
+              activePair: null,
+              discoveredPairs: [...discoveredPairs],
+              cumulativePairs,
+              desc: `Merge compare: nums[${i}] (${nums[i]}) &le; nums[${j}] (${nums[j]}). Placed into <span class="code-font text-cyan-300">temp[${k}] = ${nums[i]}</span>.`,
+              soundFreq: 580
+            });
+            i++;
+          } else {
+            temp[k] = nums[j];
+            generated.push({
+              line: 37,
+              phase: "Merge Pick Right",
+              nums: [...nums],
+              temp: [...temp],
+              low,
+              high,
+              mid,
+              left: i,
+              right: j,
+              k,
+              activePair: null,
+              discoveredPairs: [...discoveredPairs],
+              cumulativePairs,
+              desc: `Merge compare: nums[${i}] (${nums[i]}) &gt; nums[${j}] (${nums[j]}). Placed into <span class="code-font text-amber-300">temp[${k}] = ${nums[j]}</span>.`,
+              soundFreq: 600
+            });
+            j++;
+          }
+          k++;
+        }
+
+        while (i <= mid) {
+          temp[k] = nums[i];
+          generated.push({
+            line: 39,
+            phase: "Merge Flush Left",
+            nums: [...nums],
+            temp: [...temp],
+            low,
+            high,
+            mid,
+            left: i,
+            right: -1,
+            k,
+            activePair: null,
+            discoveredPairs: [...discoveredPairs],
+            cumulativePairs,
+            desc: `Flushing remaining left element into <span class="code-font text-cyan-300">temp[${k}] = ${nums[i]}</span>.`,
+            soundFreq: 560
+          });
+          i++;
+          k++;
+        }
+
+        while (j <= high) {
+          temp[k] = nums[j];
+          generated.push({
+            line: 40,
+            phase: "Merge Flush Right",
+            nums: [...nums],
+            temp: [...temp],
+            low,
+            high,
+            mid,
+            left: -1,
+            right: j,
+            k,
+            activePair: null,
+            discoveredPairs: [...discoveredPairs],
+            cumulativePairs,
+            desc: `Flushing remaining right element into <span class="code-font text-amber-300">temp[${k}] = ${nums[j]}</span>.`,
+            soundFreq: 560
+          });
+          j++;
+          k++;
+        }
+
+        // Copy back to nums
+        for (let x = low; x <= high; x++) {
+          nums[x] = temp[x];
+        }
+
+        generated.push({
+          line: 41,
+          phase: "Merge Complete",
+          nums: [...nums],
+          temp: [...temp],
+          low,
+          high,
+          mid,
+          left: -1,
+          right: -1,
+          activePair: null,
+          discoveredPairs: [...discoveredPairs],
+          cumulativePairs,
+          desc: `Copied sorted values from temp buffer back to <span class="code-font text-emerald-300 font-bold">nums[${low}..${high}]</span>: [${nums.slice(low, high + 1).join(', ')}].`,
+          soundFreq: 640
+        });
+      }
+
+      // Run recursive simulation
+      simMergeSort(0, n - 1);
+
+      // Final Return
+      generated.push({
+        line: 4,
+        phase: "Complete",
+        nums: [...nums],
+        temp: [...temp],
+        low: 0,
+        high: n - 1,
+        mid: -1,
+        left: -1,
+        right: -1,
+        activePair: null,
+        discoveredPairs: [...discoveredPairs],
+        cumulativePairs,
+        desc: `<span class="text-emerald-400 font-bold text-sm"><i class="fa-solid fa-trophy mr-1.5"></i>Finished!</span> Total Reverse Pairs: <span class="code-font text-emerald-300 font-extrabold text-base">${cumulativePairs}</span>. Array is fully sorted.`,
+        soundFreq: 920
+      });
+
+      return generated;
+    }
+
+    // BUILD RECURSION TREE DATA
+    function buildTreeData(rawNums) {
+      const n = rawNums.length;
+      if (n === 0) return { levels: [], nodes: [] };
+
+      const nodes = [];
+      let idCounter = 0;
+
+      function createSubtree(low, high, depth, parentId = null) {
+        const id = idCounter++;
+        const node = {
+          id,
+          parentId,
+          low,
+          high,
+          depth,
+          isLeaf: (low === high),
+          values: rawNums.slice(low, high + 1),
+          children: []
+        };
+        nodes.push(node);
+
+        if (low < high) {
+          const mid = low + Math.floor((high - low) / 2);
+          const leftChild = createSubtree(low, mid, depth + 1, id);
+          const rightChild = createSubtree(mid + 1, high, depth + 1, id);
+          node.children = [leftChild, rightChild];
+        }
+        return node;
+      }
+
+      const root = createSubtree(0, n - 1, 0);
+
+      // Group nodes by depth
+      const maxDepth = Math.max(...nodes.map(node => node.depth));
+      const levels = [];
+      for (let d = 0; d <= maxDepth; d++) {
+        levels.push(nodes.filter(node => node.depth === d));
+      }
+
+      return { root, nodes, levels, maxDepth };
+    }
+
+    let currentTreeModel = null;
+
+    // RENDER TREE STRUCTURE
+    function renderTreeStructure(treeModel) {
+      if (!treeLevelsContainer || !treeModel || !treeModel.levels) return;
+      treeLevelsContainer.innerHTML = '';
+
+      treeModel.levels.forEach((levelNodes, depth) => {
+        const row = document.createElement('div');
+        row.className = "flex items-center justify-around w-full gap-2 relative";
+        row.dataset.depth = depth;
+
+        levelNodes.forEach(node => {
+          const nodeEl = document.createElement('div');
+          nodeEl.id = `treeNode-${node.id}`;
+          nodeEl.className = "tree-node transition-all duration-200 z-10 px-2.5 py-1.5 rounded-lg border text-xs font-mono flex flex-col items-center gap-0.5 bg-black/60 border-white/10 text-slate-400";
+          
+          const valDisplay = node.values.join(', ');
+          const isSingle = node.isLeaf;
+
+          nodeEl.innerHTML = `
+            <div class="flex items-center gap-1 text-[9px] text-slate-500 font-sans">
+              <span>[${node.low}..${node.high}]</span>
+              ${isSingle ? '<span class="text-amber-400/80 text-[8px] px-1 bg-amber-500/10 rounded">Leaf</span>' : ''}
+            </div>
+            <span class="font-bold text-slate-200 text-xs">[ ${valDisplay} ]</span>
+          `;
+          row.appendChild(nodeEl);
+        });
+
+        treeLevelsContainer.appendChild(row);
+      });
+
+      // Draw SVG lines after DOM elements are placed
+      setTimeout(drawTreeLines, 50);
+    }
+
+    function drawTreeLines() {
+      if (!treeSvgLinks || !currentTreeModel) return;
+      treeSvgLinks.innerHTML = '';
+      const svgRect = treeSvgLinks.getBoundingClientRect();
+
+      currentTreeModel.nodes.forEach(node => {
+        if (!node.children || node.children.length === 0) return;
+        const parentEl = document.getElementById(`treeNode-${node.id}`);
+        if (!parentEl) return;
+        const pRect = parentEl.getBoundingClientRect();
+        const px = pRect.left + pRect.width / 2 - svgRect.left;
+        const py = pRect.bottom - svgRect.top;
+
+        node.children.forEach(child => {
+          const childEl = document.getElementById(`treeNode-${child.id}`);
+          if (!childEl) return;
+          const cRect = childEl.getBoundingClientRect();
+          const cx = cRect.left + cRect.width / 2 - svgRect.left;
+          const cy = cRect.top - svgRect.top;
+
+          const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+          const midY = (py + cy) / 2;
+          const d = `M ${px} ${py} C ${px} ${midY}, ${cx} ${midY}, ${cx} ${cy}`;
+          path.setAttribute('d', d);
+          path.setAttribute('stroke', 'rgba(255, 255, 255, 0.15)');
+          path.setAttribute('stroke-width', '1.5');
+          path.setAttribute('fill', 'none');
+          path.id = `treeLink-${node.id}-${child.id}`;
+          treeSvgLinks.appendChild(path);
+        });
+      });
+    }
+
+    // UPDATE ACTIVE TREE NODE HIGHLIGHTS FOR CURRENT STEP
+    function updateTreeHighlight(step) {
+      if (!currentTreeModel) return;
+
+      document.querySelectorAll('.tree-node').forEach(el => {
+        el.className = "tree-node transition-all duration-200 z-10 px-2.5 py-1.5 rounded-lg border text-xs font-mono flex flex-col items-center gap-0.5 bg-black/60 border-white/10 text-slate-400";
+      });
+
+      if (step.low >= 0 && step.high >= 0) {
+        // Find matching node
+        const activeNode = currentTreeModel.nodes.find(n => n.low === step.low && n.high === step.high);
+        if (activeNode) {
+          const el = document.getElementById(`treeNode-${activeNode.id}`);
+          if (el) {
+            if (step.phase.includes("Merge")) {
+              el.className = "tree-node transition-all duration-200 z-10 px-2.5 py-1.5 rounded-lg border text-xs font-mono flex flex-col items-center gap-0.5 bg-emerald-500/25 border-emerald-400 text-emerald-200 ring-2 ring-emerald-400/50 shadow-lg scale-105";
+            } else if (step.phase.includes("countPairs") || step.phase.includes("Inspect") || step.phase.includes("Evaluate") || step.phase.includes("Advance") || step.phase.includes("Add Pairs")) {
+              el.className = "tree-node transition-all duration-200 z-10 px-2.5 py-1.5 rounded-lg border text-xs font-mono flex flex-col items-center gap-0.5 bg-amber-500/25 border-amber-400 text-amber-200 ring-2 ring-amber-400/50 shadow-lg scale-105";
+            } else {
+              el.className = "tree-node transition-all duration-200 z-10 px-2.5 py-1.5 rounded-lg border text-xs font-mono flex flex-col items-center gap-0.5 bg-cyan-500/25 border-cyan-400 text-cyan-200 ring-2 ring-cyan-400/50 shadow-lg scale-105";
+            }
+          }
+        }
+      }
+    }
+
+    // ZERO-JUMP LOCALIZED CODE LINE HIGHLIGHTER
+    function highlightCodeLine(lineNum) {
+      document.querySelectorAll('.code-line').forEach(el => el.classList.remove('active-line'));
+      const activeEl = document.getElementById(`line${lineNum}`);
+      if (activeEl) {
+        activeEl.classList.add('active-line');
+
+        // Scroll strictly inside codeContainer without affecting parent window
+        const containerTop = codeContainer.scrollTop;
+        const containerBottom = containerTop + codeContainer.clientHeight;
+        const elTop = activeEl.offsetTop - codeContainer.offsetTop;
+        const elBottom = elTop + activeEl.clientHeight;
+
+        if (elTop < containerTop + 20) {
+          codeContainer.scrollTo({ top: Math.max(0, elTop - 20), behavior: 'smooth' });
+        } else if (elBottom > containerBottom - 20) {
+          codeContainer.scrollTo({ top: elBottom - codeContainer.clientHeight + 20, behavior: 'smooth' });
+        }
+      }
+    }
+
+    // RENDER CURRENT STEP INTO DOM
+    function renderStep(idx) {
+      if (idx < 0 || idx >= steps.length) return;
+      const step = steps[idx];
+      const n = step.nums.length;
+
+      // Top Deck Status
+      stepCounterBadge.textContent = `Step: ${idx + 1} / ${steps.length}`;
+      phaseBadge.textContent = step.phase;
+      totalPairsBadge.textContent = `Total Reverse Pairs: ${step.cumulativePairs}`;
+      stepScrubber.max = steps.length - 1;
+      stepScrubber.value = idx;
+
+      // HUD Cards
+      if (step.low >= 0 && step.mid >= 0) {
+        varLeftRange.textContent = `${step.low} .. ${step.mid}`;
+        varLeftSub.textContent = `low: ${step.low}, mid: ${step.mid}`;
+      } else {
+        varLeftRange.textContent = `-`;
+        varLeftSub.textContent = `low: -, mid: -`;
+      }
+
+      if (step.mid >= 0 && step.high >= 0) {
+        varRightRange.textContent = `${step.mid + 1} .. ${step.high}`;
+        varRightSub.textContent = `mid+1: ${step.mid + 1}, high: ${step.high}`;
+      } else {
+        varRightRange.textContent = `-`;
+        varRightSub.textContent = `mid+1: -, high: -`;
+      }
+
+      const leftText = step.left >= 0 ? `left: [${step.left}] = ${step.nums[step.left]}` : 'left: -';
+      const rightText = step.right >= 0 && step.right < n ? `right: [${step.right}] = ${step.nums[step.right]}` : 'right: -';
+      varPointers.textContent = `${leftText}, ${rightText}`;
+
+      varTotalCount.textContent = step.cumulativePairs;
+
+      // Narrative description
+      stepDescription.innerHTML = step.desc;
+
+      // 1. Primary Array Stage: nums[]
+      numsArrayContainer.innerHTML = '';
+      step.nums.forEach((val, i) => {
+        const isLeftHalf = (step.low >= 0 && step.mid >= 0 && i >= step.low && i <= step.mid);
+        const isRightHalf = (step.mid >= 0 && step.high >= 0 && i >= step.mid + 1 && i <= step.high);
+        const isActiveLeft = (step.left === i);
+        const isActiveRight = (step.right === i);
+        const isInActivePair = step.activePair && (step.activePair.i === i || step.activePair.j === i);
+
+        let borderAndBg = "bg-white/5 border-white/10 text-slate-400";
+        let subBadge = "";
+
+        if (isActiveLeft && isActiveRight) {
+          borderAndBg = "bg-purple-500/30 border-purple-400 text-purple-200 ring-2 ring-purple-400/50 scale-105 font-bold";
+          subBadge = '<span class="text-[9px] px-1 bg-purple-500/40 rounded text-purple-200">left & right</span>';
+        } else if (isActiveLeft) {
+          borderAndBg = "bg-cyan-500/30 border-cyan-400 text-cyan-100 ring-2 ring-cyan-400/50 scale-105 font-bold";
+          subBadge = '<span class="text-[9px] px-1 bg-cyan-500/40 rounded text-cyan-200">left</span>';
+        } else if (isActiveRight) {
+          borderAndBg = "bg-amber-500/30 border-amber-400 text-amber-100 ring-2 ring-amber-400/50 scale-105 font-bold";
+          subBadge = '<span class="text-[9px] px-1 bg-amber-500/40 rounded text-amber-200">right</span>';
+        } else if (isLeftHalf) {
+          borderAndBg = "bg-cyan-500/10 border-cyan-500/30 text-cyan-300";
+          subBadge = '<span class="text-[9px] text-cyan-400/70">Left Half</span>';
+        } else if (isRightHalf) {
+          borderAndBg = "bg-amber-500/10 border-amber-500/30 text-amber-300";
+          subBadge = '<span class="text-[9px] text-amber-400/70">Right Half</span>';
+        }
+
+        if (isInActivePair) {
+          borderAndBg += " ring-2 ring-emerald-400/80 match-anim";
+        }
+
+        const tile = document.createElement('div');
+        tile.className = `flex flex-col items-center justify-between p-2 rounded-xl border min-w-[62px] min-h-[70px] transition-all duration-200 ${borderAndBg}`;
+        tile.innerHTML = `
+          <div class="flex items-center justify-between w-full text-[10px] text-slate-500 font-sans">
+            <span>[${i}]</span>
+            ${subBadge}
+          </div>
+          <span class="code-font text-sm font-bold my-1">${val}</span>
+          <div class="text-[9px] text-slate-400">
+            ${isLeftHalf ? 'L' : isRightHalf ? 'R' : ''}
+          </div>
+        `;
+        numsArrayContainer.appendChild(tile);
+      });
+
+      // Comparison Box State
+      if (step.evalData) {
+        conditionBadge.classList.remove('hidden');
+        conditionBadge.innerHTML = `
+          <span class="text-cyan-300 font-bold">${step.evalData.valLeft}</span>
+          &gt; 2 &times;
+          <span class="text-amber-300 font-bold">${step.evalData.valRight}</span>
+          (${step.evalData.doubleRight}) &rarr;
+          <span class="${step.evalData.isPair ? 'text-emerald-400 font-extrabold' : 'text-rose-400'}">${step.evalData.isPair ? 'TRUE (+1)' : 'FALSE'}</span>
+        `;
+        comparisonIcon.className = step.evalData.isPair ? "fa-solid fa-circle-check text-emerald-400 text-base" : "fa-solid fa-circle-xmark text-rose-400 text-base";
+        comparisonText.textContent = step.evalData.isPair
+          ? `Reverse Pair Verified: nums[${step.evalData.left}] (${step.evalData.valLeft}) > 2 * nums[${step.evalData.right}] (${step.evalData.valRight})`
+          : `Threshold not met: nums[${step.evalData.left}] (${step.evalData.valLeft}) <= 2 * nums[${step.evalData.right}] (${step.evalData.doubleRight})`;
+        comparisonBox.className = step.evalData.isPair
+          ? "p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-xs flex flex-col sm:flex-row items-center justify-between gap-3"
+          : "p-3 rounded-xl bg-rose-500/10 border border-rose-500/20 text-xs flex flex-col sm:flex-row items-center justify-between gap-3";
+      } else {
+        conditionBadge.classList.add('hidden');
+        comparisonIcon.className = "fa-solid fa-circle-info text-cyan-400 text-sm";
+        comparisonText.innerHTML = step.desc;
+        comparisonBox.className = "p-3 rounded-xl bg-white/5 border border-white/10 text-xs flex flex-col sm:flex-row items-center justify-between gap-3";
+      }
+
+      // 2. Auxiliary Array Stage: temp[]
+      tempArrayContainer.innerHTML = '';
+      step.temp.forEach((val, k) => {
+        const isCurrentK = (step.k === k);
+        const tile = document.createElement('div');
+        const hasVal = (val !== null && val !== undefined);
+
+        tile.className = `flex flex-col items-center justify-between p-1.5 rounded-lg border min-w-[48px] min-h-[48px] text-xs transition-all ${
+          isCurrentK
+            ? 'bg-indigo-500/30 border-indigo-400 text-indigo-100 ring-2 ring-indigo-400 font-bold scale-105'
+            : hasVal
+              ? 'bg-black/40 border-white/15 text-slate-300'
+              : 'bg-black/20 border-white/5 text-slate-600'
+        }`;
+        tile.innerHTML = `
+          <span class="text-[9px] text-slate-500 font-sans">[${k}]</span>
+          <span class="code-font font-semibold">${hasVal ? val : '-'}</span>
+        `;
+        tempArrayContainer.appendChild(tile);
+      });
+
+      if (step.phase.includes("Merge")) {
+        mergeStatusText.textContent = `Merge phase active on segment [${step.low}..${step.high}]`;
+      } else {
+        mergeStatusText.textContent = `Ready for merge steps`;
+      }
+
+      // 3. Certified Reverse Pairs Catalog
+      pairCounterPill.textContent = `${step.discoveredPairs.length} Pairs Found`;
+      if (step.discoveredPairs.length === 0) {
+        pairsListContainer.innerHTML = '<span class="text-xs text-slate-500 italic">No reverse pairs discovered yet.</span>';
+      } else {
+        pairsListContainer.innerHTML = '';
+        step.discoveredPairs.forEach(p => {
+          const pill = document.createElement('div');
+          pill.className = "text-xs px-2.5 py-1 rounded-lg bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 font-mono flex items-center gap-1.5 shadow-sm";
+          pill.innerHTML = `
+            <i class="fa-solid fa-link text-[10px] text-emerald-400"></i>
+            <span>(${p.i}, ${p.j})</span>
+            <span class="text-[10px] text-emerald-400/80 font-sans">[${p.valI} &gt; 2&times;${p.valJ}]</span>
+          `;
+          pairsListContainer.appendChild(pill);
+        });
+      }
+
+      // Synchronize Code View
+      highlightCodeLine(step.line);
+
+      // Synchronize Tree View
+      updateTreeHighlight(step);
+
+      // Synthesized Sound
+      if (step.soundFreq) {
+        playBeep(step.soundFreq, 'sine', 0.08, 0.04);
+      }
+    }
+
+    // PLAYBACK CONTROLLER
+    function setPlaying(playing) {
+      isPlaying = playing;
+      if (isPlaying) {
+        playIcon.className = "fa-solid fa-pause";
+        playText.textContent = "Stop";
+        btnPlay.classList.add('bg-rose-500/20', 'text-rose-300', 'border-rose-500/40');
+        btnPlay.classList.remove('bg-cyan-500/20', 'text-cyan-300', 'border-cyan-500/40');
+
+        playInterval = setInterval(() => {
+          if (currentStepIdx < steps.length - 1) {
+            currentStepIdx++;
+            renderStep(currentStepIdx);
+          } else {
+            setPlaying(false);
+          }
+        }, playSpeed);
+      } else {
+        playIcon.className = "fa-solid fa-play";
+        playText.textContent = "Start";
+        btnPlay.classList.remove('bg-rose-500/20', 'text-rose-300', 'border-rose-500/40');
+        btnPlay.classList.add('bg-cyan-500/20', 'text-cyan-300', 'border-cyan-500/40');
+        if (playInterval) {
+          clearInterval(playInterval);
+          playInterval = null;
+        }
+      }
+    }
+
+    function initSimulation(numsArray) {
+      setPlaying(false);
+      currentNums = [...numsArray];
+      steps = generateSteps(currentNums);
+      currentTreeModel = buildTreeData(currentNums);
+      renderTreeStructure(currentTreeModel);
+      currentStepIdx = 0;
+      stepScrubber.max = steps.length - 1;
+      stepScrubber.value = 0;
+      renderStep(0);
+    }
+
+    // Handle window resize for tree svg connector lines
+    window.addEventListener('resize', () => {
+      drawTreeLines();
+    });
+
+    // EVENT LISTENERS
+    btnPlay.addEventListener('click', () => {
+      if (currentStepIdx >= steps.length - 1) {
+        currentStepIdx = 0;
+        renderStep(0);
+      }
+      setPlaying(!isPlaying);
+    });
+
+    btnNext.addEventListener('click', () => {
+      setPlaying(false);
+      if (currentStepIdx < steps.length - 1) {
+        currentStepIdx++;
+        renderStep(currentStepIdx);
+      }
+    });
+
+    btnPrev.addEventListener('click', () => {
+      setPlaying(false);
+      if (currentStepIdx > 0) {
+        currentStepIdx--;
+        renderStep(currentStepIdx);
+      }
+    });
+
+    btnReset.addEventListener('click', () => {
+      setPlaying(false);
+      currentStepIdx = 0;
+      renderStep(0);
+    });
+
+    stepScrubber.addEventListener('input', (e) => {
+      setPlaying(false);
+      currentStepIdx = parseInt(e.target.value, 10);
+      renderStep(currentStepIdx);
+    });
+
+    // Speed Selector Buttons
+    document.querySelectorAll('.speed-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.speed-btn').forEach(b => {
+          b.classList.remove('bg-cyan-500/30', 'text-cyan-300', 'font-semibold');
+        });
+        btn.classList.add('bg-cyan-500/30', 'text-cyan-300', 'font-semibold');
+        playSpeed = parseInt(btn.dataset.speed, 10);
+        if (isPlaying) {
+          setPlaying(false);
+          setPlaying(true);
+        }
+      });
+    });
+
+    // Audio Toggle
+    btnAudio.addEventListener('click', () => {
+      audioEnabled = !audioEnabled;
+      if (audioEnabled) {
+        audioIcon.className = "fa-solid fa-volume-high";
+        btnAudio.classList.remove('text-slate-600');
+        btnAudio.classList.add('text-slate-400');
+      } else {
+        audioIcon.className = "fa-solid fa-volume-xmark";
+        btnAudio.classList.add('text-slate-600');
+        btnAudio.classList.remove('text-slate-400');
+      }
+    });
+
+    // Preset Selection
+    presetSelect.addEventListener('change', (e) => {
+      const idx = parseInt(e.target.value, 10);
+      initSimulation(PRESETS[idx].nums);
+    });
+
+    // Custom Input Load
+    btnApplyCustom.addEventListener('click', () => {
+      const text = customInput.value.trim();
+      if (!text) return;
+      const parsed = text.split(',')
+        .map(s => parseInt(s.trim(), 10))
+        .filter(n => !isNaN(n));
+      if (parsed.length > 0) {
+        initSimulation(parsed);
+      }
+    });
+
+    // Keyboard Shortcuts (Space: Play/Pause, Arrows: Step)
+    window.addEventListener('keydown', (e) => {
+      if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT') return;
+      if (e.code === 'Space') {
+        e.preventDefault();
+        btnPlay.click();
+      } else if (e.code === 'ArrowRight') {
+        e.preventDefault();
+        btnNext.click();
+      } else if (e.code === 'ArrowLeft') {
+        e.preventDefault();
+        btnPrev.click();
+      }
+    });
+
+    // Initialize with default preset
+    window.onload = function() {
+      initSimulation(PRESETS[0].nums);
+    };
+  </script>
+</body>
+</html>

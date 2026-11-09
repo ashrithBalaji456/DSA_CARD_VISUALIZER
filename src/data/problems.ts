@@ -2239,6 +2239,11 @@ export const PROBLEMS: DSAProblem[] = [
         "number": 238,
         "title": "Product of Array Except Self",
         "difficulty": "Medium"
+      },
+      {
+        "number": 493,
+        "title": "Reverse Pairs",
+        "difficulty": "Hard"
       }
     ],
     "leetcodeUrl": "https://leetcode.com/problems/rotate-array/"
@@ -2585,5 +2590,97 @@ export const PROBLEMS: DSAProblem[] = [
       }
     ],
     "leetcodeUrl": "https://leetcode.com/problems/meeting-rooms-ii/"
+  },
+  {
+    "id": "reverse-pairs",
+    "number": 493,
+    "title": "Reverse Pairs",
+    "slug": "reverse-pairs",
+    "difficulty": "Hard",
+    "categories": [
+      "Arrays",
+      "Sorting",
+      "Two Pointers"
+    ],
+    "description": "Given an integer array nums, return the number of reverse pairs in the array.\n\nA reverse pair is defined as a pair (i, j) such that:\n• 0 <= i < j < nums.length and\n• nums[i] > 2 * nums[j]",
+    "inputFormat": "nums = [int]",
+    "outputFormat": "int (count of reverse pairs)",
+    "constraints": [
+      "1 <= nums.length <= 5 * 10^4",
+      "-2^31 <= nums[i] <= 2^31 - 1"
+    ],
+    "examples": [
+      {
+        "exampleNumber": 1,
+        "input": "nums = [1, 3, 2, 3, 1]",
+        "output": "2",
+        "explanation": "The reverse pairs are: (1, 4) since nums[1] = 3 > 2 * nums[4] = 2; and (3, 4) since nums[3] = 3 > 2 * nums[4] = 2.",
+        "type": "official"
+      },
+      {
+        "exampleNumber": 2,
+        "input": "nums = [2, 4, 3, 5, 1]",
+        "output": "3",
+        "explanation": "The reverse pairs are: (1, 4) where 4 > 2*1; (2, 4) where 3 > 2*1; and (3, 4) where 5 > 2*1.",
+        "type": "official"
+      }
+    ],
+    "approach": "Divide and conquer using modified Merge Sort. Before merging two sorted halves [low..mid] and [mid+1..high], count qualifying pairs using a two-pointer scan in O(high - low) linear time, then merge the two sorted halves into a temporary buffer.",
+    "flowSteps": [
+      {
+        "step": 1,
+        "title": "Divide Subarrays",
+        "description": "Recursively split nums into left [low..mid] and right [mid+1..high] until base case (low >= high).",
+        "stateSnapshot": "mid = low + (high - low) / 2",
+        "highlight": "Divide"
+      },
+      {
+        "step": 2,
+        "title": "Monotonic Two-Pointer Scan",
+        "description": "For each left element, advance right pointer while nums[left] > 2L * nums[right]. Accumulate (right - (mid + 1)).",
+        "stateSnapshot": "count += right - (mid + 1)",
+        "highlight": "Count"
+      },
+      {
+        "step": 3,
+        "title": "Merge Sorted Halves",
+        "description": "Standard two-pointer merge into temp[] buffer and copy back to maintain sorted order for higher levels.",
+        "stateSnapshot": "merge(nums, temp, low, mid, high)",
+        "highlight": "Merge"
+      }
+    ],
+    "timeComplexity": "O(n log n)",
+    "timeComplexityExplanation": "O(log n) recursion tree depth with O(n) two-pointer pair counting and merging at each level.",
+    "spaceComplexity": "O(n)",
+    "spaceComplexityExplanation": "One auxiliary array temp[] of size n for merging, plus O(log n) call stack.",
+    "visualizerUrl": "/visualizers/reverse_pairs_visualizer.html",
+    "keyObservations": [
+      "Sorting the halves allows the right pointer to advance monotonically without resetting, keeping countPairs strictly linear O(n).",
+      "Always cast nums[left] and nums[right] to 64-bit long (2L * nums[right]) to prevent integer overflow."
+    ],
+    "importantPattern": "Modified Merge Sort (Divide & Conquer with Monotonic Two-Pointer Counting)",
+    "commonMistakes": [
+      "32-bit signed integer overflow when multiplying nums[j] by 2.",
+      "Resetting the right pointer to mid + 1 for each left element instead of exploiting sorted monotonicity."
+    ],
+    "optimalApproach": "Modified Merge Sort with Two Pointers",
+    "relatedProblems": [
+      {
+        "number": 189,
+        "title": "Rotate Array",
+        "difficulty": "Medium"
+      },
+      {
+        "number": 1796,
+        "title": "Second Largest Element in Array",
+        "difficulty": "Easy"
+      },
+      {
+        "number": 453,
+        "title": "Minimum Moves to Equal Array Elements",
+        "difficulty": "Medium"
+      }
+    ],
+    "leetcodeUrl": "https://leetcode.com/problems/reverse-pairs/"
   }
 ];
