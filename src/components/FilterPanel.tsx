@@ -54,7 +54,7 @@ export const FilterPanel: React.FC<Props> = ({
     { value: 'title-desc', label: 'Title (Z - A)' },
   ];
   return (
-    <div className="glass-panel rounded-2xl p-4 sm:p-5 mb-6">
+    <div className="glass-panel rounded-2xl p-4 sm:p-5 mb-6 relative z-30">
       <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-4 pb-4 border-b border-white/5">
         <div className="flex items-center gap-2">
           <SlidersHorizontal className="w-4 h-4 text-indigo-400" />

@@ -51,7 +51,7 @@ export const CustomDropdown: React.FC<CustomDropdownProps> = ({
   }, []);
 
   return (
-    <div className="relative" ref={dropdownRef}>
+    <div className={`relative ${isOpen ? 'z-50' : 'z-10'}`} ref={dropdownRef}>
       <label className="block text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-2">
         {label}
       </label>
@@ -91,7 +91,7 @@ export const CustomDropdown: React.FC<CustomDropdownProps> = ({
 
       {/* Curved Glassmorphism Dropdown Menu */}
       {isOpen && (
-        <div className="absolute left-0 right-0 top-full mt-2 z-50 rounded-2xl bg-[#0e1526]/95 border border-white/15 shadow-2xl shadow-black/80 backdrop-blur-2xl p-1.5 max-h-64 overflow-y-auto space-y-1 animate-in fade-in zoom-in-95 duration-150">
+        <div className="absolute left-0 right-0 top-full mt-2 z-[100] rounded-2xl bg-[#0c1220] border border-white/20 shadow-2xl shadow-black p-1.5 max-h-64 overflow-y-auto space-y-1 animate-in fade-in zoom-in-95 duration-150">
           {options.map((option) => {
             const isSelected = option.value === selectedValue;
             return (
