@@ -254,3 +254,4 @@ export const SearchModal: React.FC<Props> = ({
     </div>
   );
 };
+

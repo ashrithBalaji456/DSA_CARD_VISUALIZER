@@ -1327,6 +1327,105 @@ const problems = [
         }
     ],
     "leetcodeUrl": "https://leetcode.com/problems/reverse-pairs/"
+},
+  {
+    "id": "maximum-size-subarray-sum-equals-k",
+    "number": 325,
+    "title": "Maximum Size Subarray Sum Equals K",
+    "slug": "maximum-size-subarray-sum-equals-k",
+    "difficulty": "Medium",
+    "categories": [
+        "Arrays",
+        "Hashing",
+        "Prefix Sum"
+    ],
+    "description": "Given an integer array nums and an integer k, return the maximum length of a subarray that sums to k. If there is not one, return 0 instead.",
+    "inputFormat": "nums = [int], k = int",
+    "outputFormat": "int (maximum subarray length)",
+    "constraints": [
+        "1 <= nums.length <= 2 * 10^5",
+        "-10^4 <= nums[i] <= 10^4",
+        "-10^9 <= k <= 10^9"
+    ],
+    "examples": [
+        {
+            "exampleNumber": 1,
+            "input": "nums = [1, -1, 5, -2, 3], k = 3",
+            "output": "4",
+            "explanation": "The subarray [1, -1, 5, -2] sums to 3 and has the maximum length 4.",
+            "type": "official"
+        },
+        {
+            "exampleNumber": 2,
+            "input": "nums = [-2, -1, 2, 1], k = 1",
+            "output": "2",
+            "explanation": "The subarray [-1, 2] sums to 1 and has the maximum length 2.",
+            "type": "official"
+        }
+    ],
+    "approach": "Prefix Sum + Hash Table: Keep running sum and store the earliest index of each prefix sum. If running sum equals k, length is i + 1. If (running sum - k) exists in the map at index j, the subarray from j + 1 to i sums to k with length i - j. Never overwrite existing map entries to preserve the earliest index and maximize length.",
+    "flowSteps": [
+        {
+            "step": 1,
+            "title": "Initialize Prefix Map",
+            "description": "Create an empty map to record prefixSum -> earliestIndex, and set maxLength = 0.",
+            "stateSnapshot": "seen = {}, prefixSum = 0, maxLen = 0",
+            "highlight": "Init"
+        },
+        {
+            "step": 2,
+            "title": "Accumulate & Check Complement",
+            "description": "At each element nums[i], prefixSum += nums[i]. Check if prefixSum == k (len = i + 1) or if (prefixSum - k) exists in seen.",
+            "stateSnapshot": "complement = prefixSum - k",
+            "highlight": "Check"
+        },
+        {
+            "step": 3,
+            "title": "Store Earliest Occurrence",
+            "description": "If prefixSum is not yet in seen, insert seen[prefixSum] = i. If already present, do not overwrite to keep maximum subarray span.",
+            "stateSnapshot": "seen.has(prefixSum) ? keep : set(i)",
+            "highlight": "Update"
+        }
+    ],
+    "timeComplexity": "O(n)",
+    "timeComplexityExplanation": "Single linear scan through the array with O(1) hash map operations.",
+    "spaceComplexity": "O(n)",
+    "spaceComplexityExplanation": "Stores at most n distinct prefix sums in the hash table.",
+    "visualizerUrl": "/visualizers/maximum_size_subarray_sum_equals_k.html",
+    "keyObservations": [
+        "Subarray sum nums[j+1..i] = prefix[i] - prefix[j]. Thus prefix[j] = prefix[i] - k.",
+        "Only save the earliest index where each prefix sum appears to maximize the span (i - j).",
+        "Handling negative numbers prevents standard two-pointer sliding window, making prefix sum + hash map the optimal approach."
+    ],
+    "importantPattern": "Prefix Sum with Earliest Index Hash Map",
+    "commonMistakes": [
+        "Overwriting the index of an already recorded prefix sum, which shrinks subarray length.",
+        "Trying to use a two-pointer sliding window when negative numbers are present."
+    ],
+    "optimalApproach": "Prefix Sum + Earliest-Index Hash Map",
+    "relatedProblems": [
+        {
+            "number": 1480,
+            "title": "Running Sum of 1d Array (Prefix Sum)",
+            "difficulty": "Easy"
+        },
+        {
+            "number": 724,
+            "title": "Find Pivot Index (Balanced Split Array)",
+            "difficulty": "Easy"
+        },
+        {
+            "number": 53,
+            "title": "Maximum Subarray (Max Inventory Increase)",
+            "difficulty": "Medium"
+        },
+        {
+            "number": 1,
+            "title": "Two Sum",
+            "difficulty": "Easy"
+        }
+    ],
+    "leetcodeUrl": "https://leetcode.com/problems/maximum-size-subarray-sum-equals-k/"
 }
 ];
 

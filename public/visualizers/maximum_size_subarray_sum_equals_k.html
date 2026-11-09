@@ -1,0 +1,1168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Maximum Size Subarray Sum Equals K - Visualizer</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: radial-gradient(circle at 10% 15%, #0d1527 0%, #030712 100%);
+      color: #e2e8f0;
+      min-height: 100vh;
+    }
+
+    .code-font {
+      font-family: 'Fira Code', monospace;
+    }
+
+    .glass-panel {
+      background: rgba(15, 23, 42, 0.75);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.65);
+    }
+
+    .glass-button {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      backdrop-filter: blur(12px);
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .glass-button:hover:not(:disabled) {
+      background: rgba(255, 255, 255, 0.14);
+      border-color: rgba(255, 255, 255, 0.25);
+      transform: translateY(-1px);
+    }
+    .glass-button:active:not(:disabled) {
+      transform: translateY(1px);
+    }
+    .glass-button:disabled {
+      opacity: 0.35;
+      cursor: not-allowed;
+    }
+
+    .code-line {
+      transition: all 0.2s ease;
+      border-left: 3px solid transparent;
+      padding: 2px 10px;
+    }
+    .code-line.active-line {
+      background: rgba(56, 189, 248, 0.16);
+      border-left: 3px solid #38bdf8;
+      color: #ffffff;
+      box-shadow: inset 0 0 16px rgba(56, 189, 248, 0.12);
+    }
+
+    /* Custom scrollbars */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: rgba(15, 23, 42, 0.5);
+    }
+    ::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.16);
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(255, 255, 255, 0.28);
+    }
+
+    @keyframes matchPulse {
+      0%, 100% { transform: scale(1); filter: drop-shadow(0 0 8px rgba(16, 185, 129, 0.6)); }
+      50% { transform: scale(1.05); filter: drop-shadow(0 0 20px rgba(16, 185, 129, 0.9)); }
+    }
+    .match-anim {
+      animation: matchPulse 0.5s ease-in-out;
+    }
+
+    @keyframes recordCrown {
+      0%, 100% { transform: translateY(0) rotate(0deg); }
+      50% { transform: translateY(-4px) rotate(8deg); }
+    }
+    .crown-anim {
+      animation: recordCrown 0.6s infinite ease-in-out;
+    }
+  </style>
+</head>
+<body class="p-4 sm:p-6 lg:p-8 flex flex-col items-center justify-start min-h-screen">
+
+  <!-- Ambient Glow Orbs -->
+  <div class="fixed top-10 left-1/4 w-96 h-96 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none -z-10"></div>
+  <div class="fixed bottom-20 right-1/4 w-96 h-96 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none -z-10"></div>
+  <div class="fixed top-1/2 left-2/3 w-80 h-80 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none -z-10"></div>
+
+  <!-- MAIN WRAPPER -->
+  <div class="w-full max-w-7xl flex flex-col gap-6">
+
+    <!-- TOP GLASS CONTROLS DECK -->
+    <header class="glass-panel rounded-2xl p-4 sm:p-5 flex flex-col gap-4 sticky top-4 z-50">
+      <div class="flex flex-wrap items-center justify-between gap-4">
+
+        <!-- Title & Subtitle -->
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-cyan-500 via-indigo-500 to-emerald-500 flex items-center justify-center shadow-lg shadow-cyan-500/20 text-white font-bold text-lg">
+            <i class="fa-solid fa-arrows-left-right-to-line text-cyan-300"></i>
+          </div>
+          <div>
+            <h1 class="text-lg sm:text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white via-slate-200 to-slate-400">
+              Maximum Size Subarray Sum Equals K
+            </h1>
+            <p class="text-xs text-slate-400 flex items-center gap-2">
+              <span class="inline-block w-2 h-2 rounded-full bg-cyan-400 animate-pulse"></span>
+              LeetCode 325 • Prefix Sum + HashMap • &Omicron;(n) Time • &Omicron;(n) Space
+            </p>
+          </div>
+        </div>
+
+        <!-- Center Controls: Reset, Prev, Play/Stop, Next -->
+        <div class="flex items-center gap-2 sm:gap-3 bg-black/30 p-1.5 rounded-xl border border-white/5">
+          <button id="btnReset" class="glass-button text-slate-300 hover:text-white px-3 py-2 rounded-lg text-sm flex items-center gap-1.5" title="Reset to Start">
+            <i class="fa-solid fa-rotate-left"></i>
+            <span class="hidden sm:inline">Reset</span>
+          </button>
+          <button id="btnPrev" class="glass-button text-slate-300 hover:text-white px-3 py-2 rounded-lg text-sm flex items-center gap-1.5" title="Previous Step (Left Arrow)">
+            <i class="fa-solid fa-backward-step"></i>
+            <span class="hidden sm:inline">Prev</span>
+          </button>
+          <button id="btnPlay" class="glass-button bg-cyan-500/20 text-cyan-300 hover:bg-cyan-500/30 border-cyan-500/40 px-4 py-2 rounded-lg text-sm font-semibold flex items-center gap-2 shadow-lg shadow-cyan-500/10" title="Start / Stop (Spacebar)">
+            <i class="fa-solid fa-play" id="playIcon"></i>
+            <span id="playText">Start</span>
+          </button>
+          <button id="btnNext" class="glass-button text-slate-300 hover:text-white px-3 py-2 rounded-lg text-sm flex items-center gap-1.5" title="Next Step (Right Arrow)">
+            <span class="hidden sm:inline">Next</span>
+            <i class="fa-solid fa-forward-step"></i>
+          </button>
+        </div>
+
+        <!-- Speed & Audio Controls -->
+        <div class="flex items-center gap-2">
+          <a href="/" class="glass-button px-3 py-2 rounded-xl text-xs font-semibold text-slate-300 hover:text-white flex items-center gap-1.5 border border-white/10 hover:border-indigo-500/40 bg-white/5 shrink-0 transition-all active:scale-95 cursor-pointer" title="Return to DSA Atlas Library"><i class="fa-solid fa-arrow-left text-indigo-400"></i><span>DSA Atlas</span></a>
+          <div class="flex items-center bg-black/30 rounded-xl p-1 border border-white/5 text-xs text-slate-400">
+            <span class="px-2 py-1"><i class="fa-solid fa-gauge-high mr-1"></i>Speed</span>
+            <button class="speed-btn px-2 py-1 rounded-lg hover:text-white" data-speed="1400">0.5x</button>
+            <button class="speed-btn px-2 py-1 rounded-lg bg-cyan-500/30 text-cyan-300 font-semibold" data-speed="750">1x</button>
+            <button class="speed-btn px-2 py-1 rounded-lg hover:text-white" data-speed="350">2x</button>
+            <button class="speed-btn px-2 py-1 rounded-lg hover:text-white" data-speed="150">4x</button>
+          </div>
+          <button id="btnAudio" class="glass-button p-2.5 rounded-xl text-slate-400 hover:text-cyan-300" title="Toggle Synthesized Audio">
+            <i class="fa-solid fa-volume-high" id="audioIcon"></i>
+          </button>
+        </div>
+
+      </div>
+
+      <!-- Scrubber Slider & Status Badge Bar -->
+      <div class="flex flex-col sm:flex-row items-center gap-3 pt-1 border-t border-white/5">
+        <div class="flex items-center gap-2 text-xs text-slate-400 w-full sm:w-auto shrink-0">
+          <span id="stepCounterBadge" class="code-font px-2.5 py-1 rounded-md bg-white/5 border border-white/10 text-cyan-300">
+            Step: 0 / 0
+          </span>
+          <span id="phaseBadge" class="px-2.5 py-1 rounded-md bg-cyan-500/20 border border-cyan-500/30 text-cyan-300 font-semibold">
+            Ready
+          </span>
+          <span id="maxLenBadge" class="px-2.5 py-1 rounded-md bg-emerald-500/20 border border-emerald-500/30 text-emerald-300 font-bold">
+            maxLength: 0
+          </span>
+        </div>
+        <div class="w-full flex items-center gap-3">
+          <input type="range" id="stepScrubber" min="0" max="0" value="0" class="w-full h-1.5 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-cyan-400">
+        </div>
+      </div>
+    </header>
+
+    <!-- PRESETS & CUSTOM INPUT ROW -->
+    <section class="glass-panel rounded-2xl p-4 flex flex-wrap items-center justify-between gap-4">
+      <div class="flex flex-wrap items-center gap-3">
+        <label for="presetSelect" class="text-xs uppercase font-semibold text-slate-400 tracking-wider flex items-center gap-1.5">
+          <i class="fa-solid fa-list-check text-cyan-400"></i> Presets:
+        </label>
+        <select id="presetSelect" class="bg-black/50 border border-white/10 text-xs sm:text-sm text-slate-200 rounded-xl px-3 py-2 outline-none focus:border-cyan-500/50">
+          <option value="0">1: Ex 1 ([1, -1, 5, -2, 3], k = 3 &rarr; max: 4)</option>
+          <option value="1">2: Ex 2 ([-2, -1, 2, 1], k = 1 &rarr; max: 2)</option>
+          <option value="2">3: Ex 3 ([1, 2, 3], k = 7 &rarr; max: 0)</option>
+          <option value="3">4: putIfAbsent Guard ([1, 0, 0, 0, 2], k = 3 &rarr; max: 5)</option>
+          <option value="4">5: Full Array Match ([3, 1, -1, 2], k = 5 &rarr; max: 4 via (0, -1))</option>
+          <option value="5">6: All Zeroes ([0, 0, 0, 0], k = 0 &rarr; max: 4)</option>
+          <option value="6">7: Negative Target ([2, -3, 1, -2, -1], k = -3 &rarr; max: 3)</option>
+          <option value="7">8: Single Element Match ([5], k = 5 &rarr; max: 1)</option>
+          <option value="8">9: Alternating Signs ([1, -1, 1, -1, 1], k = 0 &rarr; max: 4)</option>
+          <option value="9">10: Subarray in Middle ([10, 2, -1, 2, -3, 20], k = 0 &rarr; max: 4)</option>
+        </select>
+      </div>
+
+      <div class="flex items-center gap-2 flex-grow max-w-md">
+        <input type="text" id="customInput" placeholder="Array: 1, -1, 5, -2, 3" class="w-full bg-black/40 border border-white/10 rounded-xl px-3 py-1.5 text-xs text-slate-200 outline-none focus:border-cyan-400">
+        <input type="number" id="customK" placeholder="k: 3" value="3" class="w-20 bg-black/40 border border-white/10 rounded-xl px-2 py-1.5 text-xs text-slate-200 outline-none focus:border-cyan-400">
+        <button id="btnApplyCustom" class="glass-button text-xs px-3 py-2 rounded-xl text-cyan-300 font-semibold shrink-0">
+          Load
+        </button>
+      </div>
+    </section>
+
+    <!-- MAIN VISUAL STAGE & JAVA CODE SECTION -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+      <!-- LEFT: VISUALIZATION ARENA (7 Cols) -->
+      <section class="lg:col-span-7 flex flex-col gap-6">
+
+        <!-- Live Scope & Variable HUD Cards -->
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+
+          <!-- Current Index & Element -->
+          <div class="glass-panel rounded-xl p-3 flex flex-col justify-between border-cyan-500/20">
+            <span class="text-[11px] text-slate-400 uppercase font-semibold flex items-center justify-between">
+              Pointer i
+              <span class="w-2 h-2 rounded-full bg-cyan-400"></span>
+            </span>
+            <div class="flex items-baseline gap-2 mt-2">
+              <span id="varIndex" class="code-font text-xl font-bold text-cyan-300">-</span>
+              <span id="varNum" class="text-xs text-slate-400 code-font">nums[i]: -</span>
+            </div>
+            <span class="text-[10px] text-slate-500 mt-1">Loop Iterator</span>
+          </div>
+
+          <!-- prefixSum Gauge -->
+          <div class="glass-panel rounded-xl p-3 flex flex-col justify-between border-blue-500/20">
+            <span class="text-[11px] text-slate-400 uppercase font-semibold flex items-center justify-between">
+              prefixSum
+              <i class="fa-solid fa-calculator text-blue-400"></i>
+            </span>
+            <div class="flex items-baseline gap-2 mt-2">
+              <span id="varPrefixSum" class="code-font text-2xl font-black text-blue-300">0</span>
+            </div>
+            <span id="varPrefixSub" class="text-[10px] text-slate-500 mt-1">Accumulated Sum</span>
+          </div>
+
+          <!-- Target Remaining (prefixSum - k) -->
+          <div class="glass-panel rounded-xl p-3 flex flex-col justify-between border-amber-500/20">
+            <span class="text-[11px] text-slate-400 uppercase font-semibold flex items-center justify-between">
+              Remaining (prefix - k)
+              <i class="fa-solid fa-magnifying-glass text-amber-400"></i>
+            </span>
+            <div class="flex items-baseline gap-2 mt-2">
+              <span id="varRemaining" class="code-font text-xl font-bold text-amber-300">-</span>
+            </div>
+            <span id="varRemainingSub" class="text-[10px] text-slate-500 mt-1">Query in Map</span>
+          </div>
+
+          <!-- maxLength Record -->
+          <div class="glass-panel rounded-xl p-3 flex flex-col justify-between border-emerald-500/20">
+            <span class="text-[11px] text-slate-400 uppercase font-semibold flex items-center justify-between">
+              maxLength
+              <i class="fa-solid fa-trophy text-emerald-400 crown-anim"></i>
+            </span>
+            <div class="flex items-baseline gap-2 mt-2">
+              <span id="varMaxLen" class="code-font text-2xl font-black text-emerald-300">0</span>
+            </div>
+            <span id="varMaxLenSub" class="text-[10px] text-slate-500 mt-1">Max Subarray Found</span>
+          </div>
+
+        </div>
+
+        <!-- 1. Array Stage with Value Bars & Subarray Span Highlighter -->
+        <div class="glass-panel rounded-2xl p-5 flex flex-col gap-4">
+          <div class="flex flex-wrap items-center justify-between text-xs pb-2 border-b border-white/5 gap-2">
+            <span class="font-semibold text-slate-300 uppercase tracking-wider flex items-center gap-1.5">
+              <i class="fa-solid fa-layer-group text-cyan-400"></i>
+              Primary Array: <span class="code-font text-slate-400">nums[]</span> with Element Value Bars
+            </span>
+            <div class="flex items-center gap-3 text-[11px]">
+              <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded bg-cyan-500/40 border border-cyan-400 inline-block"></span> Active i</span>
+              <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded bg-emerald-500/40 border border-emerald-400 inline-block"></span> Subarray Window (Sum = k)</span>
+              <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded bg-amber-500/40 border border-amber-400 inline-block"></span> Matched Map Index j</span>
+            </div>
+          </div>
+
+          <!-- Active Subarray Span Bracket Banner -->
+          <div id="subarraySpanBanner" class="p-2.5 rounded-xl bg-black/40 border border-white/5 flex items-center justify-between text-xs transition-all">
+            <div class="flex items-center gap-2">
+              <i class="fa-solid fa-arrows-left-right text-emerald-400"></i>
+              <span id="subarraySpanText" class="text-slate-300">No active subarray matching sum k = 3 yet.</span>
+            </div>
+            <span id="subarrayLenBadge" class="code-font px-2 py-0.5 rounded text-[11px] font-bold bg-white/5 text-slate-400">
+              Length: -
+            </span>
+          </div>
+
+          <!-- Interactive Array Tiles & Value Bars Container -->
+          <div id="arrayTilesContainer" class="flex flex-wrap gap-3 p-3 min-h-[140px] bg-black/30 rounded-xl border border-white/5 items-end justify-start overflow-x-auto">
+            <!-- Dynamically populated number cards with vertical value bars -->
+          </div>
+
+          <!-- Mathematical Equation Inspection HUD -->
+          <div id="equationBox" class="p-3 rounded-xl bg-white/5 border border-white/10 text-xs flex flex-col sm:flex-row items-center justify-between gap-3">
+            <div class="flex items-center gap-2">
+              <i id="equationIcon" class="fa-solid fa-circle-info text-cyan-400 text-sm"></i>
+              <span id="equationText" class="text-slate-300">Ready to execute. Click Start or Next to step through.</span>
+            </div>
+            <div id="equationFormulaBadge" class="hidden text-xs code-font px-3 py-1.5 rounded-lg bg-black/60 border border-white/10 text-slate-300 font-semibold shrink-0">
+              <!-- prefixSum - remaining = k -->
+            </div>
+          </div>
+        </div>
+
+        <!-- 2. HASHMAP MEMORY STRUCTURE (prefixSum -> firstIndex) -->
+        <div class="glass-panel rounded-2xl p-4 sm:p-5 flex flex-col gap-3">
+          <div class="flex flex-wrap items-center justify-between gap-2 pb-2 border-b border-white/5">
+            <div class="flex items-center gap-2">
+              <span class="w-2.5 h-2.5 rounded-full bg-indigo-400 animate-pulse"></span>
+              <span class="font-bold text-xs uppercase tracking-wider text-slate-200 flex items-center gap-1.5">
+                <i class="fa-solid fa-table-list text-indigo-400"></i>
+                HashMap Memory Structure: <code class="font-mono text-cyan-300">map.putIfAbsent(prefixSum, i)</code>
+              </span>
+            </div>
+            <span class="text-[11px] text-slate-400 flex items-center gap-2">
+              <span class="inline-block w-2 h-2 rounded-full bg-amber-400"></span>
+              Preserves earliest index to maximize <code class="font-mono text-emerald-300">i - map.get(rem)</code>
+            </span>
+          </div>
+
+          <!-- Map Key-Value Pairs Grid -->
+          <div id="mapEntriesContainer" class="flex flex-wrap gap-2.5 p-3 min-h-[75px] max-h-[180px] overflow-y-auto bg-black/40 rounded-xl border border-white/5 items-center">
+            <!-- Dynamically populated key-value entry badges -->
+          </div>
+
+          <!-- Map Insight Explanation Banner -->
+          <div class="p-2.5 bg-indigo-950/20 border border-indigo-500/20 rounded-xl flex items-center justify-between text-[11px] text-slate-300">
+            <span class="flex items-center gap-2">
+              <i class="fa-solid fa-shield-halved text-amber-400"></i>
+              <span><b>Why <code class="font-mono text-amber-300">map.put(0, -1)</code> is crucial:</b> If a subarray starting at index <code class="font-mono text-cyan-300">0</code> has sum equal to <code class="font-mono">k</code>, then <code class="font-mono">prefixSum = k</code>, making <code class="font-mono">remaining = 0</code>. The length formula yields <code class="font-mono text-emerald-300">i - (-1) = i + 1</code>, which correctly captures the entire range <code class="font-mono">[0..i]</code>!</span>
+            </span>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- RIGHT: JAVA CODE CONTAINER WITH SYNCHRONIZED LINE HIGHLIGHTING (5 Cols) -->
+      <section class="lg:col-span-5 flex flex-col gap-4">
+        
+        <div class="glass-panel rounded-2xl p-4 flex flex-col h-full">
+          <div class="flex items-center justify-between pb-3 border-b border-white/10 text-xs">
+            <div class="flex items-center gap-2">
+              <div class="flex gap-1.5">
+                <span class="w-3 h-3 rounded-full bg-rose-500/80 inline-block"></span>
+                <span class="w-3 h-3 rounded-full bg-amber-500/80 inline-block"></span>
+                <span class="w-3 h-3 rounded-full bg-emerald-500/80 inline-block"></span>
+              </div>
+              <span class="code-font text-slate-300 font-semibold ml-2">Solution.java</span>
+            </div>
+            <span class="text-[11px] text-cyan-400 bg-cyan-500/10 px-2 py-0.5 rounded border border-cyan-500/20 code-font">
+              Prefix Sum &bull; HashMap
+            </span>
+          </div>
+
+          <!-- Code Box with Line Numbers -->
+          <div id="codeContainer" class="code-font text-xs sm:text-[13px] leading-relaxed text-slate-300 py-3 overflow-y-auto max-h-[560px] flex-grow select-none">
+            <div class="code-line" id="line1"><span class="text-slate-500 mr-2"> 1</span><span class="text-indigo-400 font-semibold">class</span> <span class="text-amber-300">Solution</span> {</div>
+            <div class="code-line" id="line2"><span class="text-slate-500 mr-2"> 2</span>    <span class="text-indigo-400 font-semibold">public int</span> <span class="text-cyan-300">maxSubArrayLen</span>(<span class="text-indigo-400">int</span>[] nums, <span class="text-indigo-400">int</span> k) {</div>
+            <div class="code-line" id="line3"><span class="text-slate-500 mr-2"> 3</span></div>
+            <div class="code-line" id="line4"><span class="text-slate-500 mr-2"> 4</span>        <span class="text-indigo-400 font-semibold">Map</span>&lt;<span class="text-indigo-400">Integer</span>, <span class="text-indigo-400">Integer</span>&gt; map = <span class="text-indigo-400 font-semibold">new</span> HashMap&lt;&gt;();</div>
+            <div class="code-line" id="line5"><span class="text-slate-500 mr-2"> 5</span></div>
+            <div class="code-line" id="line6"><span class="text-slate-500 mr-2"> 6</span>        map.put(<span class="text-rose-400">0</span>, -<span class="text-rose-400">1</span>);</div>
+            <div class="code-line" id="line7"><span class="text-slate-500 mr-2"> 7</span></div>
+            <div class="code-line" id="line8"><span class="text-slate-500 mr-2"> 8</span>        <span class="text-indigo-400 font-semibold">int</span> prefixSum = <span class="text-rose-400">0</span>;</div>
+            <div class="code-line" id="line9"><span class="text-slate-500 mr-2"> 9</span>        <span class="text-indigo-400 font-semibold">int</span> maxLength = <span class="text-rose-400">0</span>;</div>
+            <div class="code-line" id="line10"><span class="text-slate-500 mr-2">10</span></div>
+            <div class="code-line" id="line11"><span class="text-slate-500 mr-2">11</span>        <span class="text-indigo-400 font-semibold">for</span> (<span class="text-indigo-400">int</span> i = <span class="text-rose-400">0</span>; i &lt; nums.length; i++) {</div>
+            <div class="code-line" id="line12"><span class="text-slate-500 mr-2">12</span></div>
+            <div class="code-line" id="line13"><span class="text-slate-500 mr-2">13</span>            prefixSum += nums[i];</div>
+            <div class="code-line" id="line14"><span class="text-slate-500 mr-2">14</span></div>
+            <div class="code-line" id="line15"><span class="text-slate-500 mr-2">15</span>            <span class="text-indigo-400 font-semibold">int</span> remaining = prefixSum - k;</div>
+            <div class="code-line" id="line16"><span class="text-slate-500 mr-2">16</span></div>
+            <div class="code-line" id="line17"><span class="text-slate-500 mr-2">17</span>            <span class="text-indigo-400 font-semibold">if</span> (map.containsKey(remaining)) {</div>
+            <div class="code-line" id="line18"><span class="text-slate-500 mr-2">18</span></div>
+            <div class="code-line" id="line19"><span class="text-slate-500 mr-2">19</span>                <span class="text-indigo-400 font-semibold">int</span> length = i - map.get(remaining);</div>
+            <div class="code-line" id="line20"><span class="text-slate-500 mr-2">20</span></div>
+            <div class="code-line" id="line21"><span class="text-slate-500 mr-2">21</span>                maxLength = Math.max(maxLength, length);</div>
+            <div class="code-line" id="line22"><span class="text-slate-500 mr-2">22</span>            }</div>
+            <div class="code-line" id="line23"><span class="text-slate-500 mr-2">23</span></div>
+            <div class="code-line" id="line24"><span class="text-slate-500 mr-2">24</span>            map.putIfAbsent(prefixSum, i);</div>
+            <div class="code-line" id="line25"><span class="text-slate-500 mr-2">25</span>        }</div>
+            <div class="code-line" id="line26"><span class="text-slate-500 mr-2">26</span></div>
+            <div class="code-line" id="line27"><span class="text-slate-500 mr-2">27</span>        <span class="text-indigo-400 font-semibold">return</span> maxLength;</div>
+            <div class="code-line" id="line28"><span class="text-slate-500 mr-2">28</span>    }</div>
+            <div class="code-line" id="line29"><span class="text-slate-500 mr-2">29</span>}</div>
+          </div>
+
+          <!-- Step Narrative Live Box -->
+          <div class="mt-3 p-3 bg-black/40 border border-white/5 rounded-xl flex items-start gap-2.5">
+            <i class="fa-solid fa-circle-info text-cyan-400 mt-0.5 text-xs"></i>
+            <div class="text-xs text-slate-300 leading-relaxed" id="stepDescription">
+              Ready to execute Maximum Size Subarray Sum Equals K. Click <b>Start</b> or <b>Next</b> to begin.
+            </div>
+          </div>
+
+        </div>
+
+      </section>
+
+    </div>
+
+    <!-- BOTTOM SECTION: PROBLEM STATEMENT & ARCHITECTURAL SUMMARY -->
+    <footer class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-2">
+
+      <!-- Problem Statement Card -->
+      <div class="glass-panel rounded-2xl p-5 flex flex-col gap-3">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <span class="text-amber-400 font-bold"><i class="fa-solid fa-file-lines mr-1.5"></i>Problem Statement</span>
+            <span class="px-2 py-0.5 rounded text-[11px] font-semibold bg-amber-500/20 text-amber-300 border border-amber-500/30">Medium</span>
+          </div>
+          <span class="text-xs text-slate-400 font-mono">LeetCode 325</span>
+        </div>
+
+        <p class="text-xs text-slate-300 leading-relaxed">
+          Given an integer array <code class="font-mono text-cyan-300">nums</code> and an integer <code class="font-mono text-amber-300">k</code>, return the <b>maximum length</b> of a subarray whose elements sum to <code class="font-mono text-emerald-400 font-semibold">k</code>.
+          <br><br>
+          A <b>subarray</b> is defined as a contiguous, non-empty sequence of elements within an array. If no such subarray exists, return <code class="font-mono text-rose-400">0</code>.
+        </p>
+
+        <div class="space-y-2 pt-2 border-t border-white/5 text-xs text-slate-300">
+          <div class="bg-black/30 p-2.5 rounded-lg border border-white/5 font-mono">
+            <span class="text-slate-400">Example 1:</span><br>
+            <b>Input:</b> nums = [1, -1, 5, -2, 3], k = 3<br>
+            <b>Output:</b> <span class="text-emerald-400 font-bold">4</span><br>
+            <span class="text-slate-400 text-[11px]">&bull; Subarray nums[0..3] = [1, -1, 5, -2] has sum = 3, length = 4.</span>
+          </div>
+          <div class="bg-black/30 p-2.5 rounded-lg border border-white/5 font-mono">
+            <span class="text-slate-400">Example 2:</span><br>
+            <b>Input:</b> nums = [-2, -1, 2, 1], k = 1<br>
+            <b>Output:</b> <span class="text-emerald-400 font-bold">2</span><br>
+            <span class="text-slate-400 text-[11px]">&bull; Subarray nums[1..2] = [-1, 2] has sum = 1, length = 2.</span>
+          </div>
+        </div>
+
+        <div class="text-[11px] text-slate-400">
+          <b>Constraints:</b> <code class="font-mono text-slate-300">1 &le; nums.length &le; 2 &times; 10<sup>5</sup></code>, <code class="font-mono text-slate-300">-10<sup>4</sup> &le; nums[i] &le; 10<sup>4</sup></code>, <code class="font-mono text-slate-300">-10<sup>9</sup> &le; k &le; 10<sup>9</sup></code>.
+        </div>
+      </div>
+
+      <!-- Architectural & Complexity Summary Card -->
+      <div class="glass-panel rounded-2xl p-5 flex flex-col gap-3">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <span class="text-cyan-400 font-bold"><i class="fa-solid fa-brain mr-1.5"></i>Algorithm Architectural Insights</span>
+          </div>
+          <span class="px-2 py-0.5 rounded text-[11px] font-semibold bg-cyan-500/20 text-cyan-300 border border-cyan-500/30">Prefix Sum + Map</span>
+        </div>
+
+        <div class="space-y-3 text-xs text-slate-300 leading-relaxed">
+          <div class="p-3 bg-cyan-950/20 border border-cyan-500/20 rounded-xl">
+            <b class="text-cyan-300 flex items-center gap-1.5 mb-1">
+              <i class="fa-solid fa-calculator"></i> Mathematical Reduction:
+            </b>
+            The sum of subarray <code class="font-mono text-cyan-300">nums[j+1..i]</code> equals <code class="font-mono">prefixSum[i] - prefixSum[j]</code>.
+            Setting this equal to <code class="font-mono">k</code> gives:
+            <div class="code-font text-emerald-300 my-1 font-bold pl-2">
+              prefixSum[i] - k = prefixSum[j] = remaining
+            </div>
+            If <code class="font-mono text-amber-300">remaining</code> has appeared in our prefix sums before at index <code class="font-mono text-amber-300">j</code>, then the range from <code class="font-mono">j + 1</code> to <code class="font-mono">i</code> has sum exactly <code class="font-mono">k</code>.
+          </div>
+
+          <div class="p-3 bg-amber-950/20 border border-amber-500/20 rounded-xl">
+            <b class="text-amber-300 flex items-center gap-1.5 mb-1">
+              <i class="fa-solid fa-shield-halved"></i> Why putIfAbsent (Greedy Preservation):
+            </b>
+            To maximize subarray length <code class="font-mono text-emerald-300">length = i - j</code> for a given current index <code class="font-mono">i</code>, we want <code class="font-mono text-amber-300">j</code> to be as <b>small as possible</b> (earliest occurrence). Using <code class="font-mono text-cyan-300">map.putIfAbsent(prefixSum, i)</code> prevents later occurrences of identical prefix sums from overwriting earlier ones!
+          </div>
+
+          <div class="grid grid-cols-2 gap-3 pt-1">
+            <div class="p-2.5 bg-black/30 rounded-lg border border-white/5">
+              <span class="text-[11px] text-slate-400 uppercase font-semibold">Time Complexity</span>
+              <div class="text-sm font-bold text-emerald-400 font-mono mt-0.5">&Omicron;(N)</div>
+              <p class="text-[10px] text-slate-400 mt-0.5">Single linear pass through the array with &Omicron;(1) average HashMap operations.</p>
+            </div>
+            <div class="p-2.5 bg-black/30 rounded-lg border border-white/5">
+              <span class="text-[11px] text-slate-400 uppercase font-semibold">Space Complexity</span>
+              <div class="text-sm font-bold text-cyan-400 font-mono mt-0.5">&Omicron;(N)</div>
+              <p class="text-[10px] text-slate-400 mt-0.5">Stores at most N + 1 distinct prefix sums in the HashMap.</p>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+    </footer>
+
+  </div>
+
+  <!-- JAVASCRIPT SIMULATION LOGIC -->
+  <script>
+    // PRESETS DEFINITIONS
+    const PRESETS = [
+      { name: "1: Ex 1 ([1, -1, 5, -2, 3], k = 3 -> max: 4)", nums: [1, -1, 5, -2, 3], k: 3 },
+      { name: "2: Ex 2 ([-2, -1, 2, 1], k = 1 -> max: 2)", nums: [-2, -1, 2, 1], k: 1 },
+      { name: "3: Ex 3 ([1, 2, 3], k = 7 -> max: 0)", nums: [1, 2, 3], k: 7 },
+      { name: "4: putIfAbsent Guard ([1, 0, 0, 0, 2], k = 3 -> max: 5)", nums: [1, 0, 0, 0, 2], k: 3 },
+      { name: "5: Full Array Match ([3, 1, -1, 2], k = 5 -> max: 4 via (0, -1))", nums: [3, 1, -1, 2], k: 5 },
+      { name: "6: All Zeroes ([0, 0, 0, 0], k = 0 -> max: 4)", nums: [0, 0, 0, 0], k: 0 },
+      { name: "7: Negative Target ([2, -3, 1, -2, -1], k = -3 -> max: 3)", nums: [2, -3, 1, -2, -1], k: -3 },
+      { name: "8: Single Element Match ([5], k = 5 -> max: 1)", nums: [5], k: 5 },
+      { name: "9: Alternating Signs ([1, -1, 1, -1, 1], k = 0 -> max: 4)", nums: [1, -1, 1, -1, 1], k: 0 },
+      { name: "10: Subarray in Middle ([10, 2, -1, 2, -3, 20], k = 0 -> max: 4)", nums: [10, 2, -1, 2, -3, 20], k: 0 }
+    ];
+
+    // APPLICATION STATE
+    let currentNums = [...PRESETS[0].nums];
+    let currentK = PRESETS[0].k;
+    let steps = [];
+    let currentStepIdx = 0;
+    let isPlaying = false;
+    let playInterval = null;
+    let playSpeed = 750; // ms per step
+    let audioEnabled = true;
+
+    // AUDIO SYNTHESIZER
+    let audioCtx = null;
+    function initAudio() {
+      if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      }
+    }
+    function playBeep(freq = 440, type = 'sine', duration = 0.08, vol = 0.05) {
+      if (!audioEnabled) return;
+      try {
+        initAudio();
+        if (audioCtx.state === 'suspended') {
+          audioCtx.resume();
+        }
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = type;
+        osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+        gain.gain.setValueAtTime(vol, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + duration);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + duration);
+      } catch (e) {}
+    }
+
+    // DOM ELEMENTS
+    const btnPlay = document.getElementById('btnPlay');
+    const playIcon = document.getElementById('playIcon');
+    const playText = document.getElementById('playText');
+    const btnPrev = document.getElementById('btnPrev');
+    const btnNext = document.getElementById('btnNext');
+    const btnReset = document.getElementById('btnReset');
+    const btnAudio = document.getElementById('btnAudio');
+    const audioIcon = document.getElementById('audioIcon');
+    const presetSelect = document.getElementById('presetSelect');
+    const customInput = document.getElementById('customInput');
+    const customK = document.getElementById('customK');
+    const btnApplyCustom = document.getElementById('btnApplyCustom');
+    const stepScrubber = document.getElementById('stepScrubber');
+    const stepCounterBadge = document.getElementById('stepCounterBadge');
+    const phaseBadge = document.getElementById('phaseBadge');
+    const maxLenBadge = document.getElementById('maxLenBadge');
+
+    const varIndex = document.getElementById('varIndex');
+    const varNum = document.getElementById('varNum');
+    const varPrefixSum = document.getElementById('varPrefixSum');
+    const varPrefixSub = document.getElementById('varPrefixSub');
+    const varRemaining = document.getElementById('varRemaining');
+    const varRemainingSub = document.getElementById('varRemainingSub');
+    const varMaxLen = document.getElementById('varMaxLen');
+    const varMaxLenSub = document.getElementById('varMaxLenSub');
+
+    const arrayTilesContainer = document.getElementById('arrayTilesContainer');
+    const subarraySpanBanner = document.getElementById('subarraySpanBanner');
+    const subarraySpanText = document.getElementById('subarraySpanText');
+    const subarrayLenBadge = document.getElementById('subarrayLenBadge');
+
+    const equationBox = document.getElementById('equationBox');
+    const equationIcon = document.getElementById('equationIcon');
+    const equationText = document.getElementById('equationText');
+    const equationFormulaBadge = document.getElementById('equationFormulaBadge');
+
+    const mapEntriesContainer = document.getElementById('mapEntriesContainer');
+    const codeContainer = document.getElementById('codeContainer');
+    const stepDescription = document.getElementById('stepDescription');
+
+    // STEP GENERATOR: Simulates maxSubArrayLen step-by-step
+    function generateSteps(nums, k) {
+      const generated = [];
+      const n = nums.length;
+      let map = {};
+      let prefixSum = 0;
+      let maxLength = 0;
+
+      // Step 1: Entry
+      generated.push({
+        line: 4,
+        phase: "Init Map",
+        nums: [...nums],
+        k,
+        i: -1,
+        prefixSum: 0,
+        remaining: null,
+        maxLength: 0,
+        map: {},
+        activeSubarray: null,
+        desc: `Initialized empty HashMap <span class="code-font text-cyan-300">Map&lt;Integer, Integer&gt; map</span> to track first occurrence index of each prefix sum.`,
+        soundFreq: 340
+      });
+
+      // Step 2: Base Case map.put(0, -1)
+      map[0] = -1;
+      generated.push({
+        line: 6,
+        phase: "Base Put (0, -1)",
+        nums: [...nums],
+        k,
+        i: -1,
+        prefixSum: 0,
+        remaining: null,
+        maxLength: 0,
+        map: { ...map },
+        activeSubarray: null,
+        highlightKey: 0,
+        desc: `Executed <span class="code-font text-amber-300 font-bold">map.put(0, -1)</span>. Virtual index -1 represents the boundary before the array starts so whole-array prefixes summing to k are handled correctly.`,
+        soundFreq: 400
+      });
+
+      // Step 3: Init prefixSum & maxLength
+      generated.push({
+        line: 8,
+        phase: "Init Variables",
+        nums: [...nums],
+        k,
+        i: -1,
+        prefixSum: 0,
+        remaining: null,
+        maxLength: 0,
+        map: { ...map },
+        activeSubarray: null,
+        desc: `Initialized <span class="code-font text-blue-300">prefixSum = 0</span> and <span class="code-font text-emerald-300">maxLength = 0</span>. Entering loop over array of size ${n}.`,
+        soundFreq: 420
+      });
+
+      // Loop
+      for (let i = 0; i < n; i++) {
+        const currentNum = nums[i];
+
+        // Step 4a: Loop Header
+        generated.push({
+          line: 11,
+          phase: `Loop i = ${i}`,
+          nums: [...nums],
+          k,
+          i,
+          prefixSum,
+          remaining: null,
+          maxLength,
+          map: { ...map },
+          activeSubarray: null,
+          desc: `Starting iteration at index <span class="code-font text-cyan-300 font-bold">i = ${i}</span> (nums[${i}] = ${currentNum}).`,
+          soundFreq: 460
+        });
+
+        // Step 4b: prefixSum += nums[i]
+        prefixSum += currentNum;
+        generated.push({
+          line: 13,
+          phase: "Accumulate Prefix",
+          nums: [...nums],
+          k,
+          i,
+          prefixSum,
+          remaining: null,
+          maxLength,
+          map: { ...map },
+          activeSubarray: null,
+          desc: `Accumulated prefix sum: <span class="code-font text-blue-300 font-bold">prefixSum += ${currentNum}</span> &rarr; <b>${prefixSum}</b>.`,
+          soundFreq: 520
+        });
+
+        // Step 4c: remaining = prefixSum - k
+        const remaining = prefixSum - k;
+        generated.push({
+          line: 15,
+          phase: "Compute Remaining",
+          nums: [...nums],
+          k,
+          i,
+          prefixSum,
+          remaining,
+          maxLength,
+          map: { ...map },
+          activeSubarray: null,
+          desc: `Computed target prefix: <span class="code-font text-amber-300 font-bold">remaining = prefixSum (${prefixSum}) - k (${k}) = ${remaining}</span>.`,
+          soundFreq: 560
+        });
+
+        // Step 4d: Check if map.containsKey(remaining)
+        const hasRemaining = (remaining in map);
+        const prevIndex = hasRemaining ? map[remaining] : null;
+
+        generated.push({
+          line: 17,
+          phase: "Check Map Contains",
+          nums: [...nums],
+          k,
+          i,
+          prefixSum,
+          remaining,
+          hasRemaining,
+          prevIndex,
+          maxLength,
+          map: { ...map },
+          highlightKey: hasRemaining ? remaining : null,
+          activeSubarray: null,
+          desc: `Queried <span class="code-font text-slate-200">map.containsKey(${remaining})</span>: <b>${hasRemaining ? `<span class="text-emerald-400">TRUE (found at index j = ${prevIndex})</span>` : `<span class="text-rose-400">FALSE (not in map)</span>`}</b>.`,
+          soundFreq: hasRemaining ? 680 : 380
+        });
+
+        if (hasRemaining) {
+          const length = i - prevIndex;
+          const isNewMax = length > maxLength;
+          const oldMax = maxLength;
+
+          // Step 4e: Compute Subarray Length
+          generated.push({
+            line: 19,
+            phase: "Found Subarray Match",
+            nums: [...nums],
+            k,
+            i,
+            prefixSum,
+            remaining,
+            hasRemaining: true,
+            prevIndex,
+            computedLength: length,
+            maxLength,
+            map: { ...map },
+            highlightKey: remaining,
+            activeSubarray: { start: prevIndex + 1, end: i, len: length, sum: k },
+            desc: `Found valid subarray with sum k = ${k}! Subarray span: <span class="code-font text-emerald-300 font-bold">nums[${prevIndex + 1}..${i}]</span>. Length: <span class="code-font text-cyan-300">${i} - (${prevIndex}) = ${length}</span>.`,
+            soundFreq: 760
+          });
+
+          // Step 4f: Update maxLength
+          maxLength = Math.max(maxLength, length);
+          generated.push({
+            line: 21,
+            phase: isNewMax ? "New Record MaxLength" : "Compare MaxLength",
+            nums: [...nums],
+            k,
+            i,
+            prefixSum,
+            remaining,
+            hasRemaining: true,
+            prevIndex,
+            computedLength: length,
+            maxLength,
+            map: { ...map },
+            highlightKey: remaining,
+            activeSubarray: { start: prevIndex + 1, end: i, len: length, sum: k },
+            desc: isNewMax
+              ? `<span class="text-emerald-400 font-bold"><i class="fa-solid fa-trophy mr-1"></i>New Record!</span> maxLength updated from ${oldMax} to <span class="code-font text-emerald-300 font-extrabold text-base">${maxLength}</span>.`
+              : `maxLength remains unchanged at <span class="code-font text-slate-200">${maxLength}</span> (current length ${length} &le; existing max ${maxLength}).`,
+            soundFreq: isNewMax ? 880 : 620
+          });
+        }
+
+        // Step 4g: map.putIfAbsent(prefixSum, i)
+        const alreadyExists = (prefixSum in map);
+        if (!alreadyExists) {
+          map[prefixSum] = i;
+          generated.push({
+            line: 24,
+            phase: "putIfAbsent: New Key Added",
+            nums: [...nums],
+            k,
+            i,
+            prefixSum,
+            remaining,
+            maxLength,
+            map: { ...map },
+            highlightKey: prefixSum,
+            activeSubarray: null,
+            desc: `<span class="code-font text-cyan-300 font-bold">map.putIfAbsent(${prefixSum}, ${i})</span>: Key ${prefixSum} is new. Recorded first occurrence index <span class="code-font text-cyan-200">i = ${i}</span>.`,
+            soundFreq: 640
+          });
+        } else {
+          generated.push({
+            line: 24,
+            phase: "putIfAbsent: Guard Kept Earliest",
+            nums: [...nums],
+            k,
+            i,
+            prefixSum,
+            remaining,
+            maxLength,
+            map: { ...map },
+            highlightKey: prefixSum,
+            activeSubarray: null,
+            desc: `<span class="code-font text-amber-300 font-bold">map.putIfAbsent(${prefixSum}, ${i})</span>: Key ${prefixSum} already exists at earlier index <span class="code-font text-amber-200">j = ${map[prefixSum]}</span>. Kept earlier index to maximize future subarray lengths!`,
+            soundFreq: 480
+          });
+        }
+      }
+
+      // Step 5: Final Return
+      generated.push({
+        line: 27,
+        phase: "Complete",
+        nums: [...nums],
+        k,
+        i: n,
+        prefixSum,
+        remaining: null,
+        maxLength,
+        map: { ...map },
+        activeSubarray: null,
+        desc: `<span class="text-emerald-400 font-bold text-sm"><i class="fa-solid fa-trophy mr-1.5"></i>Finished!</span> Maximum length of subarray summing to k = ${k} is <span class="code-font text-emerald-300 font-extrabold text-base">${maxLength}</span>.`,
+        soundFreq: 960
+      });
+
+      return generated;
+    }
+
+    // ZERO-JUMP LOCALIZED CODE LINE HIGHLIGHTER
+    function highlightCodeLine(lineNum) {
+      document.querySelectorAll('.code-line').forEach(el => el.classList.remove('active-line'));
+      const activeEl = document.getElementById(`line${lineNum}`);
+      if (activeEl) {
+        activeEl.classList.add('active-line');
+
+        // Scroll strictly inside codeContainer without affecting parent window
+        const containerTop = codeContainer.scrollTop;
+        const containerBottom = containerTop + codeContainer.clientHeight;
+        const elTop = activeEl.offsetTop - codeContainer.offsetTop;
+        const elBottom = elTop + activeEl.clientHeight;
+
+        if (elTop < containerTop + 20) {
+          codeContainer.scrollTo({ top: Math.max(0, elTop - 20), behavior: 'smooth' });
+        } else if (elBottom > containerBottom - 20) {
+          codeContainer.scrollTo({ top: elBottom - codeContainer.clientHeight + 20, behavior: 'smooth' });
+        }
+      }
+    }
+
+    // RENDER CURRENT STEP INTO DOM
+    function renderStep(idx) {
+      if (idx < 0 || idx >= steps.length) return;
+      const step = steps[idx];
+      const n = step.nums.length;
+
+      // Top Deck Status
+      stepCounterBadge.textContent = `Step: ${idx + 1} / ${steps.length}`;
+      phaseBadge.textContent = step.phase;
+      maxLenBadge.textContent = `maxLength: ${step.maxLength}`;
+      stepScrubber.max = steps.length - 1;
+      stepScrubber.value = idx;
+
+      // HUD Cards
+      varIndex.textContent = (step.i >= 0 && step.i < n) ? step.i : '-';
+      varNum.textContent = (step.i >= 0 && step.i < n) ? `nums[${step.i}]: ${step.nums[step.i]}` : 'nums[i]: -';
+      varPrefixSum.textContent = step.prefixSum;
+      varPrefixSub.textContent = `Target k = ${step.k}`;
+
+      if (step.remaining !== null && step.remaining !== undefined) {
+        varRemaining.textContent = step.remaining;
+        varRemainingSub.textContent = `${step.prefixSum} - ${step.k}`;
+      } else {
+        varRemaining.textContent = '-';
+        varRemainingSub.textContent = `Query in Map`;
+      }
+
+      varMaxLen.textContent = step.maxLength;
+      varMaxLenSub.textContent = step.maxLength > 0 ? `Longest span so far` : `No valid subarray yet`;
+
+      // Description
+      stepDescription.innerHTML = step.desc;
+
+      // 1. Subarray Span Banner
+      if (step.activeSubarray) {
+        const sub = step.activeSubarray;
+        subarraySpanBanner.className = "p-2.5 rounded-xl bg-emerald-500/15 border border-emerald-500/40 flex items-center justify-between text-xs transition-all match-anim";
+        subarraySpanText.innerHTML = `<span class="text-emerald-300 font-bold"><i class="fa-solid fa-arrows-left-right mr-1"></i>Active Subarray:</span> nums[${sub.start}..${sub.end}] = [${step.nums.slice(sub.start, sub.end + 1).join(', ')}] &rarr; Sum = <span class="font-bold text-white">${sub.sum}</span>`;
+        subarrayLenBadge.className = "code-font px-2.5 py-1 rounded-md text-xs font-extrabold bg-emerald-500/30 text-emerald-200 border border-emerald-400";
+        subarrayLenBadge.textContent = `Length: ${sub.len}`;
+      } else {
+        subarraySpanBanner.className = "p-2.5 rounded-xl bg-black/40 border border-white/5 flex items-center justify-between text-xs transition-all";
+        subarraySpanText.innerHTML = `Scanning prefix sums. Target k = <span class="text-amber-300 font-bold">${step.k}</span>.`;
+        subarrayLenBadge.className = "code-font px-2 py-0.5 rounded text-[11px] font-bold bg-white/5 text-slate-400";
+        subarrayLenBadge.textContent = `Length: -`;
+      }
+
+      // 2. Primary Array Stage: Value Bars & Tiles
+      arrayTilesContainer.innerHTML = '';
+      const maxAbsVal = Math.max(1, ...step.nums.map(x => Math.abs(x)));
+
+      step.nums.forEach((val, i) => {
+        const isActiveI = (step.i === i);
+        const isInActiveSub = step.activeSubarray && (i >= step.activeSubarray.start && i <= step.activeSubarray.end);
+        const isMatchedJ = (step.prevIndex !== null && step.prevIndex === i);
+
+        // Height proportional to absolute value (min 20px, max 60px)
+        const barHeight = Math.max(18, Math.min(60, Math.round((Math.abs(val) / maxAbsVal) * 55)));
+
+        let borderAndBg = "bg-white/5 border-white/10 text-slate-300";
+        let subBadge = "";
+
+        if (isActiveI && isInActiveSub) {
+          borderAndBg = "bg-emerald-500/25 border-emerald-400 text-emerald-100 ring-2 ring-emerald-400/60 scale-105 font-bold shadow-lg shadow-emerald-500/20";
+          subBadge = '<span class="text-[9px] px-1 bg-emerald-500/40 rounded text-emerald-200 font-bold">i (End)</span>';
+        } else if (isActiveI) {
+          borderAndBg = "bg-cyan-500/25 border-cyan-400 text-cyan-100 ring-2 ring-cyan-400/50 scale-105 font-bold shadow-lg shadow-cyan-500/20";
+          subBadge = '<span class="text-[9px] px-1 bg-cyan-500/40 rounded text-cyan-200 font-bold">Active i</span>';
+        } else if (isInActiveSub) {
+          borderAndBg = "bg-emerald-500/15 border-emerald-500/40 text-emerald-200 font-semibold";
+          subBadge = '<span class="text-[9px] text-emerald-400 font-mono">In Sub</span>';
+        } else if (isMatchedJ) {
+          borderAndBg = "bg-amber-500/20 border-amber-400 text-amber-200 font-semibold";
+          subBadge = '<span class="text-[9px] text-amber-300 font-mono">j (Start - 1)</span>';
+        }
+
+        const tile = document.createElement('div');
+        tile.className = `flex flex-col items-center justify-between p-2 rounded-xl border min-w-[64px] min-h-[110px] transition-all duration-200 ${borderAndBg}`;
+        
+        // Positive vs Negative Visual Bar
+        const isPositive = val >= 0;
+        const barColor = isPositive ? 'bg-gradient-to-t from-cyan-600 to-cyan-400' : 'bg-gradient-to-t from-rose-600 to-rose-400';
+
+        tile.innerHTML = `
+          <div class="flex items-center justify-between w-full text-[10px] text-slate-500 font-sans">
+            <span>[${i}]</span>
+            ${subBadge}
+          </div>
+
+          <!-- Vertical Value Bar -->
+          <div class="w-full flex flex-col items-center justify-end my-1.5 h-[50px] relative">
+            <div class="w-4 rounded-t ${barColor} shadow-sm transition-all duration-300" style="height: ${barHeight}px;"></div>
+          </div>
+
+          <span class="code-font text-sm font-bold">${val}</span>
+        `;
+        arrayTilesContainer.appendChild(tile);
+      });
+
+      // 3. Equation HUD
+      if (step.remaining !== null && step.remaining !== undefined) {
+        equationFormulaBadge.classList.remove('hidden');
+        equationFormulaBadge.innerHTML = `
+          prefixSum (<span class="text-blue-300 font-bold">${step.prefixSum}</span>) - k (<span class="text-amber-300 font-bold">${step.k}</span>) = 
+          <span class="text-cyan-300 font-bold">${step.remaining}</span>
+        `;
+        if (step.hasRemaining) {
+          equationIcon.className = "fa-solid fa-circle-check text-emerald-400 text-base";
+          equationText.innerHTML = `Matched in Map! <span class="font-bold text-white">${step.remaining}</span> was first seen at index <span class="text-amber-300 font-mono font-bold">j = ${step.prevIndex}</span> &rarr; Subarray length = <span class="text-emerald-300 font-bold">${step.computedLength}</span>`;
+          equationBox.className = "p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-xs flex flex-col sm:flex-row items-center justify-between gap-3";
+        } else {
+          equationIcon.className = "fa-solid fa-circle-xmark text-slate-400 text-base";
+          equationText.innerHTML = `<span class="font-bold text-slate-300">${step.remaining}</span> not found in map yet. No subarray ending at index ${step.i} sums to ${step.k}.`;
+          equationBox.className = "p-3 rounded-xl bg-white/5 border border-white/10 text-xs flex flex-col sm:flex-row items-center justify-between gap-3";
+        }
+      } else {
+        equationFormulaBadge.classList.add('hidden');
+        equationIcon.className = "fa-solid fa-circle-info text-cyan-400 text-sm";
+        equationText.innerHTML = step.desc;
+        equationBox.className = "p-3 rounded-xl bg-white/5 border border-white/10 text-xs flex flex-col sm:flex-row items-center justify-between gap-3";
+      }
+
+      // 4. HashMap Memory Structure (Entries)
+      mapEntriesContainer.innerHTML = '';
+      const mapKeys = Object.keys(step.map).map(k => parseInt(k, 10));
+
+      if (mapKeys.length === 0) {
+        mapEntriesContainer.innerHTML = '<span class="text-xs text-slate-500 italic">Map is currently empty.</span>';
+      } else {
+        mapKeys.forEach(key => {
+          const firstIdx = step.map[key];
+          const isHighlighted = (step.highlightKey !== null && step.highlightKey === key);
+          const isBaseZero = (key === 0 && firstIdx === -1);
+
+          let entryStyle = "bg-white/5 border-white/10 text-slate-300";
+          if (isHighlighted) {
+            entryStyle = "bg-amber-500/25 border-amber-400 text-amber-200 ring-2 ring-amber-400/50 shadow-md font-bold scale-105";
+          } else if (isBaseZero) {
+            entryStyle = "bg-indigo-500/15 border-indigo-500/30 text-indigo-200";
+          }
+
+          const badge = document.createElement('div');
+          badge.className = `px-3 py-1.5 rounded-xl border text-xs font-mono flex items-center gap-2 transition-all duration-200 ${entryStyle}`;
+          badge.innerHTML = `
+            <div class="flex items-center gap-1">
+              <span class="text-[10px] text-slate-500 font-sans">Key:</span>
+              <span class="font-bold text-cyan-300">${key}</span>
+            </div>
+            <i class="fa-solid fa-arrow-right text-[10px] text-slate-500"></i>
+            <div class="flex items-center gap-1">
+              <span class="text-[10px] text-slate-500 font-sans">Idx:</span>
+              <span class="font-bold text-amber-300">${firstIdx}</span>
+            </div>
+            ${isBaseZero ? '<span class="text-[9px] px-1 bg-indigo-500/30 text-indigo-300 rounded">Base</span>' : ''}
+          `;
+          mapEntriesContainer.appendChild(badge);
+        });
+      }
+
+      // Synchronize Code View
+      highlightCodeLine(step.line);
+
+      // Synthesized Sound
+      if (step.soundFreq) {
+        playBeep(step.soundFreq, 'sine', 0.08, 0.04);
+      }
+    }
+
+    // PLAYBACK CONTROLLER
+    function setPlaying(playing) {
+      isPlaying = playing;
+      if (isPlaying) {
+        playIcon.className = "fa-solid fa-pause";
+        playText.textContent = "Stop";
+        btnPlay.classList.add('bg-rose-500/20', 'text-rose-300', 'border-rose-500/40');
+        btnPlay.classList.remove('bg-cyan-500/20', 'text-cyan-300', 'border-cyan-500/40');
+
+        playInterval = setInterval(() => {
+          if (currentStepIdx < steps.length - 1) {
+            currentStepIdx++;
+            renderStep(currentStepIdx);
+          } else {
+            setPlaying(false);
+          }
+        }, playSpeed);
+      } else {
+        playIcon.className = "fa-solid fa-play";
+        playText.textContent = "Start";
+        btnPlay.classList.remove('bg-rose-500/20', 'text-rose-300', 'border-rose-500/40');
+        btnPlay.classList.add('bg-cyan-500/20', 'text-cyan-300', 'border-cyan-500/40');
+        if (playInterval) {
+          clearInterval(playInterval);
+          playInterval = null;
+        }
+      }
+    }
+
+    function initSimulation(numsArray, targetK) {
+      setPlaying(false);
+      currentNums = [...numsArray];
+      currentK = targetK;
+      steps = generateSteps(currentNums, currentK);
+      currentStepIdx = 0;
+      stepScrubber.max = steps.length - 1;
+      stepScrubber.value = 0;
+      renderStep(0);
+    }
+
+    // EVENT LISTENERS
+    btnPlay.addEventListener('click', () => {
+      if (currentStepIdx >= steps.length - 1) {
+        currentStepIdx = 0;
+        renderStep(0);
+      }
+      setPlaying(!isPlaying);
+    });
+
+    btnNext.addEventListener('click', () => {
+      setPlaying(false);
+      if (currentStepIdx < steps.length - 1) {
+        currentStepIdx++;
+        renderStep(currentStepIdx);
+      }
+    });
+
+    btnPrev.addEventListener('click', () => {
+      setPlaying(false);
+      if (currentStepIdx > 0) {
+        currentStepIdx--;
+        renderStep(currentStepIdx);
+      }
+    });
+
+    btnReset.addEventListener('click', () => {
+      setPlaying(false);
+      currentStepIdx = 0;
+      renderStep(0);
+    });
+
+    stepScrubber.addEventListener('input', (e) => {
+      setPlaying(false);
+      currentStepIdx = parseInt(e.target.value, 10);
+      renderStep(currentStepIdx);
+    });
+
+    // Speed Selector Buttons
+    document.querySelectorAll('.speed-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.speed-btn').forEach(b => {
+          b.classList.remove('bg-cyan-500/30', 'text-cyan-300', 'font-semibold');
+        });
+        btn.classList.add('bg-cyan-500/30', 'text-cyan-300', 'font-semibold');
+        playSpeed = parseInt(btn.dataset.speed, 10);
+        if (isPlaying) {
+          setPlaying(false);
+          setPlaying(true);
+        }
+      });
+    });
+
+    // Audio Toggle
+    btnAudio.addEventListener('click', () => {
+      audioEnabled = !audioEnabled;
+      if (audioEnabled) {
+        audioIcon.className = "fa-solid fa-volume-high";
+        btnAudio.classList.remove('text-slate-600');
+        btnAudio.classList.add('text-slate-400');
+      } else {
+        audioIcon.className = "fa-solid fa-volume-xmark";
+        btnAudio.classList.add('text-slate-600');
+        btnAudio.classList.remove('text-slate-400');
+      }
+    });
+
+    // Preset Selection
+    presetSelect.addEventListener('change', (e) => {
+      const idx = parseInt(e.target.value, 10);
+      const chosen = PRESETS[idx];
+      customK.value = chosen.k;
+      initSimulation(chosen.nums, chosen.k);
+    });
+
+    // Custom Input Load
+    btnApplyCustom.addEventListener('click', () => {
+      const text = customInput.value.trim();
+      const kVal = parseInt(customK.value.trim(), 10) || 0;
+      if (!text) return;
+      const parsed = text.split(',')
+        .map(s => parseInt(s.trim(), 10))
+        .filter(n => !isNaN(n));
+      if (parsed.length > 0) {
+        initSimulation(parsed, kVal);
+      }
+    });
+
+    // Keyboard Shortcuts (Space: Play/Pause, Arrows: Step)
+    window.addEventListener('keydown', (e) => {
+      if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT') return;
+      if (e.code === 'Space') {
+        e.preventDefault();
+        btnPlay.click();
+      } else if (e.code === 'ArrowRight') {
+        e.preventDefault();
+        btnNext.click();
+      } else if (e.code === 'ArrowLeft') {
+        e.preventDefault();
+        btnPrev.click();
+      }
+    });
+
+    // Initialize with default preset
+    window.onload = function() {
+      initSimulation(PRESETS[0].nums, PRESETS[0].k);
+    };
+  </script>
+</body>
+</html>
