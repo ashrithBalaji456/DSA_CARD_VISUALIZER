@@ -382,10 +382,20 @@ export function App() {
           onToggleSolved={toggleSolved}
           onToggleBookmark={toggleBookmark}
           onClose={() => setSelectedProblem(null)}
-          onSelectRelatedProblem={(title) => {
-            const found = PROBLEMS.find(
+          onSelectRelatedProblem={(title, number) => {
+            let found = PROBLEMS.find(
               (p) => p.title.toLowerCase() === title.toLowerCase()
             );
+            if (!found && number) {
+              found = PROBLEMS.find((p) => p.number === number);
+            }
+            if (!found) {
+              found = PROBLEMS.find(
+                (p) =>
+                  p.title.toLowerCase().includes(title.toLowerCase()) ||
+                  title.toLowerCase().includes(p.title.toLowerCase())
+              );
+            }
             if (found) {
               setSelectedProblem(found);
             }

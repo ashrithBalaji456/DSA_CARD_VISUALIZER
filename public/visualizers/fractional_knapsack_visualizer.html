@@ -1,0 +1,1540 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Fractional Knapsack Visualizer • Greedy Algorithm</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      background: radial-gradient(circle at 15% 15%, #081120 0%, #040913 55%, #010307 100%);
+      min-height: 100vh;
+      color: #f1f5f9;
+      overflow-x: hidden;
+    }
+    .code-font {
+      font-family: 'JetBrains Mono', monospace;
+    }
+    .glass-card {
+      background: rgba(15, 23, 42, 0.72);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      box-shadow: 0 20px 45px -10px rgba(0, 0, 0, 0.75), inset 0 1px 1px 0 rgba(255, 255, 255, 0.1);
+    }
+    .glass-input {
+      background: rgba(8, 14, 30, 0.8);
+      backdrop-filter: blur(14px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    .glass-btn {
+      background: rgba(255, 255, 255, 0.06);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .glass-btn:hover {
+      background: rgba(255, 255, 255, 0.16);
+      border-color: rgba(255, 255, 255, 0.3);
+      transform: translateY(-1px);
+    }
+    .glass-btn:active {
+      transform: translateY(1px) scale(0.97);
+    }
+    .code-line {
+      transition: background-color 0.15s ease, border-color 0.15s ease;
+    }
+    .code-active {
+      background-color: rgba(56, 189, 248, 0.22) !important;
+      border-left: 4px solid #38bdf8 !important;
+      color: #ffffff;
+      font-weight: 600;
+    }
+    @keyframes pulseTakeFull {
+      0%, 100% { transform: scale(1); filter: drop-shadow(0 0 10px rgba(16, 185, 129, 0.6)); }
+      50% { transform: scale(1.03); filter: drop-shadow(0 0 22px rgba(16, 185, 129, 0.95)); }
+    }
+    .pulse-take-full {
+      animation: pulseTakeFull 0.9s infinite ease-in-out;
+    }
+    @keyframes pulseTakeFraction {
+      0%, 100% { transform: scale(1); filter: drop-shadow(0 0 10px rgba(245, 158, 11, 0.6)); }
+      50% { transform: scale(1.03); filter: drop-shadow(0 0 22px rgba(245, 158, 11, 0.95)); }
+    }
+    .pulse-take-fraction {
+      animation: pulseTakeFraction 0.9s infinite ease-in-out;
+    }
+    ::-webkit-scrollbar {
+      width: 5px;
+      height: 5px;
+    }
+    ::-webkit-scrollbar-track {
+      background: rgba(8, 14, 30, 0.5);
+    }
+    ::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 4px;
+    }
+  </style>
+</head>
+<body class="p-3 sm:p-5 text-slate-100 flex flex-col justify-between relative min-h-screen">
+
+  <!-- Ambient Glowing Orbs -->
+  <div class="fixed top-[-10%] left-[-5%] w-[45vw] h-[45vw] rounded-full bg-emerald-600/15 blur-[130px] pointer-events-none -z-10"></div>
+  <div class="fixed bottom-[-15%] right-[-5%] w-[50vw] h-[50vw] rounded-full bg-amber-600/15 blur-[140px] pointer-events-none -z-10"></div>
+  <div class="fixed top-[35%] right-[20%] w-[35vw] h-[35vw] rounded-full bg-cyan-600/10 blur-[130px] pointer-events-none -z-10"></div>
+
+  <!-- TOP GLASSY CONTROL DECK -->
+  <header class="max-w-7xl mx-auto w-full mb-3">
+    <div class="glass-card p-3.5 sm:p-4 rounded-2xl flex flex-col gap-3 shadow-2xl">
+      
+      <!-- Top Title & Presets -->
+      <div class="flex flex-col lg:flex-row items-center justify-between gap-3">
+        <div class="flex items-center gap-3">
+          <div class="w-11 h-11 rounded-xl bg-gradient-to-tr from-emerald-500 via-cyan-500 to-amber-500 flex items-center justify-center shadow-lg shadow-emerald-500/25 text-white text-xl font-bold">
+            <i class="fa-solid fa-sack-dollar"></i>
+          </div>
+          <div>
+            <h1 class="text-base sm:text-xl font-extrabold tracking-tight bg-gradient-to-r from-emerald-300 via-cyan-200 to-amber-300 bg-clip-text text-transparent">
+              Fractional Knapsack • Greedy By Ratio
+            </h1>
+            <p class="text-xs text-slate-400 font-mono">
+              Greedy Choice: Sort items by <code class="text-emerald-400">value / weight</code> descending &bull; Take full if fits, else take fraction
+            </p>
+          </div>
+        </div>
+
+        <!-- Presets & Custom Configuration -->
+        <div class="flex flex-wrap items-center justify-center gap-2">
+          <div class="flex items-center gap-1.5 glass-input px-2.5 py-1 rounded-xl text-xs">
+            <span class="text-emerald-400 font-semibold font-mono">Preset:</span>
+            <select id="presetSelect" class="bg-transparent text-emerald-200 font-mono text-xs border-none focus:outline-none cursor-pointer pr-2">
+              <option value="0" class="bg-slate-900 text-slate-100">1: Classic Standard (W=50, 3 items, opt=240.00)</option>
+              <option value="1" class="bg-slate-900 text-slate-100">2: Exact Fit All (W=70, takes 100%)</option>
+              <option value="2" class="bg-slate-900 text-slate-100">3: Pure Fractional Only (W=15, 1st item split)</option>
+              <option value="3" class="bg-slate-900 text-slate-100">4: Single Item Oversized (W=10, wt=40)</option>
+              <option value="4" class="bg-slate-900 text-slate-100">5: Equal Ratios Tiebreak (Ratio 3.0 on all)</option>
+              <option value="5" class="bg-slate-900 text-slate-100">6: Tiny Knapsack Capacity (W=5)</option>
+              <option value="6" class="bg-slate-900 text-slate-100">7: Zero Capacity (W=0, returns 0.00)</option>
+              <option value="7" class="bg-slate-900 text-slate-100">8: Large Diverse 5 Items (W=60)</option>
+              <option value="8" class="bg-slate-900 text-slate-100">9: High Value Heavy vs Low Value Light (W=30)</option>
+              <option value="9" class="bg-slate-900 text-slate-100">10: Empty Items List (n=0, W=50)</option>
+            </select>
+          </div>
+
+          <div class="flex items-center gap-1.5 glass-input px-2.5 py-1 rounded-xl text-xs">
+            <span class="text-slate-400 font-mono">W:</span>
+            <input id="customCapInput" type="number" min="0" max="200" value="50" class="w-12 bg-transparent text-emerald-300 font-mono text-xs focus:outline-none px-1 border-b border-white/20 text-center">
+            <span class="text-slate-400 font-mono ml-1">val:</span>
+            <input id="customValInput" type="text" value="60, 100, 120" placeholder="60, 100, 120" class="w-24 bg-transparent text-cyan-300 font-mono text-xs focus:outline-none px-1 border-b border-white/20">
+            <span class="text-slate-400 font-mono ml-1">wt:</span>
+            <input id="customWtInput" type="text" value="10, 20, 30" placeholder="10, 20, 30" class="w-24 bg-transparent text-amber-300 font-mono text-xs focus:outline-none px-1 border-b border-white/20">
+            <button id="btnApplyCustom" class="px-2 py-0.5 rounded bg-emerald-600 hover:bg-emerald-500 text-white font-mono text-[11px] font-bold">Set</button>
+          </div>
+
+          <button id="btnSampleNext" class="glass-btn px-3 py-1.5 text-slate-200 rounded-xl text-xs transition" title="Cycle through sample presets">
+            <i class="fa-solid fa-shuffle text-amber-400 mr-1"></i> Sample
+          </button>
+
+          <button id="btnSoundToggle" class="glass-btn px-2.5 py-1.5 text-slate-300 rounded-xl text-xs transition" title="Toggle Sound Synthesis">
+            <i id="soundIcon" class="fa-solid fa-volume-high text-cyan-400"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Playback Controls Bar (Top Placement) -->
+      <div class="flex flex-wrap items-center justify-between gap-3 pt-2 border-t border-white/10">
+        <!-- Play / Pause / Prev / Next / Reset -->
+        <div class="flex items-center gap-2">
+          <a href="/" class="glass-button px-3 py-1.5 rounded-xl text-xs font-semibold text-slate-300 hover:text-white flex items-center gap-1.5 border border-white/10 hover:border-indigo-500/40 bg-white/5 shrink-0 transition-all active:scale-95 cursor-pointer" title="Return to DSA Atlas Library"><i class="fa-solid fa-arrow-left text-indigo-400"></i><span>DSA Atlas</span></a>
+          <button id="btnReset" class="glass-btn w-10 h-10 rounded-xl text-slate-300 flex items-center justify-center hover:text-white" title="Reset to beginning">
+            <i class="fa-solid fa-backward-step"></i>
+          </button>
+          
+          <button id="btnPrev" class="glass-btn px-3.5 h-10 rounded-xl text-slate-200 flex items-center gap-2 text-xs sm:text-sm font-semibold hover:text-white" title="Previous step">
+            <i class="fa-solid fa-chevron-left text-xs"></i> Prev
+          </button>
+
+          <button id="btnPlayPause" class="px-5 h-10 rounded-xl bg-gradient-to-r from-emerald-500 via-cyan-600 to-amber-600 hover:from-emerald-400 hover:to-amber-500 active:scale-95 text-white flex items-center gap-2 text-xs sm:text-sm font-bold shadow-lg shadow-emerald-500/30 transition">
+            <i id="playIcon" class="fa-solid fa-play text-xs"></i>
+            <span id="playText">Start</span>
+          </button>
+
+          <button id="btnNext" class="glass-btn px-3.5 h-10 rounded-xl text-slate-200 flex items-center gap-2 text-xs sm:text-sm font-semibold hover:text-white" title="Next step">
+            Next <i class="fa-solid fa-chevron-right text-xs"></i>
+          </button>
+        </div>
+
+        <!-- Phase Badge & Step Counter -->
+        <div class="flex items-center gap-2">
+          <span class="inline-flex items-center px-3 py-1.5 rounded-full text-xs font-semibold bg-emerald-950/70 text-emerald-300 border border-emerald-500/30 backdrop-blur-md">
+            <span id="phaseDot" class="w-2 h-2 rounded-full bg-emerald-400 mr-2 animate-pulse"></span>
+            <span id="topPhaseBadge">Phase: Ready</span>
+          </span>
+          <span id="topStepCounterBadge" class="text-xs glass-input text-slate-300 px-3 py-1.5 rounded-full font-mono">
+            Step 0 / 0
+          </span>
+        </div>
+
+        <!-- Speed Multipliers -->
+        <div class="flex items-center gap-2">
+          <span class="text-xs text-slate-400 font-medium hidden sm:inline">Speed:</span>
+          <div class="flex items-center glass-input rounded-xl p-1 text-xs">
+            <button class="speed-btn px-2.5 py-1 rounded-lg text-slate-300 hover:text-white" data-speed="1400">0.5x</button>
+            <button class="speed-btn px-2.5 py-1 rounded-lg bg-emerald-600 text-white font-bold" data-speed="750">1x</button>
+            <button class="speed-btn px-2.5 py-1 rounded-lg text-slate-300 hover:text-white" data-speed="350">2x</button>
+            <button class="speed-btn px-2.5 py-1 rounded-lg text-slate-300 hover:text-white" data-speed="150">4x</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Scrubber Timeline Slider -->
+      <div class="flex items-center gap-3 pt-1 border-t border-white/5">
+        <span class="text-xs font-mono text-slate-400 w-10 text-right" id="sliderCurrent">0</span>
+        <input id="stepSlider" type="range" min="0" max="0" value="0" class="w-full h-1.5 bg-slate-800/80 rounded-lg appearance-none cursor-pointer accent-emerald-500">
+        <span class="text-xs font-mono text-slate-400 w-10" id="sliderTotal">0</span>
+      </div>
+
+    </div>
+  </header>
+
+  <main class="max-w-7xl mx-auto w-full grid grid-cols-1 lg:grid-cols-12 gap-5 flex-grow mb-4">
+    
+    <!-- Left Column: Knapsack Chamber & Items Arena (7 cols) -->
+    <div class="lg:col-span-7 flex flex-col gap-4">
+      
+      <div class="glass-card rounded-3xl p-4 sm:p-5 flex flex-col justify-between min-h-[580px] relative overflow-hidden shadow-2xl gap-3.5">
+        
+        <!-- Arena Status Ribbon -->
+        <div class="flex flex-wrap items-center justify-between z-10 gap-2">
+          <div class="flex items-center gap-2 text-xs font-mono text-slate-300 glass-input px-3 py-1.5 rounded-full">
+            <span class="text-emerald-400 font-semibold flex items-center gap-1.5">
+              <i class="fa-solid fa-coins text-emerald-400"></i> totalValue: <span id="arenaTotalValue" class="font-bold">0.00</span>
+            </span>
+            <span class="text-slate-500">•</span>
+            <span class="text-cyan-400 font-semibold flex items-center gap-1.5">
+              <i class="fa-solid fa-weight-hanging text-cyan-400"></i> capacity left: <span id="arenaRemainingCap" class="font-bold">50</span>
+            </span>
+            <span class="text-slate-500">•</span>
+            <span class="text-amber-300 font-semibold flex items-center gap-1.5">
+              <i class="fa-solid fa-percent text-amber-400"></i> Filled: <span id="arenaFillPercent" class="font-bold">0.0%</span>
+            </span>
+          </div>
+
+          <div class="flex items-center gap-2 glass-input px-3 py-1.5 rounded-full text-xs">
+            <span id="arenaStatusDot" class="w-2.5 h-2.5 rounded-full bg-emerald-400"></span>
+            <span id="arenaStatusText" class="text-slate-300 font-mono text-[11px]">Ready</span>
+          </div>
+        </div>
+
+        <!-- Dynamic Action Formula Banner -->
+        <div id="actionFormulaBanner" class="min-h-[46px] flex items-center justify-center">
+          <span class="text-xs font-mono text-slate-300 glass-input px-4 py-1.5 rounded-full">
+            Sort items by (value / weight) desc &bull; Greedy optimal selection
+          </span>
+        </div>
+
+        <!-- Visual Knapsack Chamber & Fill Gauge (The Bag) -->
+        <div class="glass-input p-3.5 rounded-2xl border border-white/10 flex flex-col gap-3 relative">
+          <div class="flex items-center justify-between text-xs font-mono text-slate-300">
+            <span class="flex items-center gap-1.5 text-emerald-300 font-bold">
+              <i class="fa-solid fa-bag-shopping text-emerald-400"></i> Knapsack Storage Vessel (Max: <span id="initialCapBadge">50</span> wt)
+            </span>
+            <span class="text-[11px] text-slate-400 font-mono">
+              Occupied: <span id="bagWeightBadge" class="text-cyan-300 font-bold">0</span> / <span id="bagMaxWeightBadge">50</span>
+            </span>
+          </div>
+
+          <!-- Vessel Progress Bar / Stack Fill Area -->
+          <div class="w-full bg-slate-950/80 rounded-xl p-1.5 border border-white/10 relative overflow-hidden">
+            <div id="knapsackFillBar" class="h-8 rounded-lg bg-gradient-to-r from-emerald-600 via-cyan-600 to-amber-500 transition-all duration-300 flex items-center justify-end pr-3 text-xs font-mono font-bold text-slate-900 shadow-lg shadow-emerald-500/20" style="width: 0%;">
+              <span id="fillBarLabel" class="text-slate-950 bg-white/80 px-2 py-0.5 rounded text-[10px] hidden font-extrabold">0%</span>
+            </div>
+            <!-- Horizontal Capacity Markers -->
+            <div class="absolute inset-0 flex justify-between px-3 items-center pointer-events-none text-[9px] font-mono text-slate-500">
+              <span>0 wt</span>
+              <span id="midCapMark">25 wt</span>
+              <span id="fullCapMark">50 wt (Full)</span>
+            </div>
+          </div>
+
+          <!-- Packed Items Manifest Inside the Bag -->
+          <div class="flex flex-col gap-1.5">
+            <span class="text-[10px] font-mono text-slate-400 uppercase tracking-wider">Packed Manifest (Items in Knapsack):</span>
+            <div id="packedManifestContainer" class="flex flex-wrap items-center gap-2 min-h-[38px] p-2 bg-black/30 rounded-xl border border-white/5">
+              <span class="text-xs text-slate-500 font-mono italic">Knapsack is currently empty</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Available Items Showcase (Sorted by Ratio) -->
+        <div class="glass-input p-3.5 rounded-2xl border border-white/10 flex flex-col gap-2 relative">
+          <div class="flex items-center justify-between text-xs font-mono">
+            <span class="text-cyan-400 font-bold flex items-center gap-1.5">
+              <i class="fa-solid fa-cubes-stacked text-cyan-400"></i> Items Pool (value, weight, ratio)
+            </span>
+            <span id="sortStatusBadge" class="text-[10px] px-2 py-0.5 rounded bg-white/5 border border-white/10 font-mono text-slate-300">
+              Raw Input
+            </span>
+          </div>
+
+          <!-- Dynamic Item Cards Track -->
+          <div id="itemsContainer" class="flex flex-wrap items-center justify-center gap-2.5 min-h-[110px] p-1 overflow-x-auto">
+            <!-- Dynamically populated item cards -->
+          </div>
+        </div>
+
+        <!-- Math Decision Evaluation Strip -->
+        <div class="glass-input p-3 rounded-2xl border border-white/10 flex flex-col gap-1.5">
+          <div class="flex items-center justify-between text-xs font-mono">
+            <span class="text-slate-400 font-bold">Greedy Decision Logic:</span>
+            <span id="decisionBadge" class="text-[11px] px-2 py-0.5 rounded bg-white/5 border border-white/10 font-bold text-slate-300">
+              if (item.weight &le; capacity)
+            </span>
+          </div>
+
+          <div id="comparisonMathStrip" class="w-full bg-black/40 px-3 py-2 rounded-xl border border-white/5 flex flex-wrap items-center justify-between text-xs font-mono gap-2">
+            <div class="flex items-center gap-2">
+              <span class="text-cyan-400 font-bold">item.weight: <span id="stripItemWeight">-</span></span>
+              <span class="text-slate-500">vs</span>
+              <span class="text-emerald-400 font-bold">capacity: <span id="stripCapVal">-</span></span>
+            </div>
+            <div id="stripConditionMath" class="text-slate-300 font-semibold">
+              -
+            </div>
+            <div id="stripOutcomePill" class="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-800 text-slate-400">
+              awaiting
+            </div>
+          </div>
+        </div>
+
+        <!-- Detailed Mathematical Explanation Box -->
+        <div id="operationDetailBox" class="bg-black/40 px-3.5 py-2.5 rounded-xl border border-white/5 text-slate-300 text-xs font-mono leading-relaxed text-center">
+          Fractional Knapsack sorts items by value-per-unit-weight (value/weight). We greedily consume items with highest density first. If the whole item fits, take 100%. If only partial room remains, take that exact fraction.
+        </div>
+
+        <!-- Bottom Status Summary Bar -->
+        <div class="z-10 glass-input p-3 rounded-2xl flex items-center justify-between gap-3 text-xs sm:text-sm">
+          <div class="flex items-center gap-2.5 overflow-hidden w-full">
+            <div id="statusDot" class="w-3.5 h-3.5 rounded-full bg-emerald-400 shrink-0"></div>
+            <p id="stepDescription" class="text-slate-200 truncate font-medium text-xs sm:text-sm">Ready to begin. Click Start or Next.</p>
+          </div>
+          <div id="returnPill" class="shrink-0 px-3 py-1 rounded-xl text-xs font-bold font-mono bg-slate-800 text-slate-400 border border-slate-700">
+            pending
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- Right Column: Variable Watcher & Synchronized Java Code (5 cols) -->
+    <div class="lg:col-span-5 flex flex-col gap-4">
+      
+      <!-- Live Variable Watcher -->
+      <div class="glass-card rounded-2xl p-4 shadow-xl flex flex-col gap-3">
+        <h2 class="text-sm font-bold text-slate-300 flex items-center justify-between">
+          <span><i class="fa-solid fa-microchip text-emerald-400 mr-2"></i>Live Variable Watcher</span>
+          <span class="text-xs font-normal text-slate-400 font-mono">Scope: fractionalKnapsack</span>
+        </h2>
+        
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-center">
+          <div class="glass-input p-2 rounded-xl border border-emerald-500/20">
+            <span class="text-[10px] uppercase tracking-wider text-slate-400 font-semibold block">totalValue</span>
+            <span id="varTotalValue" class="font-mono text-xs sm:text-sm font-bold text-emerald-400">0.00</span>
+          </div>
+          <div class="glass-input p-2 rounded-xl border border-cyan-500/20">
+            <span class="text-[10px] uppercase tracking-wider text-slate-400 font-semibold block">capacity</span>
+            <span id="varCapacity" class="font-mono text-xs sm:text-sm font-bold text-cyan-300">50</span>
+          </div>
+          <div class="glass-input p-2 rounded-xl border border-amber-500/20">
+            <span class="text-[10px] uppercase tracking-wider text-slate-400 font-semibold block">item.value</span>
+            <span id="varItemValue" class="font-mono text-xs sm:text-sm font-bold text-amber-300">-</span>
+          </div>
+          <div class="glass-input p-2 rounded-xl border border-purple-500/20">
+            <span class="text-[10px] uppercase tracking-wider text-slate-400 font-semibold block">item.weight</span>
+            <span id="varItemWeight" class="font-mono text-xs sm:text-sm font-bold text-purple-300">-</span>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-2 text-center">
+          <div class="glass-input p-2 rounded-xl border border-indigo-500/20">
+            <span class="text-[10px] uppercase tracking-wider text-slate-400 font-semibold block">Ratio (val/wt)</span>
+            <span id="varItemRatio" class="font-mono text-xs font-bold text-indigo-300">-</span>
+          </div>
+          <div class="glass-input p-2 rounded-xl border border-emerald-500/20">
+            <span class="text-[10px] uppercase tracking-wider text-slate-400 font-semibold block">Fraction Taken</span>
+            <span id="varFraction" class="font-mono text-xs font-bold text-emerald-300">-</span>
+          </div>
+        </div>
+
+        <!-- Expression Evaluator -->
+        <div class="glass-input p-2.5 rounded-xl text-xs flex flex-col gap-1 font-mono">
+          <div class="flex items-center justify-between text-slate-400 text-[11px]">
+            <span>Active Expression:</span>
+            <span class="text-emerald-300">Evaluation</span>
+          </div>
+          <div class="flex items-center justify-between text-xs bg-black/40 px-3 py-1.5 rounded-lg border border-white/5">
+            <span id="evalStatement" class="text-slate-300 truncate">Solution.fractionalKnapsack(...)</span>
+            <span id="evalResult" class="font-bold text-emerald-400 shrink-0 ml-2">-</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Synchronized Java Code Viewer with Zero Page Scroll Shift -->
+      <div class="glass-card rounded-2xl p-4 shadow-xl flex flex-col flex-grow overflow-hidden">
+        <div class="flex items-center justify-between pb-2 border-b border-white/10 mb-2">
+          <div class="flex items-center gap-2">
+            <i class="fa-brands fa-java text-rose-400 text-lg"></i>
+            <span class="text-xs font-bold text-slate-200">Solution.java &bull; Synchronized</span>
+          </div>
+          <span class="text-[11px] text-slate-400 bg-white/5 px-2 py-0.5 rounded font-mono">O(N log N) Time &bull; O(N) Space</span>
+        </div>
+
+        <!-- Code lines matching Java source -->
+        <div class="code-font text-[11px] sm:text-xs text-slate-300 overflow-y-auto rounded-xl glass-input p-2.5 border border-white/5 select-none flex-grow max-h-[360px]" id="codeContainer">
+          <div id="code-line-1" class="code-line py-0.5 px-2 rounded flex"><span class="text-slate-600 w-7 select-none">1</span><span class="text-purple-400">import</span>&nbsp;java.util.Arrays;</div>
+          <div id="code-line-2" class="code-line py-0.5 px-2 rounded flex"><span class="text-slate-600 w-7 select-none">2</span><span class="text-purple-400">import</span>&nbsp;java.util.Comparator;</div>
+          <div id="code-line-3" class="code-line py-0.5 px-2 rounded flex"><span class="text-slate-600 w-7 select-none">3</span></div>
+          <div id="code-line-4" class="code-line py-0.5 px-2 rounded flex"><span class="text-slate-600 w-7 select-none">4</span><span class="text-purple-400">class</span>&nbsp;<span class="text-yellow-300">Solution</span>&nbsp;{</div>
+          <div id="code-line-5" class="code-line py-0.5 px-2 rounded flex"><span class="text-slate-600 w-7 select-none">5</span>&nbsp;&nbsp;<span class="text-purple-400">static class</span>&nbsp;<span class="text-cyan-300">Item</span>&nbsp;{ <span class="text-purple-400">int</span> value, weight; ... }</div>
+          <div id="code-line-6" class="code-line py-0.5 px-2 rounded flex"><span class="text-slate-600 w-7 select-none">6</span></div>
+          <div id="code-line-7" class="code-line py-0.5 px-2 rounded flex"><span class="text-slate-600 w-7 select-none">7</span>&nbsp;&nbsp;<span class="text-purple-400">public double</span>&nbsp;<span class="text-blue-400">fractionalKnapsack</span>(<span class="text-cyan-400">int</span>[] values, <span class="text-cyan-400">int</span>[] weights, <span class="text-cyan-400">int</span> capacity) {</div>
+          <div id="code-line-8" class="code-line py-0.5 px-2 rounded flex"><span class="text-slate-600 w-7 select-none">8</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="text-purple-400">int</span> n = values.length;</div>
+          <div id="code-line-9" class="code-line py-0.5 px-2 rounded flex"><span class="text-slate-600 w-7 select-none">9</span>&nbsp;&nbsp;&nbsp;&nbsp;Item[] items = <span class="text-purple-400">new</span> Item[n];</div>
+          <div id="code-line-10" class="code-line py-0.5 px-2 rounded flex"><span class="text-slate-600 w-7 select-none">10</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="text-purple-400">for</span> (<span class="text-purple-400">int</span> i = <span class="text-amber-400">0</span>; i &lt; n; i++) {</div>
+          <div id="code-line-11" class="code-line py-0.5 px-2 rounded flex"><span class="text-slate-600 w-7 select-none">11</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;items[i] = <span class="text-purple-400">new</span> Item(values[i], weights[i]);</div>
+          <div id="code-line-12" class="code-line py-0.5 px-2 rounded flex"><span class="text-slate-600 w-7 select-none">12</span>&nbsp;&nbsp;&nbsp;&nbsp;}</div>
+          <div id="code-line-13" class="code-line py-0.5 px-2 rounded flex"><span class="text-slate-600 w-7 select-none">13</span></div>
+          <div id="code-line-14" class="code-line py-0.5 px-2 rounded flex"><span class="text-slate-600 w-7 select-none">14</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="text-slate-500">// Sort by value/weight ratio in descending order</span></div>
+          <div id="code-line-15" class="code-line py-0.5 px-2 rounded flex"><span class="text-slate-600 w-7 select-none">15</span>&nbsp;&nbsp;&nbsp;&nbsp;Arrays.sort(items, (a, b) -&gt;</div>
+          <div id="code-line-16" class="code-line py-0.5 px-2 rounded flex"><span class="text-slate-600 w-7 select-none">16</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Double.compare((<span class="text-purple-400">double</span>) b.value / b.weight, (<span class="text-purple-400">double</span>) a.value / a.weight));</div>
+          <div id="code-line-17" class="code-line py-0.5 px-2 rounded flex"><span class="text-slate-600 w-7 select-none">17</span></div>
+          <div id="code-line-18" class="code-line py-0.5 px-2 rounded flex"><span class="text-slate-600 w-7 select-none">18</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="text-purple-400">double</span> totalValue = <span class="text-amber-400">0.0</span>;</div>
+          <div id="code-line-19" class="code-line py-0.5 px-2 rounded flex"><span class="text-slate-600 w-7 select-none">19</span></div>
+          <div id="code-line-20" class="code-line py-0.5 px-2 rounded flex"><span class="text-slate-600 w-7 select-none">20</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="text-purple-400">for</span> (Item item : items) {</div>
+          <div id="code-line-21" class="code-line py-0.5 px-2 rounded flex"><span class="text-slate-600 w-7 select-none">21</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="text-purple-400">if</span> (capacity == <span class="text-amber-400">0</span>) {</div>
+          <div id="code-line-22" class="code-line py-0.5 px-2 rounded flex"><span class="text-slate-600 w-7 select-none">22</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="text-purple-400">break</span>;</div>
+          <div id="code-line-23" class="code-line py-0.5 px-2 rounded flex"><span class="text-slate-600 w-7 select-none">23</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}</div>
+          <div id="code-line-24" class="code-line py-0.5 px-2 rounded flex"><span class="text-slate-600 w-7 select-none">24</span></div>
+          <div id="code-line-25" class="code-line py-0.5 px-2 rounded flex"><span class="text-slate-600 w-7 select-none">25</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="text-purple-400">if</span> (item.weight &lt;= capacity) {</div>
+          <div id="code-line-26" class="code-line py-0.5 px-2 rounded flex"><span class="text-slate-600 w-7 select-none">26</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="text-slate-500">// Take the entire item</span></div>
+          <div id="code-line-27" class="code-line py-0.5 px-2 rounded flex"><span class="text-slate-600 w-7 select-none">27</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;totalValue += item.value;</div>
+          <div id="code-line-28" class="code-line py-0.5 px-2 rounded flex"><span class="text-slate-600 w-7 select-none">28</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;capacity -= item.weight;</div>
+          <div id="code-line-29" class="code-line py-0.5 px-2 rounded flex"><span class="text-slate-600 w-7 select-none">29</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;} <span class="text-purple-400">else</span> {</div>
+          <div id="code-line-30" class="code-line py-0.5 px-2 rounded flex"><span class="text-slate-600 w-7 select-none">30</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="text-slate-500">// Take only the fraction that fits</span></div>
+          <div id="code-line-31" class="code-line py-0.5 px-2 rounded flex"><span class="text-slate-600 w-7 select-none">31</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;totalValue += (<span class="text-purple-400">double</span>) item.value * capacity / item.weight;</div>
+          <div id="code-line-32" class="code-line py-0.5 px-2 rounded flex"><span class="text-slate-600 w-7 select-none">32</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;capacity = <span class="text-amber-400">0</span>;</div>
+          <div id="code-line-33" class="code-line py-0.5 px-2 rounded flex"><span class="text-slate-600 w-7 select-none">33</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}</div>
+          <div id="code-line-34" class="code-line py-0.5 px-2 rounded flex"><span class="text-slate-600 w-7 select-none">34</span>&nbsp;&nbsp;&nbsp;&nbsp;}</div>
+          <div id="code-line-35" class="code-line py-0.5 px-2 rounded flex"><span class="text-slate-600 w-7 select-none">35</span></div>
+          <div id="code-line-36" class="code-line py-0.5 px-2 rounded flex"><span class="text-slate-600 w-7 select-none">36</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="text-purple-400">return</span> totalValue;</div>
+          <div id="code-line-37" class="code-line py-0.5 px-2 rounded flex"><span class="text-slate-600 w-7 select-none">37</span>&nbsp;&nbsp;}</div>
+          <div id="code-line-38" class="code-line py-0.5 px-2 rounded flex"><span class="text-slate-600 w-7 select-none">38</span>}</div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <footer class="max-w-7xl mx-auto w-full text-center text-xs text-slate-500 py-1 font-mono">
+    <p>Greedy Choice Property &bull; Value/Weight Ratio Sorting &bull; O(N log N) Time &bull; O(N) Space</p>
+  </footer>
+
+  <script>
+    class SoundEngine {
+      constructor() {
+        this.enabled = true;
+        this.ctx = null;
+      }
+
+      init() {
+        if (!this.ctx) {
+          const AudioContext = window.AudioContext || window.webkitAudioContext;
+          if (AudioContext) {
+            this.ctx = new AudioContext();
+          }
+        }
+      }
+
+      playStep() {
+        if (!this.enabled) return;
+        this.init();
+        if (!this.ctx) return;
+        if (this.ctx.state === 'suspended') this.ctx.resume();
+
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(460, this.ctx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(340, this.ctx.currentTime + 0.05);
+
+        gain.gain.setValueAtTime(0.04, this.ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.05);
+
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.start();
+        osc.stop(this.ctx.currentTime + 0.05);
+      }
+
+      playTakeFull() {
+        if (!this.enabled) return;
+        this.init();
+        if (!this.ctx) return;
+        if (this.ctx.state === 'suspended') this.ctx.resume();
+
+        // Cheerful ascending chime (100% item taken)
+        const notes = [523.25, 659.25, 783.99]; // C5, E5, G5
+        notes.forEach((freq, idx) => {
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(freq, this.ctx.currentTime + idx * 0.04);
+          gain.gain.setValueAtTime(0.045, this.ctx.currentTime + idx * 0.04);
+          gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + idx * 0.04 + 0.1);
+
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+          osc.start(this.ctx.currentTime + idx * 0.04);
+          osc.stop(this.ctx.currentTime + idx * 0.04 + 0.11);
+        });
+      }
+
+      playTakeFraction() {
+        if (!this.enabled) return;
+        this.init();
+        if (!this.ctx) return;
+        if (this.ctx.state === 'suspended') this.ctx.resume();
+
+        // Dual amber synth note (partial cut)
+        const notes = [659.25, 587.33]; // E5 -> D5
+        notes.forEach((freq, idx) => {
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(freq, this.ctx.currentTime + idx * 0.06);
+          gain.gain.setValueAtTime(0.05, this.ctx.currentTime + idx * 0.06);
+          gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + idx * 0.06 + 0.12);
+
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+          osc.start(this.ctx.currentTime + idx * 0.06);
+          osc.stop(this.ctx.currentTime + idx * 0.06 + 0.13);
+        });
+      }
+
+      playComplete() {
+        if (!this.enabled) return;
+        this.init();
+        if (!this.ctx) return;
+        if (this.ctx.state === 'suspended') this.ctx.resume();
+
+        const notes = [523.25, 659.25, 783.99, 1046.50]; // C Major triumph
+        notes.forEach((freq, idx) => {
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(freq, this.ctx.currentTime + idx * 0.05);
+          gain.gain.setValueAtTime(0.04, this.ctx.currentTime + idx * 0.05);
+          gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + idx * 0.05 + 0.15);
+
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+          osc.start(this.ctx.currentTime + idx * 0.05);
+          osc.stop(this.ctx.currentTime + idx * 0.05 + 0.16);
+        });
+      }
+    }
+
+    const sound = new SoundEngine();
+
+    const presets = [
+      {
+        name: "1: Classic Standard (W=50, 3 items, opt=240.00)",
+        capacity: 50,
+        values: [60, 100, 120],
+        weights: [10, 20, 30]
+      },
+      {
+        name: "2: Exact Fit All (W=70, takes 100%)",
+        capacity: 70,
+        values: [50, 80, 120],
+        weights: [10, 20, 40]
+      },
+      {
+        name: "3: Pure Fractional Only (W=15, 1st item split)",
+        capacity: 15,
+        values: [120, 100, 60],
+        weights: [30, 20, 10]
+      },
+      {
+        name: "4: Single Item Oversized (W=10, wt=40)",
+        capacity: 10,
+        values: [200],
+        weights: [40]
+      },
+      {
+        name: "5: Equal Ratios Tiebreak (Ratio 3.0 on all)",
+        capacity: 35,
+        values: [30, 60, 90],
+        weights: [10, 20, 30]
+      },
+      {
+        name: "6: Tiny Knapsack Capacity (W=5)",
+        capacity: 5,
+        values: [50, 120, 90],
+        weights: [10, 20, 15]
+      },
+      {
+        name: "7: Zero Capacity (W=0, returns 0.00)",
+        capacity: 0,
+        values: [100, 200],
+        weights: [10, 20]
+      },
+      {
+        name: "8: Large Diverse 5 Items (W=60)",
+        capacity: 60,
+        values: [280, 100, 120, 120, 70],
+        weights: [40, 10, 20, 24, 14]
+      },
+      {
+        name: "9: High Value Heavy vs Low Value Light (W=30)",
+        capacity: 30,
+        values: [500, 60, 100],
+        weights: [100, 10, 20]
+      },
+      {
+        name: "10: Empty Items List (n=0, W=50)",
+        capacity: 50,
+        values: [],
+        weights: []
+      }
+    ];
+
+    let currentPresetIdx = 0;
+    let currentCapacity = presets[0].capacity;
+    let currentValues = [...presets[0].values];
+    let currentWeights = [...presets[0].weights];
+    let currentSteps = [];
+    let currentStepIndex = 0;
+    let isPlaying = false;
+    let playIntervalId = null;
+    let playSpeed = 750;
+
+    function generateAlgorithmSteps(initialValues, initialWeights, initialCapacity) {
+      const steps = [];
+      const n = initialValues ? initialValues.length : 0;
+      const initialMaxCap = Math.max(1, initialCapacity);
+
+      function snapshot(meta) {
+        steps.push({
+          line: meta.line,
+          phase: meta.phase,
+          passName: meta.passName ?? 'Execution',
+          activeItemIdx: meta.activeItemIdx ?? -1,
+          activeItem: meta.activeItem ? { ...meta.activeItem } : null,
+          totalValue: meta.totalValue ?? 0.0,
+          capacity: meta.capacity ?? initialCapacity,
+          initialCapacity: initialMaxCap,
+          packedItems: meta.packedItems ? meta.packedItems.map(p => ({ ...p })) : [],
+          items: meta.items ? meta.items.map(it => ({ ...it })) : [],
+          isSorted: meta.isSorted ?? false,
+          statusType: meta.statusType ?? 'neutral',
+          evalStmt: meta.evalStmt ?? '-',
+          evalResult: meta.evalResult ?? '-',
+          detail: meta.detail ?? '',
+          returnPillText: meta.returnPillText ?? 'running...',
+          desc: meta.desc ?? '',
+          stripItemWeight: meta.stripItemWeight ?? '-',
+          stripCapVal: meta.stripCapVal ?? '-',
+          stripConditionMath: meta.stripConditionMath ?? '-',
+          stripOutcome: meta.stripOutcome ?? 'awaiting',
+          fractionTaken: meta.fractionTaken ?? '-'
+        });
+      }
+
+      // Prepare raw items representation
+      const rawItems = [];
+      for (let i = 0; i < n; i++) {
+        const v = initialValues[i];
+        const w = initialWeights[i];
+        rawItems.push({
+          id: i + 1,
+          origIdx: i,
+          value: v,
+          weight: w,
+          ratio: w > 0 ? (v / w) : 0,
+          status: 'unprocessed',
+          fraction: 0
+        });
+      }
+
+      // Step 1: Function Entry (Line 7-8)
+      snapshot({
+        line: 7,
+        phase: `Function Entry: fractionalKnapsack(values, weights, W=${initialCapacity})`,
+        passName: 'Entry',
+        totalValue: 0.0,
+        capacity: initialCapacity,
+        packedItems: [],
+        items: rawItems,
+        isSorted: false,
+        evalStmt: `fractionalKnapsack(values, weights, ${initialCapacity});`,
+        evalResult: `n = ${n}, capacity = ${initialCapacity}`,
+        detail: `Starting Fractional Knapsack solver with ${n} candidate items and vessel capacity ${initialCapacity}.`,
+        statusType: 'neutral',
+        returnPillText: 'entered',
+        desc: `Called fractionalKnapsack with ${n} items and max capacity ${initialCapacity}.`
+      });
+
+      // Step 2: Line 8: int n = values.length;
+      snapshot({
+        line: 8,
+        phase: `Get Total Items: int n = values.length (${n})`,
+        passName: 'Setup',
+        totalValue: 0.0,
+        capacity: initialCapacity,
+        packedItems: [],
+        items: rawItems,
+        isSorted: false,
+        evalStmt: `int n = values.length; // n = ${n}`,
+        evalResult: `${n}`,
+        detail: `Array length is ${n}. We will construct ${n} Item objects with values and weights.`,
+        statusType: 'neutral',
+        returnPillText: `n = ${n}`,
+        desc: `Identified ${n} items in input arrays.`
+      });
+
+      if (n === 0) {
+        snapshot({
+          line: 36,
+          phase: 'Empty Items Array: return totalValue (0.0)',
+          passName: 'Finished',
+          totalValue: 0.0,
+          capacity: initialCapacity,
+          packedItems: [],
+          items: [],
+          isSorted: false,
+          evalStmt: 'return totalValue; // 0.0',
+          evalResult: '0.0',
+          detail: 'No items provided to pick from. Returns 0.0 total value.',
+          statusType: 'finished',
+          returnPillText: 'return 0.0',
+          desc: 'Empty items list. Returned 0.0.'
+        });
+        return steps;
+      }
+
+      // Step 3: Line 9-12: Create Item[] items
+      snapshot({
+        line: 11,
+        phase: `Create Item Objects: items[i] = new Item(values[i], weights[i]);`,
+        passName: 'Object Creation',
+        totalValue: 0.0,
+        capacity: initialCapacity,
+        packedItems: [],
+        items: rawItems,
+        isSorted: false,
+        evalStmt: `new Item(val, wt); // computed ratios`,
+        evalResult: `${n} objects created`,
+        detail: `Wrapped primitive arrays into Item objects and computed their value/weight densities.`,
+        statusType: 'neutral',
+        returnPillText: 'items created',
+        desc: `Created ${n} Item objects and calculated their ratios.`
+      });
+
+      // Step 4: Line 15-16: Arrays.sort(items, ...)
+      // Sort descending by ratio
+      const sortedItems = [...rawItems].sort((a, b) => b.ratio - a.ratio);
+      snapshot({
+        line: 15,
+        phase: 'Greedy Sort: Arrays.sort by ratio (value/weight) DESC',
+        passName: 'Greedy Ordering',
+        totalValue: 0.0,
+        capacity: initialCapacity,
+        packedItems: [],
+        items: sortedItems,
+        isSorted: true,
+        evalStmt: 'Arrays.sort(items, ratioDescComparator);',
+        evalResult: sortedItems.map(it => `${it.ratio.toFixed(2)}`).join(' >= '),
+        detail: 'Greedy Strategy: Items are sorted in descending order of value-per-unit-weight. Best value densities come first!',
+        statusType: 'sort',
+        returnPillText: 'sorted by ratio',
+        desc: `Sorted ${n} items in descending order of value/weight density.`
+      });
+
+      // Step 5: Line 18: double totalValue = 0.0;
+      let totalValue = 0.0;
+      let capacity = initialCapacity;
+      const packedItems = [];
+
+      snapshot({
+        line: 18,
+        phase: 'Initialize Accumulator: double totalValue = 0.0;',
+        passName: 'Setup',
+        totalValue: 0.0,
+        capacity: capacity,
+        packedItems: [],
+        items: sortedItems,
+        isSorted: true,
+        evalStmt: 'double totalValue = 0.0;',
+        evalResult: '0.00',
+        detail: 'totalValue accumulator initialized to 0.0.',
+        statusType: 'neutral',
+        returnPillText: 'val = 0.0',
+        desc: 'Initialized totalValue = 0.0.'
+      });
+
+      // Step 6: For Loop (Line 20-34)
+      for (let idx = 0; idx < sortedItems.length; idx++) {
+        const item = sortedItems[idx];
+
+        // Line 20: for (Item item : items)
+        snapshot({
+          line: 20,
+          phase: `Loop Item #${idx + 1}: val=${item.value}, wt=${item.weight}, ratio=${item.ratio.toFixed(2)}`,
+          passName: 'Next Highest Ratio',
+          activeItemIdx: idx,
+          activeItem: item,
+          totalValue: totalValue,
+          capacity: capacity,
+          packedItems: [...packedItems],
+          items: sortedItems,
+          isSorted: true,
+          evalStmt: `for (Item item : items) // Item val=${item.value}, wt=${item.weight}`,
+          evalResult: `ratio = ${item.ratio.toFixed(2)}`,
+          detail: `Inspecting next available highest-density item with value ${item.value} and weight ${item.weight}. Current capacity left = ${capacity}.`,
+          statusType: 'evaluating',
+          returnPillText: `item #${idx + 1}`,
+          desc: `Checking Item #${idx + 1} (val=${item.value}, wt=${item.weight}, ratio=${item.ratio.toFixed(2)}).`,
+          stripItemWeight: item.weight,
+          stripCapVal: capacity,
+          stripConditionMath: `Capacity left: ${capacity}`,
+          stripOutcome: 'INSPECTING'
+        });
+
+        // Line 21: if (capacity == 0) break;
+        if (capacity === 0) {
+          snapshot({
+            line: 21,
+            phase: 'Knapsack Exhausted: if (capacity == 0) -> TRUE, break;',
+            passName: 'Capacity Full',
+            activeItemIdx: idx,
+            activeItem: item,
+            totalValue: totalValue,
+            capacity: capacity,
+            packedItems: [...packedItems],
+            items: sortedItems,
+            isSorted: true,
+            evalStmt: 'if (capacity == 0) // TRUE',
+            evalResult: 'break loop',
+            detail: 'Knapsack capacity is completely filled (capacity == 0). Cannot take any more items; breaking out of loop.',
+            statusType: 'neutral',
+            returnPillText: 'capacity == 0',
+            desc: 'Capacity is 0. Breaking early from greedy loop.',
+            stripItemWeight: item.weight,
+            stripCapVal: capacity,
+            stripConditionMath: 'capacity == 0',
+            stripOutcome: 'BREAK'
+          });
+          break;
+        }
+
+        // Line 25: if (item.weight <= capacity)
+        if (item.weight <= capacity) {
+          snapshot({
+            line: 25,
+            phase: `Check Fit: item.weight (${item.weight}) <= capacity (${capacity}) -> TRUE (Take Whole)`,
+            passName: 'Take Entire Item',
+            activeItemIdx: idx,
+            activeItem: item,
+            totalValue: totalValue,
+            capacity: capacity,
+            packedItems: [...packedItems],
+            items: sortedItems,
+            isSorted: true,
+            evalStmt: `if (${item.weight} <= ${capacity}) // TRUE`,
+            evalResult: 'true (Full Fit)',
+            detail: `Item weight ${item.weight} completely fits inside remaining capacity ${capacity}. We take 100% of this item!`,
+            statusType: 'takeFull',
+            returnPillText: 'take 100%',
+            desc: `Item weight ${item.weight} fits in capacity ${capacity}. Taking 100% of the item.`,
+            stripItemWeight: item.weight,
+            stripCapVal: capacity,
+            stripConditionMath: `${item.weight} <= ${capacity} (Fits)`,
+            stripOutcome: 'TAKE 100%',
+            fractionTaken: '1.0 (100%)'
+          });
+
+          // Line 27: totalValue += item.value;
+          totalValue += item.value;
+          snapshot({
+            line: 27,
+            phase: `Add Value: totalValue += ${item.value} -> now ${totalValue.toFixed(2)}`,
+            passName: 'Update Value',
+            activeItemIdx: idx,
+            activeItem: item,
+            totalValue: totalValue,
+            capacity: capacity,
+            packedItems: [...packedItems],
+            items: sortedItems,
+            isSorted: true,
+            evalStmt: `totalValue += ${item.value}; // ${totalValue.toFixed(2)}`,
+            evalResult: `${totalValue.toFixed(2)}`,
+            detail: `Added full item value +${item.value} to totalValue. New totalValue = ${totalValue.toFixed(2)}.`,
+            statusType: 'takeFull',
+            returnPillText: `+${item.value} val`,
+            desc: `Added entire item value ${item.value}. Total value is now ${totalValue.toFixed(2)}.`,
+            stripItemWeight: item.weight,
+            stripCapVal: capacity,
+            stripConditionMath: `totalValue = ${totalValue.toFixed(2)}`,
+            stripOutcome: 'VALUE ADDED',
+            fractionTaken: '1.0 (100%)'
+          });
+
+          // Line 28: capacity -= item.weight;
+          capacity -= item.weight;
+          item.status = 'full';
+          item.fraction = 1.0;
+          packedItems.push({
+            id: item.id,
+            valueAdded: item.value,
+            weightAdded: item.weight,
+            fraction: 1.0,
+            origItem: item
+          });
+
+          snapshot({
+            line: 28,
+            phase: `Deduct Weight: capacity -= ${item.weight} -> remaining ${capacity}`,
+            passName: 'Update Capacity',
+            activeItemIdx: idx,
+            activeItem: item,
+            totalValue: totalValue,
+            capacity: capacity,
+            packedItems: [...packedItems],
+            items: sortedItems,
+            isSorted: true,
+            evalStmt: `capacity -= ${item.weight}; // remaining = ${capacity}`,
+            evalResult: `capacity = ${capacity}`,
+            detail: `Knapsack remaining capacity reduced by ${item.weight}. New capacity left = ${capacity}.`,
+            statusType: 'takeFull',
+            returnPillText: `cap = ${capacity}`,
+            desc: `Consumed ${item.weight} wt. Remaining capacity: ${capacity}.`,
+            stripItemWeight: item.weight,
+            stripCapVal: capacity,
+            stripConditionMath: `capacity = ${capacity}`,
+            stripOutcome: 'CAPACITY CONSUMED',
+            fractionTaken: '1.0 (100%)'
+          });
+
+        } else {
+          // Line 29-31: else { take partial fraction
+          const fraction = capacity / item.weight;
+          const partialValue = (item.value * capacity) / item.weight;
+
+          snapshot({
+            line: 25,
+            phase: `Check Fit: item.weight (${item.weight}) > capacity (${capacity}) -> FALSE (Partial Slice)`,
+            passName: 'Take Fraction',
+            activeItemIdx: idx,
+            activeItem: item,
+            totalValue: totalValue,
+            capacity: capacity,
+            packedItems: [...packedItems],
+            items: sortedItems,
+            isSorted: true,
+            evalStmt: `if (${item.weight} <= ${capacity}) // FALSE`,
+            evalResult: 'false (Partial)',
+            detail: `Entire item weight ${item.weight} exceeds available room ${capacity}. We slice a fraction (${capacity} / ${item.weight} = ${(fraction * 100).toFixed(1)}%).`,
+            statusType: 'takeFraction',
+            returnPillText: `take ${(fraction * 100).toFixed(1)}%`,
+            desc: `Item wt ${item.weight} > capacity ${capacity}. Slicing ${(fraction * 100).toFixed(1)}% of the item.`,
+            stripItemWeight: item.weight,
+            stripCapVal: capacity,
+            stripConditionMath: `${item.weight} > ${capacity} (Exceeds)`,
+            stripOutcome: `SLICE ${(fraction * 100).toFixed(1)}%`,
+            fractionTaken: `${(fraction * 100).toFixed(1)}%`
+          });
+
+          // Line 31: totalValue += (double) item.value * capacity / item.weight;
+          totalValue += partialValue;
+          snapshot({
+            line: 31,
+            phase: `Add Proportional Value: +(${item.value} * ${capacity} / ${item.weight}) = +${partialValue.toFixed(2)}`,
+            passName: 'Fractional Value',
+            activeItemIdx: idx,
+            activeItem: item,
+            totalValue: totalValue,
+            capacity: capacity,
+            packedItems: [...packedItems],
+            items: sortedItems,
+            isSorted: true,
+            evalStmt: `totalValue += (${item.value} * ${capacity} / ${item.weight});`,
+            evalResult: `${totalValue.toFixed(2)}`,
+            detail: `Added proportional value +${partialValue.toFixed(2)} to totalValue. Cumulative totalValue = ${totalValue.toFixed(2)}.`,
+            statusType: 'takeFraction',
+            returnPillText: `+${partialValue.toFixed(2)} val`,
+            desc: `Added fractional value ${partialValue.toFixed(2)}. Total value is now ${totalValue.toFixed(2)}.`,
+            stripItemWeight: item.weight,
+            stripCapVal: capacity,
+            stripConditionMath: `totalValue = ${totalValue.toFixed(2)}`,
+            stripOutcome: 'FRACTION ADDED',
+            fractionTaken: `${(fraction * 100).toFixed(1)}%`
+          });
+
+          // Line 32: capacity = 0;
+          const usedWeight = capacity;
+          capacity = 0;
+          item.status = 'partial';
+          item.fraction = fraction;
+          packedItems.push({
+            id: item.id,
+            valueAdded: partialValue,
+            weightAdded: usedWeight,
+            fraction: fraction,
+            origItem: item
+          });
+
+          snapshot({
+            line: 32,
+            phase: 'Knapsack Completely Full: capacity = 0;',
+            passName: 'Cap Sealed',
+            activeItemIdx: idx,
+            activeItem: item,
+            totalValue: totalValue,
+            capacity: 0,
+            packedItems: [...packedItems],
+            items: sortedItems,
+            isSorted: true,
+            evalStmt: 'capacity = 0; // Knapsack full',
+            evalResult: '0',
+            detail: 'All knapsack capacity has been filled to 100%. capacity is set to 0.',
+            statusType: 'takeFraction',
+            returnPillText: 'capacity = 0',
+            desc: 'Capacity is now 0. Knapsack is full.',
+            stripItemWeight: item.weight,
+            stripCapVal: 0,
+            stripConditionMath: 'capacity = 0 (Full)',
+            stripOutcome: 'BAG SEALED',
+            fractionTaken: `${(fraction * 100).toFixed(1)}%`
+          });
+        }
+      }
+
+      // Step 7: Line 36: return totalValue;
+      snapshot({
+        line: 36,
+        phase: `Algorithm Finished: return totalValue (${totalValue.toFixed(2)})`,
+        passName: 'Finished',
+        activeItemIdx: -1,
+        totalValue: totalValue,
+        capacity: capacity,
+        packedItems: [...packedItems],
+        items: sortedItems,
+        isSorted: true,
+        evalStmt: `return totalValue; // Result = ${totalValue.toFixed(2)}`,
+        evalResult: `${totalValue.toFixed(2)}`,
+        detail: `The optimal maximum value achievable with fractional knapsack is ${totalValue.toFixed(2)}.`,
+        statusType: 'finished',
+        returnPillText: `return ${totalValue.toFixed(2)}`,
+        desc: `Optimal maximum total value = ${totalValue.toFixed(2)}.`,
+        stripItemWeight: 'complete',
+        stripCapVal: capacity,
+        stripConditionMath: `Final Value: ${totalValue.toFixed(2)}`,
+        stripOutcome: `Result: ${totalValue.toFixed(2)}`
+      });
+
+      return steps;
+    }
+
+    const btnPlayPause = document.getElementById('btnPlayPause');
+    const playIcon = document.getElementById('playIcon');
+    const playText = document.getElementById('playText');
+    const btnPrev = document.getElementById('btnPrev');
+    const btnNext = document.getElementById('btnNext');
+    const btnReset = document.getElementById('btnReset');
+    const topPhaseBadge = document.getElementById('topPhaseBadge');
+    const phaseDot = document.getElementById('phaseDot');
+    const topStepCounterBadge = document.getElementById('topStepCounterBadge');
+    const stepSlider = document.getElementById('stepSlider');
+    const sliderCurrent = document.getElementById('sliderCurrent');
+    const sliderTotal = document.getElementById('sliderTotal');
+    const presetSelect = document.getElementById('presetSelect');
+    const customCapInput = document.getElementById('customCapInput');
+    const customValInput = document.getElementById('customValInput');
+    const customWtInput = document.getElementById('customWtInput');
+    const btnApplyCustom = document.getElementById('btnApplyCustom');
+    const btnSampleNext = document.getElementById('btnSampleNext');
+    const btnSoundToggle = document.getElementById('btnSoundToggle');
+    const soundIcon = document.getElementById('soundIcon');
+
+    const arenaTotalValue = document.getElementById('arenaTotalValue');
+    const arenaRemainingCap = document.getElementById('arenaRemainingCap');
+    const arenaFillPercent = document.getElementById('arenaFillPercent');
+    const arenaStatusDot = document.getElementById('arenaStatusDot');
+    const arenaStatusText = document.getElementById('arenaStatusText');
+    const actionFormulaBanner = document.getElementById('actionFormulaBanner');
+    const initialCapBadge = document.getElementById('initialCapBadge');
+    const bagWeightBadge = document.getElementById('bagWeightBadge');
+    const bagMaxWeightBadge = document.getElementById('bagMaxWeightBadge');
+    const knapsackFillBar = document.getElementById('knapsackFillBar');
+    const fillBarLabel = document.getElementById('fillBarLabel');
+    const midCapMark = document.getElementById('midCapMark');
+    const fullCapMark = document.getElementById('fullCapMark');
+    const packedManifestContainer = document.getElementById('packedManifestContainer');
+    const itemsContainer = document.getElementById('itemsContainer');
+    const sortStatusBadge = document.getElementById('sortStatusBadge');
+
+    const decisionBadge = document.getElementById('decisionBadge');
+    const stripItemWeight = document.getElementById('stripItemWeight');
+    const stripCapVal = document.getElementById('stripCapVal');
+    const stripConditionMath = document.getElementById('stripConditionMath');
+    const stripOutcomePill = document.getElementById('stripOutcomePill');
+    const operationDetailBox = document.getElementById('operationDetailBox');
+    const stepDescription = document.getElementById('stepDescription');
+    const statusDot = document.getElementById('statusDot');
+    const returnPill = document.getElementById('returnPill');
+
+    const varTotalValue = document.getElementById('varTotalValue');
+    const varCapacity = document.getElementById('varCapacity');
+    const varItemValue = document.getElementById('varItemValue');
+    const varItemWeight = document.getElementById('varItemWeight');
+    const varItemRatio = document.getElementById('varItemRatio');
+    const varFraction = document.getElementById('varFraction');
+    const evalStatement = document.getElementById('evalStatement');
+    const evalResult = document.getElementById('evalResult');
+    const codeContainer = document.getElementById('codeContainer');
+
+    function renderStep(step) {
+      if (!step) return;
+
+      topPhaseBadge.textContent = step.phase;
+      topStepCounterBadge.textContent = `Step ${currentStepIndex} / ${currentSteps.length - 1}`;
+      stepDescription.textContent = step.desc;
+
+      stepSlider.value = currentStepIndex;
+      sliderCurrent.textContent = currentStepIndex;
+
+      // Knapsack Math Badges
+      const initialMax = step.initialCapacity;
+      const consumedCap = initialMax - step.capacity;
+      const fillPercentage = initialMax > 0 ? Math.min(100, Math.max(0, (consumedCap / initialMax) * 100)) : 100;
+
+      arenaTotalValue.textContent = step.totalValue.toFixed(2);
+      arenaRemainingCap.textContent = step.capacity;
+      arenaFillPercent.textContent = `${fillPercentage.toFixed(1)}%`;
+
+      initialCapBadge.textContent = initialMax;
+      bagWeightBadge.textContent = consumedCap;
+      bagMaxWeightBadge.textContent = initialMax;
+      midCapMark.textContent = `${Math.round(initialMax / 2)} wt`;
+      fullCapMark.textContent = `${initialMax} wt (Full)`;
+
+      // Animate Fill Progress Bar
+      knapsackFillBar.style.width = `${fillPercentage}%`;
+      if (fillPercentage > 15) {
+        fillBarLabel.classList.remove('hidden');
+        fillBarLabel.textContent = `${fillPercentage.toFixed(1)}% Full`;
+      } else {
+        fillBarLabel.classList.add('hidden');
+      }
+
+      // Live Variables
+      varTotalValue.textContent = step.totalValue.toFixed(2);
+      varCapacity.textContent = step.capacity;
+      if (step.activeItem) {
+        varItemValue.textContent = step.activeItem.value;
+        varItemWeight.textContent = step.activeItem.weight;
+        varItemRatio.textContent = step.activeItem.ratio.toFixed(2);
+      } else {
+        varItemValue.textContent = '-';
+        varItemWeight.textContent = '-';
+        varItemRatio.textContent = '-';
+      }
+      varFraction.textContent = step.fractionTaken;
+
+      evalStatement.textContent = step.evalStmt;
+      evalResult.textContent = step.evalResult;
+      operationDetailBox.textContent = step.detail;
+      returnPill.textContent = step.returnPillText;
+
+      stripItemWeight.textContent = step.stripItemWeight;
+      stripCapVal.textContent = step.stripCapVal;
+      stripConditionMath.textContent = step.stripConditionMath;
+      stripOutcomePill.textContent = step.stripOutcome;
+
+      // Status Pill colors
+      if (step.statusType === 'takeFull') {
+        stripOutcomePill.className = "px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-950 text-emerald-300 border border-emerald-500/40";
+      } else if (step.statusType === 'takeFraction') {
+        stripOutcomePill.className = "px-2 py-0.5 rounded text-[10px] font-bold bg-amber-950 text-amber-300 border border-amber-500/40";
+      } else if (step.statusType === 'finished') {
+        stripOutcomePill.className = "px-2 py-0.5 rounded text-[10px] font-bold bg-cyan-950 text-cyan-300 border border-cyan-500/50";
+      } else {
+        stripOutcomePill.className = "px-2 py-0.5 rounded text-[10px] font-bold bg-slate-800 text-slate-400";
+      }
+
+      sortStatusBadge.textContent = step.isSorted || step.line >= 15 ? "Sorted: Value/Weight Desc" : "Raw Input";
+      sortStatusBadge.className = step.isSorted || step.line >= 15 ? "text-[10px] px-2 py-0.5 rounded bg-emerald-950 text-emerald-300 border border-emerald-500/30 font-mono font-bold" : "text-[10px] px-2 py-0.5 rounded bg-white/5 border border-white/10 font-mono text-slate-300";
+
+      // Render Visual Knapsack Manifest
+      renderPackedManifest(step);
+
+      // Render Item Cards Track
+      renderItemCards(step);
+
+      // Banners & Audio Triggers
+      if (step.statusType === 'takeFull') {
+        actionFormulaBanner.innerHTML = `
+          <div class="flex items-center gap-2 bg-emerald-950/90 text-emerald-300 border border-emerald-500/50 px-4 py-1.5 rounded-full text-xs font-mono font-bold shadow-lg shadow-emerald-500/30 pulse-take-full">
+            <i class="fa-solid fa-circle-check text-emerald-400"></i>
+            <span>WHOLE ITEM TAKEN: wt ${step.activeItem.weight} &le; cap ${step.capacity + step.activeItem.weight}. Added +${step.activeItem.value} val (100%)</span>
+          </div>`;
+        arenaStatusDot.className = "w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping";
+        arenaStatusText.textContent = "100% Fit";
+        statusDot.className = "w-3.5 h-3.5 rounded-full bg-emerald-400 shrink-0";
+        returnPill.className = "shrink-0 px-3 py-1 rounded-xl text-xs font-bold font-mono bg-emerald-950/90 text-emerald-300 border border-emerald-400";
+        phaseDot.className = "w-2 h-2 rounded-full bg-emerald-400 mr-2";
+        decisionBadge.className = "text-[11px] px-2 py-0.5 rounded bg-emerald-950 text-emerald-300 border border-emerald-500/40 font-mono font-bold";
+        decisionBadge.textContent = `TAKE FULL: ${step.activeItem.weight} <= ${step.capacity + step.activeItem.weight}`;
+        sound.playTakeFull();
+
+      } else if (step.statusType === 'takeFraction') {
+        const fracPct = (step.activeItem.fraction * 100).toFixed(1);
+        actionFormulaBanner.innerHTML = `
+          <div class="flex items-center gap-2 bg-amber-950/90 text-amber-300 border border-amber-500/50 px-4 py-1.5 rounded-full text-xs font-mono font-bold shadow-md shadow-amber-500/30 pulse-take-fraction">
+            <i class="fa-solid fa-scissors text-amber-400"></i>
+            <span>FRACTIONAL SLICE: Taken ${fracPct}% &bull; Added +${((step.activeItem.value * step.activeItem.fraction)).toFixed(2)} value &bull; Knapsack Full</span>
+          </div>`;
+        arenaStatusDot.className = "w-2.5 h-2.5 rounded-full bg-amber-400";
+        arenaStatusText.textContent = "Fractional Slice";
+        statusDot.className = "w-3.5 h-3.5 rounded-full bg-amber-400 shrink-0";
+        returnPill.className = "shrink-0 px-3 py-1 rounded-xl text-xs font-bold font-mono bg-amber-950/80 text-amber-300 border border-amber-500/40";
+        phaseDot.className = "w-2 h-2 rounded-full bg-amber-400 mr-2";
+        decisionBadge.className = "text-[11px] px-2 py-0.5 rounded bg-amber-950 text-amber-300 border border-amber-500/40 font-mono font-bold";
+        decisionBadge.textContent = `FRACTION: slice ${(step.activeItem.fraction * 100).toFixed(1)}%`;
+        sound.playTakeFraction();
+
+      } else if (step.statusType === 'finished') {
+        actionFormulaBanner.innerHTML = `
+          <div class="flex items-center gap-2 bg-cyan-950/90 text-cyan-300 border border-cyan-500/50 px-4 py-1.5 rounded-full text-xs font-mono font-bold shadow-md shadow-cyan-500/30">
+            <i class="fa-solid fa-award text-cyan-400"></i>
+            <span>Optimization Complete: Maximum Total Value = ${step.totalValue.toFixed(2)}</span>
+          </div>`;
+        arenaStatusDot.className = "w-2.5 h-2.5 rounded-full bg-cyan-400";
+        arenaStatusText.textContent = "Complete";
+        statusDot.className = "w-3.5 h-3.5 rounded-full bg-cyan-400 shrink-0";
+        returnPill.className = "shrink-0 px-3 py-1 rounded-xl text-xs font-bold font-mono bg-cyan-950/90 text-cyan-300 border border-cyan-400";
+        phaseDot.className = "w-2 h-2 rounded-full bg-cyan-400 mr-2";
+        sound.playComplete();
+
+      } else {
+        actionFormulaBanner.innerHTML = `<span class="text-xs font-mono text-slate-300 glass-input px-4 py-1.5 rounded-full">${step.phase}</span>`;
+        arenaStatusDot.className = "w-2.5 h-2.5 rounded-full bg-emerald-400";
+        arenaStatusText.textContent = "Simulating";
+        statusDot.className = "w-3.5 h-3.5 rounded-full bg-emerald-400 shrink-0";
+        returnPill.className = "shrink-0 px-3 py-1 rounded-xl text-xs font-bold font-mono bg-slate-800 text-slate-300 border border-slate-700";
+        phaseDot.className = "w-2 h-2 rounded-full bg-emerald-400 mr-2 animate-pulse";
+        sound.playStep();
+      }
+
+      // Strictly localized code highlight without page jumping
+      highlightCodeLine(step.line);
+    }
+
+    function renderPackedManifest(step) {
+      packedManifestContainer.innerHTML = '';
+      if (!step.packedItems || step.packedItems.length === 0) {
+        packedManifestContainer.innerHTML = '<span class="text-xs text-slate-500 font-mono italic">Knapsack is currently empty</span>';
+        return;
+      }
+
+      step.packedItems.forEach((p, idx) => {
+        const isFull = (p.fraction >= 0.999);
+        const tag = document.createElement('div');
+        tag.className = "flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-mono border transition-all " +
+          (isFull 
+            ? "bg-emerald-950/70 border-emerald-500/50 text-emerald-200" 
+            : "bg-amber-950/70 border-amber-500/50 text-amber-200");
+
+        tag.innerHTML = `
+          <i class="fa-solid ${isFull ? 'fa-check-circle text-emerald-400' : 'fa-scissors text-amber-400'} text-[11px]"></i>
+          <span class="font-bold">Item #${p.id}</span>
+          <span class="text-[10px] text-slate-400">(${isFull ? '100%' : (p.fraction * 100).toFixed(1) + '%'})</span>
+          <span class="text-slate-500">&bull;</span>
+          <span class="text-emerald-300 font-bold">+${p.valueAdded.toFixed(1)} val</span>
+          <span class="text-slate-500">&bull;</span>
+          <span class="text-cyan-300 font-bold">${p.weightAdded.toFixed(1)} wt</span>
+        `;
+        packedManifestContainer.appendChild(tag);
+      });
+    }
+
+    function renderItemCards(step) {
+      itemsContainer.innerHTML = '';
+      if (!step.items || step.items.length === 0) {
+        itemsContainer.innerHTML = '<span class="text-xs text-slate-500 font-mono italic">No items scheduled</span>';
+        return;
+      }
+
+      step.items.forEach((item, idx) => {
+        const isCurrent = (idx === step.activeItemIdx);
+        const card = document.createElement('div');
+
+        let cardClass = "min-w-[130px] p-2.5 rounded-2xl border flex flex-col items-center justify-between font-mono text-xs transition-all duration-300 select-none relative ";
+
+        // Determine selection / allocation state
+        const packed = step.packedItems.find(p => p.id === item.id);
+        const isPackedFull = packed && packed.fraction >= 0.999;
+        const isPackedPartial = packed && packed.fraction < 0.999;
+
+        if (isCurrent) {
+          cardClass += "bg-emerald-950/90 border-2 border-emerald-400 text-emerald-100 shadow-xl shadow-emerald-500/40 scale-105 z-10 ";
+        } else if (isPackedFull) {
+          cardClass += "bg-slate-900/80 border-emerald-500/30 text-slate-300 opacity-80 ";
+        } else if (isPackedPartial) {
+          cardClass += "bg-slate-900/80 border-amber-500/30 text-slate-300 opacity-80 ";
+        } else {
+          cardClass += "bg-black/40 border-white/10 text-slate-300 hover:border-white/20 ";
+        }
+
+        card.className = cardClass;
+        card.innerHTML = `
+          <!-- Rank & Header -->
+          <div class="w-full flex items-center justify-between pb-1 border-b border-white/10 mb-1 text-[10px]">
+            <span class="${isCurrent ? 'text-emerald-300 font-extrabold' : 'text-slate-400 font-bold'}">
+              ${isCurrent ? '&rarr; Item #' + item.id : 'Item #' + item.id}
+            </span>
+            <span class="px-1.5 py-0.2 rounded font-bold ${item.status === 'full' || isPackedFull ? 'bg-emerald-900/60 text-emerald-300' : (item.status === 'partial' || isPackedPartial ? 'bg-amber-900/60 text-amber-300' : 'bg-white/5 text-slate-400')}">
+              ${isPackedFull ? '100% IN' : (isPackedPartial ? (packed.fraction * 100).toFixed(0) + '% IN' : 'Available')}
+            </span>
+          </div>
+
+          <!-- Value & Weight Grid -->
+          <div class="w-full grid grid-cols-2 gap-1 text-center my-1">
+            <div class="bg-black/30 p-1 rounded-lg">
+              <span class="text-[9px] text-slate-500 block uppercase">Value</span>
+              <span class="text-xs font-bold text-cyan-300">${item.value}</span>
+            </div>
+            <div class="bg-black/30 p-1 rounded-lg">
+              <span class="text-[9px] text-slate-500 block uppercase">Weight</span>
+              <span class="text-xs font-bold text-amber-300">${item.weight}</span>
+            </div>
+          </div>
+
+          <!-- Ratio Density Badge -->
+          <div class="w-full mt-1 pt-1 border-t border-white/10 flex items-center justify-between text-[10px]">
+            <span class="text-slate-500">Ratio (v/w):</span>
+            <span class="font-extrabold font-mono ${isCurrent ? 'text-emerald-300' : 'text-emerald-400'}">
+              ${item.ratio.toFixed(2)}
+            </span>
+          </div>
+        `;
+
+        itemsContainer.appendChild(card);
+      });
+    }
+
+    function highlightCodeLine(lineNumber) {
+      document.querySelectorAll('.code-line').forEach(el => el.classList.remove('code-active'));
+      const activeLineEl = document.getElementById(`code-line-${lineNumber}`);
+      if (!activeLineEl || !codeContainer) return;
+
+      activeLineEl.classList.add('code-active');
+
+      const lineOffsetTop = activeLineEl.offsetTop;
+      const containerScrollTop = codeContainer.scrollTop;
+      const containerHeight = codeContainer.clientHeight;
+      const lineTotalHeight = activeLineEl.offsetHeight;
+
+      // Strictly adjust container internal scrollbar without shifting entire browser page
+      if (lineOffsetTop < containerScrollTop) {
+        codeContainer.scrollTop = lineOffsetTop - 10;
+      } else if (lineOffsetTop + lineTotalHeight > containerScrollTop + containerHeight) {
+        codeContainer.scrollTop = (lineOffsetTop + lineTotalHeight) - containerHeight + 10;
+      }
+    }
+
+    function goToStep(index) {
+      if (index < 0) index = 0;
+      if (index >= currentSteps.length) index = currentSteps.length - 1;
+      currentStepIndex = index;
+      renderStep(currentSteps[currentStepIndex]);
+
+      if (currentStepIndex === currentSteps.length - 1 && isPlaying) {
+        stopAutoPlay();
+      }
+    }
+
+    function nextStep() {
+      if (currentStepIndex < currentSteps.length - 1) {
+        goToStep(currentStepIndex + 1);
+      } else {
+        stopAutoPlay();
+      }
+    }
+
+    function prevStep() {
+      if (currentStepIndex > 0) {
+        goToStep(currentStepIndex - 1);
+      }
+    }
+
+    function startAutoPlay() {
+      if (currentStepIndex >= currentSteps.length - 1) {
+        currentStepIndex = 0;
+      }
+      isPlaying = true;
+      playIcon.className = "fa-solid fa-pause text-xs";
+      playText.textContent = "Stop";
+      btnPlayPause.classList.replace('from-emerald-500', 'from-pink-500');
+      btnPlayPause.classList.replace('to-amber-600', 'to-rose-700');
+
+      clearInterval(playIntervalId);
+      playIntervalId = setInterval(() => {
+        nextStep();
+      }, playSpeed);
+    }
+
+    function stopAutoPlay() {
+      isPlaying = false;
+      playIcon.className = "fa-solid fa-play text-xs";
+      playText.textContent = "Start";
+      btnPlayPause.classList.replace('from-pink-500', 'from-emerald-500');
+      btnPlayPause.classList.replace('to-rose-700', 'to-amber-600');
+      clearInterval(playIntervalId);
+    }
+
+    function togglePlayPause() {
+      if (isPlaying) {
+        stopAutoPlay();
+      } else {
+        startAutoPlay();
+      }
+    }
+
+    function rebuildSimulation() {
+      stopAutoPlay();
+      currentSteps = generateAlgorithmSteps(currentValues, currentWeights, currentCapacity);
+      stepSlider.max = Math.max(0, currentSteps.length - 1);
+      sliderTotal.textContent = Math.max(0, currentSteps.length - 1);
+      currentStepIndex = 0;
+      goToStep(0);
+    }
+
+    btnPlayPause.addEventListener('click', togglePlayPause);
+    btnNext.addEventListener('click', () => { stopAutoPlay(); nextStep(); });
+    btnPrev.addEventListener('click', () => { stopAutoPlay(); prevStep(); });
+    btnReset.addEventListener('click', () => { stopAutoPlay(); goToStep(0); });
+
+    presetSelect.addEventListener('change', (e) => {
+      currentPresetIdx = parseInt(e.target.value, 10);
+      const sel = presets[currentPresetIdx];
+      currentCapacity = sel.capacity;
+      currentValues = [...sel.values];
+      currentWeights = [...sel.weights];
+
+      customCapInput.value = currentCapacity;
+      customValInput.value = currentValues.join(', ');
+      customWtInput.value = currentWeights.join(', ');
+      rebuildSimulation();
+    });
+
+    btnSampleNext.addEventListener('click', () => {
+      currentPresetIdx = (currentPresetIdx + 1) % presets.length;
+      presetSelect.value = currentPresetIdx;
+      const sel = presets[currentPresetIdx];
+      currentCapacity = sel.capacity;
+      currentValues = [...sel.values];
+      currentWeights = [...sel.weights];
+
+      customCapInput.value = currentCapacity;
+      customValInput.value = currentValues.join(', ');
+      customWtInput.value = currentWeights.join(', ');
+      rebuildSimulation();
+    });
+
+    btnApplyCustom.addEventListener('click', () => {
+      const capVal = parseInt(customCapInput.value.trim(), 10) || 0;
+      const valRaw = customValInput.value.trim();
+      const wtRaw = customWtInput.value.trim();
+
+      if (!valRaw && !wtRaw) {
+        currentCapacity = capVal;
+        currentValues = [];
+        currentWeights = [];
+        rebuildSimulation();
+        return;
+      }
+
+      try {
+        const parsedVals = valRaw.split(',').map(s => parseInt(s.trim(), 10)).filter(n => !isNaN(n));
+        const parsedWts = wtRaw.split(',').map(s => parseInt(s.trim(), 10)).filter(n => !isNaN(n));
+
+        if (parsedVals.length === parsedWts.length) {
+          currentCapacity = Math.max(0, capVal);
+          currentValues = parsedVals;
+          currentWeights = parsedWts;
+          rebuildSimulation();
+        } else {
+          operationDetailBox.textContent = `Warning: values count (${parsedVals.length}) and weights count (${parsedWts.length}) must match!`;
+        }
+      } catch (err) {
+        console.error("Invalid custom array inputs", err);
+      }
+    });
+
+    stepSlider.addEventListener('input', (e) => {
+      stopAutoPlay();
+      goToStep(parseInt(e.target.value, 10));
+    });
+
+    document.querySelectorAll('.speed-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.speed-btn').forEach(b => {
+          b.className = "speed-btn px-2.5 py-1 rounded-lg text-slate-300 hover:text-white";
+        });
+        btn.className = "speed-btn px-2.5 py-1 rounded-lg bg-emerald-600 text-white font-bold";
+        playSpeed = parseInt(btn.dataset.speed, 10);
+        if (isPlaying) {
+          startAutoPlay();
+        }
+      });
+    });
+
+    btnSoundToggle.addEventListener('click', () => {
+      sound.enabled = !sound.enabled;
+      soundIcon.className = sound.enabled
+        ? "fa-solid fa-volume-high text-cyan-400"
+        : "fa-solid fa-volume-xmark text-slate-500";
+    });
+
+    // Keyboard shortcuts: Space for Play/Pause, Left/Right for steps
+    window.addEventListener('keydown', (e) => {
+      if (['INPUT', 'SELECT', 'TEXTAREA'].includes(document.activeElement.tagName)) return;
+      if (e.code === 'Space') {
+        e.preventDefault();
+        togglePlayPause();
+      } else if (e.code === 'ArrowRight') {
+        e.preventDefault();
+        stopAutoPlay();
+        nextStep();
+      } else if (e.code === 'ArrowLeft') {
+        e.preventDefault();
+        stopAutoPlay();
+        prevStep();
+      }
+    });
+
+    window.onload = function() {
+      rebuildSimulation();
+    };
+  </script>
+</body>
+</html>

@@ -1,0 +1,1277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Max Meetings Visualizer • Greedy Interval Scheduling</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      background: radial-gradient(circle at 15% 15%, #0a1426 0%, #060b14 55%, #020408 100%);
+      min-height: 100vh;
+      color: #f1f5f9;
+      overflow-x: hidden;
+    }
+    .code-font {
+      font-family: 'JetBrains Mono', monospace;
+    }
+    .glass-card {
+      background: rgba(15, 23, 42, 0.68);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      box-shadow: 0 20px 45px -10px rgba(0, 0, 0, 0.75), inset 0 1px 1px 0 rgba(255, 255, 255, 0.1);
+    }
+    .glass-input {
+      background: rgba(8, 14, 30, 0.75);
+      backdrop-filter: blur(14px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    .glass-btn {
+      background: rgba(255, 255, 255, 0.06);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .glass-btn:hover {
+      background: rgba(255, 255, 255, 0.16);
+      border-color: rgba(255, 255, 255, 0.3);
+      transform: translateY(-1px);
+    }
+    .glass-btn:active {
+      transform: translateY(1px) scale(0.97);
+    }
+    .code-line {
+      transition: background-color 0.15s ease, border-color 0.15s ease;
+    }
+    .code-active {
+      background-color: rgba(56, 189, 248, 0.22) !important;
+      border-left: 4px solid #38bdf8 !important;
+      color: #ffffff;
+      font-weight: 600;
+    }
+    @keyframes pulseSuccess {
+      0%, 100% { transform: scale(1); filter: drop-shadow(0 0 8px rgba(52, 211, 153, 0.6)); }
+      50% { transform: scale(1.02); filter: drop-shadow(0 0 18px rgba(52, 211, 153, 0.95)); }
+    }
+    .success-glow {
+      animation: pulseSuccess 1s infinite ease-in-out;
+    }
+    @keyframes pulseConflict {
+      0%, 100% { transform: scale(1); filter: drop-shadow(0 0 8px rgba(244, 63, 94, 0.6)); }
+      50% { transform: scale(0.98); filter: drop-shadow(0 0 16px rgba(244, 63, 94, 0.9)); }
+    }
+    .conflict-glow {
+      animation: pulseConflict 0.8s infinite ease-in-out;
+    }
+    ::-webkit-scrollbar {
+      width: 5px;
+      height: 5px;
+    }
+    ::-webkit-scrollbar-track {
+      background: rgba(8, 14, 30, 0.5);
+    }
+    ::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 4px;
+    }
+  </style>
+</head>
+<body class="p-3 sm:p-5 text-slate-100 flex flex-col justify-between relative min-h-screen">
+
+  <!-- Ambient Glowing Orbs -->
+  <div class="fixed top-[-10%] left-[-5%] w-[45vw] h-[45vw] rounded-full bg-cyan-600/15 blur-[130px] pointer-events-none -z-10"></div>
+  <div class="fixed bottom-[-15%] right-[-5%] w-[50vw] h-[50vw] rounded-full bg-emerald-600/15 blur-[140px] pointer-events-none -z-10"></div>
+  <div class="fixed top-[35%] right-[20%] w-[35vw] h-[35vw] rounded-full bg-indigo-600/10 blur-[130px] pointer-events-none -z-10"></div>
+
+  <!-- TOP GLASSY CONTROL DECK -->
+  <header class="max-w-7xl mx-auto w-full mb-3">
+    <div class="glass-card p-3.5 sm:p-4 rounded-2xl flex flex-col gap-3 shadow-2xl">
+      
+      <!-- Top Title & Presets -->
+      <div class="flex flex-col lg:flex-row items-center justify-between gap-3">
+        <div class="flex items-center gap-3">
+          <div class="w-11 h-11 rounded-xl bg-gradient-to-tr from-cyan-500 via-indigo-500 to-emerald-500 flex items-center justify-center shadow-lg shadow-cyan-500/25 text-white text-xl font-bold">
+            <i class="fa-solid fa-calendar-check"></i>
+          </div>
+          <div>
+            <h1 class="text-base sm:text-xl font-extrabold tracking-tight bg-gradient-to-r from-cyan-300 via-indigo-200 to-emerald-300 bg-clip-text text-transparent">
+              Max Meetings Visualizer • maxMeetings
+            </h1>
+            <p class="text-xs text-slate-400 font-mono">
+              Greedy Activity Selection: Sort by <code class="text-amber-300">end time (asc)</code>, schedule if <code class="text-emerald-400">start >= lastEnd</code>
+            </p>
+          </div>
+        </div>
+
+        <!-- Presets & Custom Configuration -->
+        <div class="flex flex-wrap items-center justify-center gap-2">
+          <div class="flex items-center gap-1.5 glass-input px-2.5 py-1 rounded-xl text-xs">
+            <span class="text-cyan-400 font-semibold font-mono">Preset:</span>
+            <select id="presetSelect" class="bg-transparent text-cyan-200 font-mono text-xs border-none focus:outline-none cursor-pointer pr-2">
+              <option value="0" class="bg-slate-900 text-slate-100">1: [[1,2], [3,4], [0,6], [5,7], [8,9], [5,9]] (Classic 4 max)</option>
+              <option value="1" class="bg-slate-900 text-slate-100">2: [[1,3], [2,4], [3,5], [0,6]] (Back-to-back 2 max)</option>
+              <option value="2" class="bg-slate-900 text-slate-100">3: [[1,10], [2,3], [4,5], [6,7], [8,9]] (Short intervals inside large)</option>
+              <option value="3" class="bg-slate-900 text-slate-100">4: [[1,4], [2,5], [3,6]] (Heavy mutual overlap: 1 max)</option>
+              <option value="4" class="bg-slate-900 text-slate-100">5: [[0,1], [1,2], [2,3], [3,4]] (Seamless chain: all 4 scheduled)</option>
+              <option value="5" class="bg-slate-900 text-slate-100">6: [[5,8], [1,4], [3,5], [0,6], [5,7], [8,9]] (Unsorted shuffle)</option>
+              <option value="6" class="bg-slate-900 text-slate-100">7: [[1,5], [5,10], [10,15]] (Adjacent boundaries)</option>
+              <option value="7" class="bg-slate-900 text-slate-100">8: [[2,4]] (Single meeting edge case)</option>
+              <option value="8" class="bg-slate-900 text-slate-100">9: [[1,3], [1,2], [1,4]] (Same start, different ends)</option>
+              <option value="9" class="bg-slate-900 text-slate-100">10: [[2,6], [1,6], [3,6]] (Same end, tiebreak on start)</option>
+            </select>
+          </div>
+
+          <div class="flex items-center gap-1.5 glass-input px-2.5 py-1 rounded-xl text-xs">
+            <span class="text-slate-400 font-mono">Custom:</span>
+            <input id="customInput" type="text" value="[1,2], [3,4], [0,6], [5,7], [8,9], [5,9]" placeholder="e.g. [1,2], [3,4]" class="w-44 bg-transparent text-white font-mono text-xs focus:outline-none px-1 border-b border-white/20">
+            <button id="btnApplyCustom" class="px-2 py-0.5 rounded bg-cyan-600 hover:bg-cyan-500 text-white font-mono text-[11px] font-bold">Set</button>
+          </div>
+
+          <button id="btnSampleNext" class="glass-btn px-3 py-1.5 text-slate-200 rounded-xl text-xs transition" title="Cycle through sample presets">
+            <i class="fa-solid fa-shuffle text-amber-400 mr-1"></i> Sample
+          </button>
+
+          <button id="btnSoundToggle" class="glass-btn px-2.5 py-1.5 text-slate-300 rounded-xl text-xs transition" title="Toggle Sound Synthesis">
+            <i id="soundIcon" class="fa-solid fa-volume-high text-cyan-400"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Playback Controls Bar (Top Placement) -->
+      <div class="flex flex-wrap items-center justify-between gap-3 pt-2 border-t border-white/10">
+        <!-- Play / Pause / Prev / Next / Reset -->
+        <div class="flex items-center gap-2">
+          <a href="/" class="glass-button px-3 py-1.5 rounded-xl text-xs font-semibold text-slate-300 hover:text-white flex items-center gap-1.5 border border-white/10 hover:border-indigo-500/40 bg-white/5 shrink-0 transition-all active:scale-95 cursor-pointer" title="Return to DSA Atlas Library"><i class="fa-solid fa-arrow-left text-indigo-400"></i><span>DSA Atlas</span></a>
+          <button id="btnReset" class="glass-btn w-10 h-10 rounded-xl text-slate-300 flex items-center justify-center hover:text-white" title="Reset to beginning">
+            <i class="fa-solid fa-backward-step"></i>
+          </button>
+          
+          <button id="btnPrev" class="glass-btn px-3.5 h-10 rounded-xl text-slate-200 flex items-center gap-2 text-xs sm:text-sm font-semibold hover:text-white" title="Previous step">
+            <i class="fa-solid fa-chevron-left text-xs"></i> Prev
+          </button>
+
+          <button id="btnPlayPause" class="px-5 h-10 rounded-xl bg-gradient-to-r from-cyan-500 via-indigo-600 to-emerald-600 hover:from-cyan-400 hover:to-emerald-500 active:scale-95 text-white flex items-center gap-2 text-xs sm:text-sm font-bold shadow-lg shadow-indigo-500/30 transition">
+            <i id="playIcon" class="fa-solid fa-play text-xs"></i>
+            <span id="playText">Start</span>
+          </button>
+
+          <button id="btnNext" class="glass-btn px-3.5 h-10 rounded-xl text-slate-200 flex items-center gap-2 text-xs sm:text-sm font-semibold hover:text-white" title="Next step">
+            Next <i class="fa-solid fa-chevron-right text-xs"></i>
+          </button>
+        </div>
+
+        <!-- Phase Badge & Step Counter -->
+        <div class="flex items-center gap-2">
+          <span class="inline-flex items-center px-3 py-1.5 rounded-full text-xs font-semibold bg-cyan-950/70 text-cyan-300 border border-cyan-500/30 backdrop-blur-md">
+            <span id="phaseDot" class="w-2 h-2 rounded-full bg-cyan-400 mr-2 animate-pulse"></span>
+            <span id="topPhaseBadge">Phase: Ready</span>
+          </span>
+          <span id="topStepCounterBadge" class="text-xs glass-input text-slate-300 px-3 py-1.5 rounded-full font-mono">
+            Step 0 / 0
+          </span>
+        </div>
+
+        <!-- Speed Multipliers -->
+        <div class="flex items-center gap-2">
+          <span class="text-xs text-slate-400 font-medium hidden sm:inline">Speed:</span>
+          <div class="flex items-center glass-input rounded-xl p-1 text-xs">
+            <button class="speed-btn px-2.5 py-1 rounded-lg text-slate-300 hover:text-white" data-speed="1400">0.5x</button>
+            <button class="speed-btn px-2.5 py-1 rounded-lg bg-cyan-600 text-white font-bold" data-speed="750">1x</button>
+            <button class="speed-btn px-2.5 py-1 rounded-lg text-slate-300 hover:text-white" data-speed="350">2x</button>
+            <button class="speed-btn px-2.5 py-1 rounded-lg text-slate-300 hover:text-white" data-speed="150">4x</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Scrubber Timeline Slider -->
+      <div class="flex items-center gap-3 pt-1 border-t border-white/5">
+        <span class="text-xs font-mono text-slate-400 w-10 text-right" id="sliderCurrent">0</span>
+        <input id="stepSlider" type="range" min="0" max="0" value="0" class="w-full h-1.5 bg-slate-800/80 rounded-lg appearance-none cursor-pointer accent-cyan-500">
+        <span class="text-xs font-mono text-slate-400 w-10" id="sliderTotal">0</span>
+      </div>
+
+    </div>
+  </header>
+  <main class="max-w-7xl mx-auto w-full grid grid-cols-1 lg:grid-cols-12 gap-5 flex-grow mb-4">
+    
+    <!-- Left Column: Interactive Timeline Stage & Greedy Schedule Arena (7 cols) -->
+    <div class="lg:col-span-7 flex flex-col gap-4">
+      
+      <div class="glass-card rounded-3xl p-4 sm:p-5 flex flex-col justify-between min-h-[580px] relative overflow-hidden shadow-2xl gap-3.5">
+        
+        <!-- Arena Status Ribbon -->
+        <div class="flex flex-wrap items-center justify-between z-10 gap-2">
+          <div class="flex items-center gap-2 text-xs font-mono text-slate-300 glass-input px-3 py-1.5 rounded-full">
+            <span class="text-emerald-400 font-semibold flex items-center gap-1.5">
+              <i class="fa-solid fa-circle-check text-emerald-400"></i> Scheduled: <span id="arenaScheduledCount">0</span>
+            </span>
+            <span class="text-slate-500">•</span>
+            <span class="text-rose-400 font-semibold flex items-center gap-1.5">
+              <i class="fa-solid fa-circle-xmark text-rose-400"></i> Skipped: <span id="arenaSkippedCount">0</span>
+            </span>
+            <span class="text-slate-500">•</span>
+            <span class="text-amber-300 font-semibold flex items-center gap-1.5">
+              <i class="fa-solid fa-clock text-amber-400"></i> lastEnd: <span id="arenaLastEndBadge">0</span>
+            </span>
+          </div>
+
+          <div class="flex items-center gap-2 glass-input px-3 py-1.5 rounded-full text-xs">
+            <span id="arenaStatusDot" class="w-2.5 h-2.5 rounded-full bg-cyan-400"></span>
+            <span id="arenaStatusText" class="text-slate-300 font-mono text-[11px]">Ready</span>
+          </div>
+        </div>
+
+        <!-- Dynamic Action Formula Banner -->
+        <div id="actionFormulaBanner" class="min-h-[46px] flex items-center justify-center">
+          <span class="text-xs font-mono text-slate-300 glass-input px-4 py-1.5 rounded-full">
+            Sort by end time ascending • Schedule whenever start &ge; lastEnd
+          </span>
+        </div>
+
+        <!-- 2D Interactive Meeting Timeline Stage -->
+        <div class="glass-input p-4 rounded-2xl border border-white/10 flex flex-col relative min-h-[280px]" id="timelineStageContainer">
+          
+          <div class="w-full flex items-center justify-between text-[11px] font-mono text-slate-400 mb-2 z-10">
+            <div class="flex items-center gap-2">
+              <span class="px-2 py-0.5 rounded bg-cyan-950 text-cyan-300 border border-cyan-500/30 text-[10px] font-bold">
+                TIMELINE CANVASES
+              </span>
+              <span id="sortStatusTag" class="text-indigo-300 font-semibold">Unsorted Input</span>
+            </div>
+            <div class="flex items-center gap-2 text-[10px]">
+              <span class="inline-block w-2.5 h-2.5 rounded-full bg-emerald-400"></span> Accepted
+              <span class="inline-block w-2.5 h-2.5 rounded-full bg-rose-500 ml-1"></span> Conflict (start &lt; lastEnd)
+              <span class="inline-block w-2.5 h-2.5 rounded-full bg-amber-400 ml-1"></span> Evaluating
+            </div>
+          </div>
+
+          <!-- Time Scale Ticks Bar -->
+          <div id="timeScaleTicks" class="w-full flex justify-between text-[9px] font-mono text-slate-400 px-1 border-b border-white/10 pb-1 mb-3">
+            <!-- Dynamically populated numbers 0..T -->
+          </div>
+
+          <!-- Meeting Interval Rows Track -->
+          <div id="intervalsTrack" class="w-full flex flex-col gap-2 relative flex-grow overflow-y-auto max-h-[220px] pr-1">
+            <!-- Dynamically populated meeting interval bars -->
+          </div>
+
+          <!-- Vertical Current lastEnd Boundary Laser Line -->
+          <div id="lastEndLaser" class="absolute top-10 bottom-2 w-[2px] bg-amber-400 border-l border-dashed border-amber-300 pointer-events-none transition-all duration-300 opacity-0 z-20">
+            <div class="absolute -top-3 -translate-x-1/2 px-1.5 py-0.5 rounded bg-amber-950 border border-amber-400 text-amber-200 text-[8px] font-mono font-bold whitespace-nowrap shadow-md shadow-amber-500/30">
+              lastEnd: <span id="laserVal">0</span>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Scheduled vs Conflict Gauge & Greedy Decision Ribbon -->
+        <div class="glass-input p-3.5 rounded-2xl border border-white/10 flex flex-col gap-2">
+          <div class="flex items-center justify-between text-xs font-mono text-slate-300">
+            <span class="flex items-center gap-1.5 text-cyan-300 font-bold">
+              <i class="fa-solid fa-arrows-split-up-and-left text-cyan-400"></i> Greedy Condition Evaluator
+            </span>
+            <span id="decisionBadge" class="text-[11px] px-2.5 py-0.5 rounded-md bg-white/5 border border-white/10 font-mono font-bold text-slate-300">
+              Condition: count == 0 || start >= lastEnd
+            </span>
+          </div>
+
+          <!-- Interactive Visual Comparison Strip -->
+          <div id="comparisonStrip" class="w-full bg-black/40 px-3 py-2 rounded-xl border border-white/5 flex items-center justify-between text-xs font-mono">
+            <div class="flex items-center gap-2">
+              <span class="text-slate-400">Current Meeting:</span>
+              <span id="stripCurrMeeting" class="text-cyan-300 font-bold">none</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <span id="stripConditionMath" class="text-slate-300 font-semibold">-</span>
+            </div>
+            <div>
+              <span id="stripOutcomePill" class="px-2 py-0.5 rounded text-[11px] font-bold bg-slate-800 text-slate-400">awaiting</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Detailed Mathematical Explanation Box -->
+        <div id="operationDetailBox" class="bg-black/40 px-3.5 py-2.5 rounded-xl border border-white/5 text-slate-300 text-xs font-mono leading-relaxed text-center">
+          First, sort all intervals by finishing time (asc). By always picking the meeting that finishes earliest, we greedily free up the room as fast as possible for subsequent meetings.
+        </div>
+
+        <!-- Bottom Status Summary Bar -->
+        <div class="z-10 glass-input p-3 rounded-2xl flex items-center justify-between gap-3 text-xs sm:text-sm">
+          <div class="flex items-center gap-2.5 overflow-hidden w-full">
+            <div id="statusDot" class="w-3.5 h-3.5 rounded-full bg-cyan-400 shrink-0"></div>
+            <p id="stepDescription" class="text-slate-200 truncate font-medium text-xs sm:text-sm">Ready to begin. Click Start or Next.</p>
+          </div>
+          <div id="returnPill" class="shrink-0 px-3 py-1 rounded-xl text-xs font-bold font-mono bg-slate-800 text-slate-400 border border-slate-700">
+            pending
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- Right Column: Variable Watcher & Synchronized Java Code (5 cols) -->
+    <div class="lg:col-span-5 flex flex-col gap-4">
+      
+      <!-- Live Variable Watcher -->
+      <div class="glass-card rounded-2xl p-4 shadow-xl flex flex-col gap-3">
+        <h2 class="text-sm font-bold text-slate-300 flex items-center justify-between">
+          <span><i class="fa-solid fa-microchip text-cyan-400 mr-2"></i>Live Variable Watcher</span>
+          <span class="text-xs font-normal text-slate-400 font-mono">Scope: maxMeetings</span>
+        </h2>
+        
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-center">
+          <div class="glass-input p-2 rounded-xl border border-pink-500/20">
+            <span class="text-[10px] uppercase tracking-wider text-slate-400 font-semibold block">Index (i)</span>
+            <span id="varIndexI" class="font-mono text-xs sm:text-sm font-bold text-pink-300">-</span>
+          </div>
+          <div class="glass-input p-2 rounded-xl border border-cyan-500/20">
+            <span class="text-[10px] uppercase tracking-wider text-slate-400 font-semibold block">start [i][0]</span>
+            <span id="varStart" class="font-mono text-xs sm:text-sm font-bold text-cyan-400">-</span>
+          </div>
+          <div class="glass-input p-2 rounded-xl border border-amber-500/20">
+            <span class="text-[10px] uppercase tracking-wider text-slate-400 font-semibold block">lastEnd</span>
+            <span id="varLastEnd" class="font-mono text-xs sm:text-sm font-bold text-amber-300">0</span>
+          </div>
+          <div class="glass-input p-2 rounded-xl border border-emerald-500/20">
+            <span class="text-[10px] uppercase tracking-wider text-slate-400 font-semibold block">count</span>
+            <span id="varCount" class="font-mono text-xs sm:text-sm font-bold text-emerald-400">0</span>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-2 text-center">
+          <div class="glass-input p-2 rounded-xl border border-indigo-500/20">
+            <span class="text-[10px] uppercase tracking-wider text-slate-400 font-semibold block">meetings[i]</span>
+            <span id="varCurrentPair" class="font-mono text-xs font-bold text-indigo-300">-</span>
+          </div>
+          <div class="glass-input p-2 rounded-xl border border-emerald-500/20">
+            <span class="text-[10px] uppercase tracking-wider text-slate-400 font-semibold block">start >= lastEnd</span>
+            <span id="varCondition" class="font-mono text-xs font-bold text-emerald-300">-</span>
+          </div>
+        </div>
+
+        <!-- Expression Evaluator -->
+        <div class="glass-input p-2.5 rounded-xl text-xs flex flex-col gap-1 font-mono">
+          <div class="flex items-center justify-between text-slate-400 text-[11px]">
+            <span>Active Expression:</span>
+            <span class="text-cyan-300">Result</span>
+          </div>
+          <div class="flex items-center justify-between text-xs bg-black/40 px-3 py-1.5 rounded-lg border border-white/5">
+            <span id="evalStatement" class="text-slate-300 truncate">Solution.maxMeetings(meetings)</span>
+            <span id="evalResult" class="font-bold text-cyan-400 shrink-0 ml-2">-</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Synchronized Java Code Viewer with Zero Page Scroll Shift -->
+      <div class="glass-card rounded-2xl p-4 shadow-xl flex flex-col flex-grow overflow-hidden">
+        <div class="flex items-center justify-between pb-2 border-b border-white/10 mb-2">
+          <div class="flex items-center gap-2">
+            <i class="fa-brands fa-java text-rose-400 text-lg"></i>
+            <span class="text-xs font-bold text-slate-200">Solution.java • Synchronized</span>
+          </div>
+          <span class="text-[11px] text-slate-400 bg-white/5 px-2 py-0.5 rounded font-mono">O(N log N) Time • O(1) Space</span>
+        </div>
+
+        <!-- Code lines matching Java source -->
+        <div class="code-font text-[11px] sm:text-xs text-slate-300 overflow-y-auto rounded-xl glass-input p-2.5 border border-white/5 select-none flex-grow max-h-[360px]" id="codeContainer">
+          <div id="code-line-1" class="code-line py-0.5 px-2 rounded flex"><span class="text-slate-600 w-7 select-none">1</span><span class="text-purple-400">import</span>&nbsp;java.util.*;</div>
+          <div id="code-line-2" class="code-line py-0.5 px-2 rounded flex"><span class="text-slate-600 w-7 select-none">2</span></div>
+          <div id="code-line-3" class="code-line py-0.5 px-2 rounded flex"><span class="text-slate-600 w-7 select-none">3</span><span class="text-purple-400">class</span>&nbsp;<span class="text-yellow-300">Solution</span>&nbsp;{</div>
+          <div id="code-line-4" class="code-line py-0.5 px-2 rounded flex"><span class="text-slate-600 w-7 select-none">4</span>&nbsp;&nbsp;<span class="text-purple-400">public int</span>&nbsp;<span class="text-blue-400">maxMeetings</span>(<span class="text-cyan-400">int</span>[][] meetings) {</div>
+          <div id="code-line-5" class="code-line py-0.5 px-2 rounded flex"><span class="text-slate-600 w-7 select-none">5</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="text-purple-400">if</span> (meetings == <span class="text-rose-400">null</span> || meetings.length == <span class="text-amber-400">0</span>) {</div>
+          <div id="code-line-6" class="code-line py-0.5 px-2 rounded flex"><span class="text-slate-600 w-7 select-none">6</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="text-purple-400">return</span>&nbsp;<span class="text-amber-400">0</span>;</div>
+          <div id="code-line-7" class="code-line py-0.5 px-2 rounded flex"><span class="text-slate-600 w-7 select-none">7</span>&nbsp;&nbsp;&nbsp;&nbsp;}</div>
+          <div id="code-line-8" class="code-line py-0.5 px-2 rounded flex"><span class="text-slate-600 w-7 select-none">8</span></div>
+          <div id="code-line-9" class="code-line py-0.5 px-2 rounded flex"><span class="text-slate-600 w-7 select-none">9</span>&nbsp;&nbsp;&nbsp;&nbsp;Arrays.sort(meetings, (a, b) -&gt; {</div>
+          <div id="code-line-10" class="code-line py-0.5 px-2 rounded flex"><span class="text-slate-600 w-7 select-none">10</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="text-cyan-400">int</span> cmp = Integer.compare(a[<span class="text-amber-400">1</span>], b[<span class="text-amber-400">1</span>]);</div>
+          <div id="code-line-11" class="code-line py-0.5 px-2 rounded flex"><span class="text-slate-600 w-7 select-none">11</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="text-purple-400">if</span> (cmp != <span class="text-amber-400">0</span>) {</div>
+          <div id="code-line-12" class="code-line py-0.5 px-2 rounded flex"><span class="text-slate-600 w-7 select-none">12</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="text-purple-400">return</span> cmp;</div>
+          <div id="code-line-13" class="code-line py-0.5 px-2 rounded flex"><span class="text-slate-600 w-7 select-none">13</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}</div>
+          <div id="code-line-14" class="code-line py-0.5 px-2 rounded flex"><span class="text-slate-600 w-7 select-none">14</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="text-purple-400">return</span> Integer.compare(a[<span class="text-amber-400">0</span>], b[<span class="text-amber-400">0</span>]);</div>
+          <div id="code-line-15" class="code-line py-0.5 px-2 rounded flex"><span class="text-slate-600 w-7 select-none">15</span>&nbsp;&nbsp;&nbsp;&nbsp;});</div>
+          <div id="code-line-16" class="code-line py-0.5 px-2 rounded flex"><span class="text-slate-600 w-7 select-none">16</span></div>
+          <div id="code-line-17" class="code-line py-0.5 px-2 rounded flex"><span class="text-slate-600 w-7 select-none">17</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="text-cyan-400">int</span> count = <span class="text-amber-400">0</span>;</div>
+          <div id="code-line-18" class="code-line py-0.5 px-2 rounded flex"><span class="text-slate-600 w-7 select-none">18</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="text-cyan-400">int</span> lastEnd = <span class="text-amber-400">0</span>;</div>
+          <div id="code-line-19" class="code-line py-0.5 px-2 rounded flex"><span class="text-slate-600 w-7 select-none">19</span></div>
+          <div id="code-line-20" class="code-line py-0.5 px-2 rounded flex"><span class="text-slate-600 w-7 select-none">20</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="text-purple-400">for</span> (<span class="text-cyan-400">int</span> i = <span class="text-amber-400">0</span>; i &lt; meetings.length; i++) {</div>
+          <div id="code-line-21" class="code-line py-0.5 px-2 rounded flex"><span class="text-slate-600 w-7 select-none">21</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="text-purple-400">if</span> (count == <span class="text-amber-400">0</span> || meetings[i][<span class="text-amber-400">0</span>] &gt;= lastEnd) {</div>
+          <div id="code-line-22" class="code-line py-0.5 px-2 rounded flex"><span class="text-slate-600 w-7 select-none">22</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;count++;</div>
+          <div id="code-line-23" class="code-line py-0.5 px-2 rounded flex"><span class="text-slate-600 w-7 select-none">23</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;lastEnd = meetings[i][<span class="text-amber-400">1</span>];</div>
+          <div id="code-line-24" class="code-line py-0.5 px-2 rounded flex"><span class="text-slate-600 w-7 select-none">24</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}</div>
+          <div id="code-line-25" class="code-line py-0.5 px-2 rounded flex"><span class="text-slate-600 w-7 select-none">25</span>&nbsp;&nbsp;&nbsp;&nbsp;}</div>
+          <div id="code-line-26" class="code-line py-0.5 px-2 rounded flex"><span class="text-slate-600 w-7 select-none">26</span></div>
+          <div id="code-line-27" class="code-line py-0.5 px-2 rounded flex"><span class="text-slate-600 w-7 select-none">27</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="text-purple-400">return</span> count;</div>
+          <div id="code-line-28" class="code-line py-0.5 px-2 rounded flex"><span class="text-slate-600 w-7 select-none">28</span>&nbsp;&nbsp;}</div>
+          <div id="code-line-29" class="code-line py-0.5 px-2 rounded flex"><span class="text-slate-600 w-7 select-none">29</span>}</div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <footer class="max-w-7xl mx-auto w-full text-center text-xs text-slate-500 py-1 font-mono">
+    <p>Greedy Interval Scheduling • Earliest Finishing Time Priority • O(N log N) Time • O(1) Space</p>
+  </footer>
+  <script>
+    class SoundEngine {
+      constructor() {
+        this.enabled = true;
+        this.ctx = null;
+      }
+
+      init() {
+        if (!this.ctx) {
+          const AudioContext = window.AudioContext || window.webkitAudioContext;
+          if (AudioContext) {
+            this.ctx = new AudioContext();
+          }
+        }
+      }
+
+      playStep() {
+        if (!this.enabled) return;
+        this.init();
+        if (!this.ctx) return;
+        if (this.ctx.state === 'suspended') this.ctx.resume();
+
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(440, this.ctx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(320, this.ctx.currentTime + 0.05);
+
+        gain.gain.setValueAtTime(0.04, this.ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.05);
+
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.start();
+        osc.stop(this.ctx.currentTime + 0.05);
+      }
+
+      playSort() {
+        if (!this.enabled) return;
+        this.init();
+        if (!this.ctx) return;
+        if (this.ctx.state === 'suspended') this.ctx.resume();
+
+        const notes = [440, 554.37, 659.25];
+        notes.forEach((freq, idx) => {
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(freq, this.ctx.currentTime + idx * 0.06);
+          gain.gain.setValueAtTime(0.045, this.ctx.currentTime + idx * 0.06);
+          gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + idx * 0.06 + 0.12);
+
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+          osc.start(this.ctx.currentTime + idx * 0.06);
+          osc.stop(this.ctx.currentTime + idx * 0.06 + 0.13);
+        });
+      }
+
+      playAccepted() {
+        if (!this.enabled) return;
+        this.init();
+        if (!this.ctx) return;
+        if (this.ctx.state === 'suspended') this.ctx.resume();
+
+        const notes = [523.25, 659.25, 783.99, 1046.50]; // C Major arpeggio
+        notes.forEach((freq, idx) => {
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(freq, this.ctx.currentTime + idx * 0.06);
+          gain.gain.setValueAtTime(0.05, this.ctx.currentTime + idx * 0.06);
+          gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + idx * 0.06 + 0.2);
+
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+          osc.start(this.ctx.currentTime + idx * 0.06);
+          osc.stop(this.ctx.currentTime + idx * 0.06 + 0.21);
+        });
+      }
+
+      playConflict() {
+        if (!this.enabled) return;
+        this.init();
+        if (!this.ctx) return;
+        if (this.ctx.state === 'suspended') this.ctx.resume();
+
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(280, this.ctx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(180, this.ctx.currentTime + 0.09);
+
+        gain.gain.setValueAtTime(0.04, this.ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.09);
+
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.start();
+        osc.stop(this.ctx.currentTime + 0.09);
+      }
+    }
+
+    const sound = new SoundEngine();
+
+    const presets = [
+      { name: "1: [[1,2], [3,4], [0,6], [5,7], [8,9], [5,9]] (Classic 4 max)", data: [[1,2], [3,4], [0,6], [5,7], [8,9], [5,9]] },
+      { name: "2: [[1,3], [2,4], [3,5], [0,6]] (Back-to-back 2 max)", data: [[1,3], [2,4], [3,5], [0,6]] },
+      { name: "3: [[1,10], [2,3], [4,5], [6,7], [8,9]] (Short intervals inside large)", data: [[1,10], [2,3], [4,5], [6,7], [8,9]] },
+      { name: "4: [[1,4], [2,5], [3,6]] (Heavy mutual overlap: 1 max)", data: [[1,4], [2,5], [3,6]] },
+      { name: "5: [[0,1], [1,2], [2,3], [3,4]] (Seamless chain: all 4 scheduled)", data: [[0,1], [1,2], [2,3], [3,4]] },
+      { name: "6: [[5,8], [1,4], [3,5], [0,6], [5,7], [8,9]] (Unsorted shuffle)", data: [[5,8], [1,4], [3,5], [0,6], [5,7], [8,9]] },
+      { name: "7: [[1,5], [5,10], [10,15]] (Adjacent boundaries)", data: [[1,5], [5,10], [10,15]] },
+      { name: "8: [[2,4]] (Single meeting edge case)", data: [[2,4]] },
+      { name: "9: [[1,3], [1,2], [1,4]] (Same start, different ends)", data: [[1,3], [1,2], [1,4]] },
+      { name: "10: [[2,6], [1,6], [3,6]] (Same end, tiebreak on start)", data: [[2,6], [1,6], [3,6]] }
+    ];
+
+    let currentPresetIdx = 0;
+    let currentRawMeetings = JSON.parse(JSON.stringify(presets[0].data));
+    let currentSteps = [];
+    let currentStepIndex = 0;
+    let isPlaying = false;
+    let playIntervalId = null;
+    let playSpeed = 750;
+
+    function generateAlgorithmSteps(rawList) {
+      const steps = [];
+      const n = rawList ? rawList.length : 0;
+      let initialList = rawList ? rawList.map((m, idx) => ({ id: idx, start: m[0], end: m[1], status: 'pending' })) : [];
+
+      function snapshot(meta) {
+        steps.push({
+          line: meta.line,
+          phase: meta.phase,
+          passName: meta.passName ?? 'Execution',
+          count: meta.count ?? 0,
+          lastEnd: meta.lastEnd ?? 0,
+          currentIdx: meta.currentIdx !== undefined ? meta.currentIdx : -1,
+          isSorted: meta.isSorted ?? false,
+          statusType: meta.statusType ?? 'neutral',
+          evalStmt: meta.evalStmt ?? '-',
+          evalResult: meta.evalResult ?? '-',
+          detail: meta.detail ?? '',
+          returnPillText: meta.returnPillText ?? 'running...',
+          desc: meta.desc ?? '',
+          meetings: JSON.parse(JSON.stringify(meta.meetingsList)),
+          stripConditionMath: meta.stripConditionMath ?? '-',
+          stripOutcome: meta.stripOutcome ?? 'awaiting'
+        });
+      }
+
+      // Step 1: Entry
+      snapshot({
+        line: 4,
+        phase: 'Function Entry: maxMeetings(meetings)',
+        passName: 'Entry',
+        count: 0,
+        lastEnd: 0,
+        currentIdx: -1,
+        isSorted: false,
+        evalStmt: `maxMeetings(meetings); // n = ${n}`,
+        evalResult: `size = ${n}`,
+        detail: `Starting greedy activity selection algorithm on ${n} meeting intervals.`,
+        statusType: 'neutral',
+        returnPillText: 'entered',
+        desc: `Called maxMeetings with ${n} meeting intervals.`,
+        meetingsList: initialList
+      });
+
+      // Step 2: Guard Check
+      const guardFails = (!rawList || n === 0);
+      snapshot({
+        line: 5,
+        phase: 'Guard Check: meetings == null || meetings.length == 0',
+        passName: 'Validation',
+        count: 0,
+        lastEnd: 0,
+        currentIdx: -1,
+        isSorted: false,
+        evalStmt: `if (meetings == null || meetings.length == 0) // ${n} == 0`,
+        evalResult: `${guardFails}`,
+        detail: guardFails ? 'Meeting array is null or empty. Returning 0.' : `Array contains ${n} meeting(s). Proceeding to sort.`,
+        statusType: guardFails ? 'conflict' : 'neutral',
+        returnPillText: guardFails ? 'return 0' : 'valid input',
+        desc: guardFails ? 'Guard triggered: no meetings.' : 'Input valid: at least 1 meeting to schedule.',
+        meetingsList: initialList
+      });
+
+      if (guardFails) {
+        snapshot({
+          line: 6,
+          phase: 'Early Exit: return 0',
+          passName: 'Finished',
+          count: 0,
+          lastEnd: 0,
+          currentIdx: -1,
+          isSorted: false,
+          evalStmt: 'return 0;',
+          evalResult: '0',
+          detail: 'Returned 0 because no meetings exist.',
+          statusType: 'neutral',
+          returnPillText: 'return 0',
+          desc: 'Returned 0.',
+          meetingsList: initialList
+        });
+        return steps;
+      }
+
+      // Step 3: Arrays.sort (Lines 9-15)
+      let sortedList = JSON.parse(JSON.stringify(initialList));
+      sortedList.sort((a, b) => {
+        const cmp = a.end - b.end;
+        if (cmp !== 0) return cmp;
+        return a.start - b.start;
+      });
+
+      snapshot({
+        line: 9,
+        phase: 'Greedy Sort: Arrays.sort(meetings, (a, b) -> finish time asc)',
+        passName: 'Sorting',
+        count: 0,
+        lastEnd: 0,
+        currentIdx: -1,
+        isSorted: true,
+        evalStmt: 'Arrays.sort(meetings, by end time, then start time);',
+        evalResult: 'Sorted: ' + sortedList.map(m => `[${m.start},${m.end}]`).join(', '),
+        detail: 'Sorted meetings ascending by finish time (end). If finish times tie, sorted by start time. Earliest finishers get priority.',
+        statusType: 'sort',
+        returnPillText: 'sorted by end',
+        desc: 'Sorted all meetings ascending by finish time (b[1] vs a[1]).',
+        meetingsList: sortedList
+      });
+
+      // Step 4: Initialize count = 0, lastEnd = 0 (Lines 17-18)
+      let count = 0;
+      let lastEnd = 0;
+
+      snapshot({
+        line: 17,
+        phase: 'Initialize count = 0',
+        passName: 'Setup',
+        count: 0,
+        lastEnd: 0,
+        currentIdx: -1,
+        isSorted: true,
+        evalStmt: 'int count = 0;',
+        evalResult: 'count = 0',
+        detail: 'count tracks the maximum non-overlapping meetings scheduled so far.',
+        statusType: 'neutral',
+        returnPillText: 'count = 0',
+        desc: 'Initialized count to 0.',
+        meetingsList: sortedList
+      });
+
+      snapshot({
+        line: 18,
+        phase: 'Initialize lastEnd = 0',
+        passName: 'Setup',
+        count: 0,
+        lastEnd: 0,
+        currentIdx: -1,
+        isSorted: true,
+        evalStmt: 'int lastEnd = 0;',
+        evalResult: 'lastEnd = 0',
+        detail: 'lastEnd tracks the end time of the most recently scheduled meeting.',
+        statusType: 'neutral',
+        returnPillText: 'lastEnd = 0',
+        desc: 'Initialized lastEnd to 0.',
+        meetingsList: sortedList
+      });
+
+      // Step 5: For loop over meetings (Lines 20-25)
+      for (let i = 0; i < sortedList.length; i++) {
+        const curr = sortedList[i];
+        curr.status = 'evaluating';
+
+        // Loop condition (Line 20)
+        snapshot({
+          line: 20,
+          phase: `Loop Check: i = ${i} < ${sortedList.length}`,
+          passName: 'Evaluating',
+          count: count,
+          lastEnd: lastEnd,
+          currentIdx: i,
+          isSorted: true,
+          evalStmt: `for (int i = 0; i < meetings.length; i++) // i=${i}`,
+          evalResult: `i=${i} < ${sortedList.length} (true)`,
+          detail: `Inspecting meeting #${i}: [${curr.start}, ${curr.end}].`,
+          statusType: 'evaluating',
+          returnPillText: `i = ${i}`,
+          desc: `Inspecting meeting #${i}: [${curr.start}, ${curr.end}].`,
+          meetingsList: sortedList,
+          stripConditionMath: `start: ${curr.start} vs lastEnd: ${lastEnd}`,
+          stripOutcome: 'evaluating'
+        });
+
+        // If condition (Line 21)
+        const conditionMet = (count === 0 || curr.start >= lastEnd);
+        const condDetail = count === 0 
+          ? `count == 0 (First meeting always accepted)` 
+          : `${curr.start} >= ${lastEnd} (${conditionMet ? 'Room free, no conflict' : 'Overlap! Room still occupied'})`;
+
+        snapshot({
+          line: 21,
+          phase: `Check Greedy Condition: ${count === 0 ? 'count == 0' : `meetings[${i}][0] (${curr.start}) >= lastEnd (${lastEnd})`}`,
+          passName: 'Checking Condition',
+          count: count,
+          lastEnd: lastEnd,
+          currentIdx: i,
+          isSorted: true,
+          evalStmt: `if (count == 0 || meetings[i][0] >= lastEnd) // ${curr.start} >= ${lastEnd}`,
+          evalResult: `${conditionMet}`,
+          detail: conditionMet 
+            ? `ACCEPT: Meeting [${curr.start}, ${curr.end}] ${condDetail}. Scheduling it!`
+            : `REJECT: Meeting [${curr.start}, ${curr.end}] starts at ${curr.start}, which is before lastEnd (${lastEnd}). Conflict!`,
+          statusType: conditionMet ? 'accepted' : 'conflict',
+          returnPillText: conditionMet ? 'SCHEDULE' : 'SKIP (OVERLAP)',
+          desc: conditionMet ? `Meeting [${curr.start}, ${curr.end}] accepted: ${condDetail}.` : `Meeting [${curr.start}, ${curr.end}] conflicts with previous meeting (ends at ${lastEnd}).`,
+          meetingsList: sortedList,
+          stripConditionMath: `${curr.start} >= ${lastEnd} -> ${conditionMet}`,
+          stripOutcome: conditionMet ? 'SCHEDULE' : 'REJECT'
+        });
+
+        if (conditionMet) {
+          count++;
+          curr.status = 'scheduled';
+          curr.scheduledOrder = count;
+
+          // Increment count (Line 22)
+          snapshot({
+            line: 22,
+            phase: `Increment count++ (now ${count})`,
+            passName: 'Scheduling',
+            count: count,
+            lastEnd: lastEnd,
+            currentIdx: i,
+            isSorted: true,
+            evalStmt: `count++; // count = ${count}`,
+            evalResult: `count = ${count}`,
+            detail: `Meeting scheduled successfully! Total scheduled meetings: ${count}.`,
+            statusType: 'accepted',
+            returnPillText: `count = ${count}`,
+            desc: `count incremented to ${count}.`,
+            meetingsList: sortedList,
+            stripConditionMath: `Scheduled #${count}`,
+            stripOutcome: 'ACCEPTED'
+          });
+
+          // Update lastEnd (Line 23)
+          lastEnd = curr.end;
+          snapshot({
+            line: 23,
+            phase: `Update lastEnd = meetings[${i}][1] (${lastEnd})`,
+            passName: 'Updating lastEnd',
+            count: count,
+            lastEnd: lastEnd,
+            currentIdx: i,
+            isSorted: true,
+            evalStmt: `lastEnd = meetings[i][1]; // lastEnd = ${lastEnd}`,
+            evalResult: `lastEnd = ${lastEnd}`,
+            detail: `Updated room occupation deadline. Next scheduled meeting must start at or after ${lastEnd}.`,
+            statusType: 'accepted',
+            returnPillText: `lastEnd = ${lastEnd}`,
+            desc: `lastEnd advanced to ${lastEnd}.`,
+            meetingsList: sortedList,
+            stripConditionMath: `Room occupied until ${lastEnd}`,
+            stripOutcome: 'ACCEPTED'
+          });
+        } else {
+          curr.status = 'rejected';
+        }
+      }
+
+      // Step 6: Return count (Line 27)
+      snapshot({
+        line: 27,
+        phase: `Algorithm Finished: return count (${count})`,
+        passName: 'Finished',
+        count: count,
+        lastEnd: lastEnd,
+        currentIdx: -1,
+        isSorted: true,
+        evalStmt: `return count; // Result = ${count}`,
+        evalResult: `${count}`,
+        detail: `Greedy scan complete! Maximum number of non-overlapping meetings that can be accommodated is ${count}.`,
+        statusType: 'finished',
+        returnPillText: `return ${count}`,
+        desc: `Algorithm complete. Maximum non-overlapping meetings: ${count}.`,
+        meetingsList: sortedList,
+        stripConditionMath: `Final Scheduled: ${count}`,
+        stripOutcome: `Result: ${count}`
+      });
+
+      return steps;
+    }
+    const btnPlayPause = document.getElementById('btnPlayPause');
+    const playIcon = document.getElementById('playIcon');
+    const playText = document.getElementById('playText');
+    const btnPrev = document.getElementById('btnPrev');
+    const btnNext = document.getElementById('btnNext');
+    const btnReset = document.getElementById('btnReset');
+    const topPhaseBadge = document.getElementById('topPhaseBadge');
+    const phaseDot = document.getElementById('phaseDot');
+    const topStepCounterBadge = document.getElementById('topStepCounterBadge');
+    const stepSlider = document.getElementById('stepSlider');
+    const sliderCurrent = document.getElementById('sliderCurrent');
+    const sliderTotal = document.getElementById('sliderTotal');
+    const presetSelect = document.getElementById('presetSelect');
+    const customInput = document.getElementById('customInput');
+    const btnApplyCustom = document.getElementById('btnApplyCustom');
+    const btnSampleNext = document.getElementById('btnSampleNext');
+    const btnSoundToggle = document.getElementById('btnSoundToggle');
+    const soundIcon = document.getElementById('soundIcon');
+
+    const arenaScheduledCount = document.getElementById('arenaScheduledCount');
+    const arenaSkippedCount = document.getElementById('arenaSkippedCount');
+    const arenaLastEndBadge = document.getElementById('arenaLastEndBadge');
+    const arenaStatusDot = document.getElementById('arenaStatusDot');
+    const arenaStatusText = document.getElementById('arenaStatusText');
+    const actionFormulaBanner = document.getElementById('actionFormulaBanner');
+    const sortStatusTag = document.getElementById('sortStatusTag');
+    const timeScaleTicks = document.getElementById('timeScaleTicks');
+    const intervalsTrack = document.getElementById('intervalsTrack');
+    const lastEndLaser = document.getElementById('lastEndLaser');
+    const laserVal = document.getElementById('laserVal');
+    const decisionBadge = document.getElementById('decisionBadge');
+    const stripCurrMeeting = document.getElementById('stripCurrMeeting');
+    const stripConditionMath = document.getElementById('stripConditionMath');
+    const stripOutcomePill = document.getElementById('stripOutcomePill');
+    const operationDetailBox = document.getElementById('operationDetailBox');
+    const stepDescription = document.getElementById('stepDescription');
+    const statusDot = document.getElementById('statusDot');
+    const returnPill = document.getElementById('returnPill');
+
+    const varIndexI = document.getElementById('varIndexI');
+    const varStart = document.getElementById('varStart');
+    const varLastEnd = document.getElementById('varLastEnd');
+    const varCount = document.getElementById('varCount');
+    const varCurrentPair = document.getElementById('varCurrentPair');
+    const varCondition = document.getElementById('varCondition');
+    const evalStatement = document.getElementById('evalStatement');
+    const evalResult = document.getElementById('evalResult');
+    const codeContainer = document.getElementById('codeContainer');
+    const timelineGridBackground = document.getElementById('timelineGridBackground');
+
+    function renderStep(step) {
+      if (!step) return;
+
+      topPhaseBadge.textContent = step.phase;
+      topStepCounterBadge.textContent = `Step ${currentStepIndex} / ${currentSteps.length - 1}`;
+      stepDescription.textContent = step.desc;
+
+      stepSlider.value = currentStepIndex;
+      sliderCurrent.textContent = currentStepIndex;
+
+      arenaScheduledCount.textContent = step.count;
+      arenaLastEndBadge.textContent = step.lastEnd;
+
+      const skippedCount = step.meetings.filter(m => m.status === 'rejected').length;
+      arenaSkippedCount.textContent = skippedCount;
+
+      varIndexI.textContent = step.currentIdx >= 0 ? `i = ${step.currentIdx}` : '-';
+      if (step.currentIdx >= 0 && step.meetings[step.currentIdx]) {
+        const m = step.meetings[step.currentIdx];
+        varStart.textContent = m.start;
+        varCurrentPair.textContent = `[${m.start}, ${m.end}]`;
+        stripCurrMeeting.textContent = `[${m.start}, ${m.end}]`;
+      } else {
+        varStart.textContent = '-';
+        varCurrentPair.textContent = '-';
+        stripCurrMeeting.textContent = 'none';
+      }
+
+      varLastEnd.textContent = step.lastEnd;
+      varCount.textContent = step.count;
+      varCondition.textContent = step.currentIdx >= 0 ? (step.statusType === 'conflict' ? 'false (OVERLAP)' : 'true') : '-';
+
+      evalStatement.textContent = step.evalStmt;
+      evalResult.textContent = step.evalResult;
+      operationDetailBox.textContent = step.detail;
+      returnPill.textContent = step.returnPillText;
+
+      stripConditionMath.textContent = step.stripConditionMath;
+      stripOutcomePill.textContent = step.stripOutcome;
+      if (step.statusType === 'accepted') {
+        stripOutcomePill.className = "px-2 py-0.5 rounded text-[11px] font-bold bg-emerald-950 text-emerald-300 border border-emerald-500/40";
+      } else if (step.statusType === 'conflict') {
+        stripOutcomePill.className = "px-2 py-0.5 rounded text-[11px] font-bold bg-rose-950 text-rose-300 border border-rose-500/40";
+      } else {
+        stripOutcomePill.className = "px-2 py-0.5 rounded text-[11px] font-bold bg-slate-800 text-slate-400";
+      }
+
+      sortStatusTag.textContent = step.isSorted ? "Sorted: Finish Time Ascending" : "Unsorted Input";
+      sortStatusTag.className = step.isSorted 
+        ? "text-emerald-400 font-semibold bg-emerald-950/60 px-2 py-0.5 rounded border border-emerald-500/30 text-[10px]" 
+        : "text-indigo-300 font-semibold";
+
+      renderTimeline(step);
+
+      // Status Banners, Sounds & Animations
+      if (step.statusType === 'accepted') {
+        actionFormulaBanner.innerHTML = `
+          <div class="flex items-center gap-2 bg-emerald-950/90 text-emerald-300 border border-emerald-500/50 px-4 py-1.5 rounded-full text-xs font-mono font-bold shadow-lg shadow-emerald-500/30">
+            <i class="fa-solid fa-circle-check text-emerald-400"></i>
+            <span>SCHEDULED #${step.count}: [${step.meetings[step.currentIdx].start}, ${step.meetings[step.currentIdx].end}] (lastEnd updated to ${step.lastEnd})</span>
+          </div>`;
+        arenaStatusDot.className = "w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping";
+        arenaStatusText.textContent = "Meeting Scheduled";
+        statusDot.className = "w-3.5 h-3.5 rounded-full bg-emerald-400 shrink-0";
+        returnPill.className = "shrink-0 px-3 py-1 rounded-xl text-xs font-bold font-mono bg-emerald-950/90 text-emerald-300 border border-emerald-400";
+        phaseDot.className = "w-2 h-2 rounded-full bg-emerald-400 mr-2";
+        decisionBadge.className = "text-[11px] px-2.5 py-0.5 rounded-md bg-emerald-950 text-emerald-300 border border-emerald-500/40 font-mono font-bold";
+        decisionBadge.textContent = "VALID: start >= lastEnd";
+        sound.playAccepted();
+
+      } else if (step.statusType === 'conflict') {
+        actionFormulaBanner.innerHTML = `
+          <div class="flex items-center gap-2 bg-rose-950/90 text-rose-300 border border-rose-500/50 px-4 py-1.5 rounded-full text-xs font-mono font-bold shadow-md shadow-rose-500/30">
+            <i class="fa-solid fa-triangle-exclamation text-rose-400"></i>
+            <span>CONFLICT: Meeting [${step.meetings[step.currentIdx].start}, ${step.meetings[step.currentIdx].end}] starts at ${step.meetings[step.currentIdx].start} < lastEnd (${step.lastEnd})</span>
+          </div>`;
+        arenaStatusDot.className = "w-2.5 h-2.5 rounded-full bg-rose-400";
+        arenaStatusText.textContent = "Overlap Detected";
+        statusDot.className = "w-3.5 h-3.5 rounded-full bg-rose-400 shrink-0";
+        returnPill.className = "shrink-0 px-3 py-1 rounded-xl text-xs font-bold font-mono bg-rose-950/80 text-rose-300 border border-rose-500/40";
+        phaseDot.className = "w-2 h-2 rounded-full bg-rose-400 mr-2";
+        decisionBadge.className = "text-[11px] px-2.5 py-0.5 rounded-md bg-rose-950 text-rose-300 border border-rose-500/40 font-mono font-bold";
+        decisionBadge.textContent = "INVALID: Overlaps Room";
+        sound.playConflict();
+
+      } else if (step.statusType === 'sort') {
+        actionFormulaBanner.innerHTML = `
+          <div class="flex items-center gap-2 bg-indigo-950/90 text-indigo-300 border border-indigo-500/50 px-4 py-1.5 rounded-full text-xs font-mono font-bold shadow-md shadow-indigo-500/30">
+            <i class="fa-solid fa-arrow-down-short-wide text-cyan-400"></i>
+            <span>Greedy Sort Completed: Ordered by finishing time ascending</span>
+          </div>`;
+        arenaStatusDot.className = "w-2.5 h-2.5 rounded-full bg-indigo-400 animate-pulse";
+        arenaStatusText.textContent = "Sorted by End Time";
+        statusDot.className = "w-3.5 h-3.5 rounded-full bg-indigo-400 shrink-0";
+        returnPill.className = "shrink-0 px-3 py-1 rounded-xl text-xs font-bold font-mono bg-indigo-950/80 text-indigo-300 border border-indigo-500/40";
+        phaseDot.className = "w-2 h-2 rounded-full bg-indigo-400 mr-2";
+        sound.playSort();
+
+      } else if (step.statusType === 'finished') {
+        actionFormulaBanner.innerHTML = `
+          <div class="flex items-center gap-2 bg-emerald-950/90 text-emerald-300 border border-emerald-500/50 px-4 py-1.5 rounded-full text-xs font-mono font-bold shadow-md shadow-emerald-500/30">
+            <i class="fa-solid fa-award text-emerald-400"></i>
+            <span>Max Meetings Result: Accommodated ${step.count} non-overlapping meetings!</span>
+          </div>`;
+        arenaStatusDot.className = "w-2.5 h-2.5 rounded-full bg-emerald-400";
+        arenaStatusText.textContent = "Algorithm Complete";
+        statusDot.className = "w-3.5 h-3.5 rounded-full bg-emerald-400 shrink-0";
+        returnPill.className = "shrink-0 px-3 py-1 rounded-xl text-xs font-bold font-mono bg-emerald-950/90 text-emerald-300 border border-emerald-400";
+        phaseDot.className = "w-2 h-2 rounded-full bg-emerald-400 mr-2";
+        sound.playAccepted();
+
+      } else {
+        actionFormulaBanner.innerHTML = `<span class="text-xs font-mono text-slate-300 glass-input px-4 py-1.5 rounded-full">${step.phase}</span>`;
+        arenaStatusDot.className = "w-2.5 h-2.5 rounded-full bg-cyan-400";
+        arenaStatusText.textContent = "Inspecting";
+        statusDot.className = "w-3.5 h-3.5 rounded-full bg-cyan-400 shrink-0";
+        returnPill.className = "shrink-0 px-3 py-1 rounded-xl text-xs font-bold font-mono bg-slate-800 text-slate-300 border border-slate-700";
+        phaseDot.className = "w-2 h-2 rounded-full bg-cyan-400 mr-2 animate-pulse";
+        sound.playStep();
+      }
+
+      // Strictly localized code highlight without page jumping
+      highlightCodeLine(step.line);
+    }
+
+    function renderTimeline(step) {
+      intervalsTrack.innerHTML = '';
+      timeScaleTicks.innerHTML = '';
+      if (timelineGridBackground) timelineGridBackground.innerHTML = '';
+
+      if (!step.meetings || step.meetings.length === 0) {
+        intervalsTrack.innerHTML = '<span class="text-xs text-slate-500 font-mono italic my-auto text-center py-6">No meetings to display</span>';
+        lastEndLaser.style.opacity = '0';
+        return;
+      }
+
+      // Calculate timeline bounds accurately based on meeting data
+      let minT = 0;
+      let maxMeetingEnd = Math.max(...step.meetings.map(m => m.end));
+      let minMeetingStart = Math.min(0, ...step.meetings.map(m => m.start));
+      minT = Math.min(0, minMeetingStart);
+      let maxT = Math.max(10, maxMeetingEnd);
+      const span = maxT - minT;
+
+      // Generate precise tick step interval so ticks never bunch up
+      let tickStep = 1;
+      if (span > 24) tickStep = 5;
+      else if (span > 15) tickStep = 2;
+      else tickStep = 1;
+
+      // Populate Ticks and Background Vertical Guidelines
+      for (let t = minT; t <= maxT; t += tickStep) {
+        const pct = ((t - minT) / span) * 100;
+
+        // Tick number & mark at exact percentage
+        const tick = document.createElement('div');
+        tick.className = "absolute top-0 flex flex-col items-center -translate-x-1/2";
+        tick.style.left = `${pct}%`;
+        tick.innerHTML = `
+          <span class="text-[10px] font-mono font-semibold text-slate-400">${t}</span>
+          <span class="w-[1px] h-2 bg-white/20 mt-0.5"></span>
+        `;
+        timeScaleTicks.appendChild(tick);
+
+        // Vertical Guide Gridline through entire track
+        if (timelineGridBackground) {
+          const gridLine = document.createElement('div');
+          gridLine.className = "absolute top-0 bottom-0 w-[1px] bg-white/5 -translate-x-1/2 pointer-events-none";
+          gridLine.style.left = `${pct}%`;
+          timelineGridBackground.appendChild(gridLine);
+        }
+      }
+
+      // Position the lastEnd laser line matching exact tick percentage
+      if (step.lastEnd > 0) {
+        const laserPct = ((step.lastEnd - minT) / span) * 100;
+        lastEndLaser.style.left = `${Math.min(99.5, Math.max(0.5, laserPct))}%`;
+        lastEndLaser.style.opacity = '1';
+        laserVal.textContent = step.lastEnd;
+      } else {
+        lastEndLaser.style.opacity = '0';
+      }
+
+      // Render interval bars
+      step.meetings.forEach((m, idx) => {
+        const isCurrent = (step.currentIdx === idx);
+        const leftPct = ((m.start - minT) / span) * 100;
+        const widthPct = Math.max(0.5, ((m.end - m.start) / span) * 100);
+
+        const row = document.createElement('div');
+        row.className = "w-full h-8 relative flex items-center bg-black/30 rounded-lg border border-white/5 px-0 overflow-visible";
+
+        // Interval block bar
+        const bar = document.createElement('div');
+        let barClass = "absolute h-6 rounded-md flex items-center justify-between px-2 text-[10px] font-mono font-bold transition-all duration-200 select-none shadow-md ";
+
+        if (m.status === 'scheduled') {
+          barClass += "bg-emerald-950/90 border border-emerald-400 text-emerald-200 shadow-emerald-500/30 z-10 ";
+        } else if (m.status === 'rejected') {
+          barClass += "bg-rose-950/70 border border-rose-500/40 text-rose-300 opacity-60 z-0 ";
+        } else if (isCurrent) {
+          if (step.statusType === 'conflict') {
+            barClass += "bg-rose-900/90 border-2 border-rose-400 text-rose-100 conflict-glow z-20 ";
+          } else {
+            barClass += "bg-amber-950/90 border-2 border-amber-400 text-amber-200 shadow-amber-500/40 z-20 scale-105 ";
+          }
+        } else {
+          barClass += "bg-slate-800/85 border border-white/10 text-slate-300 hover:border-cyan-400/50 ";
+        }
+
+        bar.className = barClass;
+        bar.style.left = `${leftPct}%`;
+        bar.style.width = `${widthPct}%`;
+        // Ensure short bars don't clip text: set an adaptive min-width
+        bar.style.minWidth = '62px';
+
+        let badge = '';
+        if (m.status === 'scheduled') {
+          badge = `<span class="px-1 py-0.2 rounded bg-emerald-500 text-slate-950 text-[9px] font-extrabold mr-1 shrink-0">#${m.scheduledOrder}</span>`;
+        } else if (m.status === 'rejected') {
+          badge = `<span class="px-1 py-0.2 rounded bg-rose-500 text-white text-[8px] mr-1 shrink-0">Skip</span>`;
+        } else if (isCurrent) {
+          badge = `<span class="px-1 py-0.2 rounded bg-amber-400 text-slate-950 text-[8px] mr-1 shrink-0">curr</span>`;
+        }
+
+        bar.innerHTML = `
+          <div class="flex items-center whitespace-nowrap overflow-hidden">
+            ${badge}
+            <span class="whitespace-nowrap font-mono">[${m.start}, ${m.end}]</span>
+          </div>
+          <span class="text-[8px] opacity-70 ml-1 shrink-0">i=${idx}</span>
+        `;
+
+        row.appendChild(bar);
+        intervalsTrack.appendChild(row);
+      });
+    }
+
+    function highlightCodeLine(lineNumber) {
+      document.querySelectorAll('.code-line').forEach(el => el.classList.remove('code-active'));
+      const activeLineEl = document.getElementById(`code-line-${lineNumber}`);
+      if (!activeLineEl || !codeContainer) return;
+
+      activeLineEl.classList.add('code-active');
+
+      const lineOffsetTop = activeLineEl.offsetTop;
+      const containerScrollTop = codeContainer.scrollTop;
+      const containerHeight = codeContainer.clientHeight;
+      const lineTotalHeight = activeLineEl.offsetHeight;
+
+      // Strictly adjust container internal scrollbar without shifting entire browser page
+      if (lineOffsetTop < containerScrollTop) {
+        codeContainer.scrollTop = lineOffsetTop - 10;
+      } else if (lineOffsetTop + lineTotalHeight > containerScrollTop + containerHeight) {
+        codeContainer.scrollTop = (lineOffsetTop + lineTotalHeight) - containerHeight + 10;
+      }
+    }
+
+    function goToStep(index) {
+      if (index < 0) index = 0;
+      if (index >= currentSteps.length) index = currentSteps.length - 1;
+      currentStepIndex = index;
+      renderStep(currentSteps[currentStepIndex]);
+
+      if (currentStepIndex === currentSteps.length - 1 && isPlaying) {
+        stopAutoPlay();
+      }
+    }
+
+    function nextStep() {
+      if (currentStepIndex < currentSteps.length - 1) {
+        goToStep(currentStepIndex + 1);
+      } else {
+        stopAutoPlay();
+      }
+    }
+
+    function prevStep() {
+      if (currentStepIndex > 0) {
+        goToStep(currentStepIndex - 1);
+      }
+    }
+
+    function startAutoPlay() {
+      if (currentStepIndex >= currentSteps.length - 1) {
+        currentStepIndex = 0;
+      }
+      isPlaying = true;
+      playIcon.className = "fa-solid fa-pause text-xs";
+      playText.textContent = "Stop";
+      btnPlayPause.classList.replace('from-cyan-500', 'from-pink-500');
+      btnPlayPause.classList.replace('to-emerald-600', 'to-rose-700');
+
+      clearInterval(playIntervalId);
+      playIntervalId = setInterval(() => {
+        nextStep();
+      }, playSpeed);
+    }
+
+    function stopAutoPlay() {
+      isPlaying = false;
+      playIcon.className = "fa-solid fa-play text-xs";
+      playText.textContent = "Start";
+      btnPlayPause.classList.replace('from-pink-500', 'from-cyan-500');
+      btnPlayPause.classList.replace('to-rose-700', 'to-emerald-600');
+      clearInterval(playIntervalId);
+    }
+
+    function togglePlayPause() {
+      if (isPlaying) {
+        stopAutoPlay();
+      } else {
+        startAutoPlay();
+      }
+    }
+
+    function rebuildSimulation() {
+      stopAutoPlay();
+      currentSteps = generateAlgorithmSteps(currentRawMeetings);
+      stepSlider.max = Math.max(0, currentSteps.length - 1);
+      sliderTotal.textContent = Math.max(0, currentSteps.length - 1);
+      currentStepIndex = 0;
+      goToStep(0);
+    }
+
+    btnPlayPause.addEventListener('click', togglePlayPause);
+    btnNext.addEventListener('click', () => { stopAutoPlay(); nextStep(); });
+    btnPrev.addEventListener('click', () => { stopAutoPlay(); prevStep(); });
+    btnReset.addEventListener('click', () => { stopAutoPlay(); goToStep(0); });
+
+    presetSelect.addEventListener('change', (e) => {
+      currentPresetIdx = parseInt(e.target.value, 10);
+      currentRawMeetings = JSON.parse(JSON.stringify(presets[currentPresetIdx].data));
+      customInput.value = currentRawMeetings.map(m => `[${m[0]},${m[1]}]`).join(', ');
+      rebuildSimulation();
+    });
+
+    btnSampleNext.addEventListener('click', () => {
+      currentPresetIdx = (currentPresetIdx + 1) % presets.length;
+      presetSelect.value = currentPresetIdx;
+      currentRawMeetings = JSON.parse(JSON.stringify(presets[currentPresetIdx].data));
+      customInput.value = currentRawMeetings.map(m => `[${m[0]},${m[1]}]`).join(', ');
+      rebuildSimulation();
+    });
+
+    btnApplyCustom.addEventListener('click', () => {
+      const raw = customInput.value.trim();
+      if (!raw) return;
+      try {
+        const matches = raw.match(/\[\s*(-?\d+)\s*,\s*(-?\d+)\s*\]/g);
+        if (matches && matches.length > 0) {
+          const parsed = matches.map(str => {
+            const nums = str.replace(/[\[\]\s]/g, '').split(',').map(n => parseInt(n, 10));
+            return nums;
+          });
+          currentRawMeetings = parsed;
+          rebuildSimulation();
+        }
+      } catch (err) {
+        console.error("Invalid custom intervals format", err);
+      }
+    });
+
+    stepSlider.addEventListener('input', (e) => {
+      stopAutoPlay();
+      goToStep(parseInt(e.target.value, 10));
+    });
+
+    document.querySelectorAll('.speed-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.speed-btn').forEach(b => {
+          b.className = "speed-btn px-2.5 py-1 rounded-lg text-slate-300 hover:text-white";
+        });
+        btn.className = "speed-btn px-2.5 py-1 rounded-lg bg-cyan-600 text-white font-bold";
+        playSpeed = parseInt(btn.dataset.speed, 10);
+        if (isPlaying) {
+          startAutoPlay();
+        }
+      });
+    });
+
+    btnSoundToggle.addEventListener('click', () => {
+      sound.enabled = !sound.enabled;
+      soundIcon.className = sound.enabled
+        ? "fa-solid fa-volume-high text-cyan-400"
+        : "fa-solid fa-volume-xmark text-slate-500";
+    });
+
+    // Keyboard shortcuts: Space for Play/Pause, Left/Right for steps
+    window.addEventListener('keydown', (e) => {
+      if (['INPUT', 'SELECT', 'TEXTAREA'].includes(document.activeElement.tagName)) return;
+      if (e.code === 'Space') {
+        e.preventDefault();
+        togglePlayPause();
+      } else if (e.code === 'ArrowRight') {
+        e.preventDefault();
+        stopAutoPlay();
+        nextStep();
+      } else if (e.code === 'ArrowLeft') {
+        e.preventDefault();
+        stopAutoPlay();
+        prevStep();
+      }
+    });
+
+    window.onload = function() {
+      rebuildSimulation();
+    };
+  </script>
+</body>
+</html>

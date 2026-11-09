@@ -1,0 +1,1147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Minimum Arrows to Burst Balloons Visualizer</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background-color: #030712;
+      color: #f1f5f9;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    .font-mono {
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    /* Glassmorphism primitives */
+    .glass-panel {
+      background: rgba(15, 23, 42, 0.72);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.7), inset 0 1px 0 0 rgba(255, 255, 255, 0.08);
+    }
+
+    .glass-card {
+      background: rgba(30, 41, 59, 0.55);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    .glass-input {
+      background: rgba(15, 23, 42, 0.85);
+      border: 1px solid rgba(244, 63, 94, 0.25);
+    }
+
+    .glass-input:focus {
+      border-color: rgba(244, 63, 94, 0.6);
+      outline: none;
+      box-shadow: 0 0 14px rgba(244, 63, 94, 0.25);
+    }
+
+    .glow-rose {
+      box-shadow: 0 0 25px -5px rgba(244, 63, 94, 0.45);
+    }
+
+    .glow-cyan {
+      box-shadow: 0 0 25px -5px rgba(6, 182, 212, 0.4);
+    }
+
+    .glow-emerald {
+      box-shadow: 0 0 25px -5px rgba(16, 185, 129, 0.4);
+    }
+
+    /* Laser arrow pulse */
+    @keyframes laserPulse {
+      0%, 100% { opacity: 0.95; filter: drop-shadow(0 0 8px #f43f5e); }
+      50% { opacity: 0.7; filter: drop-shadow(0 0 14px #fb7185); }
+    }
+
+    .pulse-arrow {
+      animation: laserPulse 1.2s ease-in-out infinite;
+    }
+
+    /* Custom scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: rgba(15, 23, 42, 0.6);
+    }
+    ::-webkit-scrollbar-thumb {
+      background: rgba(244, 63, 94, 0.3);
+      border-radius: 9999px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(244, 63, 94, 0.6);
+    }
+
+    .code-line {
+      transition: all 0.2s ease;
+    }
+  </style>
+</head>
+<body class="relative flex flex-col justify-between p-3 sm:p-5 selection:bg-rose-500 selection:text-white">
+
+  <!-- Ambient Glow Orbs -->
+  <div class="fixed top-[-10%] left-[-10%] w-[45vw] h-[45vw] rounded-full bg-rose-600/10 blur-[120px] pointer-events-none -z-10"></div>
+  <div class="fixed bottom-[-15%] right-[-10%] w-[50vw] h-[50vw] rounded-full bg-cyan-600/10 blur-[140px] pointer-events-none -z-10"></div>
+  <div class="fixed top-[40%] left-[30%] w-[35vw] h-[35vw] rounded-full bg-indigo-600/10 blur-[130px] pointer-events-none -z-10"></div>
+
+  <!-- MAIN CONTAINER -->
+  <div class="max-w-7xl mx-auto w-full flex flex-col gap-4">
+
+    <!-- TOP CONTROL DECK & HEADER (FROSTED GLASS) -->
+    <header class="glass-panel rounded-2xl p-3.5 sm:p-4 flex flex-col gap-3.5 sticky top-2 z-50">
+      
+      <!-- Top Row: Title, Quick Stats, Sound Toggle -->
+      <div class="flex flex-wrap items-center justify-between gap-3 border-b border-white/5 pb-3">
+        <div class="flex items-center gap-2.5">
+          <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-rose-600 to-amber-500 flex items-center justify-center shadow-lg shadow-rose-500/30">
+            <i class="fa-solid fa-crosshairs text-slate-950 font-black text-base"></i>
+          </div>
+          <div>
+            <div class="flex items-center gap-2">
+              <h1 class="text-base sm:text-lg font-bold tracking-tight text-white flex items-center gap-2">
+                Minimum Arrows to Burst Balloons
+              </h1>
+              <span class="text-[10px] font-mono font-semibold px-2 py-0.5 rounded-full bg-rose-500/20 text-rose-300 border border-rose-500/30">LeetCode 452</span>
+            </div>
+            <p class="text-xs text-slate-400 font-medium hidden sm:block">Greedy Interval Scheduling &bull; Sort by ending coordinate $x_{end}$</p>
+          </div>
+        </div>
+
+        <!-- Controls: Sound + Keyboard Guide -->
+        <div class="flex items-center gap-2">
+          <a href="/" class="glass-button px-3 py-1.5 rounded-xl text-xs font-semibold text-slate-300 hover:text-white flex items-center gap-1.5 border border-white/10 hover:border-indigo-500/40 bg-white/5 shrink-0 transition-all active:scale-95 cursor-pointer" title="Return to DSA Atlas Library"><i class="fa-solid fa-arrow-left text-indigo-400"></i><span>DSA Atlas</span></a>
+          <button id="soundToggleBtn" class="px-2.5 py-1.5 rounded-xl glass-card text-xs font-mono text-slate-300 hover:text-white hover:border-rose-500/40 transition-all flex items-center gap-1.5" title="Toggle Sound">
+            <i class="fa-solid fa-volume-high text-rose-400" id="soundIcon"></i>
+            <span class="hidden md:inline">Audio</span>
+          </button>
+          <div class="hidden lg:flex items-center gap-1.5 text-[11px] font-mono text-slate-400 px-2.5 py-1 rounded-xl glass-card">
+            <span>Keys:</span>
+            <kbd class="px-1.5 py-0.5 rounded bg-slate-800 text-slate-200 border border-slate-700">Space</kbd>
+            <kbd class="px-1.5 py-0.5 rounded bg-slate-800 text-slate-200 border border-slate-700">&larr;</kbd>
+            <kbd class="px-1.5 py-0.5 rounded bg-slate-800 text-slate-200 border border-slate-700">&rarr;</kbd>
+          </div>
+        </div>
+      </div>
+
+      <!-- Playback Navigation & Actions Bar -->
+      <div class="flex flex-wrap items-center justify-between gap-3">
+        
+        <!-- Primary Step Buttons -->
+        <div class="flex items-center gap-1.5 sm:gap-2">
+          <button id="resetBtn" class="px-3 py-2 rounded-xl glass-card text-xs font-semibold text-slate-300 hover:text-white hover:bg-white/10 active:scale-95 transition-all flex items-center gap-1.5">
+            <i class="fa-solid fa-rotate-left text-slate-400"></i>
+            <span class="hidden sm:inline">Reset</span>
+          </button>
+
+          <button id="prevBtn" class="px-3.5 py-2 rounded-xl glass-card text-xs font-semibold text-slate-200 hover:text-white hover:border-cyan-500/40 active:scale-95 transition-all flex items-center gap-1.5 disabled:opacity-30 disabled:pointer-events-none">
+            <i class="fa-solid fa-chevron-left text-cyan-400"></i>
+            <span>Prev</span>
+          </button>
+
+          <button id="playPauseBtn" class="px-5 py-2 rounded-xl bg-gradient-to-r from-rose-500 to-rose-600 hover:from-rose-400 hover:to-rose-500 text-white font-bold text-xs tracking-wide shadow-lg shadow-rose-500/30 active:scale-95 transition-all flex items-center gap-2">
+            <i class="fa-solid fa-play" id="playIcon"></i>
+            <span id="playText">Play</span>
+          </button>
+
+          <button id="nextBtn" class="px-3.5 py-2 rounded-xl glass-card text-xs font-semibold text-slate-200 hover:text-white hover:border-cyan-500/40 active:scale-95 transition-all flex items-center gap-1.5 disabled:opacity-30 disabled:pointer-events-none">
+            <span>Next</span>
+            <i class="fa-solid fa-chevron-right text-cyan-400"></i>
+          </button>
+        </div>
+
+        <!-- Speed Selector -->
+        <div class="flex items-center gap-1 glass-card p-1 rounded-xl">
+          <span class="text-[10px] font-mono text-slate-400 px-1.5 uppercase font-bold">Speed:</span>
+          <button class="speed-btn px-2 py-0.5 rounded-lg text-xs font-mono text-slate-300 hover:text-white transition-all" data-speed="2000">0.5x</button>
+          <button class="speed-btn px-2 py-0.5 rounded-lg text-xs font-mono bg-rose-500/30 text-rose-200 font-bold border border-rose-500/40 transition-all" data-speed="1000">1x</button>
+          <button class="speed-btn px-2 py-0.5 rounded-lg text-xs font-mono text-slate-300 hover:text-white transition-all" data-speed="500">2x</button>
+          <button class="speed-btn px-2 py-0.5 rounded-lg text-xs font-mono text-slate-300 hover:text-white transition-all" data-speed="250">4x</button>
+        </div>
+
+        <!-- Step Counter Badge -->
+        <div class="flex items-center gap-2 font-mono text-xs">
+          <div class="px-3 py-1.5 rounded-xl glass-card border border-white/10 flex items-center gap-2">
+            <span class="text-slate-400">Step:</span>
+            <span id="stepCounter" class="text-rose-400 font-bold">0 / 0</span>
+          </div>
+          <div id="phaseBadge" class="px-2.5 py-1.5 rounded-xl text-[11px] font-bold uppercase tracking-wider bg-slate-800/80 text-slate-300 border border-white/10 flex items-center gap-1.5">
+            <span class="w-1.5 h-1.5 rounded-full bg-slate-400" id="phaseDot"></span>
+            <span id="phaseText">Ready</span>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Scrubber Timeline Slider -->
+      <div class="flex items-center gap-3 pt-1">
+        <span class="text-[10px] font-mono text-slate-400 shrink-0">TIMELINE</span>
+        <input id="timelineSlider" type="range" min="0" max="0" value="0" class="w-full h-1.5 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-rose-500">
+      </div>
+
+      <!-- Presets & Custom Configuration Dropdown -->
+      <div class="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-white/5 text-xs">
+        <div class="flex items-center gap-2 flex-grow max-w-2xl">
+          <span class="text-rose-400 font-mono font-semibold shrink-0">Preset:</span>
+          <select id="presetSelect" class="bg-slate-900 text-rose-200 font-mono text-xs rounded-xl px-2.5 py-1.5 border border-rose-500/20 focus:outline-none focus:border-rose-400 w-full truncate cursor-pointer">
+            <option value="0">1: LeetCode Ex 1 ([[10,16], [2,8], [1,6], [7,12]] -> 2)</option>
+            <option value="1">2: Completely Disjoint ([[1,2], [3,4], [5,6], [7,8]] -> 4)</option>
+            <option value="2">3: Touching Boundaries ([[1,2], [2,3], [3,4], [4,5]] -> 2)</option>
+            <option value="3">4: All In One Point ([[1,10], [2,9], [3,8], [4,7]] -> 1)</option>
+            <option value="4">5: Single Balloon ([[1,5]] -> 1)</option>
+            <option value="5">6: Identical Balloons ([[2,5], [2,5], [2,5]] -> 1)</option>
+            <option value="6">7: Zig-Zag Bridges ([[1,6], [2,8], [7,12], [10,16]] -> 2)</option>
+            <option value="7">8: Three Groups ([[1,3], [2,4], [5,7], [6,8], [9,11], [10,12]] -> 3)</option>
+            <option value="8">9: Why Start-Sort Fails ([[1,10], [2,3], [4,5], [6,7]] -> 3)</option>
+            <option value="9">10: Negative Range & Touch ([[-10,-5], [-7,-6], [-5,0], [1,4]] -> 3)</option>
+            <option value="10">11: Int Overflow Trap ([[-2147483646,-2147483645], [2147483646,2147483647]])</option>
+            <option value="11">12: Empty Array Edge Case ([] -> 0)</option>
+          </select>
+        </div>
+
+        <div class="flex items-center gap-2">
+          <input id="customInput" type="text" placeholder="[[10,16],[2,8],[1,6],[7,12]]" class="glass-input text-xs font-mono px-2.5 py-1.5 rounded-xl w-48 sm:w-64 text-slate-200 placeholder:text-slate-600">
+          <button id="applyCustomBtn" class="px-2.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-rose-300 font-mono text-xs border border-rose-500/30 transition-all">Load</button>
+        </div>
+      </div>
+
+    </header>
+
+    <!-- MAIN BODY GRID (2 COLUMNS: VISUAL ARENA & CODE/DATA) -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-4">
+
+      <!-- LEFT: VISUAL BALLOON SHOOTING RANGE (7 COLS) -->
+      <section class="lg:col-span-7 flex flex-col gap-4">
+
+        <!-- Visual Coordinate Range Arena -->
+        <div class="glass-panel rounded-2xl p-4 flex flex-col gap-3 min-h-[420px]">
+          
+          <div class="flex items-center justify-between border-b border-white/5 pb-2.5">
+            <div class="flex items-center gap-2">
+              <span class="w-2 h-2 rounded-full bg-rose-500 animate-ping"></span>
+              <h2 class="text-xs font-bold uppercase tracking-wider text-slate-200">2D Coordinate Shooting Range</h2>
+            </div>
+            <div class="flex items-center gap-2 text-[11px] font-mono">
+              <span class="flex items-center gap-1 text-emerald-400"><i class="fa-solid fa-burst"></i> Burst</span>
+              <span class="flex items-center gap-1 text-cyan-400"><i class="fa-solid fa-crosshairs"></i> Current</span>
+              <span class="flex items-center gap-1 text-rose-400"><i class="fa-solid fa-arrow-up"></i> Arrow</span>
+            </div>
+          </div>
+
+          <!-- Axis Scale Ruler -->
+          <div class="relative w-full h-7 border-b border-white/10 font-mono text-[10px] text-slate-400 select-none overflow-hidden" id="axisScaleContainer">
+            <!-- Dynamic scale ticks injected here -->
+          </div>
+
+          <!-- Arena Stage for Balloons and Arrows -->
+          <div class="relative w-full flex-grow min-h-[300px] bg-slate-950/40 rounded-xl border border-white/5 pt-8 pb-4 px-3 overflow-visible" id="rangeStage">
+            <!-- Vertical Gridlines & Arrow Laser Layers -->
+            <div id="gridAndArrowLayer" class="absolute inset-0 pointer-events-none overflow-visible"></div>
+
+            <!-- Balloon Horizontal Capsule Tracks -->
+            <div id="balloonTracksContainer" class="relative z-10 flex flex-col gap-2.5 py-1 w-full">
+              <!-- Dynamically populated balloon cards -->
+            </div>
+          </div>
+
+          <!-- Real-Time Comparison Narrative Bar -->
+          <div id="evaluationNarrative" class="glass-card rounded-xl p-3 text-xs font-mono border-l-4 border-rose-500 flex items-start gap-2.5">
+            <i class="fa-solid fa-circle-info text-rose-400 mt-0.5 text-sm shrink-0"></i>
+            <div class="flex flex-col gap-0.5">
+              <span class="font-bold text-slate-200" id="narrativeTitle">Algorithm Initialized</span>
+              <span class="text-slate-400 text-[11px]" id="narrativeBody">Load a dataset or click Next to step through.</span>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Live Metrics Deck -->
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+          
+          <div class="glass-panel rounded-xl p-3 flex flex-col">
+            <span class="text-[10px] font-mono text-slate-400 uppercase">Arrows Used</span>
+            <div class="flex items-baseline gap-1.5 mt-1">
+              <span id="metricArrows" class="text-2xl font-bold font-mono text-rose-400">0</span>
+              <span class="text-xs text-slate-500 font-mono">shots</span>
+            </div>
+          </div>
+
+          <div class="glass-panel rounded-xl p-3 flex flex-col">
+            <span class="text-[10px] font-mono text-slate-400 uppercase">Arrow Position</span>
+            <div class="flex items-baseline gap-1.5 mt-1">
+              <span id="metricArrowPos" class="text-xl font-bold font-mono text-cyan-300">null</span>
+            </div>
+          </div>
+
+          <div class="glass-panel rounded-xl p-3 flex flex-col">
+            <span class="text-[10px] font-mono text-slate-400 uppercase">Current i</span>
+            <div class="flex items-baseline gap-1.5 mt-1">
+              <span id="metricI" class="text-2xl font-bold font-mono text-amber-300">-</span>
+              <span id="metricTotalBalloons" class="text-xs text-slate-500 font-mono">/ 0</span>
+            </div>
+          </div>
+
+          <div class="glass-panel rounded-xl p-3 flex flex-col">
+            <span class="text-[10px] font-mono text-slate-400 uppercase">Balloons Burst</span>
+            <div class="flex items-baseline gap-1.5 mt-1">
+              <span id="metricBurstCount" class="text-2xl font-bold font-mono text-emerald-400">0</span>
+              <span id="metricBurstPct" class="text-xs text-slate-500 font-mono">(0%)</span>
+            </div>
+          </div>
+
+        </div>
+
+      </section>
+
+      <!-- RIGHT: CODE & VARIABLE WATCHER (5 COLS) -->
+      <section class="lg:col-span-5 flex flex-col gap-4">
+
+        <!-- Code Inspection Panel -->
+        <div class="glass-panel rounded-2xl p-4 flex flex-col gap-3">
+          <div class="flex items-center justify-between border-b border-white/5 pb-2.5">
+            <div class="flex items-center gap-2">
+              <i class="fa-brands fa-java text-rose-400 text-sm"></i>
+              <span class="text-xs font-bold uppercase tracking-wider text-slate-200">Solution.java</span>
+            </div>
+            <span class="text-[11px] font-mono text-slate-400" id="codeCurrentStepNote">Greedy interval logic</span>
+          </div>
+
+          <!-- Code View Container with strictly localized scrolling -->
+          <div id="codeContainer" class="bg-slate-950/80 rounded-xl p-3 font-mono text-[11px] sm:text-xs leading-5 border border-white/5 overflow-y-auto max-h-[360px] select-text">
+            <div class="code-line px-2 py-0.5 rounded text-slate-500" data-line="1"><span class="text-rose-400">import</span> java.util.Arrays;</div>
+            <div class="code-line px-2 py-0.5 rounded text-slate-500" data-line="2"></div>
+            <div class="code-line px-2 py-0.5 rounded text-slate-400" data-line="3"><span class="text-cyan-400">class</span> <span class="text-yellow-300">Solution</span> {</div>
+            <div class="code-line px-2 py-0.5 rounded text-slate-300" data-line="4">&nbsp;&nbsp;<span class="text-cyan-400">public int</span> <span class="text-yellow-300">findMinArrowShots</span>(<span class="text-cyan-400">int</span>[][] balloons) {</div>
+            <div class="code-line px-2 py-0.5 rounded text-slate-300" data-line="5">&nbsp;&nbsp;&nbsp;&nbsp;<span class="text-rose-400">if</span> (balloons == <span class="text-cyan-400">null</span> || balloons.length == <span class="text-cyan-400">0</span>) {</div>
+            <div class="code-line px-2 py-0.5 rounded text-slate-300" data-line="6">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="text-rose-400">return</span> <span class="text-cyan-400">0</span>;</div>
+            <div class="code-line px-2 py-0.5 rounded text-slate-300" data-line="7">&nbsp;&nbsp;&nbsp;&nbsp;}</div>
+            <div class="code-line px-2 py-0.5 rounded text-slate-500" data-line="8"></div>
+            <div class="code-line px-2 py-0.5 rounded text-slate-400" data-line="9">&nbsp;&nbsp;&nbsp;&nbsp;<span class="text-slate-500">// Sort by ending coordinate</span></div>
+            <div class="code-line px-2 py-0.5 rounded text-slate-300" data-line="10">&nbsp;&nbsp;&nbsp;&nbsp;Arrays.sort(balloons, (a, b) -&gt;</div>
+            <div class="code-line px-2 py-0.5 rounded text-slate-300" data-line="11">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Integer.compare(a[<span class="text-cyan-400">1</span>], b[<span class="text-cyan-400">1</span>])</div>
+            <div class="code-line px-2 py-0.5 rounded text-slate-300" data-line="12">&nbsp;&nbsp;&nbsp;&nbsp;);</div>
+            <div class="code-line px-2 py-0.5 rounded text-slate-500" data-line="13"></div>
+            <div class="code-line px-2 py-0.5 rounded text-slate-300" data-line="14">&nbsp;&nbsp;&nbsp;&nbsp;<span class="text-cyan-400">int</span> arrows = <span class="text-cyan-400">1</span>;</div>
+            <div class="code-line px-2 py-0.5 rounded text-slate-300" data-line="15">&nbsp;&nbsp;&nbsp;&nbsp;<span class="text-cyan-400">int</span> arrowPosition = balloons[<span class="text-cyan-400">0</span>][<span class="text-cyan-400">1</span>];</div>
+            <div class="code-line px-2 py-0.5 rounded text-slate-500" data-line="16"></div>
+            <div class="code-line px-2 py-0.5 rounded text-slate-300" data-line="17">&nbsp;&nbsp;&nbsp;&nbsp;<span class="text-rose-400">for</span> (<span class="text-cyan-400">int</span> i = <span class="text-cyan-400">1</span>; i &lt; balloons.length; i++) {</div>
+            <div class="code-line px-2 py-0.5 rounded text-slate-500" data-line="18"></div>
+            <div class="code-line px-2 py-0.5 rounded text-slate-400" data-line="19">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="text-slate-500">// Current arrow cannot burst this balloon</span></div>
+            <div class="code-line px-2 py-0.5 rounded text-slate-300" data-line="20">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="text-rose-400">if</span> (balloons[i][<span class="text-cyan-400">0</span>] &gt; arrowPosition) {</div>
+            <div class="code-line px-2 py-0.5 rounded text-slate-300" data-line="21">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;arrows++;</div>
+            <div class="code-line px-2 py-0.5 rounded text-slate-300" data-line="22">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;arrowPosition = balloons[i][<span class="text-cyan-400">1</span>];</div>
+            <div class="code-line px-2 py-0.5 rounded text-slate-300" data-line="23">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}</div>
+            <div class="code-line px-2 py-0.5 rounded text-slate-300" data-line="24">&nbsp;&nbsp;&nbsp;&nbsp;}</div>
+            <div class="code-line px-2 py-0.5 rounded text-slate-500" data-line="25"></div>
+            <div class="code-line px-2 py-0.5 rounded text-slate-300" data-line="26">&nbsp;&nbsp;&nbsp;&nbsp;<span class="text-rose-400">return</span> arrows;</div>
+            <div class="code-line px-2 py-0.5 rounded text-slate-300" data-line="27">&nbsp;&nbsp;}</div>
+            <div class="code-line px-2 py-0.5 rounded text-slate-400" data-line="28">}</div>
+          </div>
+        </div>
+
+        <!-- Live Watch Variables & Arrow Manifest Deck -->
+        <div class="glass-panel rounded-2xl p-4 flex flex-col gap-3">
+          <div class="flex items-center justify-between border-b border-white/5 pb-2.5">
+            <span class="text-xs font-bold uppercase tracking-wider text-slate-200">Fired Arrow Beams Log</span>
+            <span class="text-[11px] font-mono text-slate-400" id="arrowCountBadge">0 Fired</span>
+          </div>
+
+          <div id="firedArrowsLog" class="flex flex-wrap gap-2 max-h-36 overflow-y-auto p-1 font-mono text-xs">
+            <!-- Badges for each arrow location -->
+            <div class="text-slate-500 text-xs italic">No arrows shot yet</div>
+          </div>
+        </div>
+
+      </section>
+
+    </div>
+  </div>
+
+  <!-- JAVASCRIPT LOGIC ENGINE -->
+  <script>
+    // Audio synthesis context
+    let audioCtx = null;
+    let isSoundOn = true;
+
+    function playTone(freq, type = 'sine', duration = 0.12, volume = 0.15) {
+      if (!isSoundOn) return;
+      try {
+        if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = type;
+        osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+        gain.gain.setValueAtTime(volume, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + duration);
+      } catch (e) {
+        // Audio error silent fallback
+      }
+    }
+
+    const soundEffects = {
+      step: () => playTone(440, 'triangle', 0.08, 0.08),
+      shot: () => {
+        playTone(660, 'sawtooth', 0.14, 0.15);
+        setTimeout(() => playTone(880, 'sine', 0.2, 0.15), 50);
+      },
+      burst: () => playTone(523.25, 'sine', 0.1, 0.12),
+      finish: () => {
+        playTone(523.25, 'sine', 0.15, 0.2);
+        setTimeout(() => playTone(659.25, 'sine', 0.18, 0.2), 120);
+        setTimeout(() => playTone(783.99, 'sine', 0.25, 0.25), 240);
+      }
+    };
+
+    // 12 Presets (Standard, Edge Cases, Traps, Counterexamples)
+    const presets = [
+      {
+        name: "1: LeetCode Ex 1 ([[10,16], [2,8], [1,6], [7,12]] -> 2)",
+        balloons: [[10, 16], [2, 8], [1, 6], [7, 12]]
+      },
+      {
+        name: "2: Completely Disjoint ([[1,2], [3,4], [5,6], [7,8]] -> 4)",
+        balloons: [[1, 2], [3, 4], [5, 6], [7, 8]]
+      },
+      {
+        name: "3: Touching Boundaries ([[1,2], [2,3], [3,4], [4,5]] -> 2)",
+        balloons: [[1, 2], [2, 3], [3, 4], [4, 5]]
+      },
+      {
+        name: "4: All In One Point ([[1,10], [2,9], [3,8], [4,7]] -> 1)",
+        balloons: [[1, 10], [2, 9], [3, 8], [4, 7]]
+      },
+      {
+        name: "5: Single Balloon ([[1,5]] -> 1)",
+        balloons: [[1, 5]]
+      },
+      {
+        name: "6: Identical Balloons ([[2,5], [2,5], [2,5]] -> 1)",
+        balloons: [[2, 5], [2, 5], [2, 5]]
+      },
+      {
+        name: "7: Zig-Zag Bridges ([[1,6], [2,8], [7,12], [10,16]] -> 2)",
+        balloons: [[1, 6], [2, 8], [7, 12], [10, 16]]
+      },
+      {
+        name: "8: Three Groups ([[1,3], [2,4], [5,7], [6,8], [9,11], [10,12]] -> 3)",
+        balloons: [[1, 3], [2, 4], [5, 7], [6, 8], [9, 11], [10, 12]]
+      },
+      {
+        name: "9: Why Start-Sort Fails ([[1,10], [2,3], [4,5], [6,7]] -> 3)",
+        balloons: [[1, 10], [2, 3], [4, 5], [6, 7]]
+      },
+      {
+        name: "10: Negative Range & Touch ([[-10,-5], [-7,-6], [-5,0], [1,4]] -> 3)",
+        balloons: [[-10, -5], [-7, -6], [-5, 0], [1, 4]]
+      },
+      {
+        name: "11: Int Overflow Trap ([[-2147483646,-2147483645], [2147483646,2147483647]])",
+        balloons: [[-2147483646, -2147483645], [2147483646, 2147483647]]
+      },
+      {
+        name: "12: Empty Array Edge Case ([] -> 0)",
+        balloons: []
+      }
+    ];
+
+    let currentPresetIdx = 0;
+    let initialBalloons = JSON.parse(JSON.stringify(presets[0].balloons));
+    let steps = [];
+    let currentStepIdx = 0;
+    let isPlaying = false;
+    let playIntervalId = null;
+    let stepSpeedMs = 1000;
+
+    // DOM Elements
+    const playPauseBtn = document.getElementById('playPauseBtn');
+    const playIcon = document.getElementById('playIcon');
+    const playText = document.getElementById('playText');
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
+    const resetBtn = document.getElementById('resetBtn');
+    const timelineSlider = document.getElementById('timelineSlider');
+    const stepCounter = document.getElementById('stepCounter');
+    const phaseBadge = document.getElementById('phaseBadge');
+    const phaseDot = document.getElementById('phaseDot');
+    const phaseText = document.getElementById('phaseText');
+    const presetSelect = document.getElementById('presetSelect');
+    const customInput = document.getElementById('customInput');
+    const applyCustomBtn = document.getElementById('applyCustomBtn');
+    const soundToggleBtn = document.getElementById('soundToggleBtn');
+    const soundIcon = document.getElementById('soundIcon');
+    const speedButtons = document.querySelectorAll('.speed-btn');
+
+    // Metrics DOM
+    const metricArrows = document.getElementById('metricArrows');
+    const metricArrowPos = document.getElementById('metricArrowPos');
+    const metricI = document.getElementById('metricI');
+    const metricTotalBalloons = document.getElementById('metricTotalBalloons');
+    const metricBurstCount = document.getElementById('metricBurstCount');
+    const metricBurstPct = document.getElementById('metricBurstPct');
+    const narrativeTitle = document.getElementById('narrativeTitle');
+    const narrativeBody = document.getElementById('narrativeBody');
+    const firedArrowsLog = document.getElementById('firedArrowsLog');
+    const arrowCountBadge = document.getElementById('arrowCountBadge');
+    const codeContainer = document.getElementById('codeContainer');
+    const axisScaleContainer = document.getElementById('axisScaleContainer');
+    const gridAndArrowLayer = document.getElementById('gridAndArrowLayer');
+    const balloonTracksContainer = document.getElementById('balloonTracksContainer');
+
+    function IntegerCompare(x, y) {
+      return (x < y) ? -1 : ((x === y) ? 0 : 1);
+    }
+
+    // Step Generation Algorithm
+    function generateExecutionSteps(rawInput) {
+      const generated = [];
+      const balloons = JSON.parse(JSON.stringify(rawInput));
+      const n = balloons.length;
+
+      function snapshot(config) {
+        generated.push({
+          line: config.line,
+          phase: config.phase,
+          passName: config.passName,
+          balloons: config.balloons ? JSON.parse(JSON.stringify(config.balloons)) : [],
+          arrows: config.arrows,
+          arrowPosition: config.arrowPosition,
+          i: config.i !== undefined ? config.i : null,
+          burstStatus: config.burstStatus ? [...config.burstStatus] : [],
+          arrowHistory: config.arrowHistory ? [...config.arrowHistory] : [],
+          narrativeTitle: config.narrativeTitle || config.evalStmt || '',
+          narrativeBody: config.narrativeBody || config.detail || '',
+          statusType: config.statusType || 'neutral',
+          returnVal: config.returnVal !== undefined ? config.returnVal : null
+        });
+      }
+
+      // Step 1: Initial state
+      snapshot({
+        line: 4,
+        phase: 'Function Entry: findMinArrowShots(balloons)',
+        passName: 'Init',
+        balloons: balloons,
+        arrows: 0,
+        arrowPosition: null,
+        burstStatus: new Array(n).fill(false),
+        arrowHistory: [],
+        narrativeTitle: `findMinArrowShots() called with ${n} balloons`,
+        narrativeBody: n === 0 ? "Empty input array provided." : `Loaded intervals: ${JSON.stringify(balloons)}. Checking length...`,
+        statusType: 'neutral'
+      });
+
+      // Step 2: Empty input check
+      if (balloons == null || n === 0) {
+        snapshot({
+          line: 5,
+          phase: 'if (balloons == null || balloons.length == 0)',
+          passName: 'Edge Case',
+          balloons: [],
+          arrows: 0,
+          arrowPosition: null,
+          burstStatus: [],
+          arrowHistory: [],
+          narrativeTitle: 'Empty or Null Array Evaluated to True',
+          narrativeBody: 'balloons.length == 0, immediate return 0.',
+          statusType: 'rose',
+          returnVal: 0
+        });
+        snapshot({
+          line: 6,
+          phase: 'return 0;',
+          passName: 'Return',
+          balloons: [],
+          arrows: 0,
+          arrowPosition: null,
+          burstStatus: [],
+          arrowHistory: [],
+          narrativeTitle: 'Return 0 Arrows',
+          narrativeBody: '0 balloons require 0 arrows.',
+          statusType: 'emerald',
+          returnVal: 0
+        });
+        return generated;
+      }
+
+      // Step 3: Sort by ending coordinate
+      const sorted = JSON.parse(JSON.stringify(balloons));
+      sorted.sort((a, b) => IntegerCompare(a[1], b[1]));
+
+      let sortNote = `Sorted by x_end ascending: ${sorted.map(b => `[${b[0]}, ${b[1]}]`).join(', ')}.`;
+      if (balloons.some(b => b[0] < -1000000 || b[1] > 1000000)) {
+        sortNote += " Note: Integer.compare() safely prevents 32-bit integer subtraction overflow.";
+      }
+
+      snapshot({
+        line: 10,
+        phase: 'Arrays.sort(balloons, (a, b) -> Integer.compare(a[1], b[1]))',
+        passName: 'Sorting',
+        balloons: sorted,
+        arrows: 0,
+        arrowPosition: null,
+        burstStatus: new Array(n).fill(false),
+        arrowHistory: [],
+        narrativeTitle: 'Balloons Sorted by End Coordinate',
+        narrativeBody: sortNote,
+        statusType: 'cyan'
+      });
+
+      // Step 4: First Arrow Shot
+      let arrows = 1;
+      let arrowPos = sorted[0][1];
+      let burstStatus = new Array(n).fill(false);
+      let arrowHistory = [arrowPos];
+
+      // Mark first balloon burst
+      burstStatus[0] = true;
+
+      snapshot({
+        line: 14,
+        phase: 'int arrows = 1; int arrowPosition = balloons[0][1];',
+        passName: 'First Shot',
+        balloons: sorted,
+        arrows: 1,
+        arrowPosition: arrowPos,
+        i: 0,
+        burstStatus: burstStatus,
+        arrowHistory: arrowHistory,
+        narrativeTitle: `Arrow #1 Dispatched at x = ${arrowPos}`,
+        narrativeBody: `Greedy choice: Place arrow at earliest ending point (balloons[0][1] = ${arrowPos}). This bursts balloon #0 [${sorted[0][0]}, ${sorted[0][1]}].`,
+        statusType: 'emerald'
+      });
+
+      // Step 5: Iteration through remaining balloons
+      for (let i = 1; i < n; i++) {
+        const balloon = sorted[i];
+        const startX = balloon[0];
+        const endX = balloon[1];
+
+        // Check if current arrow can burst this balloon
+        const cannotBurst = startX > arrowPos;
+
+        snapshot({
+          line: 20,
+          phase: `Check if (balloons[${i}][0] > arrowPosition)`,
+          passName: 'Inspect',
+          balloons: sorted,
+          arrows: arrows,
+          arrowPosition: arrowPos,
+          i: i,
+          burstStatus: burstStatus,
+          arrowHistory: arrowHistory,
+          narrativeTitle: `Evaluating Balloon #${i}: [${startX}, ${endX}]`,
+          narrativeBody: `Comparing balloon start (${startX}) with active arrow position (${arrowPos}). Is ${startX} > ${arrowPos}? -> ${cannotBurst ? 'YES (Cannot burst, new arrow needed)' : 'NO (Overlaps! Bursted for free)'}`,
+          statusType: cannotBurst ? 'rose' : 'cyan'
+        });
+
+        if (cannotBurst) {
+          arrows++;
+          arrowPos = endX;
+          arrowHistory.push(arrowPos);
+          burstStatus[i] = true;
+
+          snapshot({
+            line: 21,
+            phase: 'arrows++; arrowPosition = balloons[i][1];',
+            passName: 'New Shot',
+            balloons: sorted,
+            arrows: arrows,
+            arrowPosition: arrowPos,
+            i: i,
+            burstStatus: burstStatus,
+            arrowHistory: arrowHistory,
+            narrativeTitle: `Arrow #${arrows} Fired at x = ${arrowPos}`,
+            narrativeBody: `Previous arrow at x = ${arrowHistory[arrowHistory.length - 2]} was behind start coordinate ${startX}. Dispatched arrow #${arrows} to balloon #${i}'s end coordinate (${endX}).`,
+            statusType: 'rose'
+          });
+        } else {
+          burstStatus[i] = true;
+          snapshot({
+            line: 20,
+            phase: 'Burst by existing arrow',
+            passName: 'Burst',
+            balloons: sorted,
+            arrows: arrows,
+            arrowPosition: arrowPos,
+            i: i,
+            burstStatus: burstStatus,
+            arrowHistory: arrowHistory,
+            narrativeTitle: `Balloon #${i} [${startX}, ${endX}] Pierced!`,
+            narrativeBody: `Active arrow at x = ${arrowPos} lies between [${startX}, ${endX}]. Balloon #${i} popped without extra arrows!`,
+            statusType: 'emerald'
+          });
+        }
+      }
+
+      // Step 6: Return final arrows count
+      snapshot({
+        line: 26,
+        phase: 'return arrows;',
+        passName: 'Complete',
+        balloons: sorted,
+        arrows: arrows,
+        arrowPosition: arrowPos,
+        i: n,
+        burstStatus: burstStatus,
+        arrowHistory: arrowHistory,
+        narrativeTitle: `Algorithm Complete: ${arrows} Arrow(s) Required`,
+        narrativeBody: `All ${n} balloons popped efficiently using ${arrows} arrow(s). Verified greedy optimal.`,
+        statusType: 'emerald',
+        returnVal: arrows
+      });
+
+      return generated;
+    }
+
+    // Canvas / Range Renderer
+    function renderRangeCanvas(step) {
+      if (!step.balloons || step.balloons.length === 0) {
+        axisScaleContainer.innerHTML = '<div class="text-center text-slate-500 py-1">No balloons</div>';
+        gridAndArrowLayer.innerHTML = '';
+        balloonTracksContainer.innerHTML = '<div class="text-center text-slate-500 py-10 font-mono text-xs">No balloons loaded in array</div>';
+        return;
+      }
+
+      let minCoord = Infinity;
+      let maxCoord = -Infinity;
+
+      step.balloons.forEach(b => {
+        if (b[0] < minCoord) minCoord = b[0];
+        if (b[1] > maxCoord) maxCoord = b[1];
+      });
+
+      if (step.arrowPosition !== null) {
+        if (step.arrowPosition < minCoord) minCoord = step.arrowPosition;
+        if (step.arrowPosition > maxCoord) maxCoord = step.arrowPosition;
+      }
+
+      const isExtremeRange = (maxCoord - minCoord) > 1000000;
+      const displayMin = minCoord;
+      const displayMax = maxCoord;
+      const totalSpan = Math.max(1, displayMax - displayMin);
+
+      const padding = isExtremeRange ? 1 : Math.max(1, Math.ceil(totalSpan * 0.08));
+      const rangeStart = displayMin - padding;
+      const rangeEnd = displayMax + padding;
+      const effectiveSpan = Math.max(1, rangeEnd - rangeStart);
+
+      // 1. Render Axis Scale Ticks
+      axisScaleContainer.innerHTML = '';
+      const tickCount = isExtremeRange ? 5 : Math.min(10, effectiveSpan + 1);
+      const stepVal = Math.max(1, Math.round(effectiveSpan / Math.max(1, tickCount - 1)));
+
+      for (let i = 0; i < tickCount; i++) {
+        let v = rangeStart + i * stepVal;
+        if (v > rangeEnd) v = rangeEnd;
+        const leftPct = Math.min(100, Math.max(0, ((v - rangeStart) / effectiveSpan) * 100));
+
+        const tickEl = document.createElement('div');
+        tickEl.className = 'absolute -translate-x-1/2 flex flex-col items-center top-0';
+        tickEl.style.left = `${leftPct}%`;
+
+        let labelVal = v;
+        if (Math.abs(v) >= 1000000000) {
+          labelVal = (v > 0 ? '+2.14B' : '-2.14B');
+        }
+
+        tickEl.innerHTML = `
+          <span class="whitespace-nowrap">${labelVal}</span>
+          <div class="w-[1px] h-1.5 bg-white/20"></div>
+        `;
+        axisScaleContainer.appendChild(tickEl);
+      }
+
+      // 2. Render Vertical Gridlines & Laser Arrows
+      gridAndArrowLayer.innerHTML = '';
+
+      for (let i = 0; i < tickCount; i++) {
+        let v = rangeStart + i * stepVal;
+        if (v > rangeEnd) v = rangeEnd;
+        const leftPct = Math.min(100, Math.max(0, ((v - rangeStart) / effectiveSpan) * 100));
+
+        const gridLine = document.createElement('div');
+        gridLine.className = 'absolute top-0 bottom-0 w-[1px] bg-white/[0.04]';
+        gridLine.style.left = `${leftPct}%`;
+        gridAndArrowLayer.appendChild(gridLine);
+      }
+
+      // Render fired laser arrow lines
+      step.arrowHistory.forEach((arrowX, aIdx) => {
+        const arrowLeftPct = Math.min(99.5, Math.max(0.5, ((arrowX - rangeStart) / effectiveSpan) * 100));
+        const isCurrentActiveArrow = (step.arrowPosition === arrowX);
+
+        const arrowBeam = document.createElement('div');
+        arrowBeam.className = `absolute top-0 bottom-0 w-[2px] transition-all duration-300 z-20 pointer-events-auto ${
+          isCurrentActiveArrow 
+            ? 'bg-rose-500 shadow-[0_0_14px_rgba(244,63,94,1)] pulse-arrow' 
+            : 'bg-rose-400/60 shadow-[0_0_8px_rgba(244,63,94,0.45)]'
+        }`;
+        arrowBeam.style.left = `${arrowLeftPct}%`;
+
+        // Dedicated badge container placed comfortably at top without clipping
+        const arrowTag = document.createElement('div');
+        // Alternating slight vertical offset if multiple arrows are close
+        const topOffset = (aIdx % 2 === 0) ? 'top-1.5' : 'top-6 sm:top-1.5';
+        
+        arrowTag.className = `absolute ${topOffset} -translate-x-1/2 px-2 py-0.5 rounded-md text-[10px] font-mono font-bold whitespace-nowrap shadow-xl border cursor-default select-none z-30 transition-all ${
+          isCurrentActiveArrow 
+            ? 'bg-gradient-to-r from-rose-500 to-rose-600 text-white border-rose-300 shadow-rose-500/50 scale-105 ring-2 ring-rose-400/50' 
+            : 'bg-slate-900/95 text-rose-300 border-rose-500/50 shadow-black/80'
+        }`;
+
+        let displayX = arrowX;
+        if (Math.abs(arrowX) > 1000000000) {
+          displayX = arrowX > 0 ? '+2.14B' : '-2.14B';
+        }
+        arrowTag.innerHTML = `
+          <span class="inline-flex items-center gap-1">
+            <i class="fa-solid fa-arrow-up text-[9px] ${isCurrentActiveArrow ? 'text-white' : 'text-rose-400'}"></i>
+            <span>x = ${displayX}</span>
+          </span>
+        `;
+        arrowBeam.appendChild(arrowTag);
+
+        gridAndArrowLayer.appendChild(arrowBeam);
+      });
+
+      // 3. Render Balloon Horizontal Bars (No number truncation)
+      balloonTracksContainer.innerHTML = '';
+      step.balloons.forEach((b, idx) => {
+        const startX = b[0];
+        const endX = b[1];
+        const isCurrent = (step.i === idx);
+        const isBurst = step.burstStatus && step.burstStatus[idx];
+
+        let leftPct = ((startX - rangeStart) / effectiveSpan) * 100;
+        let rightPct = ((endX - rangeStart) / effectiveSpan) * 100;
+
+        leftPct = Math.max(0, Math.min(98, leftPct));
+        rightPct = Math.max(leftPct + 1, Math.min(100, rightPct));
+        let widthPct = rightPct - leftPct;
+
+        const rowEl = document.createElement('div');
+        rowEl.className = 'relative w-full h-8 flex items-center';
+
+        const barEl = document.createElement('div');
+        barEl.className = `absolute h-7 rounded-xl flex items-center justify-between px-2 text-xs font-mono font-semibold transition-all duration-300 border shadow-lg whitespace-nowrap shrink-0 ${
+          isBurst
+            ? 'bg-emerald-950/90 border-emerald-500/80 text-emerald-200 shadow-emerald-500/20'
+            : isCurrent
+            ? 'bg-cyan-950/90 border-cyan-400 text-cyan-200 ring-2 ring-cyan-400/60 shadow-cyan-500/40'
+            : 'bg-slate-900/90 border-slate-700/90 text-slate-300'
+        }`;
+
+        barEl.style.left = `${leftPct}%`;
+        // Ensure capsules never crush coordinates below readable size
+        barEl.style.width = `max(${widthPct}%, 82px)`;
+
+        let statusIcon = '<i class="fa-solid fa-circle text-[8px] text-slate-500 mr-1 shrink-0"></i>';
+        if (isBurst) {
+          statusIcon = '<i class="fa-solid fa-burst text-emerald-400 text-[11px] mr-1 shrink-0"></i>';
+        } else if (isCurrent) {
+          statusIcon = '<i class="fa-solid fa-crosshairs text-cyan-400 text-[11px] mr-1 shrink-0 animate-spin"></i>';
+        }
+
+        let fmtStart = startX;
+        let fmtEnd = endX;
+        if (Math.abs(startX) > 1000000000) fmtStart = startX > 0 ? '+2.14B' : '-2.14B';
+        if (Math.abs(endX) > 1000000000) fmtEnd = endX > 0 ? '+2.14B' : '-2.14B';
+
+        barEl.innerHTML = `
+          <div class="flex items-center shrink-0">
+            ${statusIcon}
+            <span class="text-[11px] font-bold tracking-tight">[${fmtStart}, ${fmtEnd}]</span>
+          </div>
+          <span class="text-[10px] opacity-75 font-mono ml-2 shrink-0">#${idx}</span>
+        `;
+
+        rowEl.appendChild(barEl);
+        balloonTracksContainer.appendChild(rowEl);
+      });
+    }
+
+    // Render Arrow History Badges
+    function renderArrowBadges(step) {
+      if (!step.arrowHistory || step.arrowHistory.length === 0) {
+        firedArrowsLog.innerHTML = '<div class="text-slate-500 text-xs italic">No arrows shot yet</div>';
+        arrowCountBadge.textContent = '0 Fired';
+        return;
+      }
+
+      arrowCountBadge.textContent = `${step.arrowHistory.length} Fired`;
+      firedArrowsLog.innerHTML = '';
+
+      step.arrowHistory.forEach((pos, idx) => {
+        const isCurrent = (step.arrowPosition === pos);
+        let displayX = pos;
+        if (Math.abs(pos) > 1000000000) displayX = pos > 0 ? '+2.14B' : '-2.14B';
+
+        const badge = document.createElement('div');
+        badge.className = `px-2 py-1 rounded-lg border text-xs flex items-center gap-1.5 transition-all ${
+          isCurrent 
+            ? 'bg-rose-500/30 text-rose-200 border-rose-500/70 shadow-sm shadow-rose-500/30' 
+            : 'bg-slate-900/80 text-slate-400 border-white/5'
+        }`;
+        badge.innerHTML = `
+          <i class="fa-solid fa-arrow-up text-rose-400 text-[10px]"></i>
+          <span>Shot #${idx + 1}:</span>
+          <span class="font-bold text-white">x = ${displayX}</span>
+        `;
+        firedArrowsLog.appendChild(badge);
+      });
+    }
+
+    // Zero-Jump Synchronized Java Code Line Highlighting
+    function highlightCodeLine(lineNum) {
+      document.querySelectorAll('#codeContainer .code-line').forEach(el => {
+        el.classList.remove('bg-rose-500/25', 'border-l-4', 'border-rose-400', 'text-white', 'font-bold');
+      });
+
+      if (!lineNum) return;
+      const targetEl = document.querySelector(`#codeContainer .code-line[data-line="${lineNum}"]`);
+      if (targetEl) {
+        targetEl.classList.add('bg-rose-500/25', 'border-l-4', 'border-rose-400', 'text-white', 'font-bold');
+
+        // Strictly localized scroll inside code container
+        const lineOffsetTop = targetEl.offsetTop;
+        const containerScrollTop = codeContainer.scrollTop;
+        const containerHeight = codeContainer.clientHeight;
+        const lineTotalHeight = targetEl.offsetHeight;
+
+        if (lineOffsetTop < containerScrollTop) {
+          codeContainer.scrollTop = lineOffsetTop - 12;
+        } else if (lineOffsetTop + lineTotalHeight > containerScrollTop + containerHeight) {
+          codeContainer.scrollTop = (lineOffsetTop + lineTotalHeight) - containerHeight + 12;
+        }
+      }
+    }
+
+    // Step Rendering Controller
+    function renderStep(idx) {
+      if (steps.length === 0) return;
+      idx = Math.max(0, Math.min(steps.length - 1, idx));
+      currentStepIdx = idx;
+
+      const s = steps[idx];
+
+      // Update Header Badges & Sliders
+      stepCounter.textContent = `${idx + 1} / ${steps.length}`;
+      timelineSlider.value = idx;
+      prevBtn.disabled = (idx === 0);
+      nextBtn.disabled = (idx === steps.length - 1);
+
+      // Phase Pill
+      phaseText.textContent = s.passName || 'Execute';
+      phaseDot.className = 'w-1.5 h-1.5 rounded-full';
+      if (s.statusType === 'emerald') {
+        phaseDot.classList.add('bg-emerald-400');
+        phaseBadge.className = 'px-2.5 py-1.5 rounded-xl text-[11px] font-bold uppercase tracking-wider bg-emerald-950/70 text-emerald-300 border border-emerald-500/30 flex items-center gap-1.5';
+      } else if (s.statusType === 'rose') {
+        phaseDot.classList.add('bg-rose-400');
+        phaseBadge.className = 'px-2.5 py-1.5 rounded-xl text-[11px] font-bold uppercase tracking-wider bg-rose-950/70 text-rose-300 border border-rose-500/30 flex items-center gap-1.5';
+      } else if (s.statusType === 'cyan') {
+        phaseDot.classList.add('bg-cyan-400');
+        phaseBadge.className = 'px-2.5 py-1.5 rounded-xl text-[11px] font-bold uppercase tracking-wider bg-cyan-950/70 text-cyan-300 border border-cyan-500/30 flex items-center gap-1.5';
+      } else {
+        phaseDot.classList.add('bg-slate-400');
+        phaseBadge.className = 'px-2.5 py-1.5 rounded-xl text-[11px] font-bold uppercase tracking-wider bg-slate-800/80 text-slate-300 border border-white/10 flex items-center gap-1.5';
+      }
+
+      // Update Live Metrics Deck
+      metricArrows.textContent = s.arrows;
+      if (s.arrowPosition !== null) {
+        let displayX = s.arrowPosition;
+        if (Math.abs(s.arrowPosition) > 1000000000) displayX = s.arrowPosition > 0 ? '+2.14B' : '-2.14B';
+        metricArrowPos.textContent = `x = ${displayX}`;
+      } else {
+        metricArrowPos.textContent = 'null';
+      }
+
+      const totalB = s.balloons ? s.balloons.length : 0;
+      metricI.textContent = (s.i !== null && s.i < totalB) ? `#${s.i}` : (s.i >= totalB ? 'done' : '-');
+      metricTotalBalloons.textContent = `/ ${totalB}`;
+
+      const burstCount = s.burstStatus ? s.burstStatus.filter(Boolean).length : 0;
+      metricBurstCount.textContent = burstCount;
+      const pct = totalB > 0 ? Math.round((burstCount / totalB) * 100) : 0;
+      metricBurstPct.textContent = `(${pct}%)`;
+
+      // Narrative Card
+      narrativeTitle.textContent = s.narrativeTitle;
+      narrativeBody.textContent = s.narrativeBody;
+
+      // Render Visual Arena and Badges
+      renderRangeCanvas(s);
+      renderArrowBadges(s);
+
+      // Highlight Java Code Line
+      highlightCodeLine(s.line);
+
+      // Play matching tone
+      if (s.passName === 'New Shot' || s.passName === 'First Shot') {
+        soundEffects.shot();
+      } else if (s.passName === 'Burst') {
+        soundEffects.burst();
+      } else if (s.passName === 'Complete') {
+        soundEffects.finish();
+      } else {
+        soundEffects.step();
+      }
+    }
+
+    // Playback control
+    function setPlaying(play) {
+      isPlaying = play;
+      if (isPlaying) {
+        playIcon.className = 'fa-solid fa-pause';
+        playText.textContent = 'Pause';
+        playPauseBtn.classList.replace('from-rose-500', 'from-amber-500');
+        playPauseBtn.classList.replace('to-rose-600', 'to-amber-600');
+
+        playIntervalId = setInterval(() => {
+          if (currentStepIdx < steps.length - 1) {
+            renderStep(currentStepIdx + 1);
+          } else {
+            setPlaying(false);
+          }
+        }, stepSpeedMs);
+      } else {
+        playIcon.className = 'fa-solid fa-play';
+        playText.textContent = 'Play';
+        playPauseBtn.classList.replace('from-amber-500', 'from-rose-500');
+        playPauseBtn.classList.replace('to-amber-600', 'to-rose-600');
+        if (playIntervalId) clearInterval(playIntervalId);
+        playIntervalId = null;
+      }
+    }
+
+    // Initialize Simulator
+    function initSimulation(balloonsArray) {
+      setPlaying(false);
+      initialBalloons = JSON.parse(JSON.stringify(balloonsArray));
+      steps = generateExecutionSteps(initialBalloons);
+      timelineSlider.max = steps.length - 1;
+      timelineSlider.value = 0;
+      renderStep(0);
+    }
+
+    // Parse custom 2D array input
+    function parseCustomInput(str) {
+      try {
+        const parsed = JSON.parse(str);
+        if (Array.isArray(parsed) && parsed.every(item => Array.isArray(item) && item.length === 2 && !isNaN(item[0]) && !isNaN(item[1]))) {
+          return parsed;
+        }
+      } catch (e) {
+        // Fallback simple regex parsing
+        const matches = [...str.matchAll(/\[\s*(-?\d+)\s*,\s*(-?\d+)\s*\]/g)];
+        if (matches.length > 0) {
+          return matches.map(m => [parseInt(m[1]), parseInt(m[2])]);
+        }
+      }
+      return null;
+    }
+
+    // Event Listeners
+    playPauseBtn.addEventListener('click', () => setPlaying(!isPlaying));
+
+    prevBtn.addEventListener('click', () => {
+      setPlaying(false);
+      renderStep(currentStepIdx - 1);
+    });
+
+    nextBtn.addEventListener('click', () => {
+      setPlaying(false);
+      renderStep(currentStepIdx + 1);
+    });
+
+    resetBtn.addEventListener('click', () => {
+      setPlaying(false);
+      renderStep(0);
+    });
+
+    timelineSlider.addEventListener('input', (e) => {
+      setPlaying(false);
+      renderStep(parseInt(e.target.value));
+    });
+
+    speedButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        speedButtons.forEach(b => {
+          b.className = 'speed-btn px-2 py-0.5 rounded-lg text-xs font-mono text-slate-300 hover:text-white transition-all';
+        });
+        btn.className = 'speed-btn px-2 py-0.5 rounded-lg text-xs font-mono bg-rose-500/30 text-rose-200 font-bold border border-rose-500/40 transition-all';
+        stepSpeedMs = parseInt(btn.dataset.speed);
+        if (isPlaying) {
+          setPlaying(false);
+          setPlaying(true);
+        }
+      });
+    });
+
+    presetSelect.addEventListener('change', (e) => {
+      currentPresetIdx = parseInt(e.target.value);
+      const chosen = presets[currentPresetIdx].balloons;
+      customInput.value = JSON.stringify(chosen);
+      initSimulation(chosen);
+    });
+
+    applyCustomBtn.addEventListener('click', () => {
+      const val = customInput.value.trim();
+      if (!val) return;
+      const parsed = parseCustomInput(val);
+      if (parsed) {
+        initSimulation(parsed);
+      } else {
+        alert('Invalid format. Use [[10,16],[2,8],[1,6],[7,12]]');
+      }
+    });
+
+    soundToggleBtn.addEventListener('click', () => {
+      isSoundOn = !isSoundOn;
+      soundIcon.className = isSoundOn ? 'fa-solid fa-volume-high text-rose-400' : 'fa-solid fa-volume-xmark text-slate-500';
+    });
+
+    window.addEventListener('keydown', (e) => {
+      if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT') return;
+      if (e.code === 'Space') {
+        e.preventDefault();
+        setPlaying(!isPlaying);
+      } else if (e.code === 'ArrowRight') {
+        e.preventDefault();
+        setPlaying(false);
+        renderStep(currentStepIdx + 1);
+      } else if (e.code === 'ArrowLeft') {
+        e.preventDefault();
+        setPlaying(false);
+        renderStep(currentStepIdx - 1);
+      }
+    });
+
+    window.addEventListener('resize', () => {
+      if (steps.length > 0) renderRangeCanvas(steps[currentStepIdx]);
+    });
+
+    // Initial load
+    initSimulation(presets[0].balloons);
+  </script>
+</body>
+</html>

@@ -1,0 +1,1167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Min Moves Equalizer &bull; Glassmorphic Visualizer</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      background: radial-gradient(circle at 15% 15%, #0b1528 0%, #060b14 55%, #020408 100%);
+      min-height: 100vh;
+      color: #f1f5f9;
+      overflow-x: hidden;
+    }
+    .code-font {
+      font-family: 'JetBrains Mono', monospace;
+    }
+    .glass-card {
+      background: rgba(15, 23, 42, 0.65);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.09);
+      box-shadow: 0 20px 45px -10px rgba(0, 0, 0, 0.75), inset 0 1px 1px 0 rgba(255, 255, 255, 0.12);
+    }
+    .glass-input {
+      background: rgba(8, 14, 30, 0.75);
+      backdrop-filter: blur(14px);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+    }
+    .glass-btn {
+      background: rgba(255, 255, 255, 0.06);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .glass-btn:hover {
+      background: rgba(255, 255, 255, 0.16);
+      border-color: rgba(255, 255, 255, 0.3);
+      transform: translateY(-1px);
+    }
+    .glass-btn:active {
+      transform: translateY(1px) scale(0.97);
+    }
+    .code-line {
+      transition: background-color 0.15s ease, border-color 0.15s ease;
+    }
+    .code-active {
+      background-color: rgba(56, 189, 248, 0.22) !important;
+      border-left: 4px solid #38bdf8 !important;
+      color: #ffffff;
+      font-weight: 600;
+    }
+    @keyframes pulseTargetLine {
+      0%, 100% { opacity: 0.6; transform: scaleY(1); }
+      50% { opacity: 1; transform: scaleY(1.2); }
+    }
+    .target-ceiling-line {
+      animation: pulseTargetLine 2s infinite ease-in-out;
+    }
+    @keyframes barGlow {
+      0%, 100% { filter: drop-shadow(0 0 6px rgba(56, 189, 248, 0.4)); }
+      50% { filter: drop-shadow(0 0 16px rgba(56, 189, 248, 0.85)); }
+    }
+    .active-bar-glow {
+      animation: barGlow 1.4s infinite ease-in-out;
+    }
+    ::-webkit-scrollbar {
+      width: 5px;
+      height: 5px;
+    }
+    ::-webkit-scrollbar-track {
+      background: rgba(8, 14, 30, 0.5);
+    }
+    ::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 4px;
+    }
+  </style>
+</head>
+<body class="p-3 sm:p-5 text-slate-100 flex flex-col justify-between relative min-h-screen">
+
+  <!-- Ambient Glow Orbs -->
+  <div class="fixed top-[-10%] left-[-5%] w-[45vw] h-[45vw] rounded-full bg-cyan-600/15 blur-[130px] pointer-events-none -z-10"></div>
+  <div class="fixed bottom-[-15%] right-[-5%] w-[50vw] h-[50vw] rounded-full bg-emerald-600/15 blur-[140px] pointer-events-none -z-10"></div>
+  <div class="fixed top-[35%] right-[20%] w-[35vw] h-[35vw] rounded-full bg-indigo-600/10 blur-[130px] pointer-events-none -z-10"></div>
+
+  <!-- TOP GLASSY CONTROL DECK (Buttons on Top) -->
+  <header class="max-w-7xl mx-auto w-full mb-3">
+    <div class="glass-card p-3.5 sm:p-4 rounded-2xl flex flex-col gap-3 shadow-2xl">
+      
+      <!-- Title & Preset Controls -->
+      <div class="flex flex-col lg:flex-row items-center justify-between gap-3">
+        <div class="flex items-center gap-3">
+          <div class="w-11 h-11 rounded-xl bg-gradient-to-tr from-cyan-500 via-indigo-500 to-emerald-500 flex items-center justify-center shadow-lg shadow-cyan-500/25 text-white text-xl font-bold">
+            <i class="fa-solid fa-chart-column"></i>
+          </div>
+          <div>
+            <h1 class="text-base sm:text-xl font-extrabold tracking-tight bg-gradient-to-r from-cyan-300 via-indigo-200 to-emerald-300 bg-clip-text text-transparent">
+              Min Moves to Equal Elements &bull; Visualizer
+            </h1>
+            <p class="text-xs text-slate-400 font-mono">
+              Two-pass: Find <code class="text-cyan-400">max</code> &rarr; Accumulate <code class="text-emerald-400">moves += max - num</code>
+            </p>
+          </div>
+        </div>
+
+        <!-- Custom Array Input & Presets -->
+        <div class="flex flex-wrap items-center justify-center gap-2">
+          <div class="flex items-center gap-1.5 glass-input px-2.5 py-1 rounded-xl text-xs">
+            <span class="text-cyan-400 font-semibold font-mono">Preset:</span>
+            <select id="presetSelect" class="bg-transparent text-cyan-200 font-mono text-xs border-none focus:outline-none cursor-pointer pr-2">
+              <option value="0" class="bg-slate-900 text-slate-100">[1, 2, 3] &rarr; 3 moves</option>
+              <option value="1" class="bg-slate-900 text-slate-100">[1, 5, 2, 4] &rarr; 8 moves</option>
+              <option value="2" class="bg-slate-900 text-slate-100">[4, 4, 4, 4] &rarr; 0 moves</option>
+              <option value="3" class="bg-slate-900 text-slate-100">[10, 1, 10, 2] &rarr; 17 moves</option>
+              <option value="4" class="bg-slate-900 text-slate-100">[7, 3, 9, 2, 6] &rarr; 18 moves</option>
+              <option value="5" class="bg-slate-900 text-slate-100">Empty [] &rarr; 0 moves</option>
+            </select>
+          </div>
+
+          <div class="flex items-center gap-1.5 glass-input px-2.5 py-1 rounded-xl text-xs">
+            <input id="customArrayInput" type="text" placeholder="e.g. 1, 5, 2, 4" class="bg-transparent font-mono text-xs text-white focus:outline-none w-28 sm:w-36 placeholder-slate-500">
+            <button id="btnApplyCustom" class="px-2 py-0.5 rounded-lg bg-cyan-600 hover:bg-cyan-500 text-white font-semibold text-[11px] transition">Apply</button>
+          </div>
+
+          <button id="btnSampleNext" class="glass-btn px-3 py-1.5 text-slate-200 rounded-xl text-xs transition" title="Cycle preset arrays">
+            <i class="fa-solid fa-shuffle text-amber-400 mr-1"></i> Sample
+          </button>
+
+          <button id="btnSoundToggle" class="glass-btn px-2.5 py-1.5 text-slate-300 rounded-xl text-xs transition" title="Toggle Sound">
+            <i id="soundIcon" class="fa-solid fa-volume-high text-cyan-400"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Playback Controls Bar (Top Placement) -->
+      <div class="flex flex-wrap items-center justify-between gap-3 pt-2 border-t border-white/10">
+        <!-- Play / Pause / Prev / Next / Reset -->
+        <div class="flex items-center gap-2">
+          <a href="/" class="glass-button px-3 py-1.5 rounded-xl text-xs font-semibold text-slate-300 hover:text-white flex items-center gap-1.5 border border-white/10 hover:border-indigo-500/40 bg-white/5 shrink-0 transition-all active:scale-95 cursor-pointer" title="Return to DSA Atlas Library"><i class="fa-solid fa-arrow-left text-indigo-400"></i><span>DSA Atlas</span></a>
+          <button id="btnReset" class="glass-btn w-10 h-10 rounded-xl text-slate-300 flex items-center justify-center hover:text-white" title="Reset to beginning">
+            <i class="fa-solid fa-backward-step"></i>
+          </button>
+          
+          <button id="btnPrev" class="glass-btn px-3.5 h-10 rounded-xl text-slate-200 flex items-center gap-2 text-xs sm:text-sm font-semibold hover:text-white" title="Previous step">
+            <i class="fa-solid fa-chevron-left text-xs"></i> Prev
+          </button>
+
+          <button id="btnPlayPause" class="px-5 h-10 rounded-xl bg-gradient-to-r from-cyan-500 via-indigo-600 to-emerald-600 hover:from-cyan-400 hover:to-emerald-500 active:scale-95 text-white flex items-center gap-2 text-xs sm:text-sm font-bold shadow-lg shadow-indigo-500/30 transition">
+            <i id="playIcon" class="fa-solid fa-play text-xs"></i>
+            <span id="playText">Start</span>
+          </button>
+
+          <button id="btnNext" class="glass-btn px-3.5 h-10 rounded-xl text-slate-200 flex items-center gap-2 text-xs sm:text-sm font-semibold hover:text-white" title="Next step">
+            Next <i class="fa-solid fa-chevron-right text-xs"></i>
+          </button>
+        </div>
+
+        <!-- Phase Badge & Step Counter -->
+        <div class="flex items-center gap-2">
+          <span class="inline-flex items-center px-3 py-1.5 rounded-full text-xs font-semibold bg-cyan-950/70 text-cyan-300 border border-cyan-500/30 backdrop-blur-md">
+            <span id="phaseDot" class="w-2 h-2 rounded-full bg-cyan-400 mr-2 animate-pulse"></span>
+            <span id="topPhaseBadge">Phase: Ready</span>
+          </span>
+          <span id="topStepCounterBadge" class="text-xs glass-input text-slate-300 px-3 py-1.5 rounded-full font-mono">
+            Step 0 / 0
+          </span>
+        </div>
+
+        <!-- Speed Selector Options -->
+        <div class="flex items-center gap-2">
+          <span class="text-xs text-slate-400 font-medium hidden sm:inline">Speed:</span>
+          <div class="flex items-center glass-input rounded-xl p-1 text-xs">
+            <button class="speed-btn px-2.5 py-1 rounded-lg text-slate-300 hover:text-white" data-speed="1400">0.5x</button>
+            <button class="speed-btn px-2.5 py-1 rounded-lg bg-cyan-600 text-white font-bold" data-speed="750">1x</button>
+            <button class="speed-btn px-2.5 py-1 rounded-lg text-slate-300 hover:text-white" data-speed="350">2x</button>
+            <button class="speed-btn px-2.5 py-1 rounded-lg text-slate-300 hover:text-white" data-speed="150">4x</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Scrubber Timeline Slider -->
+      <div class="flex items-center gap-3 pt-1 border-t border-white/5">
+        <span class="text-xs font-mono text-slate-400 w-10 text-right" id="sliderCurrent">0</span>
+        <input id="stepSlider" type="range" min="0" max="0" value="0" class="w-full h-1.5 bg-slate-800/80 rounded-lg appearance-none cursor-pointer accent-cyan-500">
+        <span class="text-xs font-mono text-slate-400 w-10" id="sliderTotal">0</span>
+      </div>
+
+    </div>
+  </header>
+
+  <!-- MAIN DUAL-COLUMN ARENA -->
+  <main class="max-w-7xl mx-auto w-full grid grid-cols-1 lg:grid-cols-12 gap-5 flex-grow mb-4">
+    
+    <!-- Left Column: Visual Bar Chart & Array Cards Arena (7 cols) -->
+    <div class="lg:col-span-7 flex flex-col gap-4">
+      
+      <div class="glass-card rounded-3xl p-4 sm:p-5 flex flex-col justify-between min-h-[580px] relative overflow-hidden shadow-2xl gap-3.5">
+        
+        <!-- Arena Header Status Bar -->
+        <div class="flex flex-wrap items-center justify-between z-10 gap-2">
+          <div class="flex items-center gap-2 text-xs font-mono text-slate-300 glass-input px-3 py-1.5 rounded-full">
+            <span class="text-cyan-300 font-semibold" id="arenaCurNumBadge">Current num: -</span>
+            <span class="text-slate-500">&bull;</span>
+            <span class="text-amber-300 font-semibold" id="arenaMaxBadge">Max: -</span>
+            <span class="text-slate-500">&bull;</span>
+            <span class="text-emerald-400 font-semibold" id="arenaMovesBadge">Total Moves: 0</span>
+          </div>
+
+          <div class="flex items-center gap-2 glass-input px-3 py-1.5 rounded-full text-xs">
+            <span id="arenaStatusDot" class="w-2.5 h-2.5 rounded-full bg-cyan-400"></span>
+            <span id="arenaStatusText" class="text-slate-300 font-mono text-[11px]">Ready</span>
+          </div>
+        </div>
+
+        <!-- Dynamic Action Formula Banner -->
+        <div id="actionFormulaBanner" class="min-h-[44px] flex items-center justify-center">
+          <span class="text-xs font-mono text-slate-400 glass-input px-4 py-1.5 rounded-full">
+            Pass 1: Find maximum &bull; Pass 2: Accumulate (max - num)
+          </span>
+        </div>
+
+        <!-- Interactive Vertical Bar Chart Elevation Arena -->
+        <div class="glass-input p-4 rounded-2xl border border-white/10 flex flex-col relative min-h-[260px] justify-end overflow-hidden" id="barChartArena">
+          
+          <!-- Target Max Ceiling Line -->
+          <div id="targetCeilingLine" class="absolute left-0 right-0 border-t-2 border-dashed border-cyan-400 z-20 transition-all duration-300 flex items-center justify-end pr-4 opacity-0 pointer-events-none">
+            <span id="targetCeilingLabel" class="text-[10px] font-mono px-2 py-0.5 rounded bg-cyan-950/95 text-cyan-300 border border-cyan-400 shadow-lg -translate-y-1/2">
+              Target Max: 0
+            </span>
+          </div>
+
+          <!-- Bar Graph Columns Container -->
+          <div id="barColumnsContainer" class="flex items-end justify-center gap-3 sm:gap-5 w-full h-[180px] z-10 px-2 relative">
+            <!-- Dynamically generated bars -->
+          </div>
+
+          <!-- Base Ground Platform Line -->
+          <div class="w-full border-t border-slate-700 mt-2 flex items-center justify-between text-[10px] font-mono text-slate-500 px-2 pt-1">
+            <span>Ground Level (0)</span>
+            <span>Target Level: All values raised to Max</span>
+          </div>
+        </div>
+
+        <!-- Array Elements Card Rack -->
+        <div class="glass-input p-3.5 rounded-2xl border border-white/10 flex flex-col gap-2">
+          <div class="flex items-center justify-between text-xs font-mono text-slate-400 px-1">
+            <span class="flex items-center gap-1.5 text-cyan-300 font-bold">
+              <i class="fa-solid fa-layer-group"></i> Array Elements &bull; <span class="text-slate-400 font-normal">int[] arr</span>
+            </span>
+            <span id="passStatusIndicator" class="text-[11px] px-2 py-0.5 rounded-md bg-white/5 border border-white/10 text-slate-300 font-semibold">
+              Idle
+            </span>
+          </div>
+
+          <div id="arrayCardsRack" class="flex flex-wrap items-center justify-center gap-2.5 py-1">
+            <!-- Dynamically generated card items -->
+          </div>
+        </div>
+
+        <!-- Explanation Callout Box -->
+        <div id="operationDetailBox" class="bg-black/40 px-3.5 py-2.5 rounded-xl border border-white/5 text-slate-300 text-xs font-mono leading-relaxed text-center">
+          First pass finds the maximum element in the array. Second pass adds the deficit (max - num) for each element to equalize all elements.
+        </div>
+
+        <!-- Bottom Status Summary Bar -->
+        <div class="z-10 glass-input p-3 rounded-2xl flex items-center justify-between gap-3 text-xs sm:text-sm">
+          <div class="flex items-center gap-2.5 overflow-hidden w-full">
+            <div id="statusDot" class="w-3.5 h-3.5 rounded-full bg-cyan-400 shrink-0"></div>
+            <p id="stepDescription" class="text-slate-200 truncate font-medium text-xs sm:text-sm">Ready to begin. Click Start or Next.</p>
+          </div>
+          <div id="returnPill" class="shrink-0 px-3 py-1 rounded-xl text-xs font-bold font-mono bg-slate-800 text-slate-400 border border-slate-700">
+            pending
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- Right Column: Variable Watcher & Synchronized Java Code (5 cols) -->
+    <div class="lg:col-span-5 flex flex-col gap-4">
+      
+      <!-- Live Variable Watcher -->
+      <div class="glass-card rounded-2xl p-4 shadow-xl flex flex-col gap-3">
+        <h2 class="text-sm font-bold text-slate-300 flex items-center justify-between">
+          <span><i class="fa-solid fa-microchip text-cyan-400 mr-2"></i>Live Variable Watcher</span>
+          <span class="text-xs font-normal text-slate-400 font-mono">Scope: minMoves</span>
+        </h2>
+        
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-center">
+          <div class="glass-input p-2 rounded-xl border border-cyan-500/20">
+            <span class="text-[10px] uppercase tracking-wider text-slate-400 font-semibold block">arr.length</span>
+            <span id="varArrLen" class="font-mono text-base font-bold text-cyan-400">-</span>
+          </div>
+          <div class="glass-input p-2 rounded-xl border border-cyan-500/20">
+            <span class="text-[10px] uppercase tracking-wider text-slate-400 font-semibold block">num (current)</span>
+            <span id="varNum" class="font-mono text-base font-bold text-cyan-300">-</span>
+          </div>
+          <div class="glass-input p-2 rounded-xl border border-amber-500/20">
+            <span class="text-[10px] uppercase tracking-wider text-slate-400 font-semibold block">max</span>
+            <span id="varMax" class="font-mono text-base font-bold text-amber-300">-</span>
+          </div>
+          <div class="glass-input p-2 rounded-xl border border-emerald-500/20">
+            <span class="text-[10px] uppercase tracking-wider text-slate-400 font-semibold block">moves</span>
+            <span id="varMoves" class="font-mono text-base font-bold text-emerald-400">0</span>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-2 text-center">
+          <div class="glass-input p-2 rounded-xl border border-indigo-500/20">
+            <span class="text-[10px] uppercase tracking-wider text-slate-400 font-semibold block">Added Moves: (max - num)</span>
+            <span id="varDiff" class="font-mono text-sm font-bold text-indigo-300">-</span>
+          </div>
+          <div class="glass-input p-2 rounded-xl border border-emerald-500/20">
+            <span class="text-[10px] uppercase tracking-wider text-slate-400 font-semibold block">Active Pass</span>
+            <span id="varPass" class="font-mono text-sm font-bold text-emerald-300">Ready</span>
+          </div>
+        </div>
+
+        <!-- Condition / Expression Evaluator -->
+        <div class="glass-input p-2.5 rounded-xl text-xs flex flex-col gap-1 font-mono">
+          <div class="flex items-center justify-between text-slate-400 text-[11px]">
+            <span>Active Expression:</span>
+            <span class="text-cyan-300">Result</span>
+          </div>
+          <div class="flex items-center justify-between text-xs bg-black/40 px-3 py-1.5 rounded-lg border border-white/5">
+            <span id="evalStatement" class="text-slate-300 truncate">Solution.minMoves(arr)</span>
+            <span id="evalResult" class="font-bold text-cyan-400 shrink-0 ml-2">-</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Synchronized Java Code Viewer -->
+      <div class="glass-card rounded-2xl p-4 shadow-xl flex flex-col flex-grow overflow-hidden">
+        <div class="flex items-center justify-between pb-2 border-b border-white/10 mb-2">
+          <div class="flex items-center gap-2">
+            <i class="fa-brands fa-java text-rose-400 text-lg"></i>
+            <span class="text-xs font-bold text-slate-200">Solution.java &bull; Synchronized</span>
+          </div>
+          <span class="text-[11px] text-slate-400 bg-white/5 px-2 py-0.5 rounded font-mono">O(N) Time &bull; O(1) Space</span>
+        </div>
+
+        <!-- Code Lines matching user implementation -->
+        <div class="code-font text-[11px] sm:text-xs text-slate-300 overflow-y-auto rounded-xl glass-input p-2.5 border border-white/5 select-none flex-grow max-h-[380px]" id="codeContainer">
+          <div id="code-line-1" class="code-line py-0.5 px-2 rounded flex"><span class="text-slate-600 w-7 select-none">1</span><span class="text-purple-400">class</span>&nbsp;<span class="text-yellow-300">Solution</span>&nbsp;{</div>
+          <div id="code-line-2" class="code-line py-0.5 px-2 rounded flex"><span class="text-slate-600 w-7 select-none">2</span>&nbsp;&nbsp;<span class="text-purple-400">public long</span>&nbsp;<span class="text-blue-400">minMoves</span>(<span class="text-cyan-400">int</span>[] arr) {</div>
+          <div id="code-line-3" class="code-line py-0.5 px-2 rounded flex"><span class="text-slate-600 w-7 select-none">3</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="text-purple-400">if</span> (arr == <span class="text-rose-400">null</span> || arr.length == <span class="text-amber-300">0</span>) {</div>
+          <div id="code-line-4" class="code-line py-0.5 px-2 rounded flex"><span class="text-slate-600 w-7 select-none">4</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="text-purple-400">return</span>&nbsp;<span class="text-amber-300">0</span>;</div>
+          <div id="code-line-5" class="code-line py-0.5 px-2 rounded flex"><span class="text-slate-600 w-7 select-none">5</span>&nbsp;&nbsp;&nbsp;&nbsp;}</div>
+          <div id="code-line-6" class="code-line py-0.5 px-2 rounded flex"><span class="text-slate-600 w-7 select-none">6</span></div>
+          <div id="code-line-7" class="code-line py-0.5 px-2 rounded flex"><span class="text-slate-600 w-7 select-none">7</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="text-cyan-400">int</span> max = arr[<span class="text-amber-300">0</span>];</div>
+          <div id="code-line-8" class="code-line py-0.5 px-2 rounded flex"><span class="text-slate-600 w-7 select-none">8</span></div>
+          <div id="code-line-9" class="code-line py-0.5 px-2 rounded flex"><span class="text-slate-600 w-7 select-none">9</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="text-slate-500">// Find maximum element</span></div>
+          <div id="code-line-10" class="code-line py-0.5 px-2 rounded flex"><span class="text-slate-600 w-7 select-none">10</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="text-purple-400">for</span> (<span class="text-cyan-400">int</span> num : arr) {</div>
+          <div id="code-line-11" class="code-line py-0.5 px-2 rounded flex"><span class="text-slate-600 w-7 select-none">11</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;max = Math.<span class="text-yellow-200">max</span>(max, num);</div>
+          <div id="code-line-12" class="code-line py-0.5 px-2 rounded flex"><span class="text-slate-600 w-7 select-none">12</span>&nbsp;&nbsp;&nbsp;&nbsp;}</div>
+          <div id="code-line-13" class="code-line py-0.5 px-2 rounded flex"><span class="text-slate-600 w-7 select-none">13</span></div>
+          <div id="code-line-14" class="code-line py-0.5 px-2 rounded flex"><span class="text-slate-600 w-7 select-none">14</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="text-cyan-400">long</span> moves = <span class="text-amber-300">0</span>;</div>
+          <div id="code-line-15" class="code-line py-0.5 px-2 rounded flex"><span class="text-slate-600 w-7 select-none">15</span></div>
+          <div id="code-line-16" class="code-line py-0.5 px-2 rounded flex"><span class="text-slate-600 w-7 select-none">16</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="text-slate-500">// Calculate moves needed</span></div>
+          <div id="code-line-17" class="code-line py-0.5 px-2 rounded flex"><span class="text-slate-600 w-7 select-none">17</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="text-purple-400">for</span> (<span class="text-cyan-400">int</span> num : arr) {</div>
+          <div id="code-line-18" class="code-line py-0.5 px-2 rounded flex"><span class="text-slate-600 w-7 select-none">18</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;moves += (<span class="text-cyan-400">long</span>) max - num;</div>
+          <div id="code-line-19" class="code-line py-0.5 px-2 rounded flex"><span class="text-slate-600 w-7 select-none">19</span>&nbsp;&nbsp;&nbsp;&nbsp;}</div>
+          <div id="code-line-20" class="code-line py-0.5 px-2 rounded flex"><span class="text-slate-600 w-7 select-none">20</span></div>
+          <div id="code-line-21" class="code-line py-0.5 px-2 rounded flex"><span class="text-slate-600 w-7 select-none">21</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="text-purple-400">return</span> moves;</div>
+          <div id="code-line-22" class="code-line py-0.5 px-2 rounded flex"><span class="text-slate-600 w-7 select-none">22</span>&nbsp;&nbsp;}</div>
+          <div id="code-line-23" class="code-line py-0.5 px-2 rounded flex"><span class="text-slate-600 w-7 select-none">23</span>}</div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <footer class="max-w-7xl mx-auto w-full text-center text-xs text-slate-500 py-1 font-mono">
+    <p>Min Moves Equalizer &bull; Two-Pass Simulation &bull; Non-Intrusive Local Code Highlighting</p>
+  </footer>
+
+  <!-- SCRIPT ENGINE: SOUND SYNTHESIS & STEP GENERATOR -->
+  <script>
+    class SoundEngine {
+      constructor() {
+        this.enabled = true;
+        this.ctx = null;
+      }
+
+      init() {
+        if (!this.ctx) {
+          const AudioContext = window.AudioContext || window.webkitAudioContext;
+          if (AudioContext) {
+            this.ctx = new AudioContext();
+          }
+        }
+      }
+
+      playStep() {
+        if (!this.enabled) return;
+        this.init();
+        if (!this.ctx) return;
+        if (this.ctx.state === 'suspended') this.ctx.resume();
+
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(460, this.ctx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(360, this.ctx.currentTime + 0.05);
+
+        gain.gain.setValueAtTime(0.04, this.ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.05);
+
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.start();
+        osc.stop(this.ctx.currentTime + 0.05);
+      }
+
+      playNewMax() {
+        if (!this.enabled) return;
+        this.init();
+        if (!this.ctx) return;
+        if (this.ctx.state === 'suspended') this.ctx.resume();
+
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(520, this.ctx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(880, this.ctx.currentTime + 0.09);
+
+        gain.gain.setValueAtTime(0.05, this.ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.09);
+
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.start();
+        osc.stop(this.ctx.currentTime + 0.09);
+      }
+
+      playAddMoves() {
+        if (!this.enabled) return;
+        this.init();
+        if (!this.ctx) return;
+        if (this.ctx.state === 'suspended') this.ctx.resume();
+
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(650, this.ctx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(740, this.ctx.currentTime + 0.07);
+
+        gain.gain.setValueAtTime(0.045, this.ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.07);
+
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.start();
+        osc.stop(this.ctx.currentTime + 0.07);
+      }
+
+      playComplete() {
+        if (!this.enabled) return;
+        this.init();
+        if (!this.ctx) return;
+        if (this.ctx.state === 'suspended') this.ctx.resume();
+
+        const freqs = [440, 554.37, 659.25, 880];
+        freqs.forEach((freq, idx) => {
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(freq, this.ctx.currentTime + idx * 0.07);
+          gain.gain.setValueAtTime(0.05, this.ctx.currentTime + idx * 0.07);
+          gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + idx * 0.07 + 0.2);
+
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+          osc.start(this.ctx.currentTime + idx * 0.07);
+          osc.stop(this.ctx.currentTime + idx * 0.07 + 0.21);
+        });
+      }
+    }
+
+    const sound = new SoundEngine();
+
+    // Preset Arrays
+    const presets = [
+      [1, 2, 3],
+      [1, 5, 2, 4],
+      [4, 4, 4, 4],
+      [10, 1, 10, 2],
+      [7, 3, 9, 2, 6],
+      []
+    ];
+
+    let currentPresetIdx = 0;
+    let currentRawArr = [...presets[0]];
+    let currentSteps = [];
+    let currentStepIndex = 0;
+    let isPlaying = false;
+    let playIntervalId = null;
+    let playSpeed = 750;
+
+    // STEP GENERATOR ALGORITHM
+    function generateMinMovesSteps(arr) {
+      const steps = [];
+      const n = arr ? arr.length : 0;
+
+      function snapshot(meta) {
+        steps.push({
+          line: meta.line,
+          phase: meta.phase,
+          passName: meta.passName ?? 'Ready',
+          idx: meta.idx ?? null,
+          num: meta.num ?? null,
+          max: meta.max ?? null,
+          diff: meta.diff ?? null,
+          moves: meta.moves ?? 0,
+          addedMovesMap: meta.addedMovesMap ? { ...meta.addedMovesMap } : {},
+          statusType: meta.statusType ?? 'neutral',
+          evalStmt: meta.evalStmt ?? '-',
+          evalResult: meta.evalResult ?? '-',
+          detail: meta.detail ?? '',
+          returnPillText: meta.returnPillText ?? 'running...',
+          desc: meta.desc ?? '',
+          arr: [...(arr ?? [])]
+        });
+      }
+
+      // Check null or empty array (Lines 3-5)
+      snapshot({
+        line: 3,
+        phase: 'Validation Check',
+        passName: 'Validation',
+        evalStmt: `arr == null || arr.length == 0 (${arr == null} || ${n == 0})`,
+        evalResult: `${arr == null || n === 0}`,
+        detail: `Validating input array. Length is ${n}.`,
+        statusType: 'neutral',
+        returnPillText: (arr == null || n === 0) ? 'return 0' : 'Valid',
+        desc: `Inspecting array boundaries: length = ${n}.`
+      });
+
+      if (!arr || n === 0) {
+        snapshot({
+          line: 4,
+          phase: 'Empty Array &bull; return 0',
+          passName: 'Finished',
+          evalStmt: 'return 0;',
+          evalResult: '0 (Empty Array)',
+          detail: 'Array is empty or null. No moves needed. Returns 0.',
+          statusType: 'success',
+          returnPillText: 'return 0',
+          desc: 'Array is empty. Returned 0.'
+        });
+        return steps;
+      }
+
+      // Initialize max = arr[0] (Line 7)
+      let maxVal = arr[0];
+      snapshot({
+        line: 7,
+        phase: 'Initialize Maximum',
+        passName: 'Pass 1: Find Max',
+        idx: 0,
+        num: arr[0],
+        max: maxVal,
+        evalStmt: `int max = arr[0]; // max = ${maxVal}`,
+        evalResult: `max = ${maxVal}`,
+        detail: `Initialized max with the first element: arr[0] = ${maxVal}.`,
+        statusType: 'newMax',
+        returnPillText: `max = ${maxVal}`,
+        desc: `Initialized max = arr[0] = ${maxVal}.`
+      });
+
+      // Pass 1: Find Maximum (Lines 10-12)
+      for (let i = 0; i < n; i++) {
+        const num = arr[i];
+        const isBigger = num > maxVal;
+
+        snapshot({
+          line: 10,
+          phase: `Pass 1: Inspect arr[${i}] = ${num}`,
+          passName: 'Pass 1: Find Max',
+          idx: i,
+          num: num,
+          max: maxVal,
+          evalStmt: `for (int num : arr) // checking ${num}`,
+          evalResult: `num = ${num}`,
+          detail: `Pass 1: Checking element ${num} at index ${i}. Current max is ${maxVal}.`,
+          statusType: 'neutral',
+          returnPillText: `num: ${num}`,
+          desc: `Pass 1: Inspecting element ${num} at index ${i}.`
+        });
+
+        const oldMax = maxVal;
+        maxVal = Math.max(maxVal, num);
+
+        snapshot({
+          line: 11,
+          phase: `Pass 1: Update Max (Math.max(${oldMax}, ${num}))`,
+          passName: 'Pass 1: Find Max',
+          idx: i,
+          num: num,
+          max: maxVal,
+          evalStmt: `max = Math.max(${oldMax}, ${num})`,
+          evalResult: `${maxVal} ${isBigger ? '(New Maximum Found!)' : '(Unchanged)'}`,
+          detail: isBigger
+            ? `Found new maximum element ${num} > ${oldMax}. Updated max to ${maxVal}.`
+            : `Element ${num} <= current max ${maxVal}. max remains ${maxVal}.`,
+          statusType: isBigger ? 'newMax' : 'neutral',
+          returnPillText: `max = ${maxVal}`,
+          desc: isBigger ? `Updated max to ${maxVal}!` : `max remains ${maxVal}.`
+        });
+      }
+
+      // Initialize moves = 0 (Line 14)
+      let moves = 0;
+      const addedMovesMap = {};
+
+      snapshot({
+        line: 14,
+        phase: 'Initialize Moves Counter',
+        passName: 'Pass 2: Calculate Moves',
+        max: maxVal,
+        moves: 0,
+        evalStmt: 'long moves = 0;',
+        evalResult: 'moves = 0',
+        detail: `Pass 1 complete. Global maximum is ${maxVal}. Initialized moves accumulator to 0.`,
+        statusType: 'neutral',
+        returnPillText: 'moves = 0',
+        desc: `Maximum found: ${maxVal}. Ready for Pass 2.`
+      });
+
+      // Pass 2: Calculate moves needed (Lines 17-19)
+      for (let i = 0; i < n; i++) {
+        const num = arr[i];
+        const diff = maxVal - num;
+
+        snapshot({
+          line: 17,
+          phase: `Pass 2: Evaluate arr[${i}] = ${num}`,
+          passName: 'Pass 2: Calculate Moves',
+          idx: i,
+          num: num,
+          max: maxVal,
+          diff: diff,
+          moves: moves,
+          addedMovesMap: addedMovesMap,
+          evalStmt: `for (int num : arr) // num = ${num}`,
+          evalResult: `num = ${num}, max = ${maxVal}`,
+          detail: `Pass 2: Calculating elevation deficit for element ${num}: (${maxVal} - ${num}) = ${diff} moves needed.`,
+          statusType: 'neutral',
+          returnPillText: `diff = ${diff}`,
+          desc: `Pass 2: Deficit for element ${num} is (${maxVal} - ${num}) = ${diff}.`
+        });
+
+        moves += diff;
+        addedMovesMap[i] = diff;
+
+        snapshot({
+          line: 18,
+          phase: `Pass 2: moves += (${maxVal} - ${num}) &rarr; +${diff}`,
+          passName: 'Pass 2: Calculate Moves',
+          idx: i,
+          num: num,
+          max: maxVal,
+          diff: diff,
+          moves: moves,
+          addedMovesMap: addedMovesMap,
+          evalStmt: `moves += (${maxVal} - ${num}); // +${diff}`,
+          evalResult: `moves = ${moves}`,
+          detail: `Added ${diff} moves to accumulator. Running total moves is now ${moves}.`,
+          statusType: diff > 0 ? 'addMoves' : 'neutral',
+          returnPillText: `+${diff} moves`,
+          desc: `Added ${diff} moves. Total moves = ${moves}.`
+        });
+      }
+
+      // Return moves (Line 21)
+      snapshot({
+        line: 21,
+        phase: `Algorithm Finished &bull; return ${moves}`,
+        passName: 'Finished',
+        max: maxVal,
+        moves: moves,
+        addedMovesMap: addedMovesMap,
+        evalStmt: `return moves; // ${moves}`,
+        evalResult: `${moves} total moves`,
+        detail: `All elements equalized to target maximum ${maxVal}. Total minimum increment moves required: ${moves}.`,
+        statusType: 'success',
+        returnPillText: `return ${moves}`,
+        desc: `Completed! Total minimum moves = ${moves}.`
+      });
+
+      return steps;
+    }
+  </script>
+
+  <script>
+    // DOM UI Elements
+    const btnPlayPause = document.getElementById('btnPlayPause');
+    const playIcon = document.getElementById('playIcon');
+    const playText = document.getElementById('playText');
+    const btnPrev = document.getElementById('btnPrev');
+    const btnNext = document.getElementById('btnNext');
+    const btnReset = document.getElementById('btnReset');
+    const topPhaseBadge = document.getElementById('topPhaseBadge');
+    const phaseDot = document.getElementById('phaseDot');
+    const topStepCounterBadge = document.getElementById('topStepCounterBadge');
+    const stepSlider = document.getElementById('stepSlider');
+    const sliderCurrent = document.getElementById('sliderCurrent');
+    const sliderTotal = document.getElementById('sliderTotal');
+    const presetSelect = document.getElementById('presetSelect');
+    const btnSampleNext = document.getElementById('btnSampleNext');
+    const customArrayInput = document.getElementById('customArrayInput');
+    const btnApplyCustom = document.getElementById('btnApplyCustom');
+    const btnSoundToggle = document.getElementById('btnSoundToggle');
+    const soundIcon = document.getElementById('soundIcon');
+
+    const arenaCurNumBadge = document.getElementById('arenaCurNumBadge');
+    const arenaMaxBadge = document.getElementById('arenaMaxBadge');
+    const arenaMovesBadge = document.getElementById('arenaMovesBadge');
+    const arenaStatusDot = document.getElementById('arenaStatusDot');
+    const arenaStatusText = document.getElementById('arenaStatusText');
+    const actionFormulaBanner = document.getElementById('actionFormulaBanner');
+    const targetCeilingLine = document.getElementById('targetCeilingLine');
+    const targetCeilingLabel = document.getElementById('targetCeilingLabel');
+    const barColumnsContainer = document.getElementById('barColumnsContainer');
+    const arrayCardsRack = document.getElementById('arrayCardsRack');
+    const passStatusIndicator = document.getElementById('passStatusIndicator');
+    const operationDetailBox = document.getElementById('operationDetailBox');
+    const stepDescription = document.getElementById('stepDescription');
+    const statusDot = document.getElementById('statusDot');
+    const returnPill = document.getElementById('returnPill');
+
+    const varArrLen = document.getElementById('varArrLen');
+    const varNum = document.getElementById('varNum');
+    const varMax = document.getElementById('varMax');
+    const varMoves = document.getElementById('varMoves');
+    const varDiff = document.getElementById('varDiff');
+    const varPass = document.getElementById('varPass');
+    const evalStatement = document.getElementById('evalStatement');
+    const evalResult = document.getElementById('evalResult');
+    const codeContainer = document.getElementById('codeContainer');
+
+    // RENDER STEP FUNCTION
+    function renderStep(step) {
+      if (!step) return;
+
+      topPhaseBadge.textContent = step.phase;
+      topStepCounterBadge.textContent = `Step ${currentStepIndex} / ${currentSteps.length - 1}`;
+      stepDescription.textContent = step.desc;
+
+      stepSlider.value = currentStepIndex;
+      sliderCurrent.textContent = currentStepIndex;
+
+      arenaCurNumBadge.textContent = step.num !== null ? `Current num: ${step.num}` : 'Current num: -';
+      arenaMaxBadge.textContent = step.max !== null ? `Max: ${step.max}` : 'Max: -';
+      arenaMovesBadge.textContent = `Total Moves: ${step.moves}`;
+
+      varArrLen.textContent = step.arr.length;
+      varNum.textContent = step.num !== null ? step.num : '-';
+      varMax.textContent = step.max !== null ? step.max : '-';
+      varMoves.textContent = step.moves;
+      varDiff.textContent = step.diff !== null ? `+${step.diff}` : '-';
+      varPass.textContent = step.passName;
+
+      evalStatement.textContent = step.evalStmt;
+      evalResult.textContent = step.evalResult;
+      operationDetailBox.textContent = step.detail;
+      returnPill.textContent = step.returnPillText;
+      passStatusIndicator.textContent = step.passName;
+
+      // Render Visual Bar Chart Elevation & Ceiling
+      renderBarElevation(step);
+
+      // Render Array Cards
+      renderArrayCards(step);
+
+      // Status Banners, Sounds & Animations
+      if (step.statusType === 'success') {
+        actionFormulaBanner.innerHTML = `
+          <div class="flex items-center gap-2 bg-emerald-950/90 text-emerald-300 border border-emerald-500/50 px-4 py-1.5 rounded-full text-xs font-mono font-bold shadow-lg shadow-emerald-500/30">
+            <i class="fa-solid fa-circle-check text-emerald-400"></i>
+            <span>All Elements Equalized to ${step.max}! Total Moves: ${step.moves} &bull; return moves</span>
+          </div>`;
+        arenaStatusDot.className = "w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping";
+        arenaStatusText.textContent = "Finished";
+        statusDot.className = "w-3.5 h-3.5 rounded-full bg-emerald-400 shrink-0";
+        returnPill.className = "shrink-0 px-3 py-1 rounded-xl text-xs font-bold font-mono bg-emerald-950/90 text-emerald-300 border border-emerald-400";
+        phaseDot.className = "w-2 h-2 rounded-full bg-emerald-400 mr-2";
+        sound.playComplete();
+
+      } else if (step.statusType === 'newMax') {
+        actionFormulaBanner.innerHTML = `
+          <div class="flex items-center gap-2 bg-amber-950/90 text-amber-300 border border-amber-500/50 px-4 py-1.5 rounded-full text-xs font-mono font-bold shadow-lg shadow-amber-500/30">
+            <i class="fa-solid fa-crown text-amber-400"></i>
+            <span>New Maximum Element Found: max = ${step.max}</span>
+          </div>`;
+        arenaStatusDot.className = "w-2.5 h-2.5 rounded-full bg-amber-400 animate-pulse";
+        arenaStatusText.textContent = "New Max";
+        statusDot.className = "w-3.5 h-3.5 rounded-full bg-amber-400 shrink-0";
+        returnPill.className = "shrink-0 px-3 py-1 rounded-xl text-xs font-bold font-mono bg-amber-950/90 text-amber-300 border border-amber-400";
+        phaseDot.className = "w-2 h-2 rounded-full bg-amber-400 mr-2";
+        sound.playNewMax();
+
+      } else if (step.statusType === 'addMoves') {
+        actionFormulaBanner.innerHTML = `
+          <div class="flex items-center gap-2 bg-cyan-950/80 text-cyan-300 border border-cyan-500/40 px-4 py-1.5 rounded-full text-xs font-mono font-bold shadow-md shadow-cyan-500/20">
+            <i class="fa-solid fa-arrow-trend-up text-cyan-400"></i>
+            <span>Accumulating Deficit: (${step.max} - ${step.num}) = +${step.diff} moves (Total: ${step.moves})</span>
+          </div>`;
+        arenaStatusDot.className = "w-2.5 h-2.5 rounded-full bg-cyan-400";
+        arenaStatusText.textContent = "Adding Moves";
+        statusDot.className = "w-3.5 h-3.5 rounded-full bg-cyan-400 shrink-0";
+        returnPill.className = "shrink-0 px-3 py-1 rounded-xl text-xs font-bold font-mono bg-cyan-950/80 text-cyan-300 border border-cyan-500/40";
+        phaseDot.className = "w-2 h-2 rounded-full bg-cyan-400 mr-2";
+        sound.playAddMoves();
+
+      } else {
+        actionFormulaBanner.innerHTML = `<span class="text-xs font-mono text-slate-300 glass-input px-4 py-1.5 rounded-full">${step.phase}</span>`;
+        arenaStatusDot.className = "w-2.5 h-2.5 rounded-full bg-cyan-400";
+        arenaStatusText.textContent = "Inspecting";
+        statusDot.className = "w-3.5 h-3.5 rounded-full bg-cyan-400 shrink-0";
+        returnPill.className = "shrink-0 px-3 py-1 rounded-xl text-xs font-bold font-mono bg-slate-800 text-slate-300 border border-slate-700";
+        phaseDot.className = "w-2 h-2 rounded-full bg-cyan-400 mr-2 animate-pulse";
+        sound.playStep();
+      }
+
+      // SYNCHRONIZE CODE LINE WITHOUT JUMPING/SCROLLING THE WHOLE PAGE
+      highlightCodeLine(step.line);
+    }
+
+    // STRICTLY LOCALIZED CODE LINE HIGHLIGHT (Prevents whole-page scrolling)
+    function highlightCodeLine(lineNumber) {
+      document.querySelectorAll('.code-line').forEach(el => el.classList.remove('code-active'));
+      const activeLineEl = document.getElementById(`code-line-${lineNumber}`);
+      if (!activeLineEl || !codeContainer) return;
+
+      activeLineEl.classList.add('code-active');
+
+      // Calculate localized relative offset inside codeContainer only
+      // Do NOT call activeLineEl.scrollIntoView() which scrolls the window/page!
+      const lineOffsetTop = activeLineEl.offsetTop;
+      const containerScrollTop = codeContainer.scrollTop;
+      const containerHeight = codeContainer.clientHeight;
+      const lineTotalHeight = activeLineEl.offsetHeight;
+
+      // Only adjust scrollTop if line falls outside visible bounds of container
+      if (lineOffsetTop < containerScrollTop) {
+        codeContainer.scrollTop = lineOffsetTop - 10;
+      } else if (lineOffsetTop + lineTotalHeight > containerScrollTop + containerHeight) {
+        codeContainer.scrollTop = (lineOffsetTop + lineTotalHeight) - containerHeight + 10;
+      }
+    }
+
+    // RENDER VERTICAL BARS & TARGET CEILING
+    function renderBarElevation(step) {
+      barColumnsContainer.innerHTML = '';
+      if (!step.arr || step.arr.length === 0) {
+        barColumnsContainer.innerHTML = '<span class="text-xs text-slate-500 font-mono italic my-auto">Array is empty</span>';
+        targetCeilingLine.style.opacity = '0';
+        return;
+      }
+
+      // Find the absolute maximum across the array to keep scale fixed and stable
+      const arrayMax = Math.max(...step.arr, 1);
+      const maxGraphHeightPx = 145; // Height reserved strictly for the colored bar body
+
+      step.arr.forEach((val, idx) => {
+        const isCurrentIdx = (step.idx === idx);
+        const isMaxCandidate = (step.max === val);
+        const addedMoves = step.addedMovesMap[idx] ?? 0;
+
+        // Base bar height proportionally mapped to arrayMax
+        const baseHeightPx = Math.max(16, Math.round((val / arrayMax) * maxGraphHeightPx));
+        // Added elevation height (Pass 2)
+        const addedHeightPx = Math.round((addedMoves / arrayMax) * maxGraphHeightPx);
+
+        const colWrap = document.createElement('div');
+        colWrap.className = "flex flex-col items-center justify-end h-full flex-1 max-w-[64px] transition-all duration-300 relative group";
+
+        // Dynamic Deficit Tag for Pass 2
+        let diffBadge = '';
+        if (step.passName.includes('Pass 2') && isCurrentIdx && step.diff !== null) {
+          diffBadge = `
+            <div class="absolute -top-7 px-1.5 py-0.5 rounded bg-emerald-950/90 text-emerald-300 border border-emerald-400 font-mono text-[9px] font-bold shadow-md animate-bounce z-30">
+              +${step.diff}
+            </div>
+          `;
+        }
+
+        colWrap.innerHTML = `
+          ${diffBadge}
+          <div class="text-[11px] font-mono font-bold mb-1 transition-colors ${isCurrentIdx ? 'text-cyan-300' : 'text-slate-400'}">
+            ${val}
+          </div>
+          
+          <div data-bar-box="true" data-val="${val}" class="w-full flex flex-col justify-end items-center rounded-t-xl overflow-hidden transition-all duration-300 ${isCurrentIdx ? 'active-bar-glow ring-2 ring-cyan-400' : ''}">
+            <!-- Added moves elevation layer (Pass 2) -->
+            ${addedHeightPx > 0 ? `
+              <div style="height: ${addedHeightPx}px;" class="w-full bg-emerald-500/50 border-t-2 border-emerald-400 flex items-center justify-center text-[9px] font-mono text-emerald-200 font-bold transition-all duration-300">
+                +${addedMoves}
+              </div>
+            ` : ''}
+
+            <!-- Base initial element height bar -->
+            <div style="height: ${baseHeightPx}px;" class="w-full transition-all duration-300 flex items-center justify-center text-[10px] font-mono font-bold text-white ${
+              isCurrentIdx 
+                ? 'bg-gradient-to-t from-cyan-600 via-indigo-600 to-cyan-400' 
+                : (isMaxCandidate && step.max !== null 
+                    ? 'bg-gradient-to-t from-amber-600/80 to-amber-400/90' 
+                    : 'bg-gradient-to-t from-slate-800 to-indigo-950/80 border-t border-white/20')
+            }">
+              <span class="opacity-75">${val}</span>
+            </div>
+          </div>
+
+          <div class="text-[10px] font-mono text-slate-500 mt-1">
+            [${idx}]
+          </div>
+        `;
+
+        barColumnsContainer.appendChild(colWrap);
+      });
+
+      // Align Target Ceiling Line exactly with the top of the bar holding the current max value
+      updateCeilingPosition(step);
+    }
+
+    // Precise DOM-aligned positioning for the ceiling line
+    function updateCeilingPosition(step) {
+      if (step.max === null || !step.arr || step.arr.length === 0) {
+        targetCeilingLine.style.opacity = '0';
+        return;
+      }
+
+      // Allow DOM to settle, then inspect actual rendered bounding box
+      requestAnimationFrame(() => {
+        const arena = document.getElementById('barChartArena');
+        if (!arena) return;
+
+        // Find the bar element that represents step.max
+        const barBoxes = barColumnsContainer.querySelectorAll('[data-bar-box="true"]');
+        let targetBarEl = null;
+
+        for (const box of barBoxes) {
+          if (parseInt(box.getAttribute('data-val'), 10) === step.max) {
+            targetBarEl = box;
+            break;
+          }
+        }
+
+        if (targetBarEl) {
+          const arenaRect = arena.getBoundingClientRect();
+          const barRect = targetBarEl.getBoundingClientRect();
+
+          // Calculate exact top offset relative to the arena container
+          const exactTopOffsetPx = barRect.top - arenaRect.top;
+
+          targetCeilingLine.style.top = `${exactTopOffsetPx}px`;
+          targetCeilingLine.style.bottom = 'auto';
+          targetCeilingLine.style.opacity = '1';
+          targetCeilingLabel.textContent = `Target Max Ceiling: ${step.max}`;
+        } else {
+          targetCeilingLine.style.opacity = '0';
+        }
+      });
+    }
+
+    // Window resize handler to maintain exact ceiling alignment
+    window.addEventListener('resize', () => {
+      if (currentSteps && currentSteps[currentStepIndex]) {
+        updateCeilingPosition(currentSteps[currentStepIndex]);
+      }
+    });
+
+    // RENDER ARRAY CARDS RACK
+    function renderArrayCards(step) {
+      arrayCardsRack.innerHTML = '';
+      if (!step.arr || step.arr.length === 0) {
+        arrayCardsRack.innerHTML = '<span class="text-xs text-slate-500 font-mono italic">arr = []</span>';
+        return;
+      }
+
+      step.arr.forEach((val, idx) => {
+        const isCurrent = (step.idx === idx);
+        const isMax = (step.max === val);
+        const added = step.addedMovesMap[idx];
+
+        const card = document.createElement('div');
+        let cardClasses = "px-3 py-2 rounded-xl border font-mono flex flex-col items-center justify-center min-w-[54px] transition-all duration-200 select-none shadow-md ";
+
+        let statusBadge = `[${idx}]`;
+        if (isCurrent) {
+          cardClasses += "bg-cyan-950/90 border-cyan-400 text-cyan-200 scale-105 shadow-cyan-500/30 z-20 ";
+          statusBadge = `<span class="text-[9px] text-cyan-300 font-bold">ACTIVE</span>`;
+        } else if (isMax && step.max !== null) {
+          cardClasses += "bg-amber-950/60 border-amber-400/60 text-amber-200 ";
+          statusBadge = `<span class="text-[9px] text-amber-300 font-bold">MAX</span>`;
+        } else {
+          cardClasses += "bg-slate-900/60 border-white/10 text-slate-300 ";
+        }
+
+        let addedHtml = '';
+        if (added !== undefined && added > 0) {
+          addedHtml = `<span class="text-[9px] text-emerald-300 font-bold mt-0.5">+${added}</span>`;
+        } else if (added === 0) {
+          addedHtml = `<span class="text-[9px] text-slate-500 mt-0.5">+0</span>`;
+        }
+
+        card.className = cardClasses;
+        card.innerHTML = `
+          <span class="text-sm font-extrabold">${val}</span>
+          ${addedHtml}
+          <span class="text-[9px] text-slate-400 mt-0.5">${statusBadge}</span>
+        `;
+
+        arrayCardsRack.appendChild(card);
+      });
+    }
+
+    // PLAYBACK CONTROLLER
+    function goToStep(index) {
+      if (index < 0) index = 0;
+      if (index >= currentSteps.length) index = currentSteps.length - 1;
+      currentStepIndex = index;
+      renderStep(currentSteps[currentStepIndex]);
+
+      if (currentStepIndex === currentSteps.length - 1 && isPlaying) {
+        stopAutoPlay();
+      }
+    }
+
+    function nextStep() {
+      if (currentStepIndex < currentSteps.length - 1) {
+        goToStep(currentStepIndex + 1);
+      } else {
+        stopAutoPlay();
+      }
+    }
+
+    function prevStep() {
+      if (currentStepIndex > 0) {
+        goToStep(currentStepIndex - 1);
+      }
+    }
+
+    function startAutoPlay() {
+      if (currentStepIndex >= currentSteps.length - 1) {
+        currentStepIndex = 0;
+      }
+      isPlaying = true;
+      playIcon.className = "fa-solid fa-pause text-xs";
+      playText.textContent = "Stop";
+      btnPlayPause.classList.replace('from-cyan-500', 'from-rose-500');
+      btnPlayPause.classList.replace('to-emerald-600', 'to-rose-700');
+
+      clearInterval(playIntervalId);
+      playIntervalId = setInterval(() => {
+        nextStep();
+      }, playSpeed);
+    }
+
+    function stopAutoPlay() {
+      isPlaying = false;
+      playIcon.className = "fa-solid fa-play text-xs";
+      playText.textContent = "Start";
+      btnPlayPause.classList.replace('from-rose-500', 'from-cyan-500');
+      btnPlayPause.classList.replace('to-rose-700', 'to-emerald-600');
+      clearInterval(playIntervalId);
+    }
+
+    function togglePlayPause() {
+      if (isPlaying) {
+        stopAutoPlay();
+      } else {
+        startAutoPlay();
+      }
+    }
+
+    function rebuildSimulation() {
+      stopAutoPlay();
+      currentSteps = generateMinMovesSteps(currentRawArr);
+      stepSlider.max = Math.max(0, currentSteps.length - 1);
+      sliderTotal.textContent = Math.max(0, currentSteps.length - 1);
+      currentStepIndex = 0;
+      goToStep(0);
+    }
+
+    // EVENT LISTENERS
+    btnPlayPause.addEventListener('click', togglePlayPause);
+    btnNext.addEventListener('click', () => { stopAutoPlay(); nextStep(); });
+    btnPrev.addEventListener('click', () => { stopAutoPlay(); prevStep(); });
+    btnReset.addEventListener('click', () => { stopAutoPlay(); goToStep(0); });
+
+    presetSelect.addEventListener('change', (e) => {
+      currentPresetIdx = parseInt(e.target.value, 10);
+      currentRawArr = [...presets[currentPresetIdx]];
+      rebuildSimulation();
+    });
+
+    btnSampleNext.addEventListener('click', () => {
+      currentPresetIdx = (currentPresetIdx + 1) % presets.length;
+      presetSelect.value = currentPresetIdx;
+      currentRawArr = [...presets[currentPresetIdx]];
+      rebuildSimulation();
+    });
+
+    btnApplyCustom.addEventListener('click', () => {
+      const raw = customArrayInput.value.trim();
+      if (!raw) return;
+      const parsed = raw.split(/[\s,]+/).map(Number).filter(v => !isNaN(v));
+      currentRawArr = parsed;
+      rebuildSimulation();
+    });
+
+    stepSlider.addEventListener('input', (e) => {
+      stopAutoPlay();
+      goToStep(parseInt(e.target.value, 10));
+    });
+
+    document.querySelectorAll('.speed-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.speed-btn').forEach(b => {
+          b.className = "speed-btn px-2.5 py-1 rounded-lg text-slate-300 hover:text-white";
+        });
+        btn.className = "speed-btn px-2.5 py-1 rounded-lg bg-cyan-600 text-white font-bold";
+        playSpeed = parseInt(btn.dataset.speed, 10);
+        if (isPlaying) {
+          startAutoPlay();
+        }
+      });
+    });
+
+    btnSoundToggle.addEventListener('click', () => {
+      sound.enabled = !sound.enabled;
+      soundIcon.className = sound.enabled
+        ? "fa-solid fa-volume-high text-cyan-400"
+        : "fa-solid fa-volume-xmark text-slate-500";
+    });
+
+    // Keyboard shortcuts: Space for Play/Pause, Left/Right for steps
+    window.addEventListener('keydown', (e) => {
+      if (['INPUT', 'SELECT', 'TEXTAREA'].includes(document.activeElement.tagName)) return;
+      if (e.code === 'Space') {
+        e.preventDefault();
+        togglePlayPause();
+      } else if (e.code === 'ArrowRight') {
+        e.preventDefault();
+        stopAutoPlay();
+        nextStep();
+      } else if (e.code === 'ArrowLeft') {
+        e.preventDefault();
+        stopAutoPlay();
+        prevStep();
+      }
+    });
+
+    window.onload = function() {
+      rebuildSimulation();
+    };
+  </script>
+</body>
+</html>

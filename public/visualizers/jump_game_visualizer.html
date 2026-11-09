@@ -1,0 +1,1312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Jump Game Visualizer • canJump</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      background: radial-gradient(circle at 20% 15%, #0c1a30 0%, #060b17 55%, #02040a 100%);
+      min-height: 100vh;
+      color: #f1f5f9;
+      overflow-x: hidden;
+    }
+    .code-font {
+      font-family: 'JetBrains Mono', monospace;
+    }
+    .glass-card {
+      background: rgba(15, 23, 42, 0.72);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      box-shadow: 0 20px 45px -10px rgba(0, 0, 0, 0.75), inset 0 1px 1px 0 rgba(255, 255, 255, 0.1);
+    }
+    .glass-input {
+      background: rgba(8, 14, 30, 0.82);
+      backdrop-filter: blur(14px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    .glass-btn {
+      background: rgba(255, 255, 255, 0.06);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .glass-btn:hover {
+      background: rgba(255, 255, 255, 0.16);
+      border-color: rgba(255, 255, 255, 0.3);
+      transform: translateY(-1px);
+    }
+    .glass-btn:active {
+      transform: translateY(1px) scale(0.97);
+    }
+    .code-line {
+      transition: background-color 0.15s ease, border-color 0.15s ease;
+    }
+    .code-active {
+      background-color: rgba(6, 182, 212, 0.22) !important;
+      border-left: 4px solid #06b6d4 !important;
+      color: #ffffff;
+      font-weight: 600;
+    }
+    @keyframes pulseGlow {
+      0%, 100% { filter: drop-shadow(0 0 8px rgba(6, 182, 212, 0.6)); }
+      50% { filter: drop-shadow(0 0 22px rgba(6, 182, 212, 1)); }
+    }
+    .pulse-glow {
+      animation: pulseGlow 1.2s infinite ease-in-out;
+    }
+    @keyframes jumpBounce {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-8px); }
+    }
+    .jump-bounce {
+      animation: jumpBounce 0.7s infinite ease-in-out;
+    }
+    ::-webkit-scrollbar {
+      width: 5px;
+      height: 5px;
+    }
+    ::-webkit-scrollbar-track {
+      background: rgba(8, 14, 30, 0.5);
+    }
+    ::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 4px;
+    }
+  </style>
+</head>
+<body class="p-3 sm:p-5 text-slate-100 flex flex-col justify-between relative min-h-screen">
+
+  <!-- Ambient Glowing Orbs -->
+  <div class="fixed top-[-10%] left-[-5%] w-[45vw] h-[45vw] rounded-full bg-cyan-500/15 blur-[140px] pointer-events-none -z-10"></div>
+  <div class="fixed bottom-[-15%] right-[-5%] w-[50vw] h-[50vw] rounded-full bg-emerald-500/15 blur-[150px] pointer-events-none -z-10"></div>
+  <div class="fixed top-[35%] right-[20%] w-[35vw] h-[35vw] rounded-full bg-amber-500/10 blur-[130px] pointer-events-none -z-10"></div>
+
+  <!-- TOP GLASSY CONTROL DECK -->
+  <header class="max-w-7xl mx-auto w-full mb-3">
+    <div class="glass-card p-3.5 sm:p-4 rounded-2xl flex flex-col gap-3 shadow-2xl">
+      
+      <!-- Top Title & Presets -->
+      <div class="flex flex-col lg:flex-row items-center justify-between gap-3">
+        <div class="flex items-center gap-3">
+          <div class="w-11 h-11 rounded-xl bg-gradient-to-tr from-cyan-500 via-teal-500 to-emerald-500 flex items-center justify-center shadow-lg shadow-cyan-500/25 text-slate-950 text-xl font-bold">
+            <i class="fa-solid fa-person-running"></i>
+          </div>
+          <div>
+            <h1 class="text-base sm:text-xl font-extrabold tracking-tight bg-gradient-to-r from-cyan-300 via-teal-200 to-emerald-300 bg-clip-text text-transparent">
+              Jump Game Visualizer
+            </h1>
+            <p class="text-xs text-slate-400 font-mono">
+              Greedy Horizon: <code class="text-cyan-400">farthest = Math.max(farthest, i + arr[i])</code> &bull; Early Stop: <code class="text-emerald-400">farthest &gt;= n - 1</code>
+            </p>
+          </div>
+        </div>
+
+        <!-- Presets & Custom Configuration -->
+        <div class="flex flex-wrap items-center justify-center gap-2">
+          <div class="flex items-center gap-1.5 glass-input px-2.5 py-1 rounded-xl text-xs">
+            <span class="text-cyan-400 font-semibold font-mono">Preset:</span>
+            <select id="presetSelect" class="bg-transparent text-cyan-200 font-mono text-xs border-none focus:outline-none cursor-pointer pr-2 max-w-[260px] sm:max-w-[340px] truncate">
+              <option value="0" class="bg-slate-900 text-slate-100">1: LeetCode Ex 1 (arr=[2, 3, 1, 1, 4] -> true)</option>
+              <option value="1" class="bg-slate-900 text-slate-100">2: Zero Trap Failure (arr=[3, 2, 1, 0, 4] -> false)</option>
+              <option value="2" class="bg-slate-900 text-slate-100">3: Big Initial Jump (arr=[5, 0, 0, 0, 0, 1] -> true)</option>
+              <option value="3" class="bg-slate-900 text-slate-100">4: Single Element (arr=[0] -> true)</option>
+              <option value="4" class="bg-slate-900 text-slate-100">5: Immediate Zero Stuck (arr=[0, 2, 3] -> false)</option>
+              <option value="5" class="bg-slate-900 text-slate-100">6: Pure 1-Step Hops (arr=[1, 1, 1, 1, 1] -> true)</option>
+              <option value="6" class="bg-slate-900 text-slate-100">7: Double Zero Valley (arr=[2, 0, 0] -> true)</option>
+              <option value="7" class="bg-slate-900 text-slate-100">8: Zero at End Reached (arr=[2, 1, 0] -> true)</option>
+              <option value="8" class="bg-slate-900 text-slate-100">9: Long Leap Chain (arr=[1, 2, 0, 3, 0, 0, 2] -> true)</option>
+              <option value="9" class="bg-slate-900 text-slate-100">10: Empty Array Edge Case (arr=[] -> false)</option>
+            </select>
+          </div>
+
+          <div class="flex items-center gap-1.5 glass-input px-2.5 py-1 rounded-xl text-xs">
+            <span class="text-slate-400 font-mono">arr:</span>
+            <input id="customArrInput" type="text" value="2, 3, 1, 1, 4" placeholder="2, 3, 1, 1, 4" class="w-36 bg-transparent text-cyan-300 font-mono text-xs focus:outline-none px-1 border-b border-white/20">
+            <button id="btnApplyCustom" class="px-2.5 py-0.5 rounded bg-cyan-600 hover:bg-cyan-500 text-slate-950 font-mono text-[11px] font-bold transition">Set</button>
+          </div>
+
+          <button id="btnSampleNext" class="glass-btn px-3 py-1.5 text-slate-200 rounded-xl text-xs transition" title="Cycle through sample presets">
+            <i class="fa-solid fa-shuffle text-cyan-400 mr-1"></i> Sample
+          </button>
+
+          <button id="btnSoundToggle" class="glass-btn px-2.5 py-1.5 text-slate-300 rounded-xl text-xs transition" title="Toggle Sound Synthesis">
+            <i id="soundIcon" class="fa-solid fa-volume-high text-emerald-400"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Playback Controls Bar -->
+      <div class="flex flex-wrap items-center justify-between gap-3 pt-2 border-t border-white/10">
+        <!-- Play / Pause / Prev / Next / Reset -->
+        <div class="flex items-center gap-2">
+          <a href="/" class="glass-button px-3 py-1.5 rounded-xl text-xs font-semibold text-slate-300 hover:text-white flex items-center gap-1.5 border border-white/10 hover:border-indigo-500/40 bg-white/5 shrink-0 transition-all active:scale-95 cursor-pointer" title="Return to DSA Atlas Library"><i class="fa-solid fa-arrow-left text-indigo-400"></i><span>DSA Atlas</span></a>
+          <button id="btnReset" class="glass-btn w-10 h-10 rounded-xl text-slate-300 flex items-center justify-center hover:text-white" title="Reset to beginning">
+            <i class="fa-solid fa-backward-step"></i>
+          </button>
+          
+          <button id="btnPrev" class="glass-btn px-3.5 h-10 rounded-xl text-slate-200 flex items-center gap-2 text-xs sm:text-sm font-semibold hover:text-white" title="Previous step">
+            <i class="fa-solid fa-chevron-left text-xs"></i> Prev
+          </button>
+
+          <button id="btnPlayPause" class="px-5 h-10 rounded-xl bg-gradient-to-r from-cyan-500 via-teal-500 to-emerald-500 hover:from-cyan-400 hover:to-emerald-400 active:scale-95 text-slate-950 flex items-center gap-2 text-xs sm:text-sm font-bold shadow-lg shadow-cyan-500/25 transition">
+            <i id="playIcon" class="fa-solid fa-play text-xs"></i>
+            <span id="playText">Start</span>
+          </button>
+
+          <button id="btnNext" class="glass-btn px-3.5 h-10 rounded-xl text-slate-200 flex items-center gap-2 text-xs sm:text-sm font-semibold hover:text-white" title="Next step">
+            Next <i class="fa-solid fa-chevron-right text-xs"></i>
+          </button>
+        </div>
+
+        <!-- Phase Badge & Step Counter -->
+        <div class="flex items-center gap-2">
+          <span class="inline-flex items-center px-3 py-1.5 rounded-full text-xs font-semibold bg-cyan-950/70 text-cyan-300 border border-cyan-500/30 backdrop-blur-md">
+            <span id="phaseDot" class="w-2 h-2 rounded-full bg-cyan-400 mr-2 animate-pulse"></span>
+            <span id="topPhaseBadge">Phase: Ready</span>
+          </span>
+          <span id="topStepCounterBadge" class="text-xs glass-input text-slate-300 px-3 py-1.5 rounded-full font-mono">
+            Step 0 / 0
+          </span>
+        </div>
+
+        <!-- Speed Multipliers -->
+        <div class="flex items-center gap-2">
+          <span class="text-xs text-slate-400 font-medium hidden sm:inline">Speed:</span>
+          <div class="flex items-center glass-input rounded-xl p-1 text-xs">
+            <button class="speed-btn px-2.5 py-1 rounded-lg text-slate-300 hover:text-white" data-speed="1400">0.5x</button>
+            <button class="speed-btn px-2.5 py-1 rounded-lg bg-cyan-500 text-slate-950 font-bold" data-speed="750">1x</button>
+            <button class="speed-btn px-2.5 py-1 rounded-lg text-slate-300 hover:text-white" data-speed="350">2x</button>
+            <button class="speed-btn px-2.5 py-1 rounded-lg text-slate-300 hover:text-white" data-speed="150">4x</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Scrubber Timeline Slider -->
+      <div class="flex items-center gap-3 pt-1 border-t border-white/5">
+        <span class="text-xs font-mono text-slate-400 w-10 text-right" id="sliderCurrent">0</span>
+        <input id="stepSlider" type="range" min="0" max="0" value="0" class="w-full h-1.5 bg-slate-800/80 rounded-lg appearance-none cursor-pointer accent-cyan-500">
+        <span class="text-xs font-mono text-slate-400 w-10" id="sliderTotal">0</span>
+      </div>
+
+    </div>
+  </header>
+
+  <main class="max-w-7xl mx-auto w-full grid grid-cols-1 lg:grid-cols-12 gap-5 flex-grow mb-4">
+    
+    <!-- Left Column: Jump Game Arena (7 cols) -->
+    <div class="lg:col-span-7 flex flex-col gap-4">
+      
+      <div class="glass-card rounded-3xl p-4 sm:p-5 flex flex-col justify-between min-h-[580px] relative overflow-hidden shadow-2xl gap-3.5">
+        
+        <!-- Arena Status Ribbon -->
+        <div class="flex flex-wrap items-center justify-between z-10 gap-2">
+          <div class="flex items-center gap-2 text-xs font-mono text-slate-300 glass-input px-3 py-1.5 rounded-full">
+            <span class="text-cyan-400 font-semibold flex items-center gap-1.5">
+              <i class="fa-solid fa-location-dot text-cyan-400"></i> Index i: <span id="arenaIndexBadge" class="font-bold">0</span>
+            </span>
+            <span class="text-slate-500">•</span>
+            <span class="text-amber-400 font-semibold flex items-center gap-1.5">
+              <i class="fa-solid fa-arrows-left-right text-amber-400"></i> arr[i]: <span id="arenaArrBadge" class="font-bold">2</span>
+            </span>
+            <span class="text-slate-500">•</span>
+            <span class="text-emerald-300 font-semibold flex items-center gap-1.5">
+              <i class="fa-solid fa-flag-checkered text-emerald-400"></i> Farthest: <span id="arenaFarthestBadge" class="font-bold">0</span> / <span id="arenaGoalBadge">4</span>
+            </span>
+          </div>
+
+          <div class="flex items-center gap-2 glass-input px-3 py-1.5 rounded-full text-xs">
+            <span id="arenaStatusDot" class="w-2.5 h-2.5 rounded-full bg-cyan-400"></span>
+            <span id="arenaStatusText" class="text-slate-300 font-mono text-[11px]">Ready</span>
+          </div>
+        </div>
+
+        <!-- Dynamic Action Formula Banner -->
+        <div id="actionFormulaBanner" class="min-h-[46px] flex items-center justify-center">
+          <span class="text-xs font-mono text-slate-300 glass-input px-4 py-1.5 rounded-full">
+            Greedy Horizon Check: farthest = Math.max(farthest, i + arr[i])
+          </span>
+        </div>
+
+        <!-- Stepping Stone Track & Trajectory Jump Deck -->
+        <div class="glass-input p-3.5 rounded-2xl border border-white/10 flex flex-col gap-3 relative">
+          <div class="flex items-center justify-between text-xs font-mono text-slate-300">
+            <span class="flex items-center gap-1.5 text-cyan-300 font-bold">
+              <i class="fa-solid fa-road text-cyan-400"></i> Stepping Stones Track (Goal: index <span id="trackGoalIdx" class="text-emerald-400">4</span>)
+            </span>
+            <span class="text-[11px] text-slate-400 font-mono flex items-center gap-2">
+              <span class="inline-block w-2.5 h-2.5 rounded bg-emerald-400/30 border border-emerald-400"></span> In Reach
+              <span class="inline-block w-2.5 h-2.5 rounded bg-rose-500/30 border border-rose-500 ml-1"></span> Unreachable
+            </span>
+          </div>
+
+          <!-- Stepping Stone Cards Container with SVG Jump Arcs -->
+          <div id="trackStageContainer" class="relative w-full min-h-[170px] bg-slate-950/70 rounded-2xl p-3 border border-white/10 flex flex-col justify-end overflow-x-auto pb-4">
+            
+            <!-- SVG Jump Arc Trajectory Overlay -->
+            <svg id="jumpTrajectorySvg" class="absolute inset-0 w-full h-full pointer-events-none z-10" style="overflow: visible;">
+              <defs>
+                <marker id="jumpArrow" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                  <path d="M 0 1 L 9 5 L 0 9 z" fill="#06b6d4" />
+                </marker>
+                <marker id="reachArrow" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                  <path d="M 0 1 L 9 5 L 0 9 z" fill="#10b981" />
+                </marker>
+              </defs>
+              <path id="activeJumpArc" d="" fill="none" stroke="#06b6d4" stroke-width="2.5" stroke-dasharray="6,4" marker-end="url(#jumpArrow)" opacity="0" />
+            </svg>
+
+            <!-- Tiles Track -->
+            <div id="stonesTrack" class="flex items-end justify-start gap-3 min-w-full z-20 pt-10">
+              <!-- Dynamically populated stone tiles -->
+            </div>
+          </div>
+
+          <!-- Reach Progress Horizon Bar -->
+          <div class="flex flex-col gap-1.5 pt-1">
+            <div class="flex items-center justify-between text-[11px] font-mono text-slate-400">
+              <span>Reachable Horizon Coverage:</span>
+              <span class="text-cyan-300 font-bold"><span id="horizonPercent">0.0</span>% of track</span>
+            </div>
+            <div class="w-full bg-slate-950/80 rounded-xl p-1 border border-white/10 relative overflow-hidden">
+              <div id="horizonFillBar" class="h-3 rounded-lg bg-gradient-to-r from-cyan-500 via-teal-400 to-emerald-400 transition-all duration-300 shadow-md shadow-cyan-500/20" style="width: 0%;"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Math Decision Evaluation Strip -->
+        <div class="glass-input p-3 rounded-2xl border border-white/10 flex flex-col gap-1.5">
+          <div class="flex items-center justify-between text-xs font-mono">
+            <span class="text-slate-400 font-bold">Greedy Math Computation:</span>
+            <span id="decisionBadge" class="text-[11px] px-2 py-0.5 rounded bg-white/5 border border-white/10 font-bold text-slate-300">
+              farthest = Math.max(farthest, i + arr[i]);
+            </span>
+          </div>
+
+          <div id="comparisonMathStrip" class="w-full bg-black/40 px-3 py-2 rounded-xl border border-white/5 flex flex-wrap items-center justify-between text-xs font-mono gap-2">
+            <div class="flex items-center gap-2">
+              <span class="text-cyan-400 font-bold">i: <span id="stripIVal">-</span></span>
+              <span class="text-slate-500">&gt;</span>
+              <span class="text-amber-400 font-bold">farthest: <span id="stripFarthestVal">-</span> ?</span>
+            </div>
+            <div id="stripConditionMath" class="text-slate-300 font-semibold">
+              potential = i + arr[i] = -
+            </div>
+            <div id="stripOutcomePill" class="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-800 text-slate-400">
+              awaiting
+            </div>
+          </div>
+        </div>
+
+        <!-- Detailed Mathematical Explanation Box -->
+        <div id="operationDetailBox" class="bg-black/40 px-3.5 py-2.5 rounded-xl border border-white/5 text-slate-300 text-xs font-mono leading-relaxed text-center">
+          Jump Game keeps track of the maximum reachable index (`farthest`). At each step `i`, if `i > farthest`, we cannot reach this cell and return `false`. Otherwise, we expand our reach to `Math.max(farthest, i + arr[i])`. If `farthest >= arr.length - 1`, we can reach the end and return `true`.
+        </div>
+
+        <!-- Bottom Status Summary Bar -->
+        <div class="z-10 glass-input p-3 rounded-2xl flex items-center justify-between gap-3 text-xs sm:text-sm">
+          <div class="flex items-center gap-2.5 overflow-hidden w-full">
+            <div id="statusDot" class="w-3.5 h-3.5 rounded-full bg-cyan-400 shrink-0"></div>
+            <p id="stepDescription" class="text-slate-200 truncate font-medium text-xs sm:text-sm">Ready to begin. Click Start or Next.</p>
+          </div>
+          <div id="returnPill" class="shrink-0 px-3 py-1 rounded-xl text-xs font-bold font-mono bg-slate-800 text-slate-400 border border-slate-700">
+            pending
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- Right Column: Variable Watcher & Synchronized Java Code (5 cols) -->
+    <div class="lg:col-span-5 flex flex-col gap-4">
+      
+      <!-- Live Variable Watcher -->
+      <div class="glass-card rounded-2xl p-4 shadow-xl flex flex-col gap-3">
+        <h2 class="text-sm font-bold text-slate-300 flex items-center justify-between">
+          <span><i class="fa-solid fa-microchip text-cyan-400 mr-2"></i>Live Variable Watcher</span>
+          <span class="text-xs font-normal text-slate-400 font-mono">Scope: canJump</span>
+        </h2>
+        
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-center">
+          <div class="glass-input p-2 rounded-xl border border-cyan-500/20">
+            <span class="text-[10px] uppercase tracking-wider text-slate-400 font-semibold block">i (index)</span>
+            <span id="varIndex" class="font-mono text-xs sm:text-sm font-bold text-cyan-300">0</span>
+          </div>
+          <div class="glass-input p-2 rounded-xl border border-amber-500/20">
+            <span class="text-[10px] uppercase tracking-wider text-slate-400 font-semibold block">arr[i]</span>
+            <span id="varArrI" class="font-mono text-xs sm:text-sm font-bold text-amber-300">2</span>
+          </div>
+          <div class="glass-input p-2 rounded-xl border border-emerald-500/20">
+            <span class="text-[10px] uppercase tracking-wider text-slate-400 font-semibold block">farthest</span>
+            <span id="varFarthest" class="font-mono text-xs sm:text-sm font-bold text-emerald-400">0</span>
+          </div>
+          <div class="glass-input p-2 rounded-xl border border-purple-500/20">
+            <span class="text-[10px] uppercase tracking-wider text-slate-400 font-semibold block">n - 1 (goal)</span>
+            <span id="varGoal" class="font-mono text-xs sm:text-sm font-bold text-purple-300">4</span>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-2 text-center">
+          <div class="glass-input p-2 rounded-xl border border-indigo-500/20">
+            <span class="text-[10px] uppercase tracking-wider text-slate-400 font-semibold block">i + arr[i] (potential)</span>
+            <span id="varPotential" class="font-mono text-xs font-bold text-indigo-300">-</span>
+          </div>
+          <div class="glass-input p-2 rounded-xl border border-rose-500/20">
+            <span class="text-[10px] uppercase tracking-wider text-slate-400 font-semibold block">i > farthest ?</span>
+            <span id="varUnreachable" class="font-mono text-xs font-bold text-rose-300">false</span>
+          </div>
+        </div>
+
+        <!-- Expression Evaluator -->
+        <div class="glass-input p-2.5 rounded-xl text-xs flex flex-col gap-1 font-mono">
+          <div class="flex items-center justify-between text-slate-400 text-[11px]">
+            <span>Active Expression:</span>
+            <span class="text-cyan-300">Evaluation</span>
+          </div>
+          <div class="flex items-center justify-between text-xs bg-black/40 px-3 py-1.5 rounded-lg border border-white/5">
+            <span id="evalStatement" class="text-slate-300 truncate">Solution.canJump(arr)</span>
+            <span id="evalResult" class="font-bold text-cyan-400 shrink-0 ml-2">-</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Synchronized Java Code Viewer with Zero Page Scroll Shift -->
+      <div class="glass-card rounded-2xl p-4 shadow-xl flex flex-col flex-grow overflow-hidden">
+        <div class="flex items-center justify-between pb-2 border-b border-white/10 mb-2">
+          <div class="flex items-center gap-2">
+            <i class="fa-brands fa-java text-cyan-400 text-lg"></i>
+            <span class="text-xs font-bold text-slate-200">Solution.java &bull; Synchronized</span>
+          </div>
+          <span class="text-[11px] text-slate-400 bg-white/5 px-2 py-0.5 rounded font-mono">O(N) Time &bull; O(1) Space</span>
+        </div>
+
+        <!-- Code lines matching Java source -->
+        <div class="code-font text-[11px] sm:text-xs text-slate-300 overflow-y-auto rounded-xl glass-input p-2.5 border border-white/5 select-none flex-grow max-h-[380px]" id="codeContainer">
+          <div id="code-line-1" class="code-line py-0.5 px-2 rounded flex"><span class="text-slate-600 w-7 select-none">1</span><span class="text-purple-400">class</span>&nbsp;<span class="text-yellow-300">Solution</span>&nbsp;{</div>
+          <div id="code-line-2" class="code-line py-0.5 px-2 rounded flex"><span class="text-slate-600 w-7 select-none">2</span>&nbsp;&nbsp;<span class="text-purple-400">public boolean</span>&nbsp;<span class="text-blue-400">canJump</span>(<span class="text-cyan-400">int</span>[] arr) {</div>
+          <div id="code-line-3" class="code-line py-0.5 px-2 rounded flex"><span class="text-slate-600 w-7 select-none">3</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="text-purple-400">if</span> (arr == <span class="text-purple-400">null</span> || arr.length == <span class="text-amber-400">0</span>) {</div>
+          <div id="code-line-4" class="code-line py-0.5 px-2 rounded flex"><span class="text-slate-600 w-7 select-none">4</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="text-purple-400">return false</span>;</div>
+          <div id="code-line-5" class="code-line py-0.5 px-2 rounded flex"><span class="text-slate-600 w-7 select-none">5</span>&nbsp;&nbsp;&nbsp;&nbsp;}</div>
+          <div id="code-line-6" class="code-line py-0.5 px-2 rounded flex"><span class="text-slate-600 w-7 select-none">6</span></div>
+          <div id="code-line-7" class="code-line py-0.5 px-2 rounded flex"><span class="text-slate-600 w-7 select-none">7</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="text-purple-400">int</span> farthest = <span class="text-amber-400">0</span>;</div>
+          <div id="code-line-8" class="code-line py-0.5 px-2 rounded flex"><span class="text-slate-600 w-7 select-none">8</span></div>
+          <div id="code-line-9" class="code-line py-0.5 px-2 rounded flex"><span class="text-slate-600 w-7 select-none">9</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="text-purple-400">for</span> (<span class="text-purple-400">int</span> i = <span class="text-amber-400">0</span>; i &lt; arr.length; i++) {</div>
+          <div id="code-line-10" class="code-line py-0.5 px-2 rounded flex"><span class="text-slate-600 w-7 select-none">10</span></div>
+          <div id="code-line-11" class="code-line py-0.5 px-2 rounded flex"><span class="text-slate-600 w-7 select-none">11</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="text-slate-500">// Current index cannot be reached</span></div>
+          <div id="code-line-12" class="code-line py-0.5 px-2 rounded flex"><span class="text-slate-600 w-7 select-none">12</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="text-purple-400">if</span> (i &gt; farthest) {</div>
+          <div id="code-line-13" class="code-line py-0.5 px-2 rounded flex"><span class="text-slate-600 w-7 select-none">13</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="text-purple-400">return false</span>;</div>
+          <div id="code-line-14" class="code-line py-0.5 px-2 rounded flex"><span class="text-slate-600 w-7 select-none">14</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}</div>
+          <div id="code-line-15" class="code-line py-0.5 px-2 rounded flex"><span class="text-slate-600 w-7 select-none">15</span></div>
+          <div id="code-line-16" class="code-line py-0.5 px-2 rounded flex"><span class="text-slate-600 w-7 select-none">16</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="text-slate-500">// Update the farthest reachable position</span></div>
+          <div id="code-line-17" class="code-line py-0.5 px-2 rounded flex"><span class="text-slate-600 w-7 select-none">17</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;farthest = Math.max(farthest, i + arr[i]);</div>
+          <div id="code-line-18" class="code-line py-0.5 px-2 rounded flex"><span class="text-slate-600 w-7 select-none">18</span></div>
+          <div id="code-line-19" class="code-line py-0.5 px-2 rounded flex"><span class="text-slate-600 w-7 select-none">19</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="text-slate-500">// Last index is reachable</span></div>
+          <div id="code-line-20" class="code-line py-0.5 px-2 rounded flex"><span class="text-slate-600 w-7 select-none">20</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="text-purple-400">if</span> (farthest &gt;= arr.length - <span class="text-amber-400">1</span>) {</div>
+          <div id="code-line-21" class="code-line py-0.5 px-2 rounded flex"><span class="text-slate-600 w-7 select-none">21</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="text-purple-400">return true</span>;</div>
+          <div id="code-line-22" class="code-line py-0.5 px-2 rounded flex"><span class="text-slate-600 w-7 select-none">22</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}</div>
+          <div id="code-line-23" class="code-line py-0.5 px-2 rounded flex"><span class="text-slate-600 w-7 select-none">23</span>&nbsp;&nbsp;&nbsp;&nbsp;}</div>
+          <div id="code-line-24" class="code-line py-0.5 px-2 rounded flex"><span class="text-slate-600 w-7 select-none">24</span></div>
+          <div id="code-line-25" class="code-line py-0.5 px-2 rounded flex"><span class="text-slate-600 w-7 select-none">25</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="text-purple-400">return true</span>;</div>
+          <div id="code-line-26" class="code-line py-0.5 px-2 rounded flex"><span class="text-slate-600 w-7 select-none">26</span>&nbsp;&nbsp;}</div>
+          <div id="code-line-27" class="code-line py-0.5 px-2 rounded flex"><span class="text-slate-600 w-7 select-none">27</span>}</div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <footer class="max-w-7xl mx-auto w-full text-center text-xs text-slate-500 py-1 font-mono">
+    <p>Greedy Maximum Reach Horizon &bull; Early Termination at Goal &bull; O(N) Time &bull; O(1) Space</p>
+  </footer>
+
+  <script>
+    class SoundEngine {
+      constructor() {
+        this.enabled = true;
+        this.ctx = null;
+      }
+
+      init() {
+        if (!this.ctx) {
+          const AudioContext = window.AudioContext || window.webkitAudioContext;
+          if (AudioContext) {
+            this.ctx = new AudioContext();
+          }
+        }
+      }
+
+      playStep() {
+        if (!this.enabled) return;
+        this.init();
+        if (!this.ctx) return;
+        if (this.ctx.state === 'suspended') this.ctx.resume();
+
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(440, this.ctx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(330, this.ctx.currentTime + 0.05);
+
+        gain.gain.setValueAtTime(0.04, this.ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.05);
+
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.start();
+        osc.stop(this.ctx.currentTime + 0.05);
+      }
+
+      playJump() {
+        if (!this.enabled) return;
+        this.init();
+        if (!this.ctx) return;
+        if (this.ctx.state === 'suspended') this.ctx.resume();
+
+        // Upward frequency sweep for jump
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(320, this.ctx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(740, this.ctx.currentTime + 0.09);
+
+        gain.gain.setValueAtTime(0.06, this.ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.1);
+
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.start();
+        osc.stop(this.ctx.currentTime + 0.1);
+      }
+
+      playComplete() {
+        if (!this.enabled) return;
+        this.init();
+        if (!this.ctx) return;
+        if (this.ctx.state === 'suspended') this.ctx.resume();
+
+        const notes = [523.25, 659.25, 783.99, 1046.50]; // C Major triumph
+        notes.forEach((freq, idx) => {
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(freq, this.ctx.currentTime + idx * 0.06);
+          gain.gain.setValueAtTime(0.06, this.ctx.currentTime + idx * 0.06);
+          gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + idx * 0.06 + 0.18);
+
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+          osc.start(this.ctx.currentTime + idx * 0.06);
+          osc.stop(this.ctx.currentTime + idx * 0.06 + 0.2);
+        });
+      }
+
+      playError() {
+        if (!this.enabled) return;
+        this.init();
+        if (!this.ctx) return;
+        if (this.ctx.state === 'suspended') this.ctx.resume();
+
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(200, this.ctx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(100, this.ctx.currentTime + 0.25);
+
+        gain.gain.setValueAtTime(0.06, this.ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.25);
+
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.start();
+        osc.stop(this.ctx.currentTime + 0.25);
+      }
+    }
+
+    const sound = new SoundEngine();
+
+    const presets = [
+      {
+        name: "1: LeetCode Ex 1 (arr=[2, 3, 1, 1, 4] -> true)",
+        arr: [2, 3, 1, 1, 4]
+      },
+      {
+        name: "2: Zero Trap Failure (arr=[3, 2, 1, 0, 4] -> false)",
+        arr: [3, 2, 1, 0, 4]
+      },
+      {
+        name: "3: Big Initial Jump (arr=[5, 0, 0, 0, 0, 1] -> true)",
+        arr: [5, 0, 0, 0, 0, 1]
+      },
+      {
+        name: "4: Single Element (arr=[0] -> true)",
+        arr: [0]
+      },
+      {
+        name: "5: Immediate Zero Stuck (arr=[0, 2, 3] -> false)",
+        arr: [0, 2, 3]
+      },
+      {
+        name: "6: Pure 1-Step Hops (arr=[1, 1, 1, 1, 1] -> true)",
+        arr: [1, 1, 1, 1, 1]
+      },
+      {
+        name: "7: Double Zero Valley (arr=[2, 0, 0] -> true)",
+        arr: [2, 0, 0]
+      },
+      {
+        name: "8: Zero at End Reached (arr=[2, 1, 0] -> true)",
+        arr: [2, 1, 0]
+      },
+      {
+        name: "9: Long Leap Chain (arr=[1, 2, 0, 3, 0, 0, 2] -> true)",
+        arr: [1, 2, 0, 3, 0, 0, 2]
+      },
+      {
+        name: "10: Empty Array Edge Case (arr=[] -> false)",
+        arr: []
+      }
+    ];
+
+    let currentPresetIdx = 0;
+    let currentArr = [...presets[0].arr];
+    let currentSteps = [];
+    let currentStepIndex = 0;
+    let isPlaying = false;
+    let playIntervalId = null;
+    let playSpeed = 750;
+
+    function generateAlgorithmSteps(arr) {
+      const steps = [];
+      const n = arr ? arr.length : 0;
+      const targetGoal = Math.max(0, n - 1);
+
+      function snapshot(meta) {
+        steps.push({
+          line: meta.line,
+          phase: meta.phase,
+          passName: meta.passName ?? 'Execution',
+          arr: arr ? [...arr] : [],
+          n: n,
+          goal: targetGoal,
+          i: meta.i ?? 0,
+          arrI: (meta.i !== undefined && meta.i >= 0 && meta.i < n) ? arr[meta.i] : null,
+          farthest: meta.farthest ?? 0,
+          jumpTarget: meta.jumpTarget ?? null,
+          evalStmt: meta.evalStmt ?? '-',
+          evalResult: meta.evalResult ?? '-',
+          detail: meta.detail ?? '',
+          returnPillText: meta.returnPillText ?? 'running...',
+          desc: meta.desc ?? '',
+          stripIVal: meta.stripIVal ?? '-',
+          stripFarthestVal: meta.stripFarthestVal ?? '-',
+          stripConditionMath: meta.stripConditionMath ?? '-',
+          stripOutcome: meta.stripOutcome ?? 'awaiting',
+          statusType: meta.statusType ?? 'neutral',
+          isGoalReached: meta.isGoalReached ?? false,
+          isBlocked: meta.isBlocked ?? false
+        });
+      }
+
+      // Step 1: Function Entry (Line 2)
+      snapshot({
+        line: 2,
+        phase: `Function Entry: canJump(arr of length ${n})`,
+        passName: 'Entry',
+        i: 0,
+        farthest: 0,
+        evalStmt: `canJump([${arr.join(', ')}]);`,
+        evalResult: `arr.length = ${n}`,
+        detail: `Starting Jump Game simulation with array of length ${n}. Target destination is index ${targetGoal}.`,
+        statusType: 'neutral',
+        returnPillText: 'entered',
+        desc: `Called canJump(arr) with ${n} element(s).`
+      });
+
+      // Step 2: Line 3-5: null or empty check
+      const isEmpty = (arr == null || arr.length === 0);
+      snapshot({
+        line: 3,
+        phase: `Check Null or Empty: arr == null || arr.length == 0 -> ${isEmpty}`,
+        passName: 'Validation',
+        i: 0,
+        farthest: 0,
+        evalStmt: `if (arr == null || arr.length == 0) // ${isEmpty}`,
+        evalResult: `${isEmpty}`,
+        detail: isEmpty ? 'Array is empty or null. Returning false immediately.' : `Array length is ${n} > 0. Validation passed.`,
+        statusType: isEmpty ? 'error' : 'neutral',
+        returnPillText: isEmpty ? 'return false' : 'valid array',
+        desc: `Checked if array is null or empty (${isEmpty}).`
+      });
+
+      if (isEmpty) {
+        snapshot({
+          line: 4,
+          phase: 'Empty Array: return false;',
+          passName: 'Finished',
+          i: 0,
+          farthest: 0,
+          evalStmt: 'return false; // arr is null or empty',
+          evalResult: 'false',
+          detail: 'No stepping stones exist to jump on. Returned false.',
+          statusType: 'error',
+          returnPillText: 'return false',
+          desc: 'Terminated early: returned false for empty array.'
+        });
+        return steps;
+      }
+
+      // Step 3: Line 7: int farthest = 0;
+      let farthest = 0;
+      snapshot({
+        line: 7,
+        phase: 'Initialize Reach Horizon: int farthest = 0;',
+        passName: 'Setup',
+        i: 0,
+        farthest: 0,
+        evalStmt: 'int farthest = 0;',
+        evalResult: 'farthest = 0',
+        detail: 'The farthest reachable position initialized to 0 (we start standing at index 0).',
+        statusType: 'neutral',
+        returnPillText: 'farthest = 0',
+        desc: 'Initialized farthest reachable position to 0.'
+      });
+
+      // Step 4: Loop through array (Line 9-23)
+      for (let i = 0; i < n; i++) {
+        const val = arr[i];
+
+        // Line 9: for loop header
+        snapshot({
+          line: 9,
+          phase: `Loop Check: i = ${i} < arr.length (${n})`,
+          passName: 'Loop Header',
+          i: i,
+          farthest: farthest,
+          evalStmt: `for (int i = ${i}; i < ${n}; i++)`,
+          evalResult: `i = ${i}, arr[${i}] = ${val}`,
+          detail: `Entering loop iteration for index ${i} with jump capacity arr[${i}] = ${val}. Current reach horizon is ${farthest}.`,
+          statusType: 'neutral',
+          returnPillText: `i = ${i}`,
+          desc: `Advancing to index ${i} (value = ${val}).`,
+          stripIVal: i,
+          stripFarthestVal: farthest,
+          stripConditionMath: `i = ${i}, farthest = ${farthest}`,
+          stripOutcome: 'ITERATING'
+        });
+
+        // Line 12: if (i > farthest)
+        const isBlocked = (i > farthest);
+        snapshot({
+          line: 12,
+          phase: `Check Reachability: if (i > farthest) -> ${i} > ${farthest} is ${isBlocked}`,
+          passName: 'Reach Check',
+          i: i,
+          farthest: farthest,
+          evalStmt: `if (${i} > ${farthest}) // ${isBlocked}`,
+          evalResult: `${isBlocked}`,
+          detail: isBlocked
+            ? `Runner stuck! Current index ${i} is strictly greater than farthest reachable index ${farthest}. This cell cannot be reached.`
+            : `Cell reachable: i (${i}) <= farthest (${farthest}). Continuing jump calculation.`,
+          statusType: isBlocked ? 'error' : 'neutral',
+          returnPillText: isBlocked ? 'unreachable' : 'reachable',
+          desc: isBlocked ? `Stuck at index ${i}: beyond reach horizon ${farthest}.` : `Index ${i} is within reachable horizon.`,
+          stripIVal: i,
+          stripFarthestVal: farthest,
+          stripConditionMath: `${i} > ${farthest} -> ${isBlocked}`,
+          stripOutcome: isBlocked ? 'BLOCKED' : 'PASS',
+          isBlocked: isBlocked
+        });
+
+        if (isBlocked) {
+          snapshot({
+            line: 13,
+            phase: `Cannot Reach Index ${i}: return false;`,
+            passName: 'Finished',
+            i: i,
+            farthest: farthest,
+            evalStmt: 'return false; // Trapped behind barrier',
+            evalResult: 'false',
+            detail: `Cannot bridge the gap to index ${i}. Max reach ended at ${farthest}. Returning false.`,
+            statusType: 'error',
+            returnPillText: 'return false',
+            desc: `Failed: Cannot reach index ${i}. Returned false.`,
+            stripIVal: i,
+            stripFarthestVal: farthest,
+            stripConditionMath: `Gap: ${farthest} < ${i}`,
+            stripOutcome: 'FAIL: false',
+            isBlocked: true
+          });
+          return steps;
+        }
+
+        // Line 17: farthest = Math.max(farthest, i + arr[i]);
+        const potentialReach = i + val;
+        const prevFarthest = farthest;
+        const newFarthest = Math.max(prevFarthest, potentialReach);
+        const didExpand = newFarthest > prevFarthest;
+        farthest = newFarthest;
+
+        snapshot({
+          line: 17,
+          phase: `Update Horizon: farthest = Math.max(${prevFarthest}, ${i} + ${val}) -> ${farthest}`,
+          passName: 'Expand Horizon',
+          i: i,
+          farthest: farthest,
+          jumpTarget: potentialReach,
+          evalStmt: `farthest = Math.max(${prevFarthest}, ${potentialReach}); // ${farthest}`,
+          evalResult: `farthest = ${farthest}`,
+          detail: didExpand
+            ? `Jump of ${val} from index ${i} reaches index ${potentialReach}. Reach horizon expanded from ${prevFarthest} to ${farthest}!`
+            : `Jump of ${val} from index ${i} reaches index ${potentialReach}, which does not exceed current farthest reach of ${prevFarthest}.`,
+          statusType: 'jump',
+          returnPillText: `reach -> ${farthest}`,
+          desc: didExpand ? `Expanded reach horizon to index ${farthest}.` : `Horizon remains index ${farthest}.`,
+          stripIVal: i,
+          stripFarthestVal: prevFarthest,
+          stripConditionMath: `i + arr[i] = ${i} + ${val} = ${potentialReach}`,
+          stripOutcome: didExpand ? `EXPAND to ${farthest}` : `KEEP ${farthest}`
+        });
+
+        // Line 20: if (farthest >= arr.length - 1)
+        const isGoalReached = (farthest >= targetGoal);
+        snapshot({
+          line: 20,
+          phase: `Goal Check: if (farthest >= ${targetGoal}) -> ${farthest} >= ${targetGoal} is ${isGoalReached}`,
+          passName: 'Goal Check',
+          i: i,
+          farthest: farthest,
+          jumpTarget: potentialReach,
+          evalStmt: `if (${farthest} >= ${targetGoal}) // ${isGoalReached}`,
+          evalResult: `${isGoalReached}`,
+          detail: isGoalReached
+            ? `Success! Reach horizon ${farthest} has reached or surpassed the final index ${targetGoal}. Early termination returns true!`
+            : `Farthest ${farthest} < target ${targetGoal}. Continuing to explore next stepping stone.`,
+          statusType: isGoalReached ? 'finished' : 'neutral',
+          returnPillText: isGoalReached ? 'goal reachable' : 'not yet reached',
+          desc: isGoalReached ? `Goal reached! Farthest (${farthest}) >= target (${targetGoal}).` : `Destination index ${targetGoal} not yet reached.`,
+          stripIVal: i,
+          stripFarthestVal: farthest,
+          stripConditionMath: `${farthest} >= ${targetGoal} is ${isGoalReached}`,
+          stripOutcome: isGoalReached ? 'GOAL REACHABLE' : 'CONTINUE',
+          isGoalReached: isGoalReached
+        });
+
+        if (isGoalReached) {
+          snapshot({
+            line: 21,
+            phase: 'Goal Reachable: return true;',
+            passName: 'Finished',
+            i: i,
+            farthest: farthest,
+            jumpTarget: potentialReach,
+            evalStmt: 'return true; // Target reached',
+            evalResult: 'true',
+            detail: `Optimal path confirmed: Last index ${targetGoal} is fully reachable. Returning true.`,
+            statusType: 'finished',
+            returnPillText: 'return true',
+            desc: `Optimal jump verified: Destination reached. Returned true.`,
+            stripIVal: i,
+            stripFarthestVal: farthest,
+            stripConditionMath: `Final farthest: ${farthest} >= ${targetGoal}`,
+            stripOutcome: 'SUCCESS: true',
+            isGoalReached: true
+          });
+          return steps;
+        }
+      }
+
+      // Step 5: Line 25: return true (natural loop termination)
+      snapshot({
+        line: 25,
+        phase: 'Loop Completed: return true;',
+        passName: 'Finished',
+        i: n - 1,
+        farthest: farthest,
+        evalStmt: 'return true; // End reached naturally',
+        evalResult: 'true',
+        detail: 'Traversed all elements without getting stuck. Target is reachable. Returning true.',
+        statusType: 'finished',
+        returnPillText: 'return true',
+        desc: 'All steps traversed successfully. Returned true.',
+        stripIVal: n - 1,
+        stripFarthestVal: farthest,
+        stripConditionMath: 'Natural termination',
+        stripOutcome: 'SUCCESS: true',
+        isGoalReached: true
+      });
+
+      return steps;
+    }
+
+    const btnPlayPause = document.getElementById('btnPlayPause');
+    const playIcon = document.getElementById('playIcon');
+    const playText = document.getElementById('playText');
+    const btnPrev = document.getElementById('btnPrev');
+    const btnNext = document.getElementById('btnNext');
+    const btnReset = document.getElementById('btnReset');
+    const topPhaseBadge = document.getElementById('topPhaseBadge');
+    const phaseDot = document.getElementById('phaseDot');
+    const topStepCounterBadge = document.getElementById('topStepCounterBadge');
+    const stepSlider = document.getElementById('stepSlider');
+    const sliderCurrent = document.getElementById('sliderCurrent');
+    const sliderTotal = document.getElementById('sliderTotal');
+    const presetSelect = document.getElementById('presetSelect');
+    const customArrInput = document.getElementById('customArrInput');
+    const btnApplyCustom = document.getElementById('btnApplyCustom');
+    const btnSampleNext = document.getElementById('btnSampleNext');
+    const btnSoundToggle = document.getElementById('btnSoundToggle');
+    const soundIcon = document.getElementById('soundIcon');
+
+    const arenaIndexBadge = document.getElementById('arenaIndexBadge');
+    const arenaArrBadge = document.getElementById('arenaArrBadge');
+    const arenaFarthestBadge = document.getElementById('arenaFarthestBadge');
+    const arenaGoalBadge = document.getElementById('arenaGoalBadge');
+    const arenaStatusDot = document.getElementById('arenaStatusDot');
+    const arenaStatusText = document.getElementById('arenaStatusText');
+    const actionFormulaBanner = document.getElementById('actionFormulaBanner');
+    const trackGoalIdx = document.getElementById('trackGoalIdx');
+    const stonesTrack = document.getElementById('stonesTrack');
+    const trackStageContainer = document.getElementById('trackStageContainer');
+    const jumpTrajectorySvg = document.getElementById('jumpTrajectorySvg');
+    const activeJumpArc = document.getElementById('activeJumpArc');
+    const horizonPercent = document.getElementById('horizonPercent');
+    const horizonFillBar = document.getElementById('horizonFillBar');
+
+    const decisionBadge = document.getElementById('decisionBadge');
+    const stripIVal = document.getElementById('stripIVal');
+    const stripFarthestVal = document.getElementById('stripFarthestVal');
+    const stripConditionMath = document.getElementById('stripConditionMath');
+    const stripOutcomePill = document.getElementById('stripOutcomePill');
+    const operationDetailBox = document.getElementById('operationDetailBox');
+    const stepDescription = document.getElementById('stepDescription');
+    const statusDot = document.getElementById('statusDot');
+    const returnPill = document.getElementById('returnPill');
+
+    const varIndex = document.getElementById('varIndex');
+    const varArrI = document.getElementById('varArrI');
+    const varFarthest = document.getElementById('varFarthest');
+    const varGoal = document.getElementById('varGoal');
+    const varPotential = document.getElementById('varPotential');
+    const varUnreachable = document.getElementById('varUnreachable');
+    const evalStatement = document.getElementById('evalStatement');
+    const evalResult = document.getElementById('evalResult');
+    const codeContainer = document.getElementById('codeContainer');
+
+    function renderStep(step) {
+      if (!step) return;
+
+      topPhaseBadge.textContent = step.phase;
+      topStepCounterBadge.textContent = `Step ${currentStepIndex} / ${currentSteps.length - 1}`;
+      stepDescription.textContent = step.desc;
+
+      stepSlider.value = currentStepIndex;
+      sliderCurrent.textContent = currentStepIndex;
+
+      // Arena badges
+      arenaIndexBadge.textContent = step.i !== undefined ? step.i : '-';
+      arenaArrBadge.textContent = step.arrI !== null ? step.arrI : '-';
+      arenaFarthestBadge.textContent = step.farthest;
+      arenaGoalBadge.textContent = step.goal;
+      trackGoalIdx.textContent = step.goal;
+
+      // Horizon Progress Calculation
+      const goalIdx = Math.max(1, step.goal);
+      const reachPct = Math.min(100, Math.max(0, (step.farthest / goalIdx) * 100));
+      horizonPercent.textContent = reachPct.toFixed(1);
+      horizonFillBar.style.width = `${reachPct}%`;
+
+      // Live Variables
+      varIndex.textContent = step.i !== undefined ? step.i : '-';
+      varArrI.textContent = step.arrI !== null ? step.arrI : '-';
+      varFarthest.textContent = step.farthest;
+      varGoal.textContent = step.goal;
+      varPotential.textContent = (step.i !== undefined && step.arrI !== null) ? (step.i + step.arrI) : '-';
+      varUnreachable.textContent = step.isBlocked ? 'true' : 'false';
+
+      evalStatement.textContent = step.evalStmt;
+      evalResult.textContent = step.evalResult;
+      operationDetailBox.textContent = step.detail;
+      returnPill.textContent = step.returnPillText;
+
+      stripIVal.textContent = step.stripIVal;
+      stripFarthestVal.textContent = step.stripFarthestVal;
+      stripConditionMath.textContent = step.stripConditionMath;
+      stripOutcomePill.textContent = step.stripOutcome;
+
+      // Status Pill colors
+      if (step.statusType === 'jump') {
+        stripOutcomePill.className = "px-2.5 py-0.5 rounded text-[10px] font-bold bg-cyan-950 text-cyan-300 border border-cyan-500/40";
+      } else if (step.statusType === 'finished') {
+        stripOutcomePill.className = "px-2.5 py-0.5 rounded text-[10px] font-bold bg-emerald-950 text-emerald-300 border border-emerald-500/50";
+      } else if (step.statusType === 'error') {
+        stripOutcomePill.className = "px-2.5 py-0.5 rounded text-[10px] font-bold bg-rose-950 text-rose-300 border border-rose-500/50";
+      } else {
+        stripOutcomePill.className = "px-2.5 py-0.5 rounded text-[10px] font-bold bg-slate-800 text-slate-400";
+      }
+
+      // Render Stepping Stones Track
+      renderStonesTrack(step);
+
+      // Render Jump Arc Trajectory
+      renderJumpArc(step);
+
+      // Banners & Audio Triggers
+      if (step.statusType === 'jump') {
+        actionFormulaBanner.innerHTML = `
+          <div class="flex items-center gap-2 bg-cyan-950/90 text-cyan-300 border border-cyan-500/50 px-4 py-1.5 rounded-full text-xs font-mono font-bold shadow-lg shadow-cyan-500/30 pulse-glow">
+            <i class="fa-solid fa-person-running text-cyan-400"></i>
+            <span>JUMP: arr[${step.i}] = ${step.arrI} &bull; Potential: ${step.i} + ${step.arrI} = ${step.i + step.arrI} &bull; Farthest: ${step.farthest}</span>
+          </div>`;
+        arenaStatusDot.className = "w-2.5 h-2.5 rounded-full bg-cyan-400 animate-ping";
+        arenaStatusText.textContent = "Leap Calculated";
+        statusDot.className = "w-3.5 h-3.5 rounded-full bg-cyan-400 shrink-0";
+        returnPill.className = "shrink-0 px-3 py-1 rounded-xl text-xs font-bold font-mono bg-cyan-950/90 text-cyan-300 border border-cyan-400";
+        phaseDot.className = "w-2 h-2 rounded-full bg-cyan-400 mr-2";
+        decisionBadge.className = "text-[11px] px-2 py-0.5 rounded bg-cyan-950 text-cyan-300 border border-cyan-500/40 font-mono font-bold";
+        decisionBadge.textContent = `farthest = Math.max(${step.stripFarthestVal}, ${step.i + step.arrI}) = ${step.farthest}`;
+        sound.playJump();
+
+      } else if (step.statusType === 'finished') {
+        actionFormulaBanner.innerHTML = `
+          <div class="flex items-center gap-2 bg-emerald-950/90 text-emerald-300 border border-emerald-500/50 px-4 py-1.5 rounded-full text-xs font-mono font-bold shadow-md shadow-emerald-500/30">
+            <i class="fa-solid fa-flag-checkered text-emerald-400"></i>
+            <span>Destination Reachable! farthest (${step.farthest}) &gt;= goal (${step.goal}) &bull; return true</span>
+          </div>`;
+        arenaStatusDot.className = "w-2.5 h-2.5 rounded-full bg-emerald-400";
+        arenaStatusText.textContent = "Goal Reached (true)";
+        statusDot.className = "w-3.5 h-3.5 rounded-full bg-emerald-400 shrink-0";
+        returnPill.className = "shrink-0 px-3 py-1 rounded-xl text-xs font-bold font-mono bg-emerald-950/90 text-emerald-300 border border-emerald-400";
+        phaseDot.className = "w-2 h-2 rounded-full bg-emerald-400 mr-2";
+        decisionBadge.className = "text-[11px] px-2 py-0.5 rounded bg-emerald-950 text-emerald-300 border border-emerald-500/40 font-mono font-bold";
+        decisionBadge.textContent = `return true; (farthest: ${step.farthest} >= ${step.goal})`;
+        sound.playComplete();
+
+      } else if (step.statusType === 'error') {
+        actionFormulaBanner.innerHTML = `
+          <div class="flex items-center gap-2 bg-rose-950/90 text-rose-300 border border-rose-500/50 px-4 py-1.5 rounded-full text-xs font-mono font-bold shadow-md shadow-rose-500/30">
+            <i class="fa-solid fa-circle-xmark text-rose-400"></i>
+            <span>Runner Blocked! Index ${step.i} &gt; farthest (${step.farthest}) &bull; return false</span>
+          </div>`;
+        arenaStatusDot.className = "w-2.5 h-2.5 rounded-full bg-rose-400";
+        arenaStatusText.textContent = "Trapped (false)";
+        statusDot.className = "w-3.5 h-3.5 rounded-full bg-rose-400 shrink-0";
+        returnPill.className = "shrink-0 px-3 py-1 rounded-xl text-xs font-bold font-mono bg-rose-950/90 text-rose-300 border border-rose-400";
+        phaseDot.className = "w-2 h-2 rounded-full bg-rose-400 mr-2";
+        decisionBadge.className = "text-[11px] px-2 py-0.5 rounded bg-rose-950 text-rose-300 border border-rose-500/40 font-mono font-bold";
+        decisionBadge.textContent = `return false; (${step.i} > ${step.farthest})`;
+        sound.playError();
+
+      } else {
+        actionFormulaBanner.innerHTML = `<span class="text-xs font-mono text-slate-300 glass-input px-4 py-1.5 rounded-full">${step.phase}</span>`;
+        arenaStatusDot.className = "w-2.5 h-2.5 rounded-full bg-cyan-400";
+        arenaStatusText.textContent = "Simulating";
+        statusDot.className = "w-3.5 h-3.5 rounded-full bg-cyan-400 shrink-0";
+        returnPill.className = "shrink-0 px-3 py-1 rounded-xl text-xs font-bold font-mono bg-slate-800 text-slate-300 border border-slate-700";
+        phaseDot.className = "w-2 h-2 rounded-full bg-cyan-400 mr-2 animate-pulse";
+        sound.playStep();
+      }
+
+      // Strictly localized code highlight without page jumping
+      highlightCodeLine(step.line);
+    }
+
+    function renderStonesTrack(step) {
+      stonesTrack.innerHTML = '';
+      if (!step.arr || step.arr.length === 0) {
+        stonesTrack.innerHTML = '<span class="text-xs text-slate-500 font-mono italic p-4">Empty array - no stepping stones</span>';
+        return;
+      }
+
+      const isCompact = step.arr.length > 7;
+
+      step.arr.forEach((val, idx) => {
+        const isCurrent = (idx === step.i);
+        const isGoal = (idx === step.goal);
+        const isReachable = (idx <= step.farthest);
+        const isFarthestEdge = (idx === step.farthest);
+        const isBlockedTile = (step.isBlocked && idx === step.i);
+
+        const tile = document.createElement('div');
+        tile.id = `stone-tile-${idx}`;
+        tile.dataset.index = idx;
+
+        let tileClass = `${isCompact ? 'min-w-[70px] p-2' : 'min-w-[85px] sm:min-w-[95px] p-2.5'} rounded-2xl border flex flex-col items-center justify-between font-mono text-xs transition-all duration-300 select-none relative shrink-0 `;
+
+        if (isBlockedTile) {
+          tileClass += "bg-rose-950/90 border-2 border-rose-500 text-rose-200 shadow-xl shadow-rose-500/40 ";
+        } else if (isCurrent) {
+          tileClass += "bg-cyan-950/90 border-2 border-cyan-400 text-cyan-100 shadow-xl shadow-cyan-500/40 scale-105 z-20 ";
+        } else if (isGoal && step.isGoalReached) {
+          tileClass += "bg-emerald-950/90 border-2 border-emerald-400 text-emerald-200 shadow-xl shadow-emerald-500/40 ";
+        } else if (isReachable) {
+          tileClass += "bg-slate-900/80 border-emerald-500/40 text-slate-200 hover:border-emerald-400 ";
+        } else {
+          tileClass += "bg-black/50 border-white/5 text-slate-500 opacity-60 ";
+        }
+
+        tile.className = tileClass;
+
+        // Runner icon atop active tile
+        const runnerHtml = isCurrent 
+          ? `<div class="absolute -top-7 left-1/2 -translate-x-1/2 flex items-center gap-1 bg-cyan-400 text-slate-950 px-2 py-0.5 rounded-full text-[10px] font-bold shadow-md shadow-cyan-500/50 jump-bounce">
+              <i class="fa-solid fa-person-running"></i>
+              <span>i=${idx}</span>
+            </div>`
+          : '';
+
+        // Goal / Flag indicator
+        const goalBadge = isGoal 
+          ? `<span class="px-1.5 py-0.2 rounded font-bold ${step.isGoalReached ? 'bg-emerald-400 text-slate-950' : 'bg-emerald-950/70 text-emerald-300 border border-emerald-500/30'}">GOAL</span>`
+          : `<span class="px-1.5 py-0.2 rounded ${isReachable ? 'bg-white/5 text-slate-400' : 'bg-rose-950/40 text-rose-400'}">[${idx}]</span>`;
+
+        tile.innerHTML = `
+          ${runnerHtml}
+
+          <!-- Header: Index and Status -->
+          <div class="w-full flex items-center justify-between pb-1 border-b border-white/10 mb-1 text-[10px]">
+            <span class="${isCurrent ? 'text-cyan-300 font-extrabold' : 'text-slate-400'}">idx: ${idx}</span>
+            ${goalBadge}
+          </div>
+
+          <!-- Stone Center Value -->
+          <div class="my-1.5 flex flex-col items-center justify-center">
+            <div class="w-10 h-10 rounded-xl border-2 ${isBlockedTile ? 'border-rose-400 bg-rose-950 text-rose-300' : (isCurrent ? 'border-cyan-300 bg-cyan-900/60 text-cyan-200 shadow-md shadow-cyan-500/30' : (val === 0 ? 'border-amber-500/40 bg-amber-950/30 text-amber-300' : 'border-white/10 bg-black/40 text-slate-200'))} flex items-center justify-center font-extrabold text-base">
+              ${val}
+            </div>
+            <span class="text-[9px] text-slate-400 mt-1">jump: +${val}</span>
+          </div>
+
+          <!-- Bottom Status Tag -->
+          <div class="w-full pt-1 border-t border-white/10 flex items-center justify-between text-[9px]">
+            <span class="text-slate-500">Reach:</span>
+            <span class="font-bold ${isFarthestEdge ? 'text-emerald-400' : (isReachable ? 'text-teal-400' : 'text-rose-400')}">
+              ${isFarthestEdge ? 'HORIZON' : (isReachable ? 'YES' : 'NO')}
+            </span>
+          </div>
+        `;
+
+        stonesTrack.appendChild(tile);
+      });
+    }
+
+    function renderJumpArc(step) {
+      if (!step || !step.arr || step.arr.length === 0 || step.jumpTarget === null || step.i === undefined) {
+        activeJumpArc.setAttribute('opacity', '0');
+        return;
+      }
+
+      // Calculate coordinates from the active tile to target tile
+      const sourceTile = document.getElementById(`stone-tile-${step.i}`);
+      const targetIdx = Math.min(step.arr.length - 1, step.jumpTarget);
+      const targetTile = document.getElementById(`stone-tile-${targetIdx}`);
+
+      if (!sourceTile || !targetTile || !trackStageContainer) {
+        activeJumpArc.setAttribute('opacity', '0');
+        return;
+      }
+
+      const stageRect = trackStageContainer.getBoundingClientRect();
+      const srcRect = sourceTile.getBoundingClientRect();
+      const tgtRect = targetTile.getBoundingClientRect();
+
+      const startX = (srcRect.left + srcRect.width / 2) - stageRect.left + trackStageContainer.scrollLeft;
+      const startY = srcRect.top - stageRect.top;
+
+      const endX = (tgtRect.left + tgtRect.width / 2) - stageRect.left + trackStageContainer.scrollLeft;
+      const endY = tgtRect.top - stageRect.top;
+
+      // Draw smooth parabolic bezier jump arc
+      const apexY = Math.max(10, Math.min(startY, endY) - 50);
+      const pathD = `M ${startX} ${startY} Q ${(startX + endX) / 2} ${apexY} ${endX} ${endY}`;
+
+      activeJumpArc.setAttribute('d', pathD);
+      activeJumpArc.setAttribute('opacity', '1');
+      activeJumpArc.setAttribute('stroke', step.isGoalReached ? '#10b981' : '#06b6d4');
+    }
+
+    function highlightCodeLine(lineNumber) {
+      document.querySelectorAll('.code-line').forEach(el => el.classList.remove('code-active'));
+      const activeLineEl = document.getElementById(`code-line-${lineNumber}`);
+      if (!activeLineEl || !codeContainer) return;
+
+      activeLineEl.classList.add('code-active');
+
+      const lineOffsetTop = activeLineEl.offsetTop;
+      const containerScrollTop = codeContainer.scrollTop;
+      const containerHeight = codeContainer.clientHeight;
+      const lineTotalHeight = activeLineEl.offsetHeight;
+
+      // Strictly adjust container internal scrollbar without shifting entire browser page
+      if (lineOffsetTop < containerScrollTop) {
+        codeContainer.scrollTop = lineOffsetTop - 10;
+      } else if (lineOffsetTop + lineTotalHeight > containerScrollTop + containerHeight) {
+        codeContainer.scrollTop = (lineOffsetTop + lineTotalHeight) - containerHeight + 10;
+      }
+    }
+
+    function goToStep(index) {
+      if (index < 0) index = 0;
+      if (index >= currentSteps.length) index = currentSteps.length - 1;
+      currentStepIndex = index;
+      renderStep(currentSteps[currentStepIndex]);
+
+      if (currentStepIndex === currentSteps.length - 1 && isPlaying) {
+        stopAutoPlay();
+      }
+    }
+
+    function nextStep() {
+      if (currentStepIndex < currentSteps.length - 1) {
+        goToStep(currentStepIndex + 1);
+      } else {
+        stopAutoPlay();
+      }
+    }
+
+    function prevStep() {
+      if (currentStepIndex > 0) {
+        goToStep(currentStepIndex - 1);
+      }
+    }
+
+    function startAutoPlay() {
+      if (currentStepIndex >= currentSteps.length - 1) {
+        currentStepIndex = 0;
+      }
+      isPlaying = true;
+      playIcon.className = "fa-solid fa-pause text-xs";
+      playText.textContent = "Stop";
+      btnPlayPause.classList.replace('from-cyan-500', 'from-pink-500');
+      btnPlayPause.classList.replace('to-emerald-500', 'to-rose-700');
+
+      clearInterval(playIntervalId);
+      playIntervalId = setInterval(() => {
+        nextStep();
+      }, playSpeed);
+    }
+
+    function stopAutoPlay() {
+      isPlaying = false;
+      playIcon.className = "fa-solid fa-play text-xs";
+      playText.textContent = "Start";
+      btnPlayPause.classList.replace('from-pink-500', 'from-cyan-500');
+      btnPlayPause.classList.replace('to-rose-700', 'to-emerald-500');
+      clearInterval(playIntervalId);
+    }
+
+    function togglePlayPause() {
+      if (isPlaying) {
+        stopAutoPlay();
+      } else {
+        startAutoPlay();
+      }
+    }
+
+    function rebuildSimulation() {
+      stopAutoPlay();
+      currentSteps = generateAlgorithmSteps(currentArr);
+      stepSlider.max = Math.max(0, currentSteps.length - 1);
+      sliderTotal.textContent = Math.max(0, currentSteps.length - 1);
+      currentStepIndex = 0;
+      goToStep(0);
+    }
+
+    btnPlayPause.addEventListener('click', togglePlayPause);
+    btnNext.addEventListener('click', () => { stopAutoPlay(); nextStep(); });
+    btnPrev.addEventListener('click', () => { stopAutoPlay(); prevStep(); });
+    btnReset.addEventListener('click', () => { stopAutoPlay(); goToStep(0); });
+
+    presetSelect.addEventListener('change', (e) => {
+      currentPresetIdx = parseInt(e.target.value, 10);
+      const sel = presets[currentPresetIdx];
+      currentArr = [...sel.arr];
+      customArrInput.value = currentArr.join(', ');
+      rebuildSimulation();
+    });
+
+    btnSampleNext.addEventListener('click', () => {
+      currentPresetIdx = (currentPresetIdx + 1) % presets.length;
+      presetSelect.value = currentPresetIdx;
+      const sel = presets[currentPresetIdx];
+      currentArr = [...sel.arr];
+      customArrInput.value = currentArr.join(', ');
+      rebuildSimulation();
+    });
+
+    btnApplyCustom.addEventListener('click', () => {
+      const raw = customArrInput.value.trim();
+      if (!raw) {
+        currentArr = [];
+        rebuildSimulation();
+        return;
+      }
+      try {
+        const parsed = raw.split(',').map(s => parseInt(s.trim(), 10)).filter(n => !isNaN(n));
+        currentArr = parsed;
+        rebuildSimulation();
+      } catch (err) {
+        console.error("Invalid custom array input", err);
+      }
+    });
+
+    stepSlider.addEventListener('input', (e) => {
+      stopAutoPlay();
+      goToStep(parseInt(e.target.value, 10));
+    });
+
+    document.querySelectorAll('.speed-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.speed-btn').forEach(b => {
+          b.className = "speed-btn px-2.5 py-1 rounded-lg text-slate-300 hover:text-white";
+        });
+        btn.className = "speed-btn px-2.5 py-1 rounded-lg bg-cyan-500 text-slate-950 font-bold";
+        playSpeed = parseInt(btn.dataset.speed, 10);
+        if (isPlaying) {
+          startAutoPlay();
+        }
+      });
+    });
+
+    btnSoundToggle.addEventListener('click', () => {
+      sound.enabled = !sound.enabled;
+      soundIcon.className = sound.enabled
+        ? "fa-solid fa-volume-high text-emerald-400"
+        : "fa-solid fa-volume-xmark text-slate-500";
+    });
+
+    // Keyboard shortcuts: Space for Play/Pause, Left/Right for steps
+    window.addEventListener('keydown', (e) => {
+      if (['INPUT', 'SELECT', 'TEXTAREA'].includes(document.activeElement.tagName)) return;
+      if (e.code === 'Space') {
+        e.preventDefault();
+        togglePlayPause();
+      } else if (e.code === 'ArrowRight') {
+        e.preventDefault();
+        stopAutoPlay();
+        nextStep();
+      } else if (e.code === 'ArrowLeft') {
+        e.preventDefault();
+        stopAutoPlay();
+        prevStep();
+      }
+    });
+
+    window.addEventListener('resize', () => {
+      if (currentSteps[currentStepIndex]) {
+        renderJumpArc(currentSteps[currentStepIndex]);
+      }
+    });
+
+    window.onload = function() {
+      rebuildSimulation();
+    };
+  </script>
+</body>
+</html>

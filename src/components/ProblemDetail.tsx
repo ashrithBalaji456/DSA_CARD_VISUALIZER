@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import {
   X,
   ExternalLink,
@@ -13,6 +13,7 @@ import {
   Lightbulb,
   Sparkles,
   Link as LinkIcon,
+  ArrowRight,
 } from 'lucide-react';
 import type { DSAProblem } from '../types/problem';
 import { DifficultyBadge } from './DifficultyBadge';
@@ -27,7 +28,7 @@ interface Props {
   onToggleSolved: (id: string) => void;
   onToggleBookmark: (id: string) => void;
   onClose: () => void;
-  onSelectRelatedProblem?: (problemTitle: string) => void;
+  onSelectRelatedProblem?: (problemTitle: string, problemNumber?: number) => void;
 }
 
 export const ProblemDetail: React.FC<Props> = ({
@@ -42,6 +43,11 @@ export const ProblemDetail: React.FC<Props> = ({
   const [activeTab, setActiveTab] = useState<'statement' | 'flow' | 'examples' | 'notes'>(
     'flow'
   );
+
+  const scrollRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    scrollRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
+  }, [problem.id]);
 
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto bg-black/80 backdrop-blur-xl flex items-center justify-center p-3 sm:p-6 lg:p-8 animate-in fade-in duration-200">
@@ -170,7 +176,7 @@ export const ProblemDetail: React.FC<Props> = ({
         </div>
 
         {/* Modal Scrollable Body */}
-        <div className="p-6 overflow-y-auto space-y-6">
+        <div ref={scrollRef} className="p-6 overflow-y-auto space-y-6">
           {/* TAB 1: VISUAL PROBLEM-SOLVING FLOW */}
           {activeTab === 'flow' && (
             <div className="space-y-6">
@@ -383,28 +389,41 @@ export const ProblemDetail: React.FC<Props> = ({
               {/* Related Problems */}
               {problem.relatedProblems && problem.relatedProblems.length > 0 && (
                 <div className="glass-card rounded-2xl p-6">
-                  <h3 className="text-sm font-semibold text-white uppercase tracking-wider mb-4 flex items-center gap-2">
-                    <LinkIcon className="w-4 h-4 text-indigo-400" />
-                    <span>Related Problems</span>
-                  </h3>
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4">
+                    <h3 className="text-sm font-semibold text-white uppercase tracking-wider flex items-center gap-2">
+                      <LinkIcon className="w-4 h-4 text-indigo-400" />
+                      <span>Related Problems in Atlas</span>
+                    </h3>
+                    <span className="text-[11px] text-slate-400 font-mono">
+                      Click any card to explore
+                    </span>
+                  </div>
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                     {problem.relatedProblems.map((rp, i) => (
                       <div
                         key={i}
-                        onClick={() => onSelectRelatedProblem?.(rp.title)}
-                        className="p-3 rounded-xl bg-white/[0.03] border border-white/5 hover:border-indigo-500/40 hover:bg-white/[0.06] transition-all cursor-pointer flex items-center justify-between"
+                        onClick={() => onSelectRelatedProblem?.(rp.title, rp.number)}
+                        className="group p-3.5 rounded-xl bg-white/[0.03] border border-white/5 hover:border-indigo-500/50 hover:bg-white/[0.07] transition-all cursor-pointer flex items-center justify-between shadow-sm hover:shadow-indigo-500/10 active:scale-[0.98]"
                       >
-                        <div>
-                          {rp.number && (
-                            <span className="text-[10px] font-mono text-slate-400 block">
-                              #{rp.number}
+                        <div className="min-w-0 pr-2">
+                          <div className="flex items-center gap-1.5 mb-1">
+                            {rp.number && (
+                              <span className="text-[10px] font-mono font-semibold text-indigo-400">
+                                #{rp.number}
+                              </span>
+                            )}
+                            <span className="text-[9px] font-medium px-1.5 py-0.2 rounded bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
+                              ✦ In Atlas
                             </span>
-                          )}
-                          <span className="text-xs font-semibold text-white hover:text-indigo-300 transition-colors">
+                          </div>
+                          <span className="text-xs font-semibold text-white group-hover:text-indigo-300 transition-colors block truncate">
                             {rp.title}
                           </span>
                         </div>
-                        <DifficultyBadge difficulty={rp.difficulty} size="sm" />
+                        <div className="shrink-0 flex items-center gap-2">
+                          <DifficultyBadge difficulty={rp.difficulty} size="sm" />
+                          <ArrowRight className="w-3.5 h-3.5 text-slate-500 group-hover:text-indigo-300 group-hover:translate-x-0.5 transition-all" />
+                        </div>
                       </div>
                     ))}
                   </div>
