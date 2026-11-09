@@ -7,6 +7,7 @@ import {
 } from 'lucide-react';
 import type { Difficulty, SortOption, StatusFilter } from '../types/problem';
 import { CATEGORIES } from '../data/categories';
+import { CustomDropdown } from './CustomDropdown';
 
 interface Props {
   selectedCategory: string;
@@ -35,6 +36,23 @@ export const FilterPanel: React.FC<Props> = ({
   activeFilterCount,
   totalFilteredCount,
 }) => {
+  const categoryOptions = [
+    { value: 'all', label: 'All Categories (20)' },
+    ...CATEGORIES.map((cat) => ({
+      value: cat.id,
+      label: cat.name,
+      colorDot: cat.color,
+    })),
+  ];
+
+  const sortOptions = [
+    { value: 'number-asc', label: 'Problem Number (Ascending)' },
+    { value: 'number-desc', label: 'Problem Number (Descending)' },
+    { value: 'difficulty-asc', label: 'Difficulty (Easy to Hard)' },
+    { value: 'difficulty-desc', label: 'Difficulty (Hard to Easy)' },
+    { value: 'title-asc', label: 'Title (A - Z)' },
+    { value: 'title-desc', label: 'Title (Z - A)' },
+  ];
   return (
     <div className="glass-panel rounded-2xl p-4 sm:p-5 mb-6">
       <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-4 pb-4 border-b border-white/5">
@@ -118,63 +136,23 @@ export const FilterPanel: React.FC<Props> = ({
           </div>
         </div>
 
-        {/* Category Dropdown */}
-        <div>
-          <label className="block text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-2">
-            Category
-          </label>
-          <div className="relative">
-            <select
-              value={selectedCategory}
-              onChange={(e) => onCategoryChange(e.target.value)}
-              className="w-full appearance-none bg-black/30 border border-white/10 rounded-xl px-3 py-2 text-xs text-white outline-none focus:border-indigo-500 cursor-pointer"
-            >
-              <option value="all" className="bg-[#080B14]">
-                All Categories (20)
-              </option>
-              {CATEGORIES.map((cat) => (
-                <option key={cat.id} value={cat.id} className="bg-[#080B14]">
-                  {cat.name}
-                </option>
-              ))}
-            </select>
-            <Layers className="w-3.5 h-3.5 text-slate-400 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
-          </div>
-        </div>
+        {/* Category Dropdown with Curved Edges */}
+        <CustomDropdown
+          label="Category"
+          options={categoryOptions}
+          selectedValue={selectedCategory}
+          onSelect={onCategoryChange}
+          icon={<Layers className="w-3.5 h-3.5" />}
+        />
 
-        {/* Sort By Dropdown */}
-        <div>
-          <label className="block text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-2">
-            Sort By
-          </label>
-          <div className="relative">
-            <select
-              value={sortBy}
-              onChange={(e) => onSortChange(e.target.value as SortOption)}
-              className="w-full appearance-none bg-black/30 border border-white/10 rounded-xl px-3 py-2 text-xs text-white outline-none focus:border-indigo-500 cursor-pointer"
-            >
-              <option value="number-asc" className="bg-[#080B14]">
-                Problem Number (Ascending)
-              </option>
-              <option value="number-desc" className="bg-[#080B14]">
-                Problem Number (Descending)
-              </option>
-              <option value="difficulty-asc" className="bg-[#080B14]">
-                Difficulty (Easy to Hard)
-              </option>
-              <option value="difficulty-desc" className="bg-[#080B14]">
-                Difficulty (Hard to Easy)
-              </option>
-              <option value="title-asc" className="bg-[#080B14]">
-                Title (A - Z)
-              </option>
-              <option value="title-desc" className="bg-[#080B14]">
-                Title (Z - A)
-              </option>
-            </select>
-            <ArrowUpDown className="w-3.5 h-3.5 text-slate-400 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
-          </div>
-        </div>
+        {/* Sort By Dropdown with Curved Edges */}
+        <CustomDropdown
+          label="Sort By"
+          options={sortOptions}
+          selectedValue={sortBy}
+          onSelect={(val) => onSortChange(val as SortOption)}
+          icon={<ArrowUpDown className="w-3.5 h-3.5" />}
+        />
       </div>
     </div>
   );
