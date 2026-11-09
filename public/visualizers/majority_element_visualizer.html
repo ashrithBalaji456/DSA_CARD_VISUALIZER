@@ -1,0 +1,1050 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Majority Element Visualizer - Boyer-Moore Voting Algorithm</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=Inter:wght@300;400;500;600;700&display=swap');
+    
+    body {
+      font-family: 'Inter', sans-serif;
+      background: radial-gradient(circle at 15% 15%, #0f172a 0%, #030712 100%);
+      color: #e2e8f0;
+      min-height: 100vh;
+    }
+    
+    .code-font {
+      font-family: 'Fira Code', monospace;
+    }
+
+    .glass-panel {
+      background: rgba(15, 23, 42, 0.72);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.6);
+    }
+
+    .glass-button {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      backdrop-filter: blur(12px);
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .glass-button:hover:not(:disabled) {
+      background: rgba(255, 255, 255, 0.14);
+      border-color: rgba(255, 255, 255, 0.25);
+      transform: translateY(-1px);
+    }
+    .glass-button:active:not(:disabled) {
+      transform: translateY(1px);
+    }
+    .glass-button:disabled {
+      opacity: 0.35;
+      cursor: not-allowed;
+    }
+
+    .code-line {
+      transition: all 0.2s ease;
+      border-left: 3px solid transparent;
+      padding: 2px 10px;
+    }
+    .code-line.active-line {
+      background: rgba(56, 189, 248, 0.16);
+      border-left: 3px solid #38bdf8;
+      color: #ffffff;
+      box-shadow: inset 0 0 16px rgba(56, 189, 248, 0.12);
+    }
+
+    /* Custom scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: rgba(15, 23, 42, 0.5);
+    }
+    ::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.15);
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(255, 255, 255, 0.28);
+    }
+
+    @keyframes pulseGlow {
+      0%, 100% { transform: scale(1); filter: drop-shadow(0 0 8px rgba(16, 185, 129, 0.4)); }
+      50% { transform: scale(1.05); filter: drop-shadow(0 0 18px rgba(16, 185, 129, 0.8)); }
+    }
+    .winner-pulse {
+      animation: pulseGlow 1.8s infinite ease-in-out;
+    }
+  </style>
+</head>
+<body class="p-4 sm:p-6 lg:p-8 flex flex-col items-center justify-start min-h-screen">
+
+  <!-- Ambient Glow Background Blobs -->
+  <div class="fixed top-12 left-1/4 w-96 h-96 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none -z-10"></div>
+  <div class="fixed bottom-20 right-1/4 w-96 h-96 bg-amber-500/10 rounded-full blur-3xl pointer-events-none -z-10"></div>
+  <div class="fixed top-1/2 left-2/3 w-80 h-80 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none -z-10"></div>
+
+  <!-- MAIN WRAPPER -->
+  <div class="w-full max-w-7xl flex flex-col gap-6">
+
+    <!-- TOP GLASS CONTROLS DECK -->
+    <header class="glass-panel rounded-2xl p-4 sm:p-5 flex flex-col gap-4 sticky top-4 z-50">
+      <div class="flex flex-wrap items-center justify-between gap-4">
+        
+        <!-- Title & Subtitle -->
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-cyan-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-cyan-500/20 text-white font-bold text-lg">
+            <i class="fa-solid fa-crown text-amber-300"></i>
+          </div>
+          <div>
+            <h1 class="text-lg sm:text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white via-slate-200 to-slate-400">
+              Majority Element Visualizer
+            </h1>
+            <p class="text-xs text-slate-400 flex items-center gap-2">
+              <span class="inline-block w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+              LeetCode 169 • Boyer-Moore Voting Algorithm • &Omicron;(n) Time &Omicron;(1) Space
+            </p>
+          </div>
+        </div>
+
+        <!-- Center Controls: Reset, Prev, Play/Stop, Next -->
+        <div class="flex items-center gap-2 sm:gap-3 bg-black/30 p-1.5 rounded-xl border border-white/5">
+          <button id="btnReset" class="glass-button text-slate-300 hover:text-white px-3 py-2 rounded-lg text-sm flex items-center gap-1.5" title="Reset to Start">
+            <i class="fa-solid fa-rotate-left"></i>
+            <span class="hidden sm:inline">Reset</span>
+          </button>
+          <button id="btnPrev" class="glass-button text-slate-300 hover:text-white px-3 py-2 rounded-lg text-sm flex items-center gap-1.5" title="Previous Step (Left Arrow)">
+            <i class="fa-solid fa-backward-step"></i>
+            <span class="hidden sm:inline">Prev</span>
+          </button>
+          <button id="btnPlay" class="glass-button bg-cyan-500/20 text-cyan-300 hover:bg-cyan-500/30 border-cyan-500/40 px-4 py-2 rounded-lg text-sm font-semibold flex items-center gap-2 shadow-lg shadow-cyan-500/10" title="Start / Stop (Spacebar)">
+            <i class="fa-solid fa-play" id="playIcon"></i>
+            <span id="playText">Start</span>
+          </button>
+          <button id="btnNext" class="glass-button text-slate-300 hover:text-white px-3 py-2 rounded-lg text-sm flex items-center gap-1.5" title="Next Step (Right Arrow)">
+            <span class="hidden sm:inline">Next</span>
+            <i class="fa-solid fa-forward-step"></i>
+          </button>
+        </div>
+
+        <!-- Speed & Audio Controls -->
+        <div class="flex items-center gap-2">
+          <div class="flex items-center bg-black/30 rounded-xl p-1 border border-white/5 text-xs text-slate-400">
+            <span class="px-2 py-1"><i class="fa-solid fa-gauge-high mr-1"></i>Speed</span>
+            <button class="speed-btn px-2 py-1 rounded-lg hover:text-white" data-speed="1600">0.5x</button>
+            <button class="speed-btn px-2 py-1 rounded-lg bg-cyan-500/30 text-cyan-300 font-semibold" data-speed="800">1x</button>
+            <button class="speed-btn px-2 py-1 rounded-lg hover:text-white" data-speed="400">2x</button>
+            <button class="speed-btn px-2 py-1 rounded-lg hover:text-white" data-speed="200">4x</button>
+          </div>
+          <button id="btnAudio" class="glass-button p-2.5 rounded-xl text-slate-400 hover:text-cyan-300" title="Toggle Synthesized Audio">
+            <i class="fa-solid fa-volume-high" id="audioIcon"></i>
+          </button>
+        </div>
+
+      </div>
+
+      <!-- Scrubber Slider & Step Status Bar -->
+      <div class="flex flex-col sm:flex-row items-center gap-3 pt-1 border-t border-white/5">
+        <div class="flex items-center gap-2 text-xs text-slate-400 w-full sm:w-auto shrink-0">
+          <span id="stepCounterBadge" class="code-font px-2.5 py-1 rounded-md bg-white/5 border border-white/10 text-cyan-300">
+            Step: 0 / 0
+          </span>
+          <span id="phaseBadge" class="px-2.5 py-1 rounded-md bg-indigo-500/20 border border-indigo-500/30 text-indigo-300">
+            Ready
+          </span>
+        </div>
+        <div class="w-full flex items-center gap-3">
+          <input type="range" id="stepScrubber" min="0" max="0" value="0" class="w-full h-1.5 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-cyan-400">
+        </div>
+      </div>
+
+    </header>
+
+    <!-- PRESETS & CUSTOM INPUT ROW -->
+    <section class="glass-panel rounded-2xl p-4 flex flex-wrap items-center justify-between gap-4">
+      <div class="flex flex-wrap items-center gap-3">
+        <label for="presetSelect" class="text-xs uppercase font-semibold text-slate-400 tracking-wider flex items-center gap-1.5">
+          <i class="fa-solid fa-list-check text-cyan-400"></i> Presets:
+        </label>
+        <select id="presetSelect" class="bg-black/50 border border-white/10 text-xs sm:text-sm text-slate-200 rounded-xl px-3 py-2 outline-none focus:border-cyan-500/50">
+          <option value="0">1: LeetCode Ex 1 ([3, 2, 3] &rarr; 3)</option>
+          <option value="1">2: LeetCode Ex 2 ([2, 2, 1, 1, 1, 2, 2] &rarr; 2)</option>
+          <option value="2">3: Alternating Neutralization ([1, 2, 1, 2, 1, 2, 1] &rarr; 1)</option>
+          <option value="3">4: Late Comeback ([1, 2, 3, 4, 5, 5, 5, 5, 5, 5] &rarr; 5)</option>
+          <option value="4">5: Unanimous Array ([7, 7, 7, 7, 7] &rarr; 7)</option>
+          <option value="5">6: Single Element ([42] &rarr; 42)</option>
+          <option value="6">7: Negative Numbers ([-1, -1, 2, -1, 3, -1, -1] &rarr; -1)</option>
+          <option value="7">8: Two Element Duel ([9, 9, 4] &rarr; 9)</option>
+          <option value="8">9: Heavy Front-Loaded ([6, 6, 6, 6, 1, 2, 3] &rarr; 6)</option>
+          <option value="9">10: Oscillating Leads ([3, 3, 4, 2, 4, 4, 2, 4, 4] &rarr; 4)</option>
+        </select>
+      </div>
+
+      <div class="flex items-center gap-2 flex-grow max-w-md">
+        <input type="text" id="customInput" placeholder="e.g. 2, 2, 1, 1, 1, 2, 2" class="w-full bg-black/40 border border-white/10 rounded-xl px-3 py-1.5 text-xs text-slate-200 outline-none focus:border-cyan-400">
+        <button id="btnApplyCustom" class="glass-button text-xs px-3 py-2 rounded-xl text-cyan-300 font-semibold shrink-0">
+          Load
+        </button>
+      </div>
+    </section>
+
+    <!-- MAIN VISUAL STAGE & JAVA CODE SECTION -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+      <!-- LEFT: VISUALIZATION ARENA (7 Cols) -->
+      <section class="lg:col-span-7 flex flex-col gap-6">
+        
+        <!-- Live Variable Status Cards -->
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          
+          <!-- Element Card -->
+          <div class="glass-panel rounded-xl p-3 flex flex-col justify-between border-cyan-500/20">
+            <span class="text-[11px] text-slate-400 uppercase font-semibold flex items-center justify-between">
+              Candidate (element)
+              <i class="fa-solid fa-shield-halved text-cyan-400"></i>
+            </span>
+            <div id="varElement" class="code-font text-xl font-bold text-cyan-300 mt-2">0</div>
+            <span id="candidateStatusSub" class="text-[10px] text-slate-500 mt-1">Holding leadership</span>
+          </div>
+
+          <!-- Count Balance Card -->
+          <div class="glass-panel rounded-xl p-3 flex flex-col justify-between border-amber-500/20">
+            <span class="text-[11px] text-slate-400 uppercase font-semibold flex items-center justify-between">
+              Vote Count (count)
+              <i class="fa-solid fa-scale-balanced text-amber-400"></i>
+            </span>
+            <div id="varCount" class="code-font text-xl font-bold text-amber-300 mt-2">0</div>
+            <span id="countStatusSub" class="text-[10px] text-slate-500 mt-1">Net surplus</span>
+          </div>
+
+          <!-- Current Stream Number -->
+          <div class="glass-panel rounded-xl p-3 flex flex-col justify-between border-purple-500/20">
+            <span class="text-[11px] text-slate-400 uppercase font-semibold flex items-center justify-between">
+              Incoming (num)
+              <i class="fa-solid fa-arrow-down-long text-purple-400"></i>
+            </span>
+            <div id="varCurrentNum" class="code-font text-xl font-bold text-purple-300 mt-2">-</div>
+            <span id="currentNumIndexSub" class="text-[10px] text-slate-500 mt-1">Index: -</span>
+          </div>
+
+          <!-- Majority Criterion Threshold -->
+          <div class="glass-panel rounded-xl p-3 flex flex-col justify-between border-emerald-500/20">
+            <span class="text-[11px] text-slate-400 uppercase font-semibold flex items-center justify-between">
+              Majority Goal (&gt; &lfloor;n/2&rfloor;)
+              <i class="fa-solid fa-bullseye text-emerald-400"></i>
+            </span>
+            <div id="varThreshold" class="code-font text-xl font-bold text-emerald-300 mt-2">&gt; 1</div>
+            <span id="thresholdSub" class="text-[10px] text-slate-500 mt-1">n = 3</span>
+          </div>
+
+        </div>
+
+        <!-- 1. Array Stream Stage -->
+        <div class="glass-panel rounded-2xl p-4 flex flex-col gap-2.5">
+          <div class="flex items-center justify-between text-xs">
+            <span class="font-semibold text-slate-300 uppercase tracking-wider flex items-center gap-1.5">
+              <i class="fa-solid fa-layer-group text-cyan-400"></i>
+              Input Array Stream: <span class="code-font text-slate-400">nums[]</span>
+            </span>
+            <span id="streamStatusText" class="text-slate-400">Iterating left to right</span>
+          </div>
+          <div id="arrayStreamContainer" class="flex flex-wrap gap-2.5 min-h-[64px] p-3 bg-black/30 rounded-xl border border-white/5 items-center">
+            <!-- Dynamically populated numbers with active badges -->
+          </div>
+        </div>
+
+        <!-- 2. Boyer-Moore Battle Arena & Candidate Throne -->
+        <div class="glass-panel rounded-2xl p-5 flex flex-col gap-4">
+          <div class="flex items-center justify-between text-xs pb-2 border-b border-white/5">
+            <span class="font-semibold text-slate-300 uppercase tracking-wider flex items-center gap-1.5">
+              <i class="fa-solid fa-chess-king text-amber-400"></i>
+              Candidate Throne & Vote Reservoir
+            </span>
+            <span id="clashActionBadge" class="px-2 py-0.5 rounded text-[11px] font-semibold bg-white/5 text-slate-400 border border-white/10">
+              Awaiting First Step
+            </span>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 items-center">
+            
+            <!-- Left: Candidate Throne Showcase -->
+            <div id="throneCard" class="bg-black/40 rounded-xl p-4 border border-white/10 flex flex-col items-center justify-center text-center relative overflow-hidden transition-all duration-300">
+              <div class="w-12 h-12 rounded-full bg-cyan-500/10 border border-cyan-400/40 flex items-center justify-center mb-2 shadow-inner">
+                <i id="throneIcon" class="fa-solid fa-shield text-cyan-400 text-lg"></i>
+              </div>
+              <span class="text-xs uppercase font-semibold text-slate-400 tracking-wider">Active Candidate</span>
+              <div id="throneValue" class="code-font text-3xl font-extrabold text-cyan-300 my-1">None</div>
+              <p id="throneExplanation" class="text-[11px] text-slate-400 max-w-xs">
+                Candidate is elected when count drops to zero.
+              </p>
+            </div>
+
+            <!-- Right: Vote Balance Meter -->
+            <div class="bg-black/40 rounded-xl p-4 border border-white/10 flex flex-col gap-3">
+              <div class="flex items-center justify-between text-xs">
+                <span class="text-slate-400 font-medium">Surplus Momentum Gauge:</span>
+                <span id="voteCountBadge" class="code-font font-bold text-amber-300 text-sm">count = 0</span>
+              </div>
+
+              <!-- Meter Bar -->
+              <div class="w-full h-3 bg-slate-900 rounded-full overflow-hidden border border-white/10 p-0.5">
+                <div id="voteProgressBar" class="h-full rounded-full bg-gradient-to-r from-amber-500 to-emerald-400 transition-all duration-300" style="width: 0%;"></div>
+              </div>
+
+              <!-- Action Indicator Feedback Box -->
+              <div id="actionFeedbackBox" class="p-2.5 rounded-lg bg-white/5 border border-white/10 text-xs flex items-center gap-2">
+                <i id="actionFeedbackIcon" class="fa-solid fa-circle-info text-cyan-400"></i>
+                <span id="actionFeedbackText" class="text-slate-300">Algorithm ready. Click Start or Next.</span>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Total Frequency Distribution Summary -->
+          <div class="pt-2 border-t border-white/5 flex flex-col gap-2">
+            <span class="text-[11px] uppercase tracking-wider text-slate-400 font-semibold flex items-center justify-between">
+              <span>Overall Element Counts in Array:</span>
+              <span class="text-[10px] text-slate-500 italic">For verification reference</span>
+            </span>
+            <div id="frequencyBadgeContainer" class="flex flex-wrap gap-2">
+              <!-- Populated with count pills -->
+            </div>
+          </div>
+
+        </div>
+
+      </section>
+
+      <!-- RIGHT: JAVA CODE CONTAINER WITH SYNCHRONIZED LINE HIGHLIGHTING (5 Cols) -->
+      <section class="lg:col-span-5 flex flex-col gap-4">
+        
+        <div class="glass-panel rounded-2xl p-4 flex flex-col h-full">
+          <div class="flex items-center justify-between pb-3 border-b border-white/10 text-xs">
+            <div class="flex items-center gap-2">
+              <div class="flex gap-1.5">
+                <span class="w-3 h-3 rounded-full bg-rose-500/80 inline-block"></span>
+                <span class="w-3 h-3 rounded-full bg-amber-500/80 inline-block"></span>
+                <span class="w-3 h-3 rounded-full bg-emerald-500/80 inline-block"></span>
+              </div>
+              <span class="code-font text-slate-300 font-semibold ml-2">Solution.java</span>
+            </div>
+            <span class="text-[11px] text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20 code-font">
+              &Omicron;(1) Extra Space
+            </span>
+          </div>
+
+          <!-- Code Box -->
+          <div id="codeContainer" class="code-font text-xs sm:text-[13px] leading-relaxed text-slate-300 py-3 overflow-y-auto max-h-[580px] flex-grow select-none">
+            <div class="code-line" id="line1"><span class="text-slate-500 mr-2"> 1</span><span class="text-indigo-400 font-semibold">class</span> <span class="text-amber-300">Solution</span> {</div>
+            <div class="code-line" id="line2"><span class="text-slate-500 mr-2"> 2</span>    <span class="text-indigo-400 font-semibold">public int</span> <span class="text-cyan-300">majorityElement</span>(<span class="text-indigo-400">int</span>[] nums) {</div>
+            <div class="code-line" id="line3"><span class="text-slate-500 mr-2"> 3</span>        <span class="text-indigo-400 font-semibold">int</span> element = <span class="text-rose-400">0</span>;</div>
+            <div class="code-line" id="line4"><span class="text-slate-500 mr-2"> 4</span>        <span class="text-indigo-400 font-semibold">int</span> count = <span class="text-rose-400">0</span>;</div>
+            <div class="code-line" id="line5"><span class="text-slate-500 mr-2"> 5</span></div>
+            <div class="code-line" id="line6"><span class="text-slate-500 mr-2"> 6</span>        <span class="text-indigo-400 font-semibold">for</span> (<span class="text-indigo-400">int</span> num : nums) {</div>
+            <div class="code-line" id="line7"><span class="text-slate-500 mr-2"> 7</span>            <span class="text-indigo-400 font-semibold">if</span> (count == <span class="text-rose-400">0</span>) {</div>
+            <div class="code-line" id="line8"><span class="text-slate-500 mr-2"> 8</span>                element = num;</div>
+            <div class="code-line" id="line9"><span class="text-slate-500 mr-2"> 9</span>            }</div>
+            <div class="code-line" id="line10"><span class="text-slate-500 mr-2">10</span>            <span class="text-indigo-400 font-semibold">if</span> (element != num) {</div>
+            <div class="code-line" id="line11"><span class="text-slate-500 mr-2">11</span>                count--;</div>
+            <div class="code-line" id="line12"><span class="text-slate-500 mr-2">12</span>            }</div>
+            <div class="code-line" id="line13"><span class="text-slate-500 mr-2">13</span>            <span class="text-indigo-400 font-semibold">else</span> {</div>
+            <div class="code-line" id="line14"><span class="text-slate-500 mr-2">14</span>                count++;</div>
+            <div class="code-line" id="line15"><span class="text-slate-500 mr-2">15</span>            }</div>
+            <div class="code-line" id="line16"><span class="text-slate-500 mr-2">16</span>        }</div>
+            <div class="code-line" id="line17"><span class="text-slate-500 mr-2">17</span></div>
+            <div class="code-line" id="line18"><span class="text-slate-500 mr-2">18</span>        <span class="text-indigo-400 font-semibold">return</span> element;</div>
+            <div class="code-line" id="line19"><span class="text-slate-500 mr-2">19</span>    }</div>
+            <div class="code-line" id="line20"><span class="text-slate-500 mr-2">20</span>}</div>
+          </div>
+
+          <!-- Step Narrative Live Box -->
+          <div class="mt-3 p-3 bg-black/40 border border-white/5 rounded-xl flex items-start gap-2.5">
+            <i class="fa-solid fa-circle-info text-cyan-400 mt-0.5 text-xs"></i>
+            <div class="text-xs text-slate-300 leading-relaxed" id="stepDescription">
+              Ready to execute Boyer-Moore Voting Algorithm. Click <b>Start</b> or <b>Next</b> to begin.
+            </div>
+          </div>
+
+        </div>
+
+      </section>
+
+    </div>
+
+    <!-- BOTTOM SECTION: LEETCODE 169 PROBLEM STATEMENT & ALGORITHM SUMMARY -->
+    <footer class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-2">
+      
+      <!-- Problem Statement Card -->
+      <div class="glass-panel rounded-2xl p-5 flex flex-col gap-3">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <span class="text-amber-400 font-bold"><i class="fa-solid fa-certificate mr-1"></i>169. Majority Element</span>
+            <span class="px-2 py-0.5 rounded text-[11px] font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">Easy</span>
+          </div>
+          <span class="text-xs text-slate-400 font-mono">LeetCode</span>
+        </div>
+
+        <p class="text-xs text-slate-300 leading-relaxed">
+          Given an array <code class="text-cyan-300 font-mono">nums</code> of size <code class="font-mono text-slate-300">n</code>, return the <b>majority element</b>.
+          <br><br>
+          The majority element is defined as the element that appears <b>more than &lfloor;n / 2&rfloor; times</b>. You may assume that the majority element always exists in the array.
+        </p>
+
+        <div class="space-y-2 pt-2 border-t border-white/5 text-xs text-slate-300">
+          <div class="bg-black/30 p-2.5 rounded-lg border border-white/5 font-mono">
+            <span class="text-slate-400">Example 1:</span><br>
+            <b>Input:</b> nums = [3, 2, 3]<br>
+            <b>Output:</b> <span class="text-emerald-400 font-bold">3</span> (&lfloor;3 / 2&rfloor; = 1, '3' appears 2 times &gt; 1)
+          </div>
+          <div class="bg-black/30 p-2.5 rounded-lg border border-white/5 font-mono">
+            <span class="text-slate-400">Example 2:</span><br>
+            <b>Input:</b> nums = [2, 2, 1, 1, 1, 2, 2]<br>
+            <b>Output:</b> <span class="text-emerald-400 font-bold">2</span> (&lfloor;7 / 2&rfloor; = 3, '2' appears 4 times &gt; 3)
+          </div>
+        </div>
+
+        <div class="text-[11px] text-slate-400">
+          <b>Constraints:</b> <code class="font-mono text-slate-300">1 &le; n &le; 5 &times; 10<sup>4</sup></code>, <code class="font-mono text-slate-300">-10<sup>9</sup> &le; nums[i] &le; 10<sup>9</sup></code>. The input guarantees a majority element exists.
+        </div>
+      </div>
+
+      <!-- Architectural & Complexity Summary Card -->
+      <div class="glass-panel rounded-2xl p-5 flex flex-col gap-3">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <span class="text-cyan-400 font-bold"><i class="fa-solid fa-brain mr-1"></i>Boyer-Moore Voting Theory</span>
+          </div>
+          <span class="px-2 py-0.5 rounded text-[11px] font-semibold bg-cyan-500/20 text-cyan-300 border border-cyan-500/30">Linear &Constant Extra Space</span>
+        </div>
+
+        <div class="space-y-3 text-xs text-slate-300 leading-relaxed">
+          <div class="p-3 bg-cyan-950/20 border border-cyan-500/20 rounded-xl">
+            <b class="text-cyan-300 flex items-center gap-1.5 mb-1">
+              <i class="fa-solid fa-handshake-slash"></i> Mutual Annihilation Principle:
+            </b>
+            If every instance of a non-majority element is paired up and cancelled out with one instance of the majority element, the majority element is guaranteed to remain because it appears more than <code class="text-amber-300 font-mono">&lfloor;n / 2&rfloor;</code> times.
+          </div>
+
+          <div class="p-3 bg-emerald-950/20 border border-emerald-500/20 rounded-xl">
+            <b class="text-emerald-300 flex items-center gap-1.5 mb-1">
+              <i class="fa-solid fa-bolt"></i> Why count == 0 Resets Candidate:
+            </b>
+            When <code class="text-amber-300 font-mono">count == 0</code>, the current prefix of elements has had all candidate votes cancelled out equally. Discarding this balanced prefix leaves the majority element unchanged in the remaining suffix.
+          </div>
+
+          <div class="grid grid-cols-2 gap-3 pt-1">
+            <div class="p-2.5 bg-black/30 rounded-lg border border-white/5">
+              <span class="text-[11px] text-slate-400 uppercase font-semibold">Time Complexity</span>
+              <div class="text-sm font-bold text-emerald-400 font-mono mt-0.5">&Omicron;(n)</div>
+              <p class="text-[10px] text-slate-400 mt-0.5">Strictly one single linear pass through the array</p>
+            </div>
+            <div class="p-2.5 bg-black/30 rounded-lg border border-white/5">
+              <span class="text-[11px] text-slate-400 uppercase font-semibold">Space Complexity</span>
+              <div class="text-sm font-bold text-cyan-400 font-mono mt-0.5">&Omicron;(1)</div>
+              <p class="text-[10px] text-slate-400 mt-0.5">Only two scalar primitive integers: element and count</p>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+    </footer>
+
+  </div>
+
+  <!-- JAVASCRIPT SIMULATION LOGIC -->
+  <script>
+    // PRESETS
+    const PRESETS = [
+      { name: "1: LeetCode Ex 1 ([3, 2, 3] -> 3)", nums: [3, 2, 3] },
+      { name: "2: LeetCode Ex 2 ([2, 2, 1, 1, 1, 2, 2] -> 2)", nums: [2, 2, 1, 1, 1, 2, 2] },
+      { name: "3: Alternating Neutralization ([1, 2, 1, 2, 1, 2, 1] -> 1)", nums: [1, 2, 1, 2, 1, 2, 1] },
+      { name: "4: Late Comeback ([1, 2, 3, 4, 5, 5, 5, 5, 5, 5] -> 5)", nums: [1, 2, 3, 4, 5, 5, 5, 5, 5, 5] },
+      { name: "5: Unanimous Array ([7, 7, 7, 7, 7] -> 7)", nums: [7, 7, 7, 7, 7] },
+      { name: "6: Single Element ([42] -> 42)", nums: [42] },
+      { name: "7: Negative Numbers ([-1, -1, 2, -1, 3, -1, -1] -> -1)", nums: [-1, -1, 2, -1, 3, -1, -1] },
+      { name: "8: Two Element Duel ([9, 9, 4] -> 9)", nums: [9, 9, 4] },
+      { name: "9: Heavy Front-Loaded ([6, 6, 6, 6, 1, 2, 3] -> 6)", nums: [6, 6, 6, 6, 1, 2, 3] },
+      { name: "10: Oscillating Leads ([3, 3, 4, 2, 4, 4, 2, 4, 4] -> 4)", nums: [3, 3, 4, 2, 4, 4, 2, 4, 4] }
+    ];
+
+    // APPLICATION STATE
+    let currentNums = [...PRESETS[0].nums];
+    let steps = [];
+    let currentStepIdx = 0;
+    let isPlaying = false;
+    let playInterval = null;
+    let playSpeed = 800; // ms per step
+    let audioEnabled = true;
+
+    // AUDIO SYNTHESIZER
+    let audioCtx = null;
+    function initAudio() {
+      if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      }
+    }
+    function playBeep(freq = 440, type = 'sine', duration = 0.09, vol = 0.05) {
+      if (!audioEnabled) return;
+      try {
+        initAudio();
+        if (audioCtx.state === 'suspended') {
+          audioCtx.resume();
+        }
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = type;
+        osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+        gain.gain.setValueAtTime(vol, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + duration);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + duration);
+      } catch (e) {}
+    }
+
+    // DOM ELEMENTS
+    const btnPlay = document.getElementById('btnPlay');
+    const playIcon = document.getElementById('playIcon');
+    const playText = document.getElementById('playText');
+    const btnPrev = document.getElementById('btnPrev');
+    const btnNext = document.getElementById('btnNext');
+    const btnReset = document.getElementById('btnReset');
+    const btnAudio = document.getElementById('btnAudio');
+    const audioIcon = document.getElementById('audioIcon');
+    const presetSelect = document.getElementById('presetSelect');
+    const customInput = document.getElementById('customInput');
+    const btnApplyCustom = document.getElementById('btnApplyCustom');
+    const stepScrubber = document.getElementById('stepScrubber');
+    const stepCounterBadge = document.getElementById('stepCounterBadge');
+    const phaseBadge = document.getElementById('phaseBadge');
+
+    const varElement = document.getElementById('varElement');
+    const varCount = document.getElementById('varCount');
+    const varCurrentNum = document.getElementById('varCurrentNum');
+    const currentNumIndexSub = document.getElementById('currentNumIndexSub');
+    const varThreshold = document.getElementById('varThreshold');
+    const thresholdSub = document.getElementById('thresholdSub');
+    const candidateStatusSub = document.getElementById('candidateStatusSub');
+    const countStatusSub = document.getElementById('countStatusSub');
+
+    const arrayStreamContainer = document.getElementById('arrayStreamContainer');
+    const streamStatusText = document.getElementById('streamStatusText');
+    const throneCard = document.getElementById('throneCard');
+    const throneIcon = document.getElementById('throneIcon');
+    const throneValue = document.getElementById('throneValue');
+    const throneExplanation = document.getElementById('throneExplanation');
+    const clashActionBadge = document.getElementById('clashActionBadge');
+    const voteCountBadge = document.getElementById('voteCountBadge');
+    const voteProgressBar = document.getElementById('voteProgressBar');
+    const actionFeedbackBox = document.getElementById('actionFeedbackBox');
+    const actionFeedbackIcon = document.getElementById('actionFeedbackIcon');
+    const actionFeedbackText = document.getElementById('actionFeedbackText');
+    const frequencyBadgeContainer = document.getElementById('frequencyBadgeContainer');
+
+    const codeContainer = document.getElementById('codeContainer');
+    const stepDescription = document.getElementById('stepDescription');
+
+    // STEP GENERATOR: Simulates Java Boyer-Moore execution line by line
+    function generateSteps(rawNums) {
+      const generated = [];
+      const n = rawNums.length;
+      let element = 0;
+      let count = 0;
+
+      // Initial Call Step
+      generated.push({
+        line: 2,
+        phase: "Call",
+        nums: [...rawNums],
+        currentIndex: -1,
+        element: 0,
+        count: 0,
+        actionType: "neutral",
+        desc: `Invoked <span class="code-font text-cyan-300">majorityElement(nums)</span> with array size n = ${n}.`,
+        soundFreq: 350
+      });
+
+      // Line 3: int element = 0;
+      generated.push({
+        line: 3,
+        phase: "Init element",
+        nums: [...rawNums],
+        currentIndex: -1,
+        element: 0,
+        count: 0,
+        actionType: "neutral",
+        desc: `Initialized variable <span class="code-font text-cyan-300">int element = 0</span>.`,
+        soundFreq: 380
+      });
+
+      // Line 4: int count = 0;
+      generated.push({
+        line: 4,
+        phase: "Init count",
+        nums: [...rawNums],
+        currentIndex: -1,
+        element: 0,
+        count: 0,
+        actionType: "neutral",
+        desc: `Initialized vote accumulator <span class="code-font text-amber-300">int count = 0</span>.`,
+        soundFreq: 400
+      });
+
+      // Line 6: for (int num : nums)
+      for (let i = 0; i < n; i++) {
+        const num = rawNums[i];
+
+        // Loop header
+        generated.push({
+          line: 6,
+          phase: "Next Number",
+          nums: [...rawNums],
+          currentIndex: i,
+          element: element,
+          count: count,
+          actionType: "read",
+          desc: `Loop stream picked <span class="code-font text-purple-300 font-bold">num = nums[${i}] = ${num}</span>.`,
+          soundFreq: 440 + (i * 15)
+        });
+
+        // Line 7: if (count == 0)
+        const isCountZero = (count === 0);
+        generated.push({
+          line: 7,
+          phase: isCountZero ? "Candidate Reset" : "Check Count",
+          nums: [...rawNums],
+          currentIndex: i,
+          element: element,
+          count: count,
+          actionType: isCountZero ? "switch" : "neutral",
+          desc: isCountZero 
+            ? `<span class="code-font text-amber-300 font-semibold">count == 0</span> is <span class="text-emerald-400 font-bold">true</span>! Leadership is vacant. Electing new candidate...` 
+            : `<span class="code-font text-amber-300 font-semibold">count == ${count} &ne; 0</span> is <span class="text-slate-400 font-bold">false</span>. Current candidate <b>${element}</b> remains on throne.`,
+          soundFreq: isCountZero ? 580 : 420
+        });
+
+        if (isCountZero) {
+          element = num;
+          // Line 8: element = num;
+          generated.push({
+            line: 8,
+            phase: "Elected New Leader",
+            nums: [...rawNums],
+            currentIndex: i,
+            element: element,
+            count: count,
+            actionType: "switch",
+            desc: `Set <span class="code-font text-cyan-300 font-bold">element = ${num}</span>. Number <b>${num}</b> is now the active candidate.`,
+            soundFreq: 640
+          });
+        }
+
+        // Line 10: if (element != num)
+        const isDifferent = (element !== num);
+        generated.push({
+          line: 10,
+          phase: isDifferent ? "Dissenting Vote" : "Supporting Vote",
+          nums: [...rawNums],
+          currentIndex: i,
+          element: element,
+          count: count,
+          actionType: isDifferent ? "clash" : "support",
+          desc: isDifferent
+            ? `Comparing: <span class="code-font text-rose-300 font-bold">element (${element}) != num (${num})</span> is <b>true</b>. Rival vote detected!`
+            : `Comparing: <span class="code-font text-emerald-300 font-bold">element (${element}) == num (${num})</span>. Ally vote matches candidate!`,
+          soundFreq: isDifferent ? 320 : 680
+        });
+
+        if (isDifferent) {
+          count--;
+          // Line 11: count--;
+          generated.push({
+            line: 11,
+            phase: "Vote Cancelled",
+            nums: [...rawNums],
+            currentIndex: i,
+            element: element,
+            count: count,
+            actionType: "clash",
+            desc: `Rival element <b>${num}</b> cancels one candidate vote: <span class="code-font text-rose-300 font-bold">count--</span> &rarr; count is now <b>${count}</b>.`,
+            soundFreq: 300
+          });
+        } else {
+          count++;
+          // Line 14: count++;
+          generated.push({
+            line: 14,
+            phase: "Vote Reinforced",
+            nums: [...rawNums],
+            currentIndex: i,
+            element: element,
+            count: count,
+            actionType: "support",
+            desc: `Ally element <b>${num}</b> reinforces candidate: <span class="code-font text-emerald-300 font-bold">count++</span> &rarr; count is now <b>${count}</b>.`,
+            soundFreq: 750
+          });
+        }
+      }
+
+      // Line 18: return element;
+      generated.push({
+        line: 18,
+        phase: "Complete",
+        nums: [...rawNums],
+        currentIndex: -1,
+        element: element,
+        count: count,
+        actionType: "winner",
+        desc: `<span class="text-emerald-400 font-bold text-sm"><i class="fa-solid fa-trophy mr-1.5"></i>Finished!</span> Majority element found: <span class="code-font text-emerald-300 font-extrabold text-base">${element}</span>.`,
+        soundFreq: 880
+      });
+
+      return generated;
+    }
+
+    // ZERO-JUMP LOCALIZED CODE LINE HIGHLIGHTER
+    function highlightCodeLine(lineNum) {
+      document.querySelectorAll('.code-line').forEach(el => el.classList.remove('active-line'));
+      const activeEl = document.getElementById(`line${lineNum}`);
+      if (activeEl) {
+        activeEl.classList.add('active-line');
+        
+        // Scroll strictly inside codeContainer
+        const containerTop = codeContainer.scrollTop;
+        const containerBottom = containerTop + codeContainer.clientHeight;
+        const elTop = activeEl.offsetTop - codeContainer.offsetTop;
+        const elBottom = elTop + activeEl.clientHeight;
+
+        if (elTop < containerTop + 20) {
+          codeContainer.scrollTo({ top: Math.max(0, elTop - 20), behavior: 'smooth' });
+        } else if (elBottom > containerBottom - 20) {
+          codeContainer.scrollTo({ top: elBottom - codeContainer.clientHeight + 20, behavior: 'smooth' });
+        }
+      }
+    }
+
+    // RENDER CURRENT STEP INTO DOM
+    function renderStep(idx) {
+      if (idx < 0 || idx >= steps.length) return;
+      const step = steps[idx];
+      const n = step.nums.length;
+      const threshold = Math.floor(n / 2);
+
+      // Top Deck Status
+      stepCounterBadge.textContent = `Step: ${idx + 1} / ${steps.length}`;
+      phaseBadge.textContent = step.phase;
+      stepScrubber.max = steps.length - 1;
+      stepScrubber.value = idx;
+
+      // Variable Cards
+      varElement.textContent = step.element;
+      varCount.textContent = step.count;
+      varThreshold.textContent = `> ${threshold}`;
+      thresholdSub.textContent = `n = ${n} (⌊n/2⌋ = ${threshold})`;
+
+      if (step.currentIndex >= 0 && step.currentIndex < n) {
+        varCurrentNum.textContent = step.nums[step.currentIndex];
+        currentNumIndexSub.textContent = `Index: [${step.currentIndex}]`;
+      } else {
+        varCurrentNum.textContent = "-";
+        currentNumIndexSub.textContent = "Index: -";
+      }
+
+      candidateStatusSub.textContent = step.count === 0 ? "Leadership vacant (count=0)" : `Surplus of ${step.count} vote(s)`;
+      countStatusSub.textContent = step.count > 0 ? "Positive surplus" : (step.count === 0 ? "Neutral balanced" : "Negative");
+
+      // Narrative description
+      stepDescription.innerHTML = step.desc;
+
+      // 1. Array Stream Pills
+      arrayStreamContainer.innerHTML = '';
+      step.nums.forEach((val, i) => {
+        const isCurrent = (step.currentIndex === i);
+        const isProcessed = (step.currentIndex > i);
+        const pill = document.createElement('div');
+        
+        let borderAndBg = "bg-white/5 border-white/10 text-slate-300";
+        if (isCurrent) {
+          if (step.actionType === 'switch') {
+            borderAndBg = "bg-amber-500/30 border-amber-400 text-amber-200 ring-2 ring-amber-400/50 scale-110 font-bold";
+          } else if (step.actionType === 'clash') {
+            borderAndBg = "bg-rose-500/30 border-rose-400 text-rose-200 ring-2 ring-rose-400/50 scale-110 font-bold";
+          } else if (step.actionType === 'support') {
+            borderAndBg = "bg-emerald-500/30 border-emerald-400 text-emerald-200 ring-2 ring-emerald-400/50 scale-110 font-bold";
+          } else {
+            borderAndBg = "bg-cyan-500/30 border-cyan-400 text-cyan-200 ring-2 ring-cyan-400/50 scale-110 font-bold";
+          }
+        } else if (isProcessed) {
+          borderAndBg = "bg-white/[0.02] border-white/5 text-slate-500";
+        }
+
+        pill.className = `code-font text-xs px-3 py-1.5 rounded-xl border transition-all duration-200 flex items-center gap-1.5 ${borderAndBg}`;
+        pill.innerHTML = `
+          <span class="text-[10px] text-slate-500 font-sans">[${i}]</span>
+          <span>${val}</span>
+          ${isCurrent ? '<span class="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-ping"></span>' : ''}
+        `;
+        arrayStreamContainer.appendChild(pill);
+      });
+
+      if (step.currentIndex >= 0) {
+        streamStatusText.textContent = `Evaluating index ${step.currentIndex} of ${n - 1}`;
+      } else if (step.phase === "Complete") {
+        streamStatusText.textContent = `Traversal complete (${n} elements scanned)`;
+      } else {
+        streamStatusText.textContent = `Ready to begin scan`;
+      }
+
+      // 2. Candidate Throne & Meter
+      throneValue.textContent = step.element;
+      voteCountBadge.textContent = `count = ${step.count}`;
+
+      // Max scale for count bar relative to array size
+      const maxPossibleSurplus = Math.max(1, n);
+      const pct = Math.min(100, Math.max(0, (step.count / maxPossibleSurplus) * 100));
+      voteProgressBar.style.width = `${pct}%`;
+
+      throneCard.classList.remove('winner-pulse', 'border-emerald-500/50', 'border-rose-500/50', 'border-amber-500/50');
+      
+      if (step.phase === "Complete") {
+        throneCard.classList.add('winner-pulse', 'border-emerald-500/50');
+        throneIcon.className = "fa-solid fa-crown text-emerald-400 text-xl";
+        throneExplanation.innerHTML = `<span class="text-emerald-300 font-bold">Undefeated Winner!</span> Guaranteed to appear &gt; &lfloor;${n}/2&rfloor; times.`;
+        clashActionBadge.className = "px-2 py-0.5 rounded text-[11px] font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30";
+        clashActionBadge.innerHTML = `<i class="fa-solid fa-check mr-1"></i>Majority Determined`;
+        actionFeedbackBox.className = "p-2.5 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-xs flex items-center gap-2";
+        actionFeedbackIcon.className = "fa-solid fa-trophy text-emerald-400";
+        actionFeedbackText.textContent = `Algorithm finished. Returned majority element = ${step.element}.`;
+      } else if (step.actionType === "switch") {
+        throneCard.classList.add('border-amber-500/50');
+        throneIcon.className = "fa-solid fa-handshake text-amber-400 text-lg";
+        throneExplanation.innerHTML = `Vacant throne claimed by <span class="text-amber-300 font-bold">${step.element}</span> because count was 0.`;
+        clashActionBadge.className = "px-2 py-0.5 rounded text-[11px] font-semibold bg-amber-500/20 text-amber-300 border border-amber-500/30";
+        clashActionBadge.innerHTML = `<i class="fa-solid fa-arrows-rotate mr-1"></i>Leader Reset`;
+        actionFeedbackBox.className = "p-2.5 rounded-lg bg-amber-500/10 border border-amber-500/20 text-xs flex items-center gap-2";
+        actionFeedbackIcon.className = "fa-solid fa-arrows-rotate text-amber-400";
+        actionFeedbackText.textContent = `New candidate established: element = ${step.element}.`;
+      } else if (step.actionType === "clash") {
+        throneCard.classList.add('border-rose-500/50');
+        throneIcon.className = "fa-solid fa-shield-slash text-rose-400 text-lg";
+        throneExplanation.innerHTML = `Opposing vote <span class="text-rose-300 font-bold">${step.nums[step.currentIndex]}</span> neutralizes candidate <span class="text-cyan-300 font-bold">${step.element}</span>.`;
+        clashActionBadge.className = "px-2 py-0.5 rounded text-[11px] font-semibold bg-rose-500/20 text-rose-300 border border-rose-500/30";
+        clashActionBadge.innerHTML = `<i class="fa-solid fa-burst mr-1"></i>Mutual Cancellation (count--)`;
+        actionFeedbackBox.className = "p-2.5 rounded-lg bg-rose-500/10 border border-rose-500/20 text-xs flex items-center gap-2";
+        actionFeedbackIcon.className = "fa-solid fa-heart-crack text-rose-400";
+        actionFeedbackText.textContent = `Element mismatch! 1 candidate vote cancelled (count = ${step.count}).`;
+      } else if (step.actionType === "support") {
+        throneCard.classList.add('border-emerald-500/50');
+        throneIcon.className = "fa-solid fa-shield text-emerald-400 text-lg";
+        throneExplanation.innerHTML = `Candidate <span class="text-emerald-300 font-bold">${step.element}</span> reinforced by ally vote.`;
+        clashActionBadge.className = "px-2 py-0.5 rounded text-[11px] font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30";
+        clashActionBadge.innerHTML = `<i class="fa-solid fa-arrow-trend-up mr-1"></i>Reinforcement (count++)`;
+        actionFeedbackBox.className = "p-2.5 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-xs flex items-center gap-2";
+        actionFeedbackIcon.className = "fa-solid fa-circle-check text-emerald-400";
+        actionFeedbackText.textContent = `Element matched! Candidate lead reinforced (count = ${step.count}).`;
+      } else {
+        throneIcon.className = "fa-solid fa-shield text-cyan-400 text-lg";
+        throneExplanation.textContent = `Candidate is elected when count drops to zero.`;
+        clashActionBadge.className = "px-2 py-0.5 rounded text-[11px] font-semibold bg-white/5 text-slate-400 border border-white/10";
+        clashActionBadge.textContent = "Scanning Array";
+        actionFeedbackBox.className = "p-2.5 rounded-lg bg-white/5 border border-white/10 text-xs flex items-center gap-2";
+        actionFeedbackIcon.className = "fa-solid fa-circle-info text-cyan-400";
+        actionFeedbackText.textContent = step.desc.replace(/<[^>]*>?/gm, '');
+      }
+
+      // 3. Frequency Distribution Pills (Reference)
+      renderFrequencies(step.nums, step.element, step.phase === "Complete");
+
+      // Synchronize Code View
+      highlightCodeLine(step.line);
+
+      // Synthesized Sound
+      if (step.soundFreq) {
+        playBeep(step.soundFreq, 'sine', 0.08, 0.04);
+      }
+    }
+
+    // RENDER REFERENCE FREQUENCY PILLS
+    function renderFrequencies(nums, currentLeader, isDone) {
+      const counts = {};
+      nums.forEach(x => { counts[x] = (counts[x] || 0) + 1; });
+      const threshold = Math.floor(nums.length / 2);
+
+      frequencyBadgeContainer.innerHTML = '';
+      Object.keys(counts).forEach(k => {
+        const val = parseInt(k, 10);
+        const count = counts[val];
+        const isTrueMajority = count > threshold;
+        const isLeader = val === currentLeader;
+
+        const pill = document.createElement('div');
+        pill.className = `text-xs px-2.5 py-1 rounded-lg border flex items-center gap-2 transition-all ${
+          isTrueMajority && isDone
+            ? 'bg-emerald-500/20 border-emerald-400 text-emerald-300 font-bold shadow-sm'
+            : isLeader
+              ? 'bg-cyan-500/15 border-cyan-400/40 text-cyan-200'
+              : 'bg-black/30 border-white/10 text-slate-400'
+        }`;
+        pill.innerHTML = `
+          <span class="code-font font-bold">${val}</span>
+          <span class="text-[10px] bg-white/10 px-1.5 py-0.2 rounded font-sans text-slate-300">${count}x</span>
+          ${isTrueMajority ? '<i class="fa-solid fa-star text-[10px] text-amber-300" title="Exceeds majority threshold"></i>' : ''}
+        `;
+        frequencyBadgeContainer.appendChild(pill);
+      });
+    }
+
+    // PLAYBACK CONTROLLER
+    function setPlaying(playing) {
+      isPlaying = playing;
+      if (isPlaying) {
+        playIcon.className = "fa-solid fa-pause";
+        playText.textContent = "Stop";
+        btnPlay.classList.add('bg-rose-500/20', 'text-rose-300', 'border-rose-500/40');
+        btnPlay.classList.remove('bg-cyan-500/20', 'text-cyan-300', 'border-cyan-500/40');
+
+        playInterval = setInterval(() => {
+          if (currentStepIdx < steps.length - 1) {
+            currentStepIdx++;
+            renderStep(currentStepIdx);
+          } else {
+            setPlaying(false);
+          }
+        }, playSpeed);
+      } else {
+        playIcon.className = "fa-solid fa-play";
+        playText.textContent = "Start";
+        btnPlay.classList.remove('bg-rose-500/20', 'text-rose-300', 'border-rose-500/40');
+        btnPlay.classList.add('bg-cyan-500/20', 'text-cyan-300', 'border-cyan-500/40');
+        if (playInterval) {
+          clearInterval(playInterval);
+          playInterval = null;
+        }
+      }
+    }
+
+    function initSimulation(numsArray) {
+      setPlaying(false);
+      currentNums = [...numsArray];
+      steps = generateSteps(currentNums);
+      currentStepIdx = 0;
+      stepScrubber.max = steps.length - 1;
+      stepScrubber.value = 0;
+      renderStep(0);
+    }
+
+    // EVENT LISTENERS
+    btnPlay.addEventListener('click', () => {
+      if (currentStepIdx >= steps.length - 1) {
+        currentStepIdx = 0;
+        renderStep(0);
+      }
+      setPlaying(!isPlaying);
+    });
+
+    btnNext.addEventListener('click', () => {
+      setPlaying(false);
+      if (currentStepIdx < steps.length - 1) {
+        currentStepIdx++;
+        renderStep(currentStepIdx);
+      }
+    });
+
+    btnPrev.addEventListener('click', () => {
+      setPlaying(false);
+      if (currentStepIdx > 0) {
+        currentStepIdx--;
+        renderStep(currentStepIdx);
+      }
+    });
+
+    btnReset.addEventListener('click', () => {
+      setPlaying(false);
+      currentStepIdx = 0;
+      renderStep(0);
+    });
+
+    stepScrubber.addEventListener('input', (e) => {
+      setPlaying(false);
+      currentStepIdx = parseInt(e.target.value, 10);
+      renderStep(currentStepIdx);
+    });
+
+    // Speed Selector Buttons
+    document.querySelectorAll('.speed-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.speed-btn').forEach(b => {
+          b.classList.remove('bg-cyan-500/30', 'text-cyan-300', 'font-semibold');
+        });
+        btn.classList.add('bg-cyan-500/30', 'text-cyan-300', 'font-semibold');
+        playSpeed = parseInt(btn.dataset.speed, 10);
+        if (isPlaying) {
+          setPlaying(false);
+          setPlaying(true);
+        }
+      });
+    });
+
+    // Audio Toggle
+    btnAudio.addEventListener('click', () => {
+      audioEnabled = !audioEnabled;
+      if (audioEnabled) {
+        audioIcon.className = "fa-solid fa-volume-high";
+        btnAudio.classList.remove('text-slate-600');
+        btnAudio.classList.add('text-slate-400');
+      } else {
+        audioIcon.className = "fa-solid fa-volume-xmark";
+        btnAudio.classList.add('text-slate-600');
+        btnAudio.classList.remove('text-slate-400');
+      }
+    });
+
+    // Preset Selection
+    presetSelect.addEventListener('change', (e) => {
+      const idx = parseInt(e.target.value, 10);
+      initSimulation(PRESETS[idx].nums);
+    });
+
+    // Custom Input Load
+    btnApplyCustom.addEventListener('click', () => {
+      const text = customInput.value.trim();
+      if (!text) return;
+      const parsed = text.split(',')
+        .map(s => parseInt(s.trim(), 10))
+        .filter(n => !isNaN(n));
+      if (parsed.length > 0) {
+        initSimulation(parsed);
+      }
+    });
+
+    // Keyboard Shortcuts (Space: Play/Pause, Arrows: Step)
+    window.addEventListener('keydown', (e) => {
+      if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT') return;
+      if (e.code === 'Space') {
+        e.preventDefault();
+        btnPlay.click();
+      } else if (e.code === 'ArrowRight') {
+        e.preventDefault();
+        btnNext.click();
+      } else if (e.code === 'ArrowLeft') {
+        e.preventDefault();
+        btnPrev.click();
+      }
+    });
+
+    // Initialize with default preset
+    window.onload = function() {
+      initSimulation(PRESETS[0].nums);
+    };
+  </script>
+</body>
+</html>

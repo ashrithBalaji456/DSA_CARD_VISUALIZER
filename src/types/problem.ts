@@ -34,6 +34,7 @@ export interface DSAProblem {
   timeComplexityExplanation: string;
   spaceComplexity: string;
   spaceComplexityExplanation: string;
+  visualizerUrl?: string; // path to interactive HTML visualizer page (e.g. '/visualizers/majority_element_ii_visualizer.html')
   keyObservations?: string[];
   importantPattern?: string;
   commonMistakes?: string[];

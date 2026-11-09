@@ -1,0 +1,914 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Contains Duplicate Visualizer</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background-color: #030712;
+      color: #f1f5f9;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    .font-mono {
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    /* Glassmorphic styles */
+    .glass-panel {
+      background: rgba(15, 23, 42, 0.75);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.7), inset 0 1px 0 0 rgba(255, 255, 255, 0.08);
+    }
+
+    .glass-card {
+      background: rgba(30, 41, 59, 0.55);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    .glass-input {
+      background: rgba(15, 23, 42, 0.85);
+      border: 1px solid rgba(59, 130, 246, 0.25);
+    }
+
+    .glass-input:focus {
+      border-color: rgba(59, 130, 246, 0.6);
+      outline: none;
+      box-shadow: 0 0 14px rgba(59, 130, 246, 0.25);
+    }
+
+    /* Custom scrollbars */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: rgba(15, 23, 42, 0.6);
+    }
+    ::-webkit-scrollbar-thumb {
+      background: rgba(59, 130, 246, 0.35);
+      border-radius: 9999px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(59, 130, 246, 0.6);
+    }
+
+    .code-line {
+      transition: all 0.2s ease;
+    }
+
+    @keyframes pulseGlow {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.05); opacity: 0.85; }
+    }
+    .active-pulse {
+      animation: pulseGlow 1.2s ease-in-out infinite;
+    }
+
+    @keyframes shakeAnimation {
+      0%, 100% { transform: translateX(0); }
+      20%, 60% { transform: translateX(-4px); }
+      40%, 80% { transform: translateX(4px); }
+    }
+    .conflict-shake {
+      animation: shakeAnimation 0.4s ease-in-out infinite;
+    }
+  </style>
+</head>
+<body class="relative flex flex-col justify-between p-3 sm:p-5 selection:bg-cyan-500 selection:text-white">
+
+  <!-- Ambient Glow Orbs -->
+  <div class="fixed top-[-10%] left-[-10%] w-[45vw] h-[45vw] rounded-full bg-cyan-600/10 blur-[130px] pointer-events-none -z-10"></div>
+  <div class="fixed bottom-[-15%] right-[-10%] w-[50vw] h-[50vw] rounded-full bg-indigo-600/10 blur-[140px] pointer-events-none -z-10"></div>
+  <div class="fixed top-[40%] right-[30%] w-[35vw] h-[35vw] rounded-full bg-emerald-600/10 blur-[130px] pointer-events-none -z-10"></div>
+
+  <!-- MAIN WRAPPER -->
+  <div class="max-w-7xl mx-auto w-full flex flex-col gap-4">
+
+    <!-- TOP CONTROL DECK (FROSTED GLASS) -->
+    <header class="glass-panel rounded-2xl p-3.5 sm:p-4 flex flex-col gap-3.5 sticky top-2 z-50">
+      
+      <!-- Top Row: Title, Badges & Audio -->
+      <div class="flex flex-wrap items-center justify-between gap-3 border-b border-white/5 pb-3">
+        <div class="flex items-center gap-2.5">
+          <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-cyan-600 to-indigo-500 flex items-center justify-center shadow-lg shadow-cyan-500/30">
+            <i class="fa-solid fa-clone text-white text-base"></i>
+          </div>
+          <div>
+            <div class="flex items-center gap-2">
+              <h1 class="text-base sm:text-lg font-bold tracking-tight text-white flex items-center gap-2">
+                Contains Duplicate Visualizer
+              </h1>
+              <span class="text-[10px] font-mono font-semibold px-2 py-0.5 rounded-full bg-cyan-500/20 text-cyan-300 border border-cyan-500/30">LeetCode 217</span>
+              <span class="text-[10px] font-mono px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 hidden sm:inline-block">HashSet &bull; O(n)</span>
+            </div>
+            <p class="text-xs text-slate-400 font-medium hidden sm:block">Step-by-step element evaluation &amp; Set membership checking</p>
+          </div>
+        </div>
+
+        <!-- Audio & Shortcuts -->
+        <div class="flex items-center gap-2">
+          <button id="soundToggleBtn" class="px-2.5 py-1.5 rounded-xl glass-card text-xs font-mono text-slate-300 hover:text-white hover:border-cyan-500/40 transition-all flex items-center gap-1.5" title="Toggle Sound">
+            <i class="fa-solid fa-volume-high text-cyan-400" id="soundIcon"></i>
+            <span class="hidden md:inline">Audio</span>
+          </button>
+          <div class="hidden lg:flex items-center gap-1.5 text-[11px] font-mono text-slate-400 px-2.5 py-1 rounded-xl glass-card">
+            <span>Keys:</span>
+            <kbd class="px-1.5 py-0.5 rounded bg-slate-800 text-slate-200 border border-slate-700">Space</kbd>
+            <kbd class="px-1.5 py-0.5 rounded bg-slate-800 text-slate-200 border border-slate-700">&larr;</kbd>
+            <kbd class="px-1.5 py-0.5 rounded bg-slate-800 text-slate-200 border border-slate-700">&rarr;</kbd>
+          </div>
+        </div>
+      </div>
+
+      <!-- Playback Buttons Bar -->
+      <div class="flex flex-wrap items-center justify-between gap-3">
+        
+        <!-- Controls: Reset, Prev, Play/Pause, Next -->
+        <div class="flex items-center gap-1.5 sm:gap-2">
+          <button id="resetBtn" class="px-3 py-2 rounded-xl glass-card text-xs font-semibold text-slate-300 hover:text-white hover:bg-white/10 active:scale-95 transition-all flex items-center gap-1.5">
+            <i class="fa-solid fa-rotate-left text-slate-400"></i>
+            <span class="hidden sm:inline">Reset</span>
+          </button>
+
+          <button id="prevBtn" class="px-3.5 py-2 rounded-xl glass-card text-xs font-semibold text-slate-200 hover:text-white hover:border-cyan-500/40 active:scale-95 transition-all flex items-center gap-1.5 disabled:opacity-30 disabled:pointer-events-none">
+            <i class="fa-solid fa-chevron-left text-cyan-400"></i>
+            <span>Prev</span>
+          </button>
+
+          <button id="playPauseBtn" class="px-5 py-2 rounded-xl bg-gradient-to-r from-cyan-500 to-indigo-500 hover:from-cyan-400 hover:to-indigo-400 text-white font-bold text-xs tracking-wide shadow-lg shadow-cyan-500/30 active:scale-95 transition-all flex items-center gap-2">
+            <i class="fa-solid fa-play" id="playIcon"></i>
+            <span id="playText">Play</span>
+          </button>
+
+          <button id="nextBtn" class="px-3.5 py-2 rounded-xl glass-card text-xs font-semibold text-slate-200 hover:text-white hover:border-cyan-500/40 active:scale-95 transition-all flex items-center gap-1.5 disabled:opacity-30 disabled:pointer-events-none">
+            <span>Next</span>
+            <i class="fa-solid fa-chevron-right text-cyan-400"></i>
+          </button>
+        </div>
+
+        <!-- Speed Selector -->
+        <div class="flex items-center gap-1 glass-card p-1 rounded-xl">
+          <span class="text-[10px] font-mono text-slate-400 px-1.5 uppercase font-bold">Speed:</span>
+          <button class="speed-btn px-2 py-0.5 rounded-lg text-xs font-mono text-slate-300 hover:text-white transition-all" data-speed="1200">0.5x</button>
+          <button class="speed-btn px-2 py-0.5 rounded-lg text-xs font-mono bg-cyan-500/30 text-cyan-200 font-bold border border-cyan-500/40 transition-all" data-speed="700">1x</button>
+          <button class="speed-btn px-2 py-0.5 rounded-lg text-xs font-mono text-slate-300 hover:text-white transition-all" data-speed="350">2x</button>
+          <button class="speed-btn px-2 py-0.5 rounded-lg text-xs font-mono text-slate-300 hover:text-white transition-all" data-speed="150">4x</button>
+        </div>
+
+        <!-- Step Counter & Phase Pill -->
+        <div class="flex items-center gap-2 font-mono text-xs">
+          <div class="px-3 py-1.5 rounded-xl glass-card border border-white/10 flex items-center gap-2">
+            <span class="text-slate-400">Step:</span>
+            <span id="stepCounter" class="text-cyan-400 font-bold">0 / 0</span>
+          </div>
+          <div id="phaseBadge" class="px-2.5 py-1.5 rounded-xl text-[11px] font-bold uppercase tracking-wider bg-slate-800/80 text-slate-300 border border-white/10 flex items-center gap-1.5">
+            <span class="w-1.5 h-1.5 rounded-full bg-slate-400" id="phaseDot"></span>
+            <span id="phaseText">Ready</span>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Scrubber Timeline Slider -->
+      <div class="flex items-center gap-3 pt-1">
+        <span class="text-[10px] font-mono text-slate-400 shrink-0">TIMELINE</span>
+        <input id="timelineSlider" type="range" min="0" max="0" value="0" class="w-full h-1.5 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-cyan-500">
+      </div>
+
+      <!-- Presets & Custom Input Bar -->
+      <div class="flex flex-wrap items-center justify-between gap-3 pt-2 border-t border-white/5 text-xs">
+        <div class="flex items-center gap-2 flex-grow max-w-xl">
+          <span class="text-cyan-400 font-mono font-semibold shrink-0">Preset:</span>
+          <select id="presetSelect" class="bg-slate-900 text-cyan-200 font-mono text-xs rounded-xl px-2.5 py-1.5 border border-cyan-500/20 focus:outline-none focus:border-cyan-400 w-full truncate cursor-pointer">
+            <!-- Dynamically Populated -->
+          </select>
+        </div>
+
+        <!-- Custom Input -->
+        <div class="flex items-center gap-2 flex-grow max-w-md">
+          <input id="customArrayInput" type="text" placeholder="e.g. 1, 2, 3, 1" class="glass-input rounded-xl px-3 py-1.5 text-xs font-mono text-white placeholder-slate-500 w-full">
+          <button id="applyCustomBtn" class="px-3 py-1.5 rounded-xl bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 hover:bg-cyan-500/30 text-xs font-mono shrink-0 transition-all">
+            Load
+          </button>
+        </div>
+      </div>
+
+    </header>
+
+    <!-- MAIN BODY: VISUAL ARENA & CODE (GRID 2 COLS) -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-4">
+
+      <!-- LEFT: VISUAL ARRAY TRACK & HASHSET STAGE (7 COLS) -->
+      <section class="lg:col-span-7 flex flex-col gap-4">
+
+        <!-- Array Elements Track -->
+        <div class="glass-panel rounded-2xl p-4 flex flex-col gap-3">
+          <div class="flex items-center justify-between border-b border-white/5 pb-2.5">
+            <div class="flex items-center gap-2">
+              <span class="w-2 h-2 rounded-full bg-cyan-400"></span>
+              <h2 class="text-xs font-bold uppercase tracking-wider text-slate-200">Array Stream (nums)</h2>
+            </div>
+            <!-- Legend Indicators -->
+            <div class="flex items-center gap-3 text-[10px] font-mono">
+              <span class="text-cyan-400 flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-cyan-400"></span> Current num</span>
+              <span class="text-emerald-400 flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-emerald-400"></span> Added</span>
+              <span class="text-rose-400 flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-rose-500"></span> Duplicate!</span>
+            </div>
+          </div>
+
+          <!-- Cards Scrollable Track -->
+          <div class="p-3 bg-slate-950/70 rounded-xl border border-white/5 overflow-x-auto">
+            <div id="arrayCardsContainer" class="flex items-center gap-3 min-h-[90px] py-1">
+              <!-- Dynamically Populated Cards -->
+            </div>
+          </div>
+
+          <!-- Current Step Math / Condition Breakdown -->
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5 text-xs font-mono">
+            <div class="glass-card p-2.5 rounded-xl flex flex-col">
+              <span class="text-[10px] text-slate-400 uppercase">Evaluating Value</span>
+              <span id="activeNumDisplay" class="text-cyan-300 font-bold mt-1 text-sm">num = -</span>
+            </div>
+            <div class="glass-card p-2.5 rounded-xl flex flex-col">
+              <span class="text-[10px] text-slate-400 uppercase">set.add(num)</span>
+              <span id="setAddEvaluation" class="text-slate-300 font-bold mt-1 text-sm">Pending</span>
+            </div>
+            <div class="glass-card p-2.5 rounded-xl flex flex-col">
+              <span class="text-[10px] text-slate-400 uppercase">!set.add(num)</span>
+              <span id="ifConditionDisplay" class="text-slate-300 font-bold mt-1 text-sm">Waiting</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- HashSet Chamber Deck -->
+        <div class="glass-panel rounded-2xl p-4 flex flex-col gap-3">
+          <div class="flex items-center justify-between border-b border-white/5 pb-2">
+            <div class="flex items-center gap-2">
+              <span class="w-2 h-2 rounded-full bg-indigo-400"></span>
+              <span class="text-xs font-bold uppercase tracking-wider text-slate-200">HashSet&lt;Integer&gt; Chamber</span>
+            </div>
+            <span class="text-[11px] font-mono text-cyan-300" id="setCountLabel">Elements: 0</span>
+          </div>
+
+          <!-- HashSet Visual Storage Box -->
+          <div class="p-4 bg-slate-950/80 rounded-xl border border-white/5 min-h-[110px] flex flex-col justify-center">
+            <div id="setTokensContainer" class="flex flex-wrap gap-2 items-center">
+              <span class="text-xs text-slate-500 font-mono italic">Set is empty (no elements tracked yet)</span>
+            </div>
+          </div>
+
+          <!-- Live Step Narrative Box -->
+          <div id="narrativeBox" class="p-3 bg-slate-950/90 rounded-xl border border-white/5 font-mono text-xs text-slate-300 leading-relaxed">
+            Ready to initialize Set and begin validation.
+          </div>
+        </div>
+
+      </section>
+
+      <!-- RIGHT: JAVA CODE INSPECTOR (5 COLS) -->
+      <section class="lg:col-span-5 flex flex-col gap-4">
+
+        <!-- Code Inspection Panel -->
+        <div class="glass-panel rounded-2xl p-4 flex flex-col gap-3 h-full">
+          <div class="flex items-center justify-between border-b border-white/5 pb-2.5">
+            <div class="flex items-center gap-2">
+              <i class="fa-brands fa-java text-cyan-400 text-sm"></i>
+              <span class="text-xs font-bold uppercase tracking-wider text-slate-200">Solution.java</span>
+            </div>
+            <span class="text-[10px] font-mono px-2 py-0.5 rounded-full bg-slate-800 text-slate-300 border border-white/10" id="returnStatusPill">Running</span>
+          </div>
+
+          <!-- Code View Container with strictly localized scrolling -->
+          <div id="codeContainer" class="bg-slate-950/90 rounded-xl p-3.5 font-mono text-xs leading-6 border border-white/5 overflow-y-auto max-h-[460px] select-text">
+            <div class="code-line px-2 py-0.5 rounded text-slate-400" data-line="1"><span class="text-indigo-400">class</span> <span class="text-yellow-300">Solution</span> {</div>
+            <div class="code-line px-2 py-0.5 rounded text-slate-300" data-line="2">&nbsp;&nbsp;<span class="text-cyan-400">public boolean</span> <span class="text-yellow-300">containsDuplicate</span>(<span class="text-cyan-400">int</span>[] nums) {</div>
+            <div class="code-line px-2 py-0.5 rounded text-slate-500" data-line="3"></div>
+            <div class="code-line px-2 py-0.5 rounded text-slate-300" data-line="4">&nbsp;&nbsp;&nbsp;&nbsp;Set&lt;Integer&gt; set = <span class="text-indigo-400">new</span> HashSet&lt;&gt;();</div>
+            <div class="code-line px-2 py-0.5 rounded text-slate-500" data-line="5"></div>
+            <div class="code-line px-2 py-0.5 rounded text-slate-300" data-line="6">&nbsp;&nbsp;&nbsp;&nbsp;<span class="text-indigo-400">for</span> (<span class="text-cyan-400">int</span> num : nums) {</div>
+            <div class="code-line px-2 py-0.5 rounded text-slate-500" data-line="7"></div>
+            <div class="code-line px-2 py-0.5 rounded text-slate-300" data-line="8">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="text-indigo-400">if</span> (!set.add(num)) {</div>
+            <div class="code-line px-2 py-0.5 rounded text-slate-300" data-line="9">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="text-rose-400 font-bold">return true</span>;</div>
+            <div class="code-line px-2 py-0.5 rounded text-slate-300" data-line="10">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}</div>
+            <div class="code-line px-2 py-0.5 rounded text-slate-300" data-line="11">&nbsp;&nbsp;&nbsp;&nbsp;}</div>
+            <div class="code-line px-2 py-0.5 rounded text-slate-500" data-line="12"></div>
+            <div class="code-line px-2 py-0.5 rounded text-slate-300" data-line="13">&nbsp;&nbsp;&nbsp;&nbsp;<span class="text-emerald-400 font-bold">return false</span>;</div>
+            <div class="code-line px-2 py-0.5 rounded text-slate-300" data-line="14">&nbsp;&nbsp;}</div>
+            <div class="code-line px-2 py-0.5 rounded text-slate-400" data-line="15">}</div>
+          </div>
+        </div>
+
+      </section>
+
+    </div>
+
+    <!-- BOTTOM DOSSIER: PROBLEM STATEMENT & ALGORITHMIC SUMMARY -->
+    <footer class="glass-panel rounded-2xl p-4 sm:p-5 flex flex-col gap-4 border border-white/5 mt-1">
+      <div class="flex items-center justify-between border-b border-white/5 pb-3">
+        <div class="flex items-center gap-2">
+          <i class="fa-solid fa-book-open text-cyan-400"></i>
+          <h2 class="text-sm font-bold uppercase tracking-wider text-slate-200">Problem Statement &amp; Architectural Summary</h2>
+        </div>
+        <span class="text-xs font-mono px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">Easy &bull; Solved</span>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs font-mono">
+        <!-- Problem Statement -->
+        <div class="glass-card p-3.5 rounded-xl flex flex-col gap-2">
+          <span class="text-cyan-400 font-bold text-[11px] uppercase tracking-wider">217. Contains Duplicate</span>
+          <p class="text-slate-300 leading-relaxed font-sans text-xs">
+            Given an integer array <code class="text-cyan-300 font-mono font-bold">nums</code>, return <code class="text-emerald-400 font-bold">true</code> if any value appears at least twice in the array, and return <code class="text-rose-400 font-bold">false</code> if every element is distinct.
+          </p>
+          <div class="bg-slate-950/70 p-2.5 rounded-lg border border-white/5 flex flex-col gap-1.5 text-[11px] text-slate-400">
+            <div><span class="text-slate-300 font-bold">Example 1:</span> nums = [1, 2, 3, 1] &rarr; <span class="text-emerald-400 font-bold">true</span> (1 occurs at indices 0 &amp; 3)</div>
+            <div><span class="text-slate-300 font-bold">Example 2:</span> nums = [1, 2, 3, 4] &rarr; <span class="text-rose-400 font-bold">false</span> (All elements distinct)</div>
+            <div><span class="text-slate-300 font-bold">Example 3:</span> nums = [1,1,1,3,3,4,3,2,4,2] &rarr; <span class="text-emerald-400 font-bold">true</span></div>
+          </div>
+        </div>
+
+        <!-- Algorithmic Summary -->
+        <div class="glass-card p-3.5 rounded-xl flex flex-col justify-between gap-2">
+          <div class="flex flex-col gap-1.5">
+            <span class="text-indigo-400 font-bold text-[11px] uppercase tracking-wider">Algorithmic Mechanics (Set Property)</span>
+            <p class="text-slate-300 leading-relaxed font-sans text-xs">
+              Java's <code class="text-cyan-300 font-mono">Set.add(e)</code> method returns <code class="text-emerald-400 font-mono">true</code> if the element was successfully added, and <code class="text-rose-400 font-mono">false</code> if it was already present. By testing <code class="text-amber-300 font-mono">!set.add(num)</code>, duplicate elements are identified immediately in a single pass without extra searches.
+            </p>
+          </div>
+          <div class="grid grid-cols-2 gap-2 pt-2 border-t border-white/5 text-[11px]">
+            <div class="bg-slate-950/60 p-2 rounded-lg border border-white/5">
+              <span class="text-slate-400 block text-[10px]">TIME COMPLEXITY</span>
+              <span class="text-cyan-300 font-bold font-mono">O(n)</span>
+              <span class="text-slate-500 block text-[9px]">Linear single pass</span>
+            </div>
+            <div class="bg-slate-950/60 p-2 rounded-lg border border-white/5">
+              <span class="text-slate-400 block text-[10px]">SPACE COMPLEXITY</span>
+              <span class="text-indigo-300 font-bold font-mono">O(n)</span>
+              <span class="text-slate-500 block text-[9px]">HashSet stores unique items</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </footer>
+
+  </div>
+
+  <!-- JAVASCRIPT LOGIC ENGINE -->
+  <script>
+    // Web Audio Synthesizer
+    let audioCtx = null;
+    let isSoundOn = true;
+
+    function playTone(freq, type = 'sine', duration = 0.1, volume = 0.15) {
+      if (!isSoundOn) return;
+      try {
+        if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = type;
+        osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+        gain.gain.setValueAtTime(volume, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + duration);
+      } catch (e) {
+        // Fallback for browser audio restrictions
+      }
+    }
+
+    const soundEffects = {
+      step: () => playTone(360, 'sine', 0.05, 0.05),
+      keyAdded: () => playTone(587.33, 'sine', 0.08, 0.1), // D5
+      duplicateFail: () => {
+        playTone(220, 'sawtooth', 0.25, 0.25);
+        setTimeout(() => playTone(175, 'sawtooth', 0.35, 0.25), 120);
+      },
+      validDistinct: () => {
+        playTone(440, 'sine', 0.1, 0.15);
+        setTimeout(() => playTone(554.37, 'sine', 0.12, 0.18), 100);
+        setTimeout(() => playTone(659.25, 'sine', 0.2, 0.22), 200);
+      }
+    };
+
+    // 10 Comprehensive Presets
+    const presets = [
+      {
+        name: "1: LeetCode Ex 1 ([1, 2, 3, 1] -> true)",
+        nums: [1, 2, 3, 1]
+      },
+      {
+        name: "2: LeetCode Ex 2 ([1, 2, 3, 4] -> false)",
+        nums: [1, 2, 3, 4]
+      },
+      {
+        name: "3: LeetCode Ex 3 ([1, 1, 1, 3, 3, 4, 3, 2, 4, 2] -> true)",
+        nums: [1, 1, 1, 3, 3, 4, 3, 2, 4, 2]
+      },
+      {
+        name: "4: Immediate Duplicate ([5, 5, 1, 2] -> true)",
+        nums: [5, 5, 1, 2]
+      },
+      {
+        name: "5: Duplicate at Tail ([10, 20, 30, 40, 50, 10] -> true)",
+        nums: [10, 20, 30, 40, 50, 10]
+      },
+      {
+        name: "6: Single Element Array ([42] -> false)",
+        nums: [42]
+      },
+      {
+        name: "7: Negative Elements with Duplicate ([-1, -2, -3, -1] -> true)",
+        nums: [-1, -2, -3, -1]
+      },
+      {
+        name: "8: Distinct Negatives & Positives ([-5, -1, 0, 1, 5] -> false)",
+        nums: [-5, -1, 0, 1, 5]
+      },
+      {
+        name: "9: Two Elements Duplicate ([99, 99] -> true)",
+        nums: [99, 99]
+      },
+      {
+        name: "10: Two Elements Distinct ([7, 8] -> false)",
+        nums: [7, 8]
+      }
+    ];
+
+    let currentPresetIdx = 0;
+    let initialNums = [...presets[0].nums];
+    let steps = [];
+    let currentStepIdx = 0;
+    let isPlaying = false;
+    let playIntervalId = null;
+    let stepSpeedMs = 700;
+
+    // DOM Elements
+    const playPauseBtn = document.getElementById('playPauseBtn');
+    const playIcon = document.getElementById('playIcon');
+    const playText = document.getElementById('playText');
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
+    const resetBtn = document.getElementById('resetBtn');
+    const timelineSlider = document.getElementById('timelineSlider');
+    const stepCounter = document.getElementById('stepCounter');
+    const phaseBadge = document.getElementById('phaseBadge');
+    const phaseDot = document.getElementById('phaseDot');
+    const phaseText = document.getElementById('phaseText');
+    const presetSelect = document.getElementById('presetSelect');
+    const customArrayInput = document.getElementById('customArrayInput');
+    const applyCustomBtn = document.getElementById('applyCustomBtn');
+    const soundToggleBtn = document.getElementById('soundToggleBtn');
+    const soundIcon = document.getElementById('soundIcon');
+    const speedButtons = document.querySelectorAll('.speed-btn');
+
+    // Visual Arena DOM
+    const arrayCardsContainer = document.getElementById('arrayCardsContainer');
+    const activeNumDisplay = document.getElementById('activeNumDisplay');
+    const setAddEvaluation = document.getElementById('setAddEvaluation');
+    const ifConditionDisplay = document.getElementById('ifConditionDisplay');
+    const setTokensContainer = document.getElementById('setTokensContainer');
+    const setCountLabel = document.getElementById('setCountLabel');
+    const narrativeBox = document.getElementById('narrativeBox');
+    const codeContainer = document.getElementById('codeContainer');
+    const returnStatusPill = document.getElementById('returnStatusPill');
+
+    // Populate Presets Select
+    presets.forEach((p, idx) => {
+      const opt = document.createElement('option');
+      opt.value = idx;
+      opt.textContent = p.name;
+      presetSelect.appendChild(opt);
+    });
+
+    // Step Generation Engine
+    function generateExecutionSteps(nums) {
+      const generated = [];
+      const set = new Set();
+
+      function snapshot(config) {
+        generated.push({
+          line: config.line,
+          passName: config.passName || 'Iterate',
+          statusType: config.statusType || 'neutral',
+          i: config.i !== undefined ? config.i : null,
+          num: config.num !== undefined ? config.num : null,
+          setSnapshot: new Set(set),
+          setAddReturned: config.setAddReturned !== undefined ? config.setAddReturned : null,
+          conditionResult: config.conditionResult !== undefined ? config.conditionResult : null,
+          isDuplicate: !!config.isDuplicate,
+          conflictIndex: config.conflictIndex !== undefined ? config.conflictIndex : null,
+          narrative: config.narrative || '',
+          actionType: config.actionType || 'step',
+          isFinished: !!config.isFinished,
+          result: config.result !== undefined ? config.result : null
+        });
+      }
+
+      // Step 0: Set<Integer> set = new HashSet<>();
+      snapshot({
+        line: 4,
+        passName: 'Init',
+        statusType: 'neutral',
+        narrative: 'Instantiated empty HashSet<Integer> set to record numbers as we iterate.'
+      });
+
+      let foundDuplicate = false;
+      const seenIndices = {};
+
+      for (let i = 0; i < nums.length; i++) {
+        const num = nums[i];
+
+        // Step: for (int num : nums)
+        snapshot({
+          line: 6,
+          passName: 'Inspect Element',
+          statusType: 'cyan',
+          i: i,
+          num: num,
+          narrative: `Inspecting array element at index [${i}]: num = ${num}.`,
+          actionType: 'step'
+        });
+
+        // Step: if (!set.add(num))
+        const alreadyInSet = set.has(num);
+
+        if (alreadyInSet) {
+          // set.add(num) returns false -> !set.add(num) is true!
+          const prevIndex = seenIndices[num];
+          snapshot({
+            line: 8,
+            passName: 'Duplicate Found!',
+            statusType: 'rose',
+            i: i,
+            num: num,
+            setAddReturned: false,
+            conditionResult: true,
+            isDuplicate: true,
+            conflictIndex: prevIndex,
+            narrative: `set.add(${num}) returned false because ${num} was already in the Set (seen earlier at index [${prevIndex}]). Condition !set.add(${num}) is TRUE!`,
+            actionType: 'duplicateFail'
+          });
+
+          // Step: return true;
+          snapshot({
+            line: 9,
+            passName: 'Return True',
+            statusType: 'rose',
+            i: i,
+            num: num,
+            setAddReturned: false,
+            conditionResult: true,
+            isDuplicate: true,
+            conflictIndex: prevIndex,
+            isFinished: true,
+            result: true,
+            narrative: `Duplicate confirmed! Method returns TRUE immediately without examining further elements.`,
+            actionType: 'duplicateFail'
+          });
+
+          foundDuplicate = true;
+          break;
+        } else {
+          // Successfully adds to set
+          set.add(num);
+          seenIndices[num] = i;
+
+          snapshot({
+            line: 8,
+            passName: 'Added to Set',
+            statusType: 'emerald',
+            i: i,
+            num: num,
+            setAddReturned: true,
+            conditionResult: false,
+            isDuplicate: false,
+            narrative: `set.add(${num}) returned true. Number ${num} added into the Set. Condition !set.add(${num}) is false; moving to next element.`,
+            actionType: 'keyAdded'
+          });
+        }
+      }
+
+      if (!foundDuplicate) {
+        // Step: return false;
+        snapshot({
+          line: 13,
+          passName: 'All Distinct',
+          statusType: 'emerald',
+          isFinished: true,
+          result: false,
+          narrative: `Loop completed without encountering duplicates. Every element in the array is unique. Returns FALSE.`,
+          actionType: 'validDistinct'
+        });
+      }
+
+      return generated;
+    }
+
+    // Render Array Cards
+    function renderArrayCards(step) {
+      arrayCardsContainer.innerHTML = '';
+      initialNums.forEach((val, idx) => {
+        const card = document.createElement('div');
+        const isCurrent = (step.i === idx);
+        const isConflict = (step.isDuplicate && (step.i === idx || step.conflictIndex === idx));
+        const isPassed = (step.i !== null && idx < step.i);
+
+        let cardBg = 'bg-slate-900/80 border-white/10 text-slate-300';
+        let badge = `<span class="text-[9px] font-mono text-slate-500">#${idx}</span>`;
+
+        if (isConflict) {
+          cardBg = 'bg-rose-950/80 border-rose-500 text-rose-200 ring-2 ring-rose-500 conflict-shake shadow-lg shadow-rose-500/20';
+          badge = `<span class="text-[9px] font-mono text-rose-300 font-bold">DUP #${idx}</span>`;
+        } else if (isCurrent) {
+          cardBg = 'bg-cyan-500 text-slate-950 border-cyan-300 font-bold active-pulse ring-2 ring-cyan-400 shadow-lg shadow-cyan-500/30';
+          badge = `<span class="text-[9px] font-mono text-slate-950 font-bold">num [${idx}]</span>`;
+        } else if (isPassed) {
+          cardBg = 'bg-slate-800/60 border-emerald-500/30 text-emerald-300';
+          badge = `<span class="text-[9px] font-mono text-emerald-400/70">seen</span>`;
+        }
+
+        card.className = `min-w-[60px] sm:min-w-[70px] h-[72px] px-2.5 py-1.5 rounded-xl border flex flex-col items-center justify-between transition-all duration-200 shrink-0 select-none ${cardBg}`;
+        card.innerHTML = `
+          ${badge}
+          <span class="text-base sm:text-lg font-mono font-bold">${val}</span>
+          <span class="text-[9px] font-mono text-slate-400 opacity-60">val</span>
+        `;
+        arrayCardsContainer.appendChild(card);
+      });
+    }
+
+    // Render HashSet Tokens
+    function renderSetTokens(setSnapshot, currentStep) {
+      setCountLabel.textContent = `Elements: ${setSnapshot.size}`;
+      setTokensContainer.innerHTML = '';
+
+      if (setSnapshot.size === 0) {
+        setTokensContainer.innerHTML = '<span class="text-xs text-slate-500 font-mono italic">Set is empty (no elements tracked yet)</span>';
+        return;
+      }
+
+      Array.from(setSnapshot).forEach(num => {
+        const token = document.createElement('div');
+        const isConflictVal = (currentStep.isDuplicate && currentStep.num === num);
+
+        let tokenClass = 'bg-indigo-950/60 border-indigo-500/30 text-indigo-200';
+        if (isConflictVal) {
+          tokenClass = 'bg-rose-950 border-rose-500 text-rose-200 ring-2 ring-rose-500 font-bold conflict-shake';
+        }
+
+        token.className = `px-3 py-1 rounded-xl text-xs font-mono border flex items-center gap-1.5 shadow-sm transition-all ${tokenClass}`;
+        token.innerHTML = `
+          <i class="fa-solid fa-hashtag text-[10px] text-indigo-400"></i>
+          <span>${num}</span>
+        `;
+        setTokensContainer.appendChild(token);
+      });
+    }
+
+    // Zero-Jump Synchronized Java Code Line Highlighting
+    function highlightCodeLine(lineNum) {
+      document.querySelectorAll('#codeContainer .code-line').forEach(el => {
+        el.classList.remove('bg-cyan-500/25', 'border-l-4', 'border-cyan-400', 'text-white', 'font-bold');
+      });
+
+      if (!lineNum) return;
+      const targetEl = document.querySelector(`#codeContainer .code-line[data-line="${lineNum}"]`);
+      if (targetEl) {
+        targetEl.classList.add('bg-cyan-500/25', 'border-l-4', 'border-cyan-400', 'text-white', 'font-bold');
+
+        // Strictly localized scrolling inside container
+        const lineOffsetTop = targetEl.offsetTop;
+        const containerScrollTop = codeContainer.scrollTop;
+        const containerHeight = codeContainer.clientHeight;
+        const lineTotalHeight = targetEl.offsetHeight;
+
+        if (lineOffsetTop < containerScrollTop) {
+          codeContainer.scrollTop = lineOffsetTop - 12;
+        } else if (lineOffsetTop + lineTotalHeight > containerScrollTop + containerHeight) {
+          codeContainer.scrollTop = (lineOffsetTop + lineTotalHeight) - containerHeight + 12;
+        }
+      }
+    }
+
+    // Master Render Step
+    function renderStep(idx) {
+      if (steps.length === 0) return;
+      idx = Math.max(0, Math.min(steps.length - 1, idx));
+      currentStepIdx = idx;
+
+      const s = steps[idx];
+
+      // Controls State
+      stepCounter.textContent = `${idx + 1} / ${steps.length}`;
+      timelineSlider.value = idx;
+      prevBtn.disabled = (idx === 0);
+      nextBtn.disabled = (idx === steps.length - 1);
+
+      // Phase Pill
+      phaseText.textContent = s.passName;
+      phaseDot.className = 'w-1.5 h-1.5 rounded-full';
+      if (s.statusType === 'emerald') {
+        phaseDot.classList.add('bg-emerald-400');
+        phaseBadge.className = 'px-2.5 py-1.5 rounded-xl text-[11px] font-bold uppercase tracking-wider bg-emerald-950/70 text-emerald-300 border border-emerald-500/30 flex items-center gap-1.5';
+      } else if (s.statusType === 'rose') {
+        phaseDot.classList.add('bg-rose-400');
+        phaseBadge.className = 'px-2.5 py-1.5 rounded-xl text-[11px] font-bold uppercase tracking-wider bg-rose-950/70 text-rose-300 border border-rose-500/30 flex items-center gap-1.5';
+      } else if (s.statusType === 'cyan') {
+        phaseDot.classList.add('bg-cyan-400');
+        phaseBadge.className = 'px-2.5 py-1.5 rounded-xl text-[11px] font-bold uppercase tracking-wider bg-cyan-950/70 text-cyan-300 border border-cyan-500/30 flex items-center gap-1.5';
+      } else {
+        phaseDot.classList.add('bg-slate-400');
+        phaseBadge.className = 'px-2.5 py-1.5 rounded-xl text-[11px] font-bold uppercase tracking-wider bg-slate-800/80 text-slate-300 border border-white/10 flex items-center gap-1.5';
+      }
+
+      // Return Status Pill
+      if (s.isFinished) {
+        if (s.result === true) {
+          returnStatusPill.textContent = 'Returned true (Duplicate Found)';
+          returnStatusPill.className = 'text-[10px] font-mono px-2 py-0.5 rounded-full bg-rose-500/20 text-rose-300 border border-rose-500/30 font-bold';
+        } else {
+          returnStatusPill.textContent = 'Returned false (All Distinct)';
+          returnStatusPill.className = 'text-[10px] font-mono px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 font-bold';
+        }
+      } else {
+        returnStatusPill.textContent = 'Executing...';
+        returnStatusPill.className = 'text-[10px] font-mono px-2 py-0.5 rounded-full bg-slate-800 text-slate-300 border border-white/10';
+      }
+
+      // Display math conditions
+      if (s.num !== null) {
+        activeNumDisplay.textContent = `nums[${s.i}] = ${s.num}`;
+      } else {
+        activeNumDisplay.textContent = 'num = -';
+      }
+
+      if (s.setAddReturned !== null) {
+        setAddEvaluation.textContent = `${s.setAddReturned}`;
+        setAddEvaluation.className = s.setAddReturned ? 'text-emerald-400 font-bold mt-1 text-sm' : 'text-rose-400 font-bold mt-1 text-sm';
+      } else {
+        setAddEvaluation.textContent = 'Pending';
+        setAddEvaluation.className = 'text-slate-400 font-bold mt-1 text-sm';
+      }
+
+      if (s.conditionResult !== null) {
+        ifConditionDisplay.textContent = s.conditionResult ? 'TRUE (Triggers Return)' : 'FALSE (Continue)';
+        ifConditionDisplay.className = s.conditionResult ? 'text-rose-400 font-bold mt-1 text-sm' : 'text-emerald-400 font-bold mt-1 text-sm';
+      } else {
+        ifConditionDisplay.textContent = 'Waiting';
+        ifConditionDisplay.className = 'text-slate-400 font-bold mt-1 text-sm';
+      }
+
+      // Step Narrative
+      narrativeBox.textContent = s.narrative;
+
+      // Render Visualizations
+      renderArrayCards(s);
+      renderSetTokens(s.setSnapshot, s);
+      highlightCodeLine(s.line);
+
+      // Audio effects
+      if (s.actionType === 'duplicateFail') {
+        soundEffects.duplicateFail();
+      } else if (s.actionType === 'keyAdded') {
+        soundEffects.keyAdded();
+      } else if (s.actionType === 'validDistinct') {
+        soundEffects.validDistinct();
+      } else {
+        soundEffects.step();
+      }
+    }
+
+    // Playback Controller
+    function setPlaying(play) {
+      isPlaying = play;
+      if (isPlaying) {
+        playIcon.className = 'fa-solid fa-pause';
+        playText.textContent = 'Pause';
+        playPauseBtn.classList.replace('from-cyan-500', 'from-amber-500');
+        playPauseBtn.classList.replace('to-indigo-500', 'to-amber-600');
+
+        playIntervalId = setInterval(() => {
+          if (currentStepIdx < steps.length - 1) {
+            renderStep(currentStepIdx + 1);
+          } else {
+            setPlaying(false);
+          }
+        }, stepSpeedMs);
+      } else {
+        playIcon.className = 'fa-solid fa-play';
+        playText.textContent = 'Play';
+        playPauseBtn.classList.replace('from-amber-500', 'from-cyan-500');
+        playPauseBtn.classList.replace('to-amber-600', 'to-indigo-500');
+        if (playIntervalId) clearInterval(playIntervalId);
+        playIntervalId = null;
+      }
+    }
+
+    // Initialize Simulation
+    function initSimulation(numsArray) {
+      setPlaying(false);
+      initialNums = [...numsArray];
+      steps = generateExecutionSteps(initialNums);
+      timelineSlider.max = Math.max(0, steps.length - 1);
+      timelineSlider.value = 0;
+      renderStep(0);
+    }
+
+    // Event Handlers
+    playPauseBtn.addEventListener('click', () => setPlaying(!isPlaying));
+
+    prevBtn.addEventListener('click', () => {
+      setPlaying(false);
+      renderStep(currentStepIdx - 1);
+    });
+
+    nextBtn.addEventListener('click', () => {
+      setPlaying(false);
+      renderStep(currentStepIdx + 1);
+    });
+
+    resetBtn.addEventListener('click', () => {
+      setPlaying(false);
+      renderStep(0);
+    });
+
+    timelineSlider.addEventListener('input', (e) => {
+      setPlaying(false);
+      renderStep(parseInt(e.target.value));
+    });
+
+    speedButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        speedButtons.forEach(b => {
+          b.className = 'speed-btn px-2 py-0.5 rounded-lg text-xs font-mono text-slate-300 hover:text-white transition-all';
+        });
+        btn.className = 'speed-btn px-2 py-0.5 rounded-lg text-xs font-mono bg-cyan-500/30 text-cyan-200 font-bold border border-cyan-500/40 transition-all';
+        stepSpeedMs = parseInt(btn.dataset.speed);
+        if (isPlaying) {
+          setPlaying(false);
+          setPlaying(true);
+        }
+      });
+    });
+
+    presetSelect.addEventListener('change', (e) => {
+      currentPresetIdx = parseInt(e.target.value);
+      customArrayInput.value = '';
+      initSimulation(presets[currentPresetIdx].nums);
+    });
+
+    applyCustomBtn.addEventListener('click', () => {
+      const raw = customArrayInput.value.trim();
+      if (!raw) return;
+      const parsed = raw.split(/[\s,]+/).map(x => parseInt(x)).filter(x => !isNaN(x));
+      if (parsed.length > 0) {
+        initSimulation(parsed);
+      }
+    });
+
+    customArrayInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        applyCustomBtn.click();
+      }
+    });
+
+    soundToggleBtn.addEventListener('click', () => {
+      isSoundOn = !isSoundOn;
+      soundIcon.className = isSoundOn ? 'fa-solid fa-volume-high text-cyan-400' : 'fa-solid fa-volume-xmark text-slate-500';
+    });
+
+    window.addEventListener('keydown', (e) => {
+      if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT') return;
+      if (e.code === 'Space') {
+        e.preventDefault();
+        setPlaying(!isPlaying);
+      } else if (e.code === 'ArrowRight') {
+        e.preventDefault();
+        setPlaying(false);
+        renderStep(currentStepIdx + 1);
+      } else if (e.code === 'ArrowLeft') {
+        e.preventDefault();
+        setPlaying(false);
+        renderStep(currentStepIdx - 1);
+      }
+    });
+
+    // Boot
+    initSimulation(presets[0].nums);
+  </script>
+</body>
+</html>

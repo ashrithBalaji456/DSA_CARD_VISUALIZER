@@ -7,6 +7,8 @@ import {
   ArrowRight,
   Clock,
   HardDrive,
+  Sparkles,
+  Info,
 } from 'lucide-react';
 import type { DSAProblem } from '../types/problem';
 import { DifficultyBadge } from './DifficultyBadge';
@@ -144,14 +146,41 @@ export const ProblemCard: React.FC<Props> = ({
             <ExternalLink className="w-3 h-3 text-slate-400" />
           </a>
 
-          {/* Explore Problem button */}
-          <button
-            onClick={() => onExplore(problem)}
-            className="flex-1 flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium bg-indigo-600/90 hover:bg-indigo-600 text-white shadow-md shadow-indigo-600/20 hover:shadow-indigo-600/40 transition-all group/btn"
-          >
-            <span>Explore Problem</span>
-            <ArrowRight className="w-3 h-3 group-hover/btn:translate-x-0.5 transition-transform" />
-          </button>
+          {/* Open Problem action button */}
+          {problem.visualizerUrl ? (
+            <a
+              href={problem.visualizerUrl}
+              onClick={(e) => e.stopPropagation()}
+              className="flex-1 flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold bg-gradient-to-r from-cyan-600 via-indigo-600 to-violet-600 hover:from-cyan-500 hover:to-violet-500 text-white shadow-md shadow-indigo-600/25 hover:shadow-cyan-500/35 transition-all group/btn"
+              title="Open full interactive visualizer page"
+            >
+              <Sparkles className="w-3 h-3 text-cyan-200" />
+              <span>Open Problem</span>
+              <ArrowRight className="w-3 h-3 group-hover/btn:translate-x-0.5 transition-transform" />
+            </a>
+          ) : (
+            <button
+              onClick={() => onExplore(problem)}
+              className="flex-1 flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium bg-indigo-600/90 hover:bg-indigo-600 text-white shadow-md shadow-indigo-600/20 hover:shadow-indigo-600/40 transition-all group/btn"
+            >
+              <span>Open Problem</span>
+              <ArrowRight className="w-3 h-3 group-hover/btn:translate-x-0.5 transition-transform" />
+            </button>
+          )}
+
+          {/* Quick Details button when visualizer is available */}
+          {problem.visualizerUrl && (
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                onExplore(problem);
+              }}
+              className="p-1.5 rounded-xl bg-white/[0.04] border border-white/10 text-slate-400 hover:text-white hover:bg-white/10 transition-all"
+              title="Quick problem overview & notes"
+            >
+              <Info className="w-3.5 h-3.5" />
+            </button>
+          )}
         </div>
       </div>
     </div>

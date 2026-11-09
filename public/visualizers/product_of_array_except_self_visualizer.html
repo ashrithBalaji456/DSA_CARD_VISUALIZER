@@ -1,0 +1,1031 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Product of Array Except Self Visualizer</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background-color: #030712;
+      color: #f1f5f9;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    .font-mono {
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    /* Glassmorphic primitives */
+    .glass-panel {
+      background: rgba(15, 23, 42, 0.75);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.7), inset 0 1px 0 0 rgba(255, 255, 255, 0.08);
+    }
+
+    .glass-card {
+      background: rgba(30, 41, 59, 0.55);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    .glass-input {
+      background: rgba(15, 23, 42, 0.85);
+      border: 1px solid rgba(59, 130, 246, 0.25);
+    }
+
+    .glass-input:focus {
+      border-color: rgba(59, 130, 246, 0.6);
+      outline: none;
+      box-shadow: 0 0 14px rgba(59, 130, 246, 0.25);
+    }
+
+    /* Custom scrollbars */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: rgba(15, 23, 42, 0.6);
+    }
+    ::-webkit-scrollbar-thumb {
+      background: rgba(59, 130, 246, 0.35);
+      border-radius: 9999px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(59, 130, 246, 0.6);
+    }
+
+    .code-line {
+      transition: all 0.2s ease;
+    }
+
+    @keyframes pulseGlow {
+      0%, 100% { transform: scale(1); opacity: 0.95; }
+      50% { transform: scale(1.05); opacity: 0.75; }
+    }
+    .active-card-glow {
+      animation: pulseGlow 1.4s ease-in-out infinite;
+    }
+  </style>
+</head>
+<body class="relative flex flex-col justify-between p-3 sm:p-5 selection:bg-blue-500 selection:text-white">
+
+  <!-- Ambient Background Glow Orbs -->
+  <div class="fixed top-[-10%] left-[-10%] w-[45vw] h-[45vw] rounded-full bg-blue-600/10 blur-[130px] pointer-events-none -z-10"></div>
+  <div class="fixed bottom-[-15%] right-[-10%] w-[50vw] h-[50vw] rounded-full bg-cyan-600/10 blur-[140px] pointer-events-none -z-10"></div>
+  <div class="fixed top-[45%] left-[30%] w-[35vw] h-[35vw] rounded-full bg-amber-600/10 blur-[130px] pointer-events-none -z-10"></div>
+
+  <!-- MAIN WRAPPER -->
+  <div class="max-w-7xl mx-auto w-full flex flex-col gap-4">
+
+    <!-- TOP CONTROL DECK (FROSTED GLASS) -->
+    <header class="glass-panel rounded-2xl p-3.5 sm:p-4 flex flex-col gap-3.5 sticky top-2 z-50">
+      
+      <!-- Top Row: Title, Problem Badges, Audio & Controls -->
+      <div class="flex flex-wrap items-center justify-between gap-3 border-b border-white/5 pb-3">
+        <div class="flex items-center gap-2.5">
+          <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-blue-600 to-cyan-500 flex items-center justify-center shadow-lg shadow-blue-500/30">
+            <i class="fa-solid fa-arrows-split-up-and-left text-white text-base"></i>
+          </div>
+          <div>
+            <div class="flex items-center gap-2">
+              <h1 class="text-base sm:text-lg font-bold tracking-tight text-white flex items-center gap-2">
+                Product of Array Except Self
+              </h1>
+              <span class="text-[10px] font-mono font-semibold px-2 py-0.5 rounded-full bg-blue-500/20 text-blue-300 border border-blue-500/30">LeetCode 238</span>
+              <span class="text-[10px] font-mono px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 hidden sm:inline-block">O(N) Time • O(1) Space</span>
+            </div>
+            <p class="text-xs text-slate-400 font-medium hidden sm:block">Pass 1: Left Prefix Product &bull; Pass 2: Right Suffix Multiplication</p>
+          </div>
+        </div>
+
+        <!-- Controls: Sound + Keyboard Guide -->
+        <div class="flex items-center gap-2">
+          <button id="soundToggleBtn" class="px-2.5 py-1.5 rounded-xl glass-card text-xs font-mono text-slate-300 hover:text-white hover:border-blue-500/40 transition-all flex items-center gap-1.5" title="Toggle Sound">
+            <i class="fa-solid fa-volume-high text-blue-400" id="soundIcon"></i>
+            <span class="hidden md:inline">Audio</span>
+          </button>
+          <div class="hidden lg:flex items-center gap-1.5 text-[11px] font-mono text-slate-400 px-2.5 py-1 rounded-xl glass-card">
+            <span>Keys:</span>
+            <kbd class="px-1.5 py-0.5 rounded bg-slate-800 text-slate-200 border border-slate-700">Space</kbd>
+            <kbd class="px-1.5 py-0.5 rounded bg-slate-800 text-slate-200 border border-slate-700">&larr;</kbd>
+            <kbd class="px-1.5 py-0.5 rounded bg-slate-800 text-slate-200 border border-slate-700">&rarr;</kbd>
+          </div>
+        </div>
+      </div>
+
+      <!-- Playback Buttons Bar -->
+      <div class="flex flex-wrap items-center justify-between gap-3">
+        
+        <!-- Primary Action Buttons -->
+        <div class="flex items-center gap-1.5 sm:gap-2">
+          <button id="resetBtn" class="px-3 py-2 rounded-xl glass-card text-xs font-semibold text-slate-300 hover:text-white hover:bg-white/10 active:scale-95 transition-all flex items-center gap-1.5">
+            <i class="fa-solid fa-rotate-left text-slate-400"></i>
+            <span class="hidden sm:inline">Reset</span>
+          </button>
+
+          <button id="prevBtn" class="px-3.5 py-2 rounded-xl glass-card text-xs font-semibold text-slate-200 hover:text-white hover:border-cyan-500/40 active:scale-95 transition-all flex items-center gap-1.5 disabled:opacity-30 disabled:pointer-events-none">
+            <i class="fa-solid fa-chevron-left text-cyan-400"></i>
+            <span>Prev</span>
+          </button>
+
+          <button id="playPauseBtn" class="px-5 py-2 rounded-xl bg-gradient-to-r from-blue-500 to-cyan-600 hover:from-blue-400 hover:to-cyan-500 text-white font-bold text-xs tracking-wide shadow-lg shadow-blue-500/30 active:scale-95 transition-all flex items-center gap-2">
+            <i class="fa-solid fa-play" id="playIcon"></i>
+            <span id="playText">Play</span>
+          </button>
+
+          <button id="nextBtn" class="px-3.5 py-2 rounded-xl glass-card text-xs font-semibold text-slate-200 hover:text-white hover:border-cyan-500/40 active:scale-95 transition-all flex items-center gap-1.5 disabled:opacity-30 disabled:pointer-events-none">
+            <span>Next</span>
+            <i class="fa-solid fa-chevron-right text-cyan-400"></i>
+          </button>
+        </div>
+
+        <!-- Speed Selector -->
+        <div class="flex items-center gap-1 glass-card p-1 rounded-xl">
+          <span class="text-[10px] font-mono text-slate-400 px-1.5 uppercase font-bold">Speed:</span>
+          <button class="speed-btn px-2 py-0.5 rounded-lg text-xs font-mono text-slate-300 hover:text-white transition-all" data-speed="1800">0.5x</button>
+          <button class="speed-btn px-2 py-0.5 rounded-lg text-xs font-mono bg-blue-500/30 text-blue-200 font-bold border border-blue-500/40 transition-all" data-speed="1000">1x</button>
+          <button class="speed-btn px-2 py-0.5 rounded-lg text-xs font-mono text-slate-300 hover:text-white transition-all" data-speed="500">2x</button>
+          <button class="speed-btn px-2 py-0.5 rounded-lg text-xs font-mono text-slate-300 hover:text-white transition-all" data-speed="250">4x</button>
+        </div>
+
+        <!-- Step Counter & Phase Badges -->
+        <div class="flex items-center gap-2 font-mono text-xs">
+          <div class="px-3 py-1.5 rounded-xl glass-card border border-white/10 flex items-center gap-2">
+            <span class="text-slate-400">Step:</span>
+            <span id="stepCounter" class="text-blue-400 font-bold">0 / 0</span>
+          </div>
+          <div id="phaseBadge" class="px-2.5 py-1.5 rounded-xl text-[11px] font-bold uppercase tracking-wider bg-slate-800/80 text-slate-300 border border-white/10 flex items-center gap-1.5">
+            <span class="w-1.5 h-1.5 rounded-full bg-slate-400" id="phaseDot"></span>
+            <span id="phaseText">Ready</span>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Scrubber Timeline Slider -->
+      <div class="flex items-center gap-3 pt-1">
+        <span class="text-[10px] font-mono text-slate-400 shrink-0">TIMELINE</span>
+        <input id="timelineSlider" type="range" min="0" max="0" value="0" class="w-full h-1.5 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-blue-500">
+      </div>
+
+      <!-- Presets & Custom Array Input -->
+      <div class="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-white/5 text-xs">
+        <div class="flex items-center gap-2 flex-grow max-w-2xl">
+          <span class="text-blue-400 font-mono font-semibold shrink-0">Preset:</span>
+          <select id="presetSelect" class="bg-slate-900 text-blue-200 font-mono text-xs rounded-xl px-2.5 py-1.5 border border-blue-500/20 focus:outline-none focus:border-blue-400 w-full truncate cursor-pointer">
+            <!-- Dynamically populated -->
+          </select>
+        </div>
+
+        <div class="flex items-center gap-2">
+          <input id="customNumsInput" type="text" placeholder="nums: 1, 2, 3, 4" class="glass-input text-xs font-mono px-2.5 py-1.5 rounded-xl w-44 sm:w-56 text-slate-200 placeholder:text-slate-600">
+          <button id="applyCustomBtn" class="px-2.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-blue-300 font-mono text-xs border border-blue-500/30 transition-all">Load</button>
+        </div>
+      </div>
+
+    </header>
+
+    <!-- MAIN BODY GRID (2 COLUMNS) -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-4">
+
+      <!-- LEFT: VISUAL PIPELINE ARENA (7 COLS) -->
+      <section class="lg:col-span-7 flex flex-col gap-4">
+
+        <!-- Running Product Meters Deck -->
+        <div class="grid grid-cols-2 gap-3">
+          <!-- Prefix Gauge -->
+          <div class="glass-panel rounded-2xl p-3.5 flex flex-col gap-1 border-l-4 border-cyan-400">
+            <div class="flex items-center justify-between">
+              <span class="text-[11px] font-mono text-slate-400 uppercase font-bold flex items-center gap-1.5">
+                <i class="fa-solid fa-arrow-right-long text-cyan-400"></i> Prefix Running Product
+              </span>
+              <span id="prefixStatusBadge" class="text-[10px] font-mono px-2 py-0.5 rounded-full bg-cyan-500/20 text-cyan-300 border border-cyan-500/30">Active</span>
+            </div>
+            <div class="flex items-baseline gap-2 mt-1">
+              <span class="text-xs font-mono text-slate-400">prefix =</span>
+              <span id="prefixValueDisplay" class="text-2xl font-black font-mono text-cyan-300">1</span>
+            </div>
+            <span class="text-[10px] text-slate-400 font-mono truncate" id="prefixFormulaNote">Initial identity value: 1</span>
+          </div>
+
+          <!-- Suffix Gauge -->
+          <div class="glass-panel rounded-2xl p-3.5 flex flex-col gap-1 border-l-4 border-amber-400">
+            <div class="flex items-center justify-between">
+              <span class="text-[11px] font-mono text-slate-400 uppercase font-bold flex items-center gap-1.5">
+                <i class="fa-solid fa-arrow-left-long text-amber-400"></i> Suffix Running Product
+              </span>
+              <span id="suffixStatusBadge" class="text-[10px] font-mono px-2 py-0.5 rounded-full bg-slate-800 text-slate-400 border border-white/5">Waiting</span>
+            </div>
+            <div class="flex items-baseline gap-2 mt-1">
+              <span class="text-xs font-mono text-slate-400">suffix =</span>
+              <span id="suffixValueDisplay" class="text-2xl font-black font-mono text-amber-300">1</span>
+            </div>
+            <span class="text-[10px] text-slate-400 font-mono truncate" id="suffixFormulaNote">Awaiting Pass 2</span>
+          </div>
+        </div>
+
+        <!-- Input Array Stage (nums[]) -->
+        <div class="glass-panel rounded-2xl p-4 flex flex-col gap-3">
+          <div class="flex items-center justify-between border-b border-white/5 pb-2.5">
+            <div class="flex items-center gap-2">
+              <span class="w-2 h-2 rounded-full bg-blue-400"></span>
+              <h2 class="text-xs font-bold uppercase tracking-wider text-slate-200">Input Array: nums[]</h2>
+            </div>
+            <span class="text-[11px] font-mono text-blue-300" id="numsLengthLabel">n = 4</span>
+          </div>
+
+          <!-- Cards Row: nums[] -->
+          <div id="numsContainer" class="flex flex-wrap gap-2.5 p-3 bg-slate-950/60 rounded-xl border border-white/5 min-h-[76px] items-center justify-center sm:justify-start">
+            <!-- Dynamically populated nums cards -->
+          </div>
+        </div>
+
+        <!-- Output Array Stage (arr[]) -->
+        <div class="glass-panel rounded-2xl p-4 flex flex-col gap-3">
+          <div class="flex items-center justify-between border-b border-white/5 pb-2.5">
+            <div class="flex items-center gap-2">
+              <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+              <h2 class="text-xs font-bold uppercase tracking-wider text-slate-200">Output Result Array: arr[]</h2>
+            </div>
+            <div class="flex items-center gap-3 text-[11px] font-mono">
+              <span class="text-cyan-400 flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-cyan-400"></span> Pass 1 Prefix</span>
+              <span class="text-emerald-400 flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-emerald-400"></span> Pass 2 Suffix</span>
+            </div>
+          </div>
+
+          <!-- Cards Row: arr[] -->
+          <div id="arrContainer" class="flex flex-wrap gap-2.5 p-3 bg-slate-950/60 rounded-xl border border-white/5 min-h-[92px] items-center justify-center sm:justify-start">
+            <!-- Dynamically populated arr cards -->
+          </div>
+        </div>
+
+        <!-- Active Math Formula Breakdown Box -->
+        <div class="glass-panel rounded-2xl p-4 flex flex-col gap-2">
+          <div class="flex items-center justify-between border-b border-white/5 pb-2">
+            <span class="text-xs font-bold uppercase tracking-wider text-slate-300">Live Mathematical Operation</span>
+            <span class="text-[11px] font-mono text-purple-300" id="formulaPill">Formula</span>
+          </div>
+          <div id="mathEquationBox" class="p-3 bg-slate-950/80 rounded-xl border border-white/5 font-mono text-sm sm:text-base text-slate-200 flex items-center justify-center text-center">
+            arr[i] = prefix; // Waiting to begin
+          </div>
+          <!-- Narrative explanation -->
+          <div id="narrativeBox" class="text-xs text-slate-400 font-mono mt-1">
+            Initialize arrays and variables.
+          </div>
+        </div>
+
+      </section>
+
+      <!-- RIGHT: CODE INSPECTION & EXECUTION WATCH (5 COLS) -->
+      <section class="lg:col-span-5 flex flex-col gap-4">
+
+        <!-- Code Inspection Panel -->
+        <div class="glass-panel rounded-2xl p-4 flex flex-col gap-3">
+          <div class="flex items-center justify-between border-b border-white/5 pb-2.5">
+            <div class="flex items-center gap-2">
+              <i class="fa-brands fa-java text-blue-400 text-sm"></i>
+              <span class="text-xs font-bold uppercase tracking-wider text-slate-200">Solution.java</span>
+            </div>
+            <span class="text-[11px] font-mono text-slate-400" id="codePhaseLabel">Dual Pass O(1) Extra Space</span>
+          </div>
+
+          <!-- Code View Container with strictly localized scrolling -->
+          <div id="codeContainer" class="bg-slate-950/80 rounded-xl p-3 font-mono text-[11px] sm:text-xs leading-5 border border-white/5 overflow-y-auto max-h-[380px] select-text">
+            <div class="code-line px-2 py-0.5 rounded text-slate-400" data-line="1"><span class="text-blue-400">class</span> <span class="text-yellow-300">Solution</span> {</div>
+            <div class="code-line px-2 py-0.5 rounded text-slate-300" data-line="2">&nbsp;&nbsp;<span class="text-cyan-400">public int</span>[] <span class="text-yellow-300">productExceptSelf</span>(<span class="text-cyan-400">int</span>[] nums) {</div>
+            <div class="code-line px-2 py-0.5 rounded text-slate-300" data-line="3">&nbsp;&nbsp;&nbsp;&nbsp;<span class="text-cyan-400">int</span> n = nums.length;</div>
+            <div class="code-line px-2 py-0.5 rounded text-slate-300" data-line="4">&nbsp;&nbsp;&nbsp;&nbsp;<span class="text-cyan-400">int</span> arr[] = <span class="text-blue-400">new int</span>[n];</div>
+            <div class="code-line px-2 py-0.5 rounded text-slate-500" data-line="5"></div>
+            <div class="code-line px-2 py-0.5 rounded text-slate-300" data-line="6">&nbsp;&nbsp;&nbsp;&nbsp;<span class="text-cyan-400">int</span> prefix = <span class="text-cyan-300">1</span>;</div>
+            <div class="code-line px-2 py-0.5 rounded text-slate-300" data-line="7">&nbsp;&nbsp;&nbsp;&nbsp;<span class="text-cyan-400">int</span> suffix = <span class="text-amber-300">1</span>;</div>
+            <div class="code-line px-2 py-0.5 rounded text-slate-500" data-line="8"></div>
+            <div class="code-line px-2 py-0.5 rounded text-slate-400" data-line="9">&nbsp;&nbsp;&nbsp;&nbsp;<span class="text-slate-500">// Prefix calculation</span></div>
+            <div class="code-line px-2 py-0.5 rounded text-slate-300" data-line="10">&nbsp;&nbsp;&nbsp;&nbsp;<span class="text-blue-400">for</span> (<span class="text-cyan-400">int</span> i = <span class="text-cyan-300">0</span>; i &lt; n; i++) {</div>
+            <div class="code-line px-2 py-0.5 rounded text-slate-300" data-line="11">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;arr[i] = prefix;</div>
+            <div class="code-line px-2 py-0.5 rounded text-slate-300" data-line="12">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;prefix *= nums[i];</div>
+            <div class="code-line px-2 py-0.5 rounded text-slate-300" data-line="13">&nbsp;&nbsp;&nbsp;&nbsp;}</div>
+            <div class="code-line px-2 py-0.5 rounded text-slate-500" data-line="14"></div>
+            <div class="code-line px-2 py-0.5 rounded text-slate-400" data-line="15">&nbsp;&nbsp;&nbsp;&nbsp;<span class="text-slate-500">// Suffix calculation</span></div>
+            <div class="code-line px-2 py-0.5 rounded text-slate-300" data-line="16">&nbsp;&nbsp;&nbsp;&nbsp;<span class="text-blue-400">for</span> (<span class="text-cyan-400">int</span> i = n - <span class="text-cyan-300">1</span>; i &gt;= <span class="text-cyan-300">0</span>; i--) {</div>
+            <div class="code-line px-2 py-0.5 rounded text-slate-300" data-line="17">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;arr[i] *= suffix;</div>
+            <div class="code-line px-2 py-0.5 rounded text-slate-300" data-line="18">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;suffix *= nums[i];</div>
+            <div class="code-line px-2 py-0.5 rounded text-slate-300" data-line="19">&nbsp;&nbsp;&nbsp;&nbsp;}</div>
+            <div class="code-line px-2 py-0.5 rounded text-slate-500" data-line="20"></div>
+            <div class="code-line px-2 py-0.5 rounded text-slate-300" data-line="21">&nbsp;&nbsp;&nbsp;&nbsp;<span class="text-blue-400">return</span> arr;</div>
+            <div class="code-line px-2 py-0.5 rounded text-slate-300" data-line="22">&nbsp;&nbsp;}</div>
+            <div class="code-line px-2 py-0.5 rounded text-slate-400" data-line="23">}</div>
+          </div>
+        </div>
+
+        <!-- Live Watch Variables Deck -->
+        <div class="glass-panel rounded-2xl p-4 flex flex-col gap-3">
+          <div class="flex items-center justify-between border-b border-white/5 pb-2.5">
+            <span class="text-xs font-bold uppercase tracking-wider text-slate-200">State Watcher</span>
+            <span class="text-[11px] font-mono text-blue-400" id="watchPhaseBadge">Ready</span>
+          </div>
+
+          <div class="grid grid-cols-2 gap-2.5 text-xs font-mono">
+            <div class="glass-card p-2.5 rounded-xl flex flex-col">
+              <span class="text-[10px] text-slate-400 uppercase">Index (i)</span>
+              <span id="watchI" class="text-base font-bold text-cyan-300 mt-0.5">-</span>
+            </div>
+
+            <div class="glass-card p-2.5 rounded-xl flex flex-col">
+              <span class="text-[10px] text-slate-400 uppercase">nums[i]</span>
+              <span id="watchNumsI" class="text-base font-bold text-yellow-300 mt-0.5">-</span>
+            </div>
+
+            <div class="glass-card p-2.5 rounded-xl flex flex-col">
+              <span class="text-[10px] text-slate-400 uppercase">prefix accumulator</span>
+              <span id="watchPrefix" class="text-base font-bold text-cyan-300 mt-0.5">1</span>
+            </div>
+
+            <div class="glass-card p-2.5 rounded-xl flex flex-col">
+              <span class="text-[10px] text-slate-400 uppercase">suffix accumulator</span>
+              <span id="watchSuffix" class="text-base font-bold text-amber-300 mt-0.5">1</span>
+            </div>
+
+            <div class="glass-card p-2.5 rounded-xl flex flex-col col-span-2">
+              <span class="text-[10px] text-slate-400 uppercase">arr[i] current slot value</span>
+              <span id="watchArrI" class="text-sm font-bold text-emerald-400 mt-0.5">-</span>
+            </div>
+          </div>
+        </div>
+
+      </section>
+
+    </div>
+  </div>
+
+  <!-- JAVASCRIPT LOGIC ENGINE -->
+  <script>
+    // Web Audio Synthesizer
+    let audioCtx = null;
+    let isSoundOn = true;
+
+    function playTone(freq, type = 'sine', duration = 0.12, volume = 0.15) {
+      if (!isSoundOn) return;
+      try {
+        if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = type;
+        osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+        gain.gain.setValueAtTime(volume, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + duration);
+      } catch (e) {
+        // Audio error silent fallback
+      }
+    }
+
+    const soundEffects = {
+      step: () => playTone(440, 'triangle', 0.08, 0.08),
+      prefixWrite: () => playTone(523.25, 'sine', 0.1, 0.12), // C5
+      prefixMultiply: () => playTone(659.25, 'sine', 0.1, 0.12), // E5
+      suffixMultiply: () => playTone(783.99, 'sine', 0.12, 0.15), // G5
+      finish: () => {
+        playTone(523.25, 'sine', 0.12, 0.2);
+        setTimeout(() => playTone(659.25, 'sine', 0.14, 0.2), 100);
+        setTimeout(() => playTone(783.99, 'sine', 0.18, 0.22), 200);
+        setTimeout(() => playTone(1046.50, 'sine', 0.28, 0.25), 300);
+      }
+    };
+
+    // 10 Comprehensive Presets
+    const presets = [
+      {
+        name: "1: LeetCode Ex 1 ([1, 2, 3, 4] -> [24, 12, 8, 6])",
+        nums: [1, 2, 3, 4]
+      },
+      {
+        name: "2: Single Zero Array ([-1, 1, 0, -3, 3] -> [0, 0, 9, 0, 0])",
+        nums: [-1, 1, 0, -3, 3]
+      },
+      {
+        name: "3: Multiple Zeros ([0, 2, 3, 0] -> [0, 0, 0, 0])",
+        nums: [0, 2, 3, 0]
+      },
+      {
+        name: "4: All Ones ([1, 1, 1, 1, 1] -> [1, 1, 1, 1, 1])",
+        nums: [1, 1, 1, 1, 1]
+      },
+      {
+        name: "5: Two Elements Only ([5, 10] -> [10, 5])",
+        nums: [5, 10]
+      },
+      {
+        name: "6: Negative Pairs ([-2, -3, -4, -5] -> [-60, -40, -30, -24])",
+        nums: [-2, -3, -4, -5]
+      },
+      {
+        name: "7: Small Values ([2, 3, 4, 5] -> [60, 40, 30, 24])",
+        nums: [2, 3, 4, 5]
+      },
+      {
+        name: "8: Alternating Signs ([1, -1, 1, -1] -> [-1, 1, -1, 1])",
+        nums: [1, -1, 1, -1]
+      },
+      {
+        name: "9: Powers of Two ([2, 4, 8] -> [32, 16, 8])",
+        nums: [2, 4, 8]
+      },
+      {
+        name: "10: Six Elements ([1, 2, 3, 2, 1, 2] -> [24, 12, 8, 12, 24, 12])",
+        nums: [1, 2, 3, 2, 1, 2]
+      }
+    ];
+
+    let currentPresetIdx = 0;
+    let initialNums = [...presets[0].nums];
+    let steps = [];
+    let currentStepIdx = 0;
+    let isPlaying = false;
+    let playIntervalId = null;
+    let stepSpeedMs = 1000;
+
+    // DOM References
+    const playPauseBtn = document.getElementById('playPauseBtn');
+    const playIcon = document.getElementById('playIcon');
+    const playText = document.getElementById('playText');
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
+    const resetBtn = document.getElementById('resetBtn');
+    const timelineSlider = document.getElementById('timelineSlider');
+    const stepCounter = document.getElementById('stepCounter');
+    const phaseBadge = document.getElementById('phaseBadge');
+    const phaseDot = document.getElementById('phaseDot');
+    const phaseText = document.getElementById('phaseText');
+    const presetSelect = document.getElementById('presetSelect');
+    const customNumsInput = document.getElementById('customNumsInput');
+    const applyCustomBtn = document.getElementById('applyCustomBtn');
+    const soundToggleBtn = document.getElementById('soundToggleBtn');
+    const soundIcon = document.getElementById('soundIcon');
+    const speedButtons = document.querySelectorAll('.speed-btn');
+
+    // Visual Arena DOM
+    const numsContainer = document.getElementById('numsContainer');
+    const arrContainer = document.getElementById('arrContainer');
+    const numsLengthLabel = document.getElementById('numsLengthLabel');
+    const prefixValueDisplay = document.getElementById('prefixValueDisplay');
+    const suffixValueDisplay = document.getElementById('suffixValueDisplay');
+    const prefixStatusBadge = document.getElementById('prefixStatusBadge');
+    const suffixStatusBadge = document.getElementById('suffixStatusBadge');
+    const prefixFormulaNote = document.getElementById('prefixFormulaNote');
+    const suffixFormulaNote = document.getElementById('suffixFormulaNote');
+    const mathEquationBox = document.getElementById('mathEquationBox');
+    const narrativeBox = document.getElementById('narrativeBox');
+    const formulaPill = document.getElementById('formulaPill');
+
+    // Code and Watchers
+    const codeContainer = document.getElementById('codeContainer');
+    const codePhaseLabel = document.getElementById('codePhaseLabel');
+    const watchPhaseBadge = document.getElementById('watchPhaseBadge');
+    const watchI = document.getElementById('watchI');
+    const watchNumsI = document.getElementById('watchNumsI');
+    const watchPrefix = document.getElementById('watchPrefix');
+    const watchSuffix = document.getElementById('watchSuffix');
+    const watchArrI = document.getElementById('watchArrI');
+
+    // Populate Presets Dropdown
+    presets.forEach((p, idx) => {
+      const opt = document.createElement('option');
+      opt.value = idx;
+      opt.textContent = p.name;
+      presetSelect.appendChild(opt);
+    });
+
+    // Step Generation Algorithm
+    function generateExecutionSteps(nums) {
+      const generated = [];
+      const n = nums.length;
+      const arr = new Array(n).fill(0);
+
+      function snapshot(config) {
+        generated.push({
+          line: config.line,
+          passName: config.passName,
+          statusType: config.statusType || 'neutral',
+          i: config.i !== undefined ? config.i : null,
+          nums: [...nums],
+          arr: [...(config.arr || arr)],
+          prefix: config.prefix,
+          suffix: config.suffix,
+          highlightArrIdx: config.highlightArrIdx !== undefined ? config.highlightArrIdx : null,
+          highlightNumsIdx: config.highlightNumsIdx !== undefined ? config.highlightNumsIdx : null,
+          mathEquation: config.mathEquation || '',
+          formulaPillText: config.formulaPillText || 'Formula',
+          narrative: config.narrative || '',
+          actionType: config.actionType || 'step',
+          passPhase: config.passPhase || 'init'
+        });
+      }
+
+      // Step 0: Initial state
+      snapshot({
+        line: 2,
+        passName: 'Init',
+        statusType: 'neutral',
+        prefix: 1,
+        suffix: 1,
+        mathEquation: `public int[] productExceptSelf(int[] nums)`,
+        formulaPillText: 'Method Entry',
+        narrative: `Initialized method with array of length ${n}: [${nums.join(', ')}]`,
+        passPhase: 'init'
+      });
+
+      // Step 1: int n = nums.length;
+      snapshot({
+        line: 3,
+        passName: 'Init',
+        statusType: 'neutral',
+        prefix: 1,
+        suffix: 1,
+        mathEquation: `n = ${n};`,
+        formulaPillText: 'Length',
+        narrative: `Recorded array length n = ${n}.`,
+        passPhase: 'init'
+      });
+
+      // Step 2: int arr[] = new int[n];
+      snapshot({
+        line: 4,
+        passName: 'Init',
+        statusType: 'neutral',
+        arr: new Array(n).fill(0),
+        prefix: 1,
+        suffix: 1,
+        mathEquation: `arr = new int[${n}]; // initialized to zeros`,
+        formulaPillText: 'Allocation',
+        narrative: `Allocated return array arr[] of size ${n}.`,
+        passPhase: 'init'
+      });
+
+      // Step 3: int prefix = 1; int suffix = 1;
+      let prefix = 1;
+      let suffix = 1;
+      snapshot({
+        line: 6,
+        passName: 'Init',
+        statusType: 'cyan',
+        arr: new Array(n).fill(0),
+        prefix: prefix,
+        suffix: suffix,
+        mathEquation: `prefix = 1; suffix = 1;`,
+        formulaPillText: 'Variables',
+        narrative: `Initialized running accumulators: prefix = 1 (left side) and suffix = 1 (right side).`,
+        passPhase: 'init'
+      });
+
+      // Pass 1: Prefix calculation
+      for (let i = 0; i < n; i++) {
+        // Line 10: for loop check
+        snapshot({
+          line: 10,
+          passName: 'Pass 1: Prefix',
+          statusType: 'cyan',
+          i: i,
+          arr: [...arr],
+          prefix: prefix,
+          suffix: suffix,
+          highlightNumsIdx: i,
+          mathEquation: `for (int i = ${i}; ${i} < ${n}; i++)`,
+          formulaPillText: 'Prefix Loop',
+          narrative: `Inspecting index i = ${i}. Element nums[${i}] = ${nums[i]}.`,
+          passPhase: 'prefix'
+        });
+
+        // Line 11: arr[i] = prefix;
+        arr[i] = prefix;
+        snapshot({
+          line: 11,
+          passName: 'Pass 1: Prefix',
+          statusType: 'cyan',
+          i: i,
+          arr: [...arr],
+          prefix: prefix,
+          suffix: suffix,
+          highlightArrIdx: i,
+          highlightNumsIdx: i,
+          mathEquation: `arr[${i}] = prefix = ${prefix};`,
+          formulaPillText: 'arr[i] Assignment',
+          narrative: `arr[${i}] takes product of all numbers strictly to its left, which is prefix = ${prefix}.`,
+          actionType: 'prefixWrite',
+          passPhase: 'prefix'
+        });
+
+        // Line 12: prefix *= nums[i];
+        const oldPrefix = prefix;
+        prefix *= nums[i];
+        snapshot({
+          line: 12,
+          passName: 'Pass 1: Prefix',
+          statusType: 'cyan',
+          i: i,
+          arr: [...arr],
+          prefix: prefix,
+          suffix: suffix,
+          highlightArrIdx: i,
+          highlightNumsIdx: i,
+          mathEquation: `prefix = ${oldPrefix} * nums[${i}] (${nums[i]}) = ${prefix};`,
+          formulaPillText: 'prefix Update',
+          narrative: `Updated running prefix accumulator for upcoming slots: ${oldPrefix} × ${nums[i]} = ${prefix}.`,
+          actionType: 'prefixMultiply',
+          passPhase: 'prefix'
+        });
+      }
+
+      // Pass 2: Suffix calculation
+      for (let i = n - 1; i >= 0; i--) {
+        // Line 16: for loop check backwards
+        snapshot({
+          line: 16,
+          passName: 'Pass 2: Suffix',
+          statusType: 'amber',
+          i: i,
+          arr: [...arr],
+          prefix: prefix,
+          suffix: suffix,
+          highlightNumsIdx: i,
+          mathEquation: `for (int i = ${i}; ${i} >= 0; i--)`,
+          formulaPillText: 'Suffix Loop',
+          narrative: `Iterating backwards at index i = ${i}. Element nums[${i}] = ${nums[i]}.`,
+          passPhase: 'suffix'
+        });
+
+        // Line 17: arr[i] *= suffix;
+        const oldArrVal = arr[i];
+        arr[i] *= suffix;
+        snapshot({
+          line: 17,
+          passName: 'Pass 2: Suffix',
+          statusType: 'emerald',
+          i: i,
+          arr: [...arr],
+          prefix: prefix,
+          suffix: suffix,
+          highlightArrIdx: i,
+          highlightNumsIdx: i,
+          mathEquation: `arr[${i}] = ${oldArrVal} * suffix (${suffix}) = ${arr[i]};`,
+          formulaPillText: 'Combined Product',
+          narrative: `Multiplying stored prefix (${oldArrVal}) by running suffix product (${suffix}) gives total product except self: ${arr[i]}!`,
+          actionType: 'suffixMultiply',
+          passPhase: 'suffix'
+        });
+
+        // Line 18: suffix *= nums[i];
+        const oldSuffix = suffix;
+        suffix *= nums[i];
+        snapshot({
+          line: 18,
+          passName: 'Pass 2: Suffix',
+          statusType: 'amber',
+          i: i,
+          arr: [...arr],
+          prefix: prefix,
+          suffix: suffix,
+          highlightArrIdx: i,
+          highlightNumsIdx: i,
+          mathEquation: `suffix = ${oldSuffix} * nums[${i}] (${nums[i]}) = ${suffix};`,
+          formulaPillText: 'suffix Update',
+          narrative: `Updated running suffix accumulator for earlier slots to the left: ${oldSuffix} × ${nums[i]} = ${suffix}.`,
+          actionType: 'step',
+          passPhase: 'suffix'
+        });
+      }
+
+      // Line 21: return arr;
+      snapshot({
+        line: 21,
+        passName: 'Complete',
+        statusType: 'emerald',
+        arr: [...arr],
+        prefix: prefix,
+        suffix: suffix,
+        mathEquation: `return arr; // Final Output: [${arr.join(', ')}]`,
+        formulaPillText: 'Return',
+        narrative: `Algorithm complete! Returned final products of array except self in O(N) time with O(1) extra space.`,
+        actionType: 'finish',
+        passPhase: 'complete'
+      });
+
+      return generated;
+    }
+
+    // Render Input nums[] Cards
+    function renderNumsCards(step) {
+      numsContainer.innerHTML = '';
+      numsLengthLabel.textContent = `n = ${step.nums.length}`;
+
+      step.nums.forEach((val, idx) => {
+        const isCurrent = (step.highlightNumsIdx === idx);
+        const card = document.createElement('div');
+        card.className = `w-14 h-16 sm:w-16 sm:h-18 rounded-xl border flex flex-col items-center justify-center font-mono transition-all duration-200 select-none ${
+          isCurrent
+            ? 'bg-blue-950/80 border-blue-400 text-blue-200 ring-2 ring-blue-400/60 shadow-lg shadow-blue-500/30 scale-105 active-card-glow'
+            : 'bg-slate-900/90 border-white/10 text-slate-300'
+        }`;
+
+        card.innerHTML = `
+          <span class="text-[9px] text-slate-500 uppercase font-bold">[${idx}]</span>
+          <span class="text-base sm:text-lg font-black text-white my-0.5">${val}</span>
+          <span class="text-[9px] ${isCurrent ? 'text-blue-400 font-bold' : 'text-slate-500'}">nums</span>
+        `;
+        numsContainer.appendChild(card);
+      });
+    }
+
+    // Render Output arr[] Cards
+    function renderArrCards(step) {
+      arrContainer.innerHTML = '';
+
+      step.arr.forEach((val, idx) => {
+        const isCurrent = (step.highlightArrIdx === idx);
+        const isPass1 = step.passPhase === 'prefix';
+        const isPass2 = step.passPhase === 'suffix';
+        const isComplete = step.passPhase === 'complete';
+
+        const card = document.createElement('div');
+        let cardStyle = 'bg-slate-900/90 border-white/10 text-slate-300';
+
+        if (isCurrent && isPass1) {
+          cardStyle = 'bg-cyan-950/80 border-cyan-400 text-cyan-200 ring-2 ring-cyan-400/60 shadow-lg shadow-cyan-500/30 scale-105 active-card-glow';
+        } else if (isCurrent && isPass2) {
+          cardStyle = 'bg-emerald-950/80 border-emerald-400 text-emerald-200 ring-2 ring-emerald-400/60 shadow-lg shadow-emerald-500/30 scale-105 active-card-glow';
+        } else if (isComplete) {
+          cardStyle = 'bg-emerald-950/40 border-emerald-500/40 text-emerald-300';
+        } else if (step.passPhase === 'suffix' && idx > (step.i !== null ? step.i : -1)) {
+          // Already finalized in pass 2
+          cardStyle = 'bg-emerald-950/30 border-emerald-500/30 text-emerald-300';
+        } else if (step.passPhase !== 'init') {
+          // Has prefix value
+          cardStyle = 'bg-cyan-950/30 border-cyan-500/30 text-cyan-300';
+        }
+
+        card.className = `w-16 h-18 sm:w-20 sm:h-20 rounded-xl border flex flex-col items-center justify-center font-mono transition-all duration-200 select-none ${cardStyle}`;
+
+        let statusText = 'empty';
+        if (isComplete || (step.passPhase === 'suffix' && idx >= (step.i !== null ? step.i : 0))) {
+          statusText = 'prefix × suffix';
+        } else if (step.passPhase !== 'init') {
+          statusText = 'prefix only';
+        }
+
+        card.innerHTML = `
+          <span class="text-[9px] text-slate-500 uppercase font-bold">[${idx}]</span>
+          <span class="text-base sm:text-lg font-black text-white my-0.5">${val}</span>
+          <span class="text-[8px] text-slate-400 font-normal truncate max-w-[65px]">${statusText}</span>
+        `;
+        arrContainer.appendChild(card);
+      });
+    }
+
+    // Zero-Jump Synchronized Java Code Line Highlighting
+    function highlightCodeLine(lineNum) {
+      document.querySelectorAll('#codeContainer .code-line').forEach(el => {
+        el.classList.remove('bg-blue-500/25', 'border-l-4', 'border-blue-400', 'text-white', 'font-bold');
+      });
+
+      if (!lineNum) return;
+      const targetEl = document.querySelector(`#codeContainer .code-line[data-line="${lineNum}"]`);
+      if (targetEl) {
+        targetEl.classList.add('bg-blue-500/25', 'border-l-4', 'border-blue-400', 'text-white', 'font-bold');
+
+        // Strictly localized scroll inside code container
+        const lineOffsetTop = targetEl.offsetTop;
+        const containerScrollTop = codeContainer.scrollTop;
+        const containerHeight = codeContainer.clientHeight;
+        const lineTotalHeight = targetEl.offsetHeight;
+
+        if (lineOffsetTop < containerScrollTop) {
+          codeContainer.scrollTop = lineOffsetTop - 12;
+        } else if (lineOffsetTop + lineTotalHeight > containerScrollTop + containerHeight) {
+          codeContainer.scrollTop = (lineOffsetTop + lineTotalHeight) - containerHeight + 12;
+        }
+      }
+    }
+
+    // Master Render Function
+    function renderStep(idx) {
+      if (steps.length === 0) return;
+      idx = Math.max(0, Math.min(steps.length - 1, idx));
+      currentStepIdx = idx;
+
+      const s = steps[idx];
+
+      // Update Controls
+      stepCounter.textContent = `${idx + 1} / ${steps.length}`;
+      timelineSlider.value = idx;
+      prevBtn.disabled = (idx === 0);
+      nextBtn.disabled = (idx === steps.length - 1);
+
+      // Phase Pill
+      phaseText.textContent = s.passName || 'Execute';
+      phaseDot.className = 'w-1.5 h-1.5 rounded-full';
+      if (s.statusType === 'emerald') {
+        phaseDot.classList.add('bg-emerald-400');
+        phaseBadge.className = 'px-2.5 py-1.5 rounded-xl text-[11px] font-bold uppercase tracking-wider bg-emerald-950/70 text-emerald-300 border border-emerald-500/30 flex items-center gap-1.5';
+      } else if (s.statusType === 'cyan') {
+        phaseDot.classList.add('bg-cyan-400');
+        phaseBadge.className = 'px-2.5 py-1.5 rounded-xl text-[11px] font-bold uppercase tracking-wider bg-cyan-950/70 text-cyan-300 border border-cyan-500/30 flex items-center gap-1.5';
+      } else if (s.statusType === 'amber') {
+        phaseDot.classList.add('bg-amber-400');
+        phaseBadge.className = 'px-2.5 py-1.5 rounded-xl text-[11px] font-bold uppercase tracking-wider bg-amber-950/70 text-amber-300 border border-amber-500/30 flex items-center gap-1.5';
+      } else {
+        phaseDot.classList.add('bg-slate-400');
+        phaseBadge.className = 'px-2.5 py-1.5 rounded-xl text-[11px] font-bold uppercase tracking-wider bg-slate-800/80 text-slate-300 border border-white/10 flex items-center gap-1.5';
+      }
+
+      codePhaseLabel.textContent = s.passName;
+      watchPhaseBadge.textContent = s.passName;
+
+      // Gauges updates
+      prefixValueDisplay.textContent = s.prefix;
+      suffixValueDisplay.textContent = s.suffix;
+
+      if (s.passPhase === 'prefix') {
+        prefixStatusBadge.textContent = 'Iterating →';
+        prefixStatusBadge.className = 'text-[10px] font-mono px-2 py-0.5 rounded-full bg-cyan-500/20 text-cyan-300 border border-cyan-500/30';
+        prefixFormulaNote.textContent = `Building left running product`;
+
+        suffixStatusBadge.textContent = 'Waiting';
+        suffixStatusBadge.className = 'text-[10px] font-mono px-2 py-0.5 rounded-full bg-slate-800 text-slate-400 border border-white/5';
+        suffixFormulaNote.textContent = `Awaiting Pass 2`;
+      } else if (s.passPhase === 'suffix') {
+        prefixStatusBadge.textContent = 'Completed ✓';
+        prefixStatusBadge.className = 'text-[10px] font-mono px-2 py-0.5 rounded-full bg-slate-800 text-slate-400 border border-white/5';
+        prefixFormulaNote.textContent = `Prefix stored in arr[]`;
+
+        suffixStatusBadge.textContent = '← Iterating';
+        suffixStatusBadge.className = 'text-[10px] font-mono px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30';
+        suffixFormulaNote.textContent = `Multiplying from right`;
+      } else if (s.passPhase === 'complete') {
+        prefixStatusBadge.textContent = 'Finished';
+        suffixStatusBadge.textContent = 'Finished';
+        prefixFormulaNote.textContent = `All products formed`;
+        suffixFormulaNote.textContent = `All products formed`;
+      }
+
+      // Formula and Narrative Boxes
+      mathEquationBox.textContent = s.mathEquation;
+      formulaPill.textContent = s.formulaPillText;
+      narrativeBox.textContent = s.narrative;
+
+      // Watch variables
+      watchI.textContent = (s.i !== null) ? `i = ${s.i}` : '-';
+      watchNumsI.textContent = (s.highlightNumsIdx !== null) ? s.nums[s.highlightNumsIdx] : '-';
+      watchPrefix.textContent = s.prefix;
+      watchSuffix.textContent = s.suffix;
+      watchArrI.textContent = (s.highlightArrIdx !== null) ? s.arr[s.highlightArrIdx] : '-';
+
+      // Render Cards
+      renderNumsCards(s);
+      renderArrCards(s);
+
+      // Highlight Code
+      highlightCodeLine(s.line);
+
+      // Play Sound Triggers
+      if (s.actionType === 'prefixWrite') {
+        soundEffects.prefixWrite();
+      } else if (s.actionType === 'prefixMultiply') {
+        soundEffects.prefixMultiply();
+      } else if (s.actionType === 'suffixMultiply') {
+        soundEffects.suffixMultiply();
+      } else if (s.actionType === 'finish') {
+        soundEffects.finish();
+      } else {
+        soundEffects.step();
+      }
+    }
+
+    // Playback Controller
+    function setPlaying(play) {
+      isPlaying = play;
+      if (isPlaying) {
+        playIcon.className = 'fa-solid fa-pause';
+        playText.textContent = 'Pause';
+        playPauseBtn.classList.replace('from-blue-500', 'from-amber-500');
+        playPauseBtn.classList.replace('to-cyan-600', 'to-amber-600');
+
+        playIntervalId = setInterval(() => {
+          if (currentStepIdx < steps.length - 1) {
+            renderStep(currentStepIdx + 1);
+          } else {
+            setPlaying(false);
+          }
+        }, stepSpeedMs);
+      } else {
+        playIcon.className = 'fa-solid fa-play';
+        playText.textContent = 'Play';
+        playPauseBtn.classList.replace('from-amber-500', 'from-blue-500');
+        playPauseBtn.classList.replace('to-amber-600', 'to-cyan-600');
+        if (playIntervalId) clearInterval(playIntervalId);
+        playIntervalId = null;
+      }
+    }
+
+    // Simulation Setup
+    function initSimulation(numsArray) {
+      setPlaying(false);
+      initialNums = [...numsArray];
+      steps = generateExecutionSteps(initialNums);
+      timelineSlider.max = steps.length - 1;
+      timelineSlider.value = 0;
+      renderStep(0);
+    }
+
+    // Event Listeners
+    playPauseBtn.addEventListener('click', () => setPlaying(!isPlaying));
+
+    prevBtn.addEventListener('click', () => {
+      setPlaying(false);
+      renderStep(currentStepIdx - 1);
+    });
+
+    nextBtn.addEventListener('click', () => {
+      setPlaying(false);
+      renderStep(currentStepIdx + 1);
+    });
+
+    resetBtn.addEventListener('click', () => {
+      setPlaying(false);
+      renderStep(0);
+    });
+
+    timelineSlider.addEventListener('input', (e) => {
+      setPlaying(false);
+      renderStep(parseInt(e.target.value));
+    });
+
+    speedButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        speedButtons.forEach(b => {
+          b.className = 'speed-btn px-2 py-0.5 rounded-lg text-xs font-mono text-slate-300 hover:text-white transition-all';
+        });
+        btn.className = 'speed-btn px-2 py-0.5 rounded-lg text-xs font-mono bg-blue-500/30 text-blue-200 font-bold border border-blue-500/40 transition-all';
+        stepSpeedMs = parseInt(btn.dataset.speed);
+        if (isPlaying) {
+          setPlaying(false);
+          setPlaying(true);
+        }
+      });
+    });
+
+    presetSelect.addEventListener('change', (e) => {
+      currentPresetIdx = parseInt(e.target.value);
+      const chosen = presets[currentPresetIdx];
+      customNumsInput.value = chosen.nums.join(',');
+      initSimulation(chosen.nums);
+    });
+
+    applyCustomBtn.addEventListener('click', () => {
+      const rawNums = customNumsInput.value.trim();
+      if (!rawNums) return;
+      const parsedNums = rawNums.split(',').map(s => parseInt(s.trim())).filter(n => !isNaN(n));
+      if (parsedNums.length >= 2) {
+        initSimulation(parsedNums);
+      }
+    });
+
+    soundToggleBtn.addEventListener('click', () => {
+      isSoundOn = !isSoundOn;
+      soundIcon.className = isSoundOn ? 'fa-solid fa-volume-high text-blue-400' : 'fa-solid fa-volume-xmark text-slate-500';
+    });
+
+    window.addEventListener('keydown', (e) => {
+      if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT') return;
+      if (e.code === 'Space') {
+        e.preventDefault();
+        setPlaying(!isPlaying);
+      } else if (e.code === 'ArrowRight') {
+        e.preventDefault();
+        setPlaying(false);
+        renderStep(currentStepIdx + 1);
+      } else if (e.code === 'ArrowLeft') {
+        e.preventDefault();
+        setPlaying(false);
+        renderStep(currentStepIdx - 1);
+      }
+    });
+
+    // Initial Start
+    customNumsInput.value = presets[0].nums.join(',');
+    initSimulation(presets[0].nums);
+  </script>
+</body>
+</html>

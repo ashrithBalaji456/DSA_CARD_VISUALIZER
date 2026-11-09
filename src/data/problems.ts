@@ -108,6 +108,7 @@ export const PROBLEMS: DSAProblem[] = [
       { number: 167, title: 'Two Sum II - Input Array Is Sorted', difficulty: 'Medium' },
       { number: 653, title: 'Two Sum IV - Input is a BST', difficulty: 'Easy' },
     ],
+    visualizerUrl: '/visualizers/two_sum_visualizer.html',
     leetcodeUrl: 'https://leetcode.com/problems/two-sum/',
   },
   {
@@ -205,6 +206,7 @@ export const PROBLEMS: DSAProblem[] = [
       { number: 219, title: 'Contains Duplicate II', difficulty: 'Easy' },
       { number: 220, title: 'Contains Duplicate III', difficulty: 'Hard' },
     ],
+    visualizerUrl: '/visualizers/contains_duplicate_visualizer.html',
     leetcodeUrl: 'https://leetcode.com/problems/contains-duplicate/',
   },
   {
@@ -302,6 +304,7 @@ export const PROBLEMS: DSAProblem[] = [
       { number: 49, title: 'Group Anagrams', difficulty: 'Medium' },
       { number: 438, title: 'Find All Anagrams in a String', difficulty: 'Medium' },
     ],
+    visualizerUrl: '/visualizers/valid_anagram_visualizer.html',
     leetcodeUrl: 'https://leetcode.com/problems/valid-anagram/',
   },
   {
@@ -401,6 +404,7 @@ export const PROBLEMS: DSAProblem[] = [
       { number: 229, title: 'Majority Element II', difficulty: 'Medium' },
       { number: 1150, title: 'Check If a Number Is Majority Element in a Sorted Array', difficulty: 'Easy' },
     ],
+    visualizerUrl: '/visualizers/majority_element_visualizer.html',
     leetcodeUrl: 'https://leetcode.com/problems/majority-element/',
   },
   {
@@ -498,6 +502,7 @@ export const PROBLEMS: DSAProblem[] = [
     relatedProblems: [
       { number: 169, title: 'Majority Element', difficulty: 'Easy' },
     ],
+    visualizerUrl: '/visualizers/majority_element_ii_visualizer.html',
     leetcodeUrl: 'https://leetcode.com/problems/majority-element-ii/',
   },
   {
@@ -694,6 +699,7 @@ export const PROBLEMS: DSAProblem[] = [
       { number: 42, title: 'Trapping Rain Water', difficulty: 'Hard' },
       { number: 152, title: 'Maximum Product Subarray', difficulty: 'Medium' },
     ],
+    visualizerUrl: '/visualizers/product_of_array_except_self_visualizer.html',
     leetcodeUrl: 'https://leetcode.com/problems/product-of-array-except-self/',
   },
   {

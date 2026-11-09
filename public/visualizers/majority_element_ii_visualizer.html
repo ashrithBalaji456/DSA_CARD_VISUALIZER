@@ -1,0 +1,1425 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Majority Element II Visualizer - Extended Boyer-Moore Algorithm</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=Inter:wght@300;400;500;600;700&display=swap');
+    
+    body {
+      font-family: 'Inter', sans-serif;
+      background: radial-gradient(circle at 15% 15%, #0f172a 0%, #030712 100%);
+      color: #e2e8f0;
+      min-height: 100vh;
+    }
+    
+    .code-font {
+      font-family: 'Fira Code', monospace;
+    }
+
+    .glass-panel {
+      background: rgba(15, 23, 42, 0.72);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.6);
+    }
+
+    .glass-button {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      backdrop-filter: blur(12px);
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .glass-button:hover:not(:disabled) {
+      background: rgba(255, 255, 255, 0.14);
+      border-color: rgba(255, 255, 255, 0.25);
+      transform: translateY(-1px);
+    }
+    .glass-button:active:not(:disabled) {
+      transform: translateY(1px);
+    }
+    .glass-button:disabled {
+      opacity: 0.35;
+      cursor: not-allowed;
+    }
+
+    .code-line {
+      transition: all 0.2s ease;
+      border-left: 3px solid transparent;
+      padding: 2px 10px;
+    }
+    .code-line.active-line {
+      background: rgba(56, 189, 248, 0.16);
+      border-left: 3px solid #38bdf8;
+      color: #ffffff;
+      box-shadow: inset 0 0 16px rgba(56, 189, 248, 0.12);
+    }
+
+    /* Custom scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: rgba(15, 23, 42, 0.5);
+    }
+    ::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.15);
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(255, 255, 255, 0.28);
+    }
+
+    @keyframes winnerPulse {
+      0%, 100% { transform: scale(1); filter: drop-shadow(0 0 10px rgba(16, 185, 129, 0.5)); }
+      50% { transform: scale(1.04); filter: drop-shadow(0 0 20px rgba(16, 185, 129, 0.85)); }
+    }
+    .winner-anim {
+      animation: winnerPulse 1.8s infinite ease-in-out;
+    }
+
+    @keyframes clashPulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(0.97); }
+    }
+    .clash-anim {
+      animation: clashPulse 0.3s ease-in-out;
+    }
+  </style>
+</head>
+<body class="p-4 sm:p-6 lg:p-8 flex flex-col items-center justify-start min-h-screen">
+
+  <!-- Ambient Background Glows -->
+  <div class="fixed top-12 left-1/4 w-96 h-96 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none -z-10"></div>
+  <div class="fixed bottom-20 right-1/4 w-96 h-96 bg-amber-500/10 rounded-full blur-3xl pointer-events-none -z-10"></div>
+  <div class="fixed top-1/2 left-2/3 w-80 h-80 bg-purple-500/10 rounded-full blur-3xl pointer-events-none -z-10"></div>
+
+  <!-- MAIN WRAPPER -->
+  <div class="w-full max-w-7xl flex flex-col gap-6">
+
+    <!-- TOP GLASS CONTROLS DECK -->
+    <header class="glass-panel rounded-2xl p-4 sm:p-5 flex flex-col gap-4 sticky top-4 z-50">
+      <div class="flex flex-wrap items-center justify-between gap-4">
+        
+        <!-- Title & Subtitle -->
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-cyan-500 via-indigo-500 to-amber-500 flex items-center justify-center shadow-lg shadow-cyan-500/20 text-white font-bold text-lg">
+            <i class="fa-solid fa-chess-queen text-amber-300"></i>
+          </div>
+          <div>
+            <h1 class="text-lg sm:text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white via-slate-200 to-slate-400">
+              Majority Element II Visualizer
+            </h1>
+            <p class="text-xs text-slate-400 flex items-center gap-2">
+              <span class="inline-block w-2 h-2 rounded-full bg-cyan-400 animate-pulse"></span>
+              LeetCode 229 • Extended Boyer-Moore (&gt; &lfloor;n / 3&rfloor;) • &Omicron;(n) Time &Omicron;(1) Space
+            </p>
+          </div>
+        </div>
+
+        <!-- Center Controls: Reset, Prev, Play/Stop, Next -->
+        <div class="flex items-center gap-2 sm:gap-3 bg-black/30 p-1.5 rounded-xl border border-white/5">
+          <button id="btnReset" class="glass-button text-slate-300 hover:text-white px-3 py-2 rounded-lg text-sm flex items-center gap-1.5" title="Reset to Start">
+            <i class="fa-solid fa-rotate-left"></i>
+            <span class="hidden sm:inline">Reset</span>
+          </button>
+          <button id="btnPrev" class="glass-button text-slate-300 hover:text-white px-3 py-2 rounded-lg text-sm flex items-center gap-1.5" title="Previous Step (Left Arrow)">
+            <i class="fa-solid fa-backward-step"></i>
+            <span class="hidden sm:inline">Prev</span>
+          </button>
+          <button id="btnPlay" class="glass-button bg-cyan-500/20 text-cyan-300 hover:bg-cyan-500/30 border-cyan-500/40 px-4 py-2 rounded-lg text-sm font-semibold flex items-center gap-2 shadow-lg shadow-cyan-500/10" title="Start / Stop (Spacebar)">
+            <i class="fa-solid fa-play" id="playIcon"></i>
+            <span id="playText">Start</span>
+          </button>
+          <button id="btnNext" class="glass-button text-slate-300 hover:text-white px-3 py-2 rounded-lg text-sm flex items-center gap-1.5" title="Next Step (Right Arrow)">
+            <span class="hidden sm:inline">Next</span>
+            <i class="fa-solid fa-forward-step"></i>
+          </button>
+        </div>
+
+        <!-- Speed & Audio Controls -->
+        <div class="flex items-center gap-2">
+          <div class="flex items-center bg-black/30 rounded-xl p-1 border border-white/5 text-xs text-slate-400">
+            <span class="px-2 py-1"><i class="fa-solid fa-gauge-high mr-1"></i>Speed</span>
+            <button class="speed-btn px-2 py-1 rounded-lg hover:text-white" data-speed="1600">0.5x</button>
+            <button class="speed-btn px-2 py-1 rounded-lg bg-cyan-500/30 text-cyan-300 font-semibold" data-speed="800">1x</button>
+            <button class="speed-btn px-2 py-1 rounded-lg hover:text-white" data-speed="400">2x</button>
+            <button class="speed-btn px-2 py-1 rounded-lg hover:text-white" data-speed="200">4x</button>
+          </div>
+          <button id="btnAudio" class="glass-button p-2.5 rounded-xl text-slate-400 hover:text-cyan-300" title="Toggle Synthesized Audio">
+            <i class="fa-solid fa-volume-high" id="audioIcon"></i>
+          </button>
+          <a href="/" class="glass-button px-3 py-2 rounded-xl text-xs font-semibold text-slate-300 hover:text-white flex items-center gap-1.5 border border-white/10 hover:border-indigo-500/40 bg-white/5" title="Return to DSA Atlas Library">
+            <i class="fa-solid fa-arrow-left text-indigo-400"></i>
+            <span class="hidden sm:inline">DSA Atlas</span>
+          </a>
+        </div>
+
+      </div>
+
+      <!-- Scrubber Slider & Step Status Bar -->
+      <div class="flex flex-col sm:flex-row items-center gap-3 pt-1 border-t border-white/5">
+        <div class="flex items-center gap-2 text-xs text-slate-400 w-full sm:w-auto shrink-0">
+          <span id="stepCounterBadge" class="code-font px-2.5 py-1 rounded-md bg-white/5 border border-white/10 text-cyan-300">
+            Step: 0 / 0
+          </span>
+          <span id="passBadge" class="px-2.5 py-1 rounded-md bg-cyan-500/20 border border-cyan-500/30 text-cyan-300 font-semibold">
+            Pass 1: Find Candidates
+          </span>
+          <span id="phaseBadge" class="px-2.5 py-1 rounded-md bg-indigo-500/20 border border-indigo-500/30 text-indigo-300">
+            Ready
+          </span>
+        </div>
+        <div class="w-full flex items-center gap-3">
+          <input type="range" id="stepScrubber" min="0" max="0" value="0" class="w-full h-1.5 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-cyan-400">
+        </div>
+      </div>
+
+    </header>
+
+    <!-- PRESETS & CUSTOM INPUT ROW -->
+    <section class="glass-panel rounded-2xl p-4 flex flex-wrap items-center justify-between gap-4">
+      <div class="flex flex-wrap items-center gap-3">
+        <label for="presetSelect" class="text-xs uppercase font-semibold text-slate-400 tracking-wider flex items-center gap-1.5">
+          <i class="fa-solid fa-list-check text-cyan-400"></i> Presets:
+        </label>
+        <select id="presetSelect" class="bg-black/50 border border-white/10 text-xs sm:text-sm text-slate-200 rounded-xl px-3 py-2 outline-none focus:border-cyan-500/50">
+          <option value="0">1: LeetCode Ex 1 ([3, 2, 3] &rarr; [3])</option>
+          <option value="1">2: LeetCode Ex 2 ([1] &rarr; [1])</option>
+          <option value="2">3: LeetCode Ex 3 ([1, 2] &rarr; [1, 2])</option>
+          <option value="3">4: Dual Winners ([1, 1, 1, 3, 3, 2, 2, 2] &rarr; [1, 2])</option>
+          <option value="4">5: No Majority Elements ([1, 2, 3, 4, 5, 6] &rarr; [])</option>
+          <option value="5">6: Triplet Clash ([1, 2, 3, 1, 2, 3, 1, 1] &rarr; [1])</option>
+          <option value="6">7: False Survivor Disqualified in Pass 2 ([2, 1, 1, 3, 1, 4, 5, 6] &rarr; [1])</option>
+          <option value="7">8: Identical Duplicates ([7, 7, 7, 7, 7, 7] &rarr; [7])</option>
+          <option value="8">9: Negative Numbers ([-1, -1, -1, 2, 3, 2] &rarr; [-1])</option>
+          <option value="9">10: Zero-Centered ([0, 0, 0] &rarr; [0])</option>
+        </select>
+      </div>
+
+      <div class="flex items-center gap-2 flex-grow max-w-md">
+        <input type="text" id="customInput" placeholder="e.g. 1, 1, 1, 3, 3, 2, 2, 2" class="w-full bg-black/40 border border-white/10 rounded-xl px-3 py-1.5 text-xs text-slate-200 outline-none focus:border-cyan-400">
+        <button id="btnApplyCustom" class="glass-button text-xs px-3 py-2 rounded-xl text-cyan-300 font-semibold shrink-0">
+          Load
+        </button>
+      </div>
+    </section>
+
+    <!-- MAIN VISUAL STAGE & JAVA CODE SECTION -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+      <!-- LEFT: VISUALIZATION ARENA (7 Cols) -->
+      <section class="lg:col-span-7 flex flex-col gap-6">
+        
+        <!-- Live Variable Cards: Candidate 1, Candidate 2, Incoming Num, Threshold -->
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          
+          <!-- Candidate 1 Card -->
+          <div class="glass-panel rounded-xl p-3 flex flex-col justify-between border-cyan-500/20">
+            <span class="text-[11px] text-slate-400 uppercase font-semibold flex items-center justify-between">
+              Candidate 1
+              <span class="w-2 h-2 rounded-full bg-cyan-400"></span>
+            </span>
+            <div class="flex items-baseline gap-2 mt-2">
+              <span id="varCand1" class="code-font text-xl font-bold text-cyan-300">0</span>
+              <span id="varCount1" class="code-font text-xs font-semibold text-cyan-400/80">(cnt: 0)</span>
+            </div>
+            <span id="cand1StatusSub" class="text-[10px] text-slate-500 mt-1">count1 = 0</span>
+          </div>
+
+          <!-- Candidate 2 Card -->
+          <div class="glass-panel rounded-xl p-3 flex flex-col justify-between border-amber-500/20">
+            <span class="text-[11px] text-slate-400 uppercase font-semibold flex items-center justify-between">
+              Candidate 2
+              <span class="w-2 h-2 rounded-full bg-amber-400"></span>
+            </span>
+            <div class="flex items-baseline gap-2 mt-2">
+              <span id="varCand2" class="code-font text-xl font-bold text-amber-300">0</span>
+              <span id="varCount2" class="code-font text-xs font-semibold text-amber-400/80">(cnt: 0)</span>
+            </div>
+            <span id="cand2StatusSub" class="text-[10px] text-slate-500 mt-1">count2 = 0</span>
+          </div>
+
+          <!-- Current Stream Number -->
+          <div class="glass-panel rounded-xl p-3 flex flex-col justify-between border-purple-500/20">
+            <span class="text-[11px] text-slate-400 uppercase font-semibold flex items-center justify-between">
+              Incoming (num)
+              <i class="fa-solid fa-arrow-down-long text-purple-400"></i>
+            </span>
+            <div id="varCurrentNum" class="code-font text-xl font-bold text-purple-300 mt-2">-</div>
+            <span id="currentNumIndexSub" class="text-[10px] text-slate-500 mt-1">Index: -</span>
+          </div>
+
+          <!-- Majority Criterion Threshold -->
+          <div class="glass-panel rounded-xl p-3 flex flex-col justify-between border-emerald-500/20">
+            <span class="text-[11px] text-slate-400 uppercase font-semibold flex items-center justify-between">
+              Target (&gt; &lfloor;n/3&rfloor;)
+              <i class="fa-solid fa-bullseye text-emerald-400"></i>
+            </span>
+            <div id="varThreshold" class="code-font text-xl font-bold text-emerald-300 mt-2">&gt; 1</div>
+            <span id="thresholdSub" class="text-[10px] text-slate-500 mt-1">n = 3 (&lfloor;3/3&rfloor; = 1)</span>
+          </div>
+
+        </div>
+
+        <!-- 1. Array Stream Stage with Pass Tracking -->
+        <div class="glass-panel rounded-2xl p-4 flex flex-col gap-2.5">
+          <div class="flex items-center justify-between text-xs">
+            <span class="font-semibold text-slate-300 uppercase tracking-wider flex items-center gap-1.5">
+              <i class="fa-solid fa-layer-group text-cyan-400"></i>
+              Input Array Stream: <span class="code-font text-slate-400">nums[]</span>
+            </span>
+            <span id="streamStatusText" class="text-slate-400">Pass 1: Identifying potential candidates</span>
+          </div>
+          <div id="arrayStreamContainer" class="flex flex-wrap gap-2 min-h-[58px] p-3 bg-black/30 rounded-xl border border-white/5 items-center">
+            <!-- Dynamically populated numbers with active badges -->
+          </div>
+        </div>
+
+        <!-- 2. Dual Candidate Podiums & Clash Zone -->
+        <div class="glass-panel rounded-2xl p-5 flex flex-col gap-4">
+          <div class="flex items-center justify-between text-xs pb-2 border-b border-white/5">
+            <span class="font-semibold text-slate-300 uppercase tracking-wider flex items-center gap-1.5">
+              <i class="fa-solid fa-shield-halved text-cyan-400"></i>
+              Dual Candidate Arenas (Max 2 can exceed &lfloor;n / 3&rfloor;)
+            </span>
+            <span id="clashActionBadge" class="px-2.5 py-1 rounded text-[11px] font-semibold bg-white/5 text-slate-400 border border-white/10">
+              Awaiting First Step
+            </span>
+          </div>
+
+          <!-- Dual Candidate Podiums -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            
+            <!-- Podium 1 (Candidate 1) -->
+            <div id="podium1Card" class="bg-black/40 rounded-xl p-4 border border-cyan-500/20 flex flex-col gap-3 relative overflow-hidden transition-all duration-300">
+              <div class="flex items-center justify-between">
+                <span class="text-xs uppercase font-semibold text-cyan-300 flex items-center gap-1.5">
+                  <i id="podium1Icon" class="fa-solid fa-crown text-cyan-400"></i> Candidate #1
+                </span>
+                <span id="podium1StatusBadge" class="text-[10px] px-2 py-0.5 rounded bg-cyan-500/10 border border-cyan-500/30 text-cyan-300 code-font">
+                  count1 = 0
+                </span>
+              </div>
+              <div class="flex items-baseline justify-between">
+                <div id="podium1Value" class="code-font text-3xl font-extrabold text-cyan-300">0</div>
+                <div class="text-[11px] text-slate-400" id="podium1Pass2Note">Pass 1 Active</div>
+              </div>
+              <div class="w-full h-2 bg-slate-900 rounded-full overflow-hidden border border-white/5">
+                <div id="podium1Bar" class="h-full bg-cyan-400 rounded-full transition-all duration-300" style="width: 0%;"></div>
+              </div>
+              <p id="podium1Desc" class="text-[11px] text-slate-400">Initial state.</p>
+            </div>
+
+            <!-- Podium 2 (Candidate 2) -->
+            <div id="podium2Card" class="bg-black/40 rounded-xl p-4 border border-amber-500/20 flex flex-col gap-3 relative overflow-hidden transition-all duration-300">
+              <div class="flex items-center justify-between">
+                <span class="text-xs uppercase font-semibold text-amber-300 flex items-center gap-1.5">
+                  <i id="podium2Icon" class="fa-solid fa-crown text-amber-400"></i> Candidate #2
+                </span>
+                <span id="podium2StatusBadge" class="text-[10px] px-2 py-0.5 rounded bg-amber-500/10 border border-amber-500/30 text-amber-300 code-font">
+                  count2 = 0
+                </span>
+              </div>
+              <div class="flex items-baseline justify-between">
+                <div id="podium2Value" class="code-font text-3xl font-extrabold text-amber-300">0</div>
+                <div class="text-[11px] text-slate-400" id="podium2Pass2Note">Pass 1 Active</div>
+              </div>
+              <div class="w-full h-2 bg-slate-900 rounded-full overflow-hidden border border-white/5">
+                <div id="podium2Bar" class="h-full bg-amber-400 rounded-full transition-all duration-300" style="width: 0%;"></div>
+              </div>
+              <p id="podium2Desc" class="text-[11px] text-slate-400">Initial state.</p>
+            </div>
+
+          </div>
+
+          <!-- Triplet Cancellation Warning & Action Feedback Box -->
+          <div id="actionFeedbackBox" class="p-3 rounded-xl bg-white/5 border border-white/10 text-xs flex items-center justify-between gap-3">
+            <div class="flex items-center gap-2">
+              <i id="actionFeedbackIcon" class="fa-solid fa-circle-info text-cyan-400 text-sm"></i>
+              <span id="actionFeedbackText" class="text-slate-300">Algorithm ready. Click Start or Next to execute Pass 1.</span>
+            </div>
+            <div id="tripletCancelIndicator" class="hidden text-[11px] text-rose-300 px-2 py-0.5 rounded bg-rose-500/20 border border-rose-500/30 flex items-center gap-1 font-semibold">
+              <i class="fa-solid fa-triangle-exclamation"></i> Triplet Annihilation
+            </div>
+          </div>
+
+          <!-- Certified Result Showcase -->
+          <div class="pt-2 border-t border-white/5 flex flex-col sm:flex-row items-center justify-between gap-3">
+            <div class="flex items-center gap-2 text-xs">
+              <span class="text-slate-400 uppercase font-semibold tracking-wider">Final Output:</span>
+              <span class="code-font text-slate-300">List&lt;Integer&gt; result = </span>
+              <div id="resultBadges" class="flex items-center gap-2">
+                <span class="text-slate-500 italic text-xs">Pending Pass 2 verification</span>
+              </div>
+            </div>
+            <div id="frequencyBadgeContainer" class="flex flex-wrap gap-1.5 text-xs">
+              <!-- Reference frequencies -->
+            </div>
+          </div>
+
+        </div>
+
+      </section>
+
+      <!-- RIGHT: JAVA CODE CONTAINER WITH SYNCHRONIZED LINE HIGHLIGHTING (5 Cols) -->
+      <section class="lg:col-span-5 flex flex-col gap-4">
+        
+        <div class="glass-panel rounded-2xl p-4 flex flex-col h-full">
+          <div class="flex items-center justify-between pb-3 border-b border-white/10 text-xs">
+            <div class="flex items-center gap-2">
+              <div class="flex gap-1.5">
+                <span class="w-3 h-3 rounded-full bg-rose-500/80 inline-block"></span>
+                <span class="w-3 h-3 rounded-full bg-amber-500/80 inline-block"></span>
+                <span class="w-3 h-3 rounded-full bg-emerald-500/80 inline-block"></span>
+              </div>
+              <span class="code-font text-slate-300 font-semibold ml-2">Solution.java</span>
+            </div>
+            <span class="text-[11px] text-cyan-400 bg-cyan-500/10 px-2 py-0.5 rounded border border-cyan-500/20 code-font">
+              Extended Boyer-Moore
+            </span>
+          </div>
+
+          <!-- Code Box -->
+          <div id="codeContainer" class="code-font text-xs sm:text-[13px] leading-relaxed text-slate-300 py-3 overflow-y-auto max-h-[580px] flex-grow select-none">
+            <div class="code-line" id="line1"><span class="text-slate-500 mr-2"> 1</span><span class="text-indigo-400 font-semibold">class</span> <span class="text-amber-300">Solution</span> {</div>
+            <div class="code-line" id="line2"><span class="text-slate-500 mr-2"> 2</span>    <span class="text-indigo-400 font-semibold">public</span> List&lt;Integer&gt; <span class="text-cyan-300">majorityElement</span>(<span class="text-indigo-400">int</span>[] nums) {</div>
+            <div class="code-line" id="line3"><span class="text-slate-500 mr-2"> 3</span></div>
+            <div class="code-line" id="line4"><span class="text-slate-500 mr-2"> 4</span>        <span class="text-indigo-400 font-semibold">int</span> candidate1 = <span class="text-rose-400">0</span>;</div>
+            <div class="code-line" id="line5"><span class="text-slate-500 mr-2"> 5</span>        <span class="text-indigo-400 font-semibold">int</span> candidate2 = <span class="text-rose-400">0</span>;</div>
+            <div class="code-line" id="line6"><span class="text-slate-500 mr-2"> 6</span></div>
+            <div class="code-line" id="line7"><span class="text-slate-500 mr-2"> 7</span>        <span class="text-indigo-400 font-semibold">int</span> count1 = <span class="text-rose-400">0</span>;</div>
+            <div class="code-line" id="line8"><span class="text-slate-500 mr-2"> 8</span>        <span class="text-indigo-400 font-semibold">int</span> count2 = <span class="text-rose-400">0</span>;</div>
+            <div class="code-line" id="line9"><span class="text-slate-500 mr-2"> 9</span></div>
+            <div class="code-line" id="line10"><span class="text-slate-500 mr-2">10</span>        <span class="text-slate-500 italic">// First pass: Find two potential candidates</span></div>
+            <div class="code-line" id="line11"><span class="text-slate-500 mr-2">11</span>        <span class="text-indigo-400 font-semibold">for</span> (<span class="text-indigo-400">int</span> num : nums) {</div>
+            <div class="code-line" id="line12"><span class="text-slate-500 mr-2">12</span>            <span class="text-indigo-400 font-semibold">if</span> (num == candidate1) {</div>
+            <div class="code-line" id="line13"><span class="text-slate-500 mr-2">13</span>                count1++;</div>
+            <div class="code-line" id="line14"><span class="text-slate-500 mr-2">14</span>            } <span class="text-indigo-400 font-semibold">else if</span> (num == candidate2) {</div>
+            <div class="code-line" id="line15"><span class="text-slate-500 mr-2">15</span>                count2++;</div>
+            <div class="code-line" id="line16"><span class="text-slate-500 mr-2">16</span>            } <span class="text-indigo-400 font-semibold">else if</span> (count1 == <span class="text-rose-400">0</span>) {</div>
+            <div class="code-line" id="line17"><span class="text-slate-500 mr-2">17</span>                candidate1 = num;</div>
+            <div class="code-line" id="line18"><span class="text-slate-500 mr-2">18</span>                count1 = <span class="text-rose-400">1</span>;</div>
+            <div class="code-line" id="line19"><span class="text-slate-500 mr-2">19</span>            } <span class="text-indigo-400 font-semibold">else if</span> (count2 == <span class="text-rose-400">0</span>) {</div>
+            <div class="code-line" id="line20"><span class="text-slate-500 mr-2">20</span>                candidate2 = num;</div>
+            <div class="code-line" id="line21"><span class="text-slate-500 mr-2">21</span>                count2 = <span class="text-rose-400">1</span>;</div>
+            <div class="code-line" id="line22"><span class="text-slate-500 mr-2">22</span>            } <span class="text-indigo-400 font-semibold">else</span> {</div>
+            <div class="code-line" id="line23"><span class="text-slate-500 mr-2">23</span>                count1--;</div>
+            <div class="code-line" id="line24"><span class="text-slate-500 mr-2">24</span>                count2--;</div>
+            <div class="code-line" id="line25"><span class="text-slate-500 mr-2">25</span>            }</div>
+            <div class="code-line" id="line26"><span class="text-slate-500 mr-2">26</span>        }</div>
+            <div class="code-line" id="line27"><span class="text-slate-500 mr-2">27</span></div>
+            <div class="code-line" id="line28"><span class="text-slate-500 mr-2">28</span>        <span class="text-slate-500 italic">// Second pass: Verify actual frequencies</span></div>
+            <div class="code-line" id="line29"><span class="text-slate-500 mr-2">29</span>        count1 = <span class="text-rose-400">0</span>;</div>
+            <div class="code-line" id="line30"><span class="text-slate-500 mr-2">30</span>        count2 = <span class="text-rose-400">0</span>;</div>
+            <div class="code-line" id="line31"><span class="text-slate-500 mr-2">31</span></div>
+            <div class="code-line" id="line32"><span class="text-slate-500 mr-2">32</span>        <span class="text-indigo-400 font-semibold">for</span> (<span class="text-indigo-400">int</span> num : nums) {</div>
+            <div class="code-line" id="line33"><span class="text-slate-500 mr-2">33</span>            <span class="text-indigo-400 font-semibold">if</span> (num == candidate1) {</div>
+            <div class="code-line" id="line34"><span class="text-slate-500 mr-2">34</span>                count1++;</div>
+            <div class="code-line" id="line35"><span class="text-slate-500 mr-2">35</span>            } <span class="text-indigo-400 font-semibold">else if</span> (num == candidate2) {</div>
+            <div class="code-line" id="line36"><span class="text-slate-500 mr-2">36</span>                count2++;</div>
+            <div class="code-line" id="line37"><span class="text-slate-500 mr-2">37</span>            }</div>
+            <div class="code-line" id="line38"><span class="text-slate-500 mr-2">38</span>        }</div>
+            <div class="code-line" id="line39"><span class="text-slate-500 mr-2">39</span></div>
+            <div class="code-line" id="line40"><span class="text-slate-500 mr-2">40</span>        List&lt;Integer&gt; result = <span class="text-indigo-400 font-semibold">new</span> ArrayList&lt;&gt;();</div>
+            <div class="code-line" id="line41"><span class="text-slate-500 mr-2">41</span></div>
+            <div class="code-line" id="line42"><span class="text-slate-500 mr-2">42</span>        <span class="text-indigo-400 font-semibold">if</span> (count1 &gt; nums.length / <span class="text-rose-400">3</span>) {</div>
+            <div class="code-line" id="line43"><span class="text-slate-500 mr-2">43</span>            result.add(candidate1);</div>
+            <div class="code-line" id="line44"><span class="text-slate-500 mr-2">44</span>        }</div>
+            <div class="code-line" id="line45"><span class="text-slate-500 mr-2">45</span>        <span class="text-indigo-400 font-semibold">if</span> (count2 &gt; nums.length / <span class="text-rose-400">3</span>) {</div>
+            <div class="code-line" id="line46"><span class="text-slate-500 mr-2">46</span>            result.add(candidate2);</div>
+            <div class="code-line" id="line47"><span class="text-slate-500 mr-2">47</span>        }</div>
+            <div class="code-line" id="line48"><span class="text-slate-500 mr-2">48</span></div>
+            <div class="code-line" id="line49"><span class="text-slate-500 mr-2">49</span>        <span class="text-indigo-400 font-semibold">return</span> result;</div>
+            <div class="code-line" id="line50"><span class="text-slate-500 mr-2">50</span>    }</div>
+            <div class="code-line" id="line51"><span class="text-slate-500 mr-2">51</span>}</div>
+          </div>
+
+          <!-- Step Narrative Live Box -->
+          <div class="mt-3 p-3 bg-black/40 border border-white/5 rounded-xl flex items-start gap-2.5">
+            <i class="fa-solid fa-circle-info text-cyan-400 mt-0.5 text-xs"></i>
+            <div class="text-xs text-slate-300 leading-relaxed" id="stepDescription">
+              Ready to execute Extended Boyer-Moore Voting Algorithm. Click <b>Start</b> or <b>Next</b> to begin.
+            </div>
+          </div>
+
+        </div>
+
+      </section>
+
+    </div>
+
+    <!-- BOTTOM SECTION: LEETCODE 229 PROBLEM STATEMENT & ALGORITHM SUMMARY -->
+    <footer class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-2">
+      
+      <!-- Problem Statement Card -->
+      <div class="glass-panel rounded-2xl p-5 flex flex-col gap-3">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <span class="text-amber-400 font-bold"><i class="fa-solid fa-certificate mr-1"></i>229. Majority Element II</span>
+            <span class="px-2 py-0.5 rounded text-[11px] font-semibold bg-amber-500/20 text-amber-300 border border-amber-500/30">Medium</span>
+          </div>
+          <span class="text-xs text-slate-400 font-mono">LeetCode</span>
+        </div>
+
+        <p class="text-xs text-slate-300 leading-relaxed">
+          Given an integer array of size <code class="font-mono text-slate-300">n</code>, find all elements that appear <b>more than &lfloor;n / 3&rfloor; times</b>.
+          <br><br>
+          <i>Mathematical Fact:</i> At most <b>two</b> distinct integers can each appear strictly more than &lfloor;n / 3&rfloor; times (since $3 \times (n/3 + 1) > n$).
+        </p>
+
+        <div class="space-y-2 pt-2 border-t border-white/5 text-xs text-slate-300">
+          <div class="bg-black/30 p-2.5 rounded-lg border border-white/5 font-mono">
+            <span class="text-slate-400">Example 1:</span><br>
+            <b>Input:</b> nums = [3, 2, 3]<br>
+            <b>Output:</b> <span class="text-emerald-400 font-bold">[3]</span> (&lfloor;3 / 3&rfloor; = 1, '3' appears 2 times &gt; 1)
+          </div>
+          <div class="bg-black/30 p-2.5 rounded-lg border border-white/5 font-mono">
+            <span class="text-slate-400">Example 2:</span><br>
+            <b>Input:</b> nums = [1]<br>
+            <b>Output:</b> <span class="text-emerald-400 font-bold">[1]</span> (&lfloor;1 / 3&rfloor; = 0, '1' appears 1 time &gt; 0)
+          </div>
+          <div class="bg-black/30 p-2.5 rounded-lg border border-white/5 font-mono">
+            <span class="text-slate-400">Example 3:</span><br>
+            <b>Input:</b> nums = [1, 2]<br>
+            <b>Output:</b> <span class="text-emerald-400 font-bold">[1, 2]</span> (&lfloor;2 / 3&rfloor; = 0, both appear 1 time &gt; 0)
+          </div>
+        </div>
+
+        <div class="text-[11px] text-slate-400">
+          <b>Constraints:</b> <code class="font-mono text-slate-300">1 &le; nums.length &le; 5 &times; 10<sup>4</sup></code>, <code class="font-mono text-slate-300">-10<sup>9</sup> &le; nums[i] &le; 10<sup>9</sup></code>.
+        </div>
+      </div>
+
+      <!-- Architectural & Complexity Summary Card -->
+      <div class="glass-panel rounded-2xl p-5 flex flex-col gap-3">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <span class="text-cyan-400 font-bold"><i class="fa-solid fa-brain mr-1"></i>Extended Boyer-Moore Principles</span>
+          </div>
+          <span class="px-2 py-0.5 rounded text-[11px] font-semibold bg-cyan-500/20 text-cyan-300 border border-cyan-500/30">Linear & Constant Space</span>
+        </div>
+
+        <div class="space-y-3 text-xs text-slate-300 leading-relaxed">
+          <div class="p-3 bg-cyan-950/20 border border-cyan-500/20 rounded-xl">
+            <b class="text-cyan-300 flex items-center gap-1.5 mb-1">
+              <i class="fa-solid fa-shield-virus"></i> Triplet Cancellation Principle:
+            </b>
+            When a number arrives that matches neither candidate1 nor candidate2, we cancel out one vote from candidate1, one from candidate2, and discard the third number. Any element appearing $&gt; n/3$ times cannot be fully cancelled.
+          </div>
+
+          <div class="p-3 bg-amber-950/20 border border-amber-500/20 rounded-xl">
+            <b class="text-amber-300 flex items-center gap-1.5 mb-1">
+              <i class="fa-solid fa-clipboard-check"></i> Why Pass 2 Verification is Mandatory:
+            </b>
+            Unlike Majority Element I (where a majority element is guaranteed to exist), an array might have <b>zero</b> or only <b>one</b> element exceeding $\lfloor n / 3 \rfloor$. The candidates from Pass 1 are merely survivors, so Pass 2 counts their true frequency.
+          </div>
+
+          <div class="grid grid-cols-2 gap-3 pt-1">
+            <div class="p-2.5 bg-black/30 rounded-lg border border-white/5">
+              <span class="text-[11px] text-slate-400 uppercase font-semibold">Time Complexity</span>
+              <div class="text-sm font-bold text-emerald-400 font-mono mt-0.5">&Omicron;(n)</div>
+              <p class="text-[10px] text-slate-400 mt-0.5">Exactly 2 linear passes (Pass 1 candidate filter + Pass 2 recount)</p>
+            </div>
+            <div class="p-2.5 bg-black/30 rounded-lg border border-white/5">
+              <span class="text-[11px] text-slate-400 uppercase font-semibold">Space Complexity</span>
+              <div class="text-sm font-bold text-cyan-400 font-mono mt-0.5">&Omicron;(1)</div>
+              <p class="text-[10px] text-slate-400 mt-0.5">Four scalar primitive integers: candidate1, candidate2, count1, count2</p>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+    </footer>
+
+  </div>
+
+  <!-- JAVASCRIPT SIMULATION LOGIC -->
+  <script>
+    // PRESETS
+    const PRESETS = [
+      { name: "1: LeetCode Ex 1 ([3, 2, 3] -> [3])", nums: [3, 2, 3] },
+      { name: "2: LeetCode Ex 2 ([1] -> [1])", nums: [1] },
+      { name: "3: LeetCode Ex 3 ([1, 2] -> [1, 2])", nums: [1, 2] },
+      { name: "4: Dual Winners ([1, 1, 1, 3, 3, 2, 2, 2] -> [1, 2])", nums: [1, 1, 1, 3, 3, 2, 2, 2] },
+      { name: "5: No Majority Elements ([1, 2, 3, 4, 5, 6] -> [])", nums: [1, 2, 3, 4, 5, 6] },
+      { name: "6: Triplet Clash ([1, 2, 3, 1, 2, 3, 1, 1] -> [1])", nums: [1, 2, 3, 1, 2, 3, 1, 1] },
+      { name: "7: False Survivor Disqualified in Pass 2 ([2, 1, 1, 3, 1, 4, 5, 6] -> [1])", nums: [2, 1, 1, 3, 1, 4, 5, 6] },
+      { name: "8: Identical Duplicates ([7, 7, 7, 7, 7, 7] -> [7])", nums: [7, 7, 7, 7, 7, 7] },
+      { name: "9: Negative Numbers ([-1, -1, -1, 2, 3, 2] -> [-1])", nums: [-1, -1, -1, 2, 3, 2] },
+      { name: "10: Zero-Centered ([0, 0, 0] -> [0])", nums: [0, 0, 0] }
+    ];
+
+    // APPLICATION STATE
+    let currentNums = [...PRESETS[0].nums];
+    let steps = [];
+    let currentStepIdx = 0;
+    let isPlaying = false;
+    let playInterval = null;
+    let playSpeed = 800; // ms per step
+    let audioEnabled = true;
+
+    // AUDIO SYNTHESIZER
+    let audioCtx = null;
+    function initAudio() {
+      if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      }
+    }
+    function playBeep(freq = 440, type = 'sine', duration = 0.08, vol = 0.05) {
+      if (!audioEnabled) return;
+      try {
+        initAudio();
+        if (audioCtx.state === 'suspended') {
+          audioCtx.resume();
+        }
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = type;
+        osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+        gain.gain.setValueAtTime(vol, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + duration);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + duration);
+      } catch (e) {}
+    }
+
+    // DOM ELEMENTS
+    const btnPlay = document.getElementById('btnPlay');
+    const playIcon = document.getElementById('playIcon');
+    const playText = document.getElementById('playText');
+    const btnPrev = document.getElementById('btnPrev');
+    const btnNext = document.getElementById('btnNext');
+    const btnReset = document.getElementById('btnReset');
+    const btnAudio = document.getElementById('btnAudio');
+    const audioIcon = document.getElementById('audioIcon');
+    const presetSelect = document.getElementById('presetSelect');
+    const customInput = document.getElementById('customInput');
+    const btnApplyCustom = document.getElementById('btnApplyCustom');
+    const stepScrubber = document.getElementById('stepScrubber');
+    const stepCounterBadge = document.getElementById('stepCounterBadge');
+    const passBadge = document.getElementById('passBadge');
+    const phaseBadge = document.getElementById('phaseBadge');
+
+    const varCand1 = document.getElementById('varCand1');
+    const varCount1 = document.getElementById('varCount1');
+    const varCand2 = document.getElementById('varCand2');
+    const varCount2 = document.getElementById('varCount2');
+    const cand1StatusSub = document.getElementById('cand1StatusSub');
+    const cand2StatusSub = document.getElementById('cand2StatusSub');
+
+    const varCurrentNum = document.getElementById('varCurrentNum');
+    const currentNumIndexSub = document.getElementById('currentNumIndexSub');
+    const varThreshold = document.getElementById('varThreshold');
+    const thresholdSub = document.getElementById('thresholdSub');
+
+    const arrayStreamContainer = document.getElementById('arrayStreamContainer');
+    const streamStatusText = document.getElementById('streamStatusText');
+
+    const podium1Card = document.getElementById('podium1Card');
+    const podium1Icon = document.getElementById('podium1Icon');
+    const podium1StatusBadge = document.getElementById('podium1StatusBadge');
+    const podium1Value = document.getElementById('podium1Value');
+    const podium1Pass2Note = document.getElementById('podium1Pass2Note');
+    const podium1Bar = document.getElementById('podium1Bar');
+    const podium1Desc = document.getElementById('podium1Desc');
+
+    const podium2Card = document.getElementById('podium2Card');
+    const podium2Icon = document.getElementById('podium2Icon');
+    const podium2StatusBadge = document.getElementById('podium2StatusBadge');
+    const podium2Value = document.getElementById('podium2Value');
+    const podium2Pass2Note = document.getElementById('podium2Pass2Note');
+    const podium2Bar = document.getElementById('podium2Bar');
+    const podium2Desc = document.getElementById('podium2Desc');
+
+    const clashActionBadge = document.getElementById('clashActionBadge');
+    const actionFeedbackBox = document.getElementById('actionFeedbackBox');
+    const actionFeedbackIcon = document.getElementById('actionFeedbackIcon');
+    const actionFeedbackText = document.getElementById('actionFeedbackText');
+    const tripletCancelIndicator = document.getElementById('tripletCancelIndicator');
+    const resultBadges = document.getElementById('resultBadges');
+    const frequencyBadgeContainer = document.getElementById('frequencyBadgeContainer');
+
+    const codeContainer = document.getElementById('codeContainer');
+    const stepDescription = document.getElementById('stepDescription');
+
+    // STEP GENERATOR: Simulates Extended Boyer-Moore Voting Algorithm step-by-step
+    function generateSteps(rawNums) {
+      const generated = [];
+      const n = rawNums.length;
+      const targetThreshold = Math.floor(n / 3);
+
+      let candidate1 = 0;
+      let candidate2 = 0;
+      let count1 = 0;
+      let count2 = 0;
+
+      // Initial Call
+      generated.push({
+        line: 2,
+        pass: 1,
+        phase: "Call",
+        nums: [...rawNums],
+        currentIndex: -1,
+        candidate1: 0,
+        candidate2: 0,
+        count1: 0,
+        count2: 0,
+        result: [],
+        actionType: "neutral",
+        desc: `Invoked <span class="code-font text-cyan-300">majorityElement(nums)</span> with size n = ${n}. Threshold is &gt; &lfloor;${n}/3&rfloor; = <b>${targetThreshold}</b>.`,
+        soundFreq: 320
+      });
+
+      // Line 4-8: Initializations
+      generated.push({
+        line: 4,
+        pass: 1,
+        phase: "Init Candidates",
+        nums: [...rawNums],
+        currentIndex: -1,
+        candidate1: 0,
+        candidate2: 0,
+        count1: 0,
+        count2: 0,
+        result: [],
+        actionType: "neutral",
+        desc: `Initialized candidate variables <span class="code-font text-cyan-300">candidate1 = 0</span>, <span class="code-font text-amber-300">candidate2 = 0</span>, <span class="code-font text-cyan-400">count1 = 0</span>, <span class="code-font text-amber-400">count2 = 0</span>.`,
+        soundFreq: 360
+      });
+
+      // PASS 1: Find two potential candidates
+      for (let i = 0; i < n; i++) {
+        const num = rawNums[i];
+
+        // Loop header
+        generated.push({
+          line: 11,
+          pass: 1,
+          phase: "P1: Read Number",
+          nums: [...rawNums],
+          currentIndex: i,
+          candidate1,
+          candidate2,
+          count1,
+          count2,
+          result: [],
+          actionType: "read",
+          desc: `Pass 1 Loop: Picked <span class="code-font text-purple-300 font-bold">num = nums[${i}] = ${num}</span>.`,
+          soundFreq: 420 + (i * 10)
+        });
+
+        if (num === candidate1) {
+          // Line 12 & 13
+          count1++;
+          generated.push({
+            line: 13,
+            pass: 1,
+            phase: "P1: Cand 1 Match",
+            nums: [...rawNums],
+            currentIndex: i,
+            candidate1,
+            candidate2,
+            count1,
+            count2,
+            result: [],
+            actionType: "match1",
+            desc: `<b>num == candidate1 (${num} == ${candidate1})</b> matched! Reinforced Candidate 1: <span class="code-font text-cyan-300 font-bold">count1++ &rarr; ${count1}</span>.`,
+            soundFreq: 600
+          });
+        } else if (num === candidate2) {
+          // Line 14 & 15
+          count2++;
+          generated.push({
+            line: 15,
+            pass: 1,
+            phase: "P1: Cand 2 Match",
+            nums: [...rawNums],
+            currentIndex: i,
+            candidate1,
+            candidate2,
+            count1,
+            count2,
+            result: [],
+            actionType: "match2",
+            desc: `<b>num == candidate2 (${num} == ${candidate2})</b> matched! Reinforced Candidate 2: <span class="code-font text-amber-300 font-bold">count2++ &rarr; ${count2}</span>.`,
+            soundFreq: 640
+          });
+        } else if (count1 === 0) {
+          // Line 16-18
+          candidate1 = num;
+          count1 = 1;
+          generated.push({
+            line: 17,
+            pass: 1,
+            phase: "P1: Elect Cand 1",
+            nums: [...rawNums],
+            currentIndex: i,
+            candidate1,
+            candidate2,
+            count1,
+            count2,
+            result: [],
+            actionType: "elect1",
+            desc: `<span class="code-font text-cyan-300 font-semibold">count1 == 0</span>! Throne 1 was vacant. Elected <span class="code-font text-cyan-300 font-bold">candidate1 = ${num}</span> with count1 = 1.`,
+            soundFreq: 520
+          });
+        } else if (count2 === 0) {
+          // Line 19-21
+          candidate2 = num;
+          count2 = 1;
+          generated.push({
+            line: 20,
+            pass: 1,
+            phase: "P1: Elect Cand 2",
+            nums: [...rawNums],
+            currentIndex: i,
+            candidate1,
+            candidate2,
+            count1,
+            count2,
+            result: [],
+            actionType: "elect2",
+            desc: `<span class="code-font text-amber-300 font-semibold">count2 == 0</span>! Throne 2 was vacant. Elected <span class="code-font text-amber-300 font-bold">candidate2 = ${num}</span> with count2 = 1.`,
+            soundFreq: 540
+          });
+        } else {
+          // Line 22-25: Triplet Cancellation
+          count1--;
+          count2--;
+          generated.push({
+            line: 23,
+            pass: 1,
+            phase: "P1: Triplet Cancellation",
+            nums: [...rawNums],
+            currentIndex: i,
+            candidate1,
+            candidate2,
+            count1,
+            count2,
+            result: [],
+            actionType: "clash",
+            desc: `Number <b>${num}</b> matches neither candidate. <b>Triplet Cancellation:</b> <span class="code-font text-rose-300">count1-- (${count1})</span> and <span class="code-font text-rose-300">count2-- (${count2})</span>.`,
+            soundFreq: 260
+          });
+        }
+      }
+
+      // Transition to Pass 2: Reset counts for frequency verification
+      count1 = 0;
+      count2 = 0;
+      generated.push({
+        line: 29,
+        pass: 2,
+        phase: "Pass 2: Reset Counts",
+        nums: [...rawNums],
+        currentIndex: -1,
+        candidate1,
+        candidate2,
+        count1: 0,
+        count2: 0,
+        result: [],
+        actionType: "neutral",
+        desc: `<b>Pass 1 Completed!</b> Survivors: <span class="code-font text-cyan-300">Cand 1 = ${candidate1}</span>, <span class="code-font text-amber-300">Cand 2 = ${candidate2}</span>. Resetting <span class="code-font">count1 = 0</span>, <span class="code-font">count2 = 0</span> for exact recount.`,
+        soundFreq: 480
+      });
+
+      // PASS 2: Recount actual occurrences
+      for (let i = 0; i < n; i++) {
+        const num = rawNums[i];
+
+        generated.push({
+          line: 32,
+          pass: 2,
+          phase: "P2: Verify Occurrence",
+          nums: [...rawNums],
+          currentIndex: i,
+          candidate1,
+          candidate2,
+          count1,
+          count2,
+          result: [],
+          actionType: "read",
+          desc: `Pass 2 Recount: Checking <span class="code-font text-purple-300 font-bold">num = nums[${i}] = ${num}</span> against candidates.`,
+          soundFreq: 400 + (i * 8)
+        });
+
+        if (num === candidate1) {
+          count1++;
+          generated.push({
+            line: 34,
+            pass: 2,
+            phase: "P2: Cand 1 Validated",
+            nums: [...rawNums],
+            currentIndex: i,
+            candidate1,
+            candidate2,
+            count1,
+            count2,
+            result: [],
+            actionType: "match1",
+            desc: `Found instance of Candidate 1 (${candidate1}): <span class="code-font text-cyan-300 font-bold">count1++ &rarr; ${count1}</span>.`,
+            soundFreq: 680
+          });
+        } else if (num === candidate2) {
+          count2++;
+          generated.push({
+            line: 36,
+            pass: 2,
+            phase: "P2: Cand 2 Validated",
+            nums: [...rawNums],
+            currentIndex: i,
+            candidate1,
+            candidate2,
+            count1,
+            count2,
+            result: [],
+            actionType: "match2",
+            desc: `Found instance of Candidate 2 (${candidate2}): <span class="code-font text-amber-300 font-bold">count2++ &rarr; ${count2}</span>.`,
+            soundFreq: 720
+          });
+        }
+      }
+
+      // Verification against threshold (count > n / 3)
+      const finalResult = [];
+
+      generated.push({
+        line: 40,
+        pass: 2,
+        phase: "Check Thresholds",
+        nums: [...rawNums],
+        currentIndex: -1,
+        candidate1,
+        candidate2,
+        count1,
+        count2,
+        result: [],
+        actionType: "neutral",
+        desc: `Pass 2 Recount complete. Total verified frequencies: <b>Cand 1 (${candidate1}): ${count1}</b>, <b>Cand 2 (${candidate2}): ${count2}</b>. Comparing to threshold (&gt; ${targetThreshold}).`,
+        soundFreq: 500
+      });
+
+      // Check candidate 1
+      const cand1Qualified = (count1 > targetThreshold);
+      generated.push({
+        line: 42,
+        pass: 2,
+        phase: "Evaluate Cand 1",
+        nums: [...rawNums],
+        currentIndex: -1,
+        candidate1,
+        candidate2,
+        count1,
+        count2,
+        result: [...finalResult],
+        actionType: cand1Qualified ? "qualify1" : "disqualify1",
+        desc: cand1Qualified 
+          ? `Condition <span class="code-font text-emerald-300 font-semibold">count1 (${count1}) &gt; ${targetThreshold}</span> is <b>true</b>! Candidate 1 (${candidate1}) is a valid majority element.` 
+          : `Condition <span class="code-font text-rose-300 font-semibold">count1 (${count1}) &gt; ${targetThreshold}</span> is <b>false</b>. Candidate 1 (${candidate1}) is disqualified.`,
+        soundFreq: cand1Qualified ? 760 : 320
+      });
+
+      if (cand1Qualified) {
+        finalResult.push(candidate1);
+        generated.push({
+          line: 43,
+          pass: 2,
+          phase: "Add Cand 1",
+          nums: [...rawNums],
+          currentIndex: -1,
+          candidate1,
+          candidate2,
+          count1,
+          count2,
+          result: [...finalResult],
+          actionType: "qualify1",
+          desc: `Executed <span class="code-font text-emerald-300">result.add(${candidate1})</span>.`,
+          soundFreq: 820
+        });
+      }
+
+      // Check candidate 2
+      const cand2Qualified = (count2 > targetThreshold);
+      generated.push({
+        line: 45,
+        pass: 2,
+        phase: "Evaluate Cand 2",
+        nums: [...rawNums],
+        currentIndex: -1,
+        candidate1,
+        candidate2,
+        count1,
+        count2,
+        result: [...finalResult],
+        actionType: cand2Qualified ? "qualify2" : "disqualify2",
+        desc: cand2Qualified 
+          ? `Condition <span class="code-font text-emerald-300 font-semibold">count2 (${count2}) &gt; ${targetThreshold}</span> is <b>true</b>! Candidate 2 (${candidate2}) is a valid majority element.` 
+          : `Condition <span class="code-font text-rose-300 font-semibold">count2 (${count2}) &gt; ${targetThreshold}</span> is <b>false</b>. Candidate 2 (${candidate2}) is disqualified.`,
+        soundFreq: cand2Qualified ? 800 : 300
+      });
+
+      if (cand2Qualified) {
+        finalResult.push(candidate2);
+        generated.push({
+          line: 46,
+          pass: 2,
+          phase: "Add Cand 2",
+          nums: [...rawNums],
+          currentIndex: -1,
+          candidate1,
+          candidate2,
+          count1,
+          count2,
+          result: [...finalResult],
+          actionType: "qualify2",
+          desc: `Executed <span class="code-font text-emerald-300">result.add(${candidate2})</span>.`,
+          soundFreq: 860
+        });
+      }
+
+      // Final Return
+      generated.push({
+        line: 49,
+        pass: 2,
+        phase: "Complete",
+        nums: [...rawNums],
+        currentIndex: -1,
+        candidate1,
+        candidate2,
+        count1,
+        count2,
+        result: [...finalResult],
+        actionType: "winner",
+        desc: `<span class="text-emerald-400 font-bold text-sm"><i class="fa-solid fa-trophy mr-1.5"></i>Finished!</span> Returned result: <span class="code-font text-emerald-300 font-extrabold text-base">[${finalResult.join(', ')}]</span>.`,
+        soundFreq: 940
+      });
+
+      return generated;
+    }
+
+    // ZERO-JUMP LOCALIZED CODE LINE HIGHLIGHTER
+    function highlightCodeLine(lineNum) {
+      document.querySelectorAll('.code-line').forEach(el => el.classList.remove('active-line'));
+      const activeEl = document.getElementById(`line${lineNum}`);
+      if (activeEl) {
+        activeEl.classList.add('active-line');
+        
+        // Scroll strictly inside codeContainer without affecting parent window
+        const containerTop = codeContainer.scrollTop;
+        const containerBottom = containerTop + codeContainer.clientHeight;
+        const elTop = activeEl.offsetTop - codeContainer.offsetTop;
+        const elBottom = elTop + activeEl.clientHeight;
+
+        if (elTop < containerTop + 20) {
+          codeContainer.scrollTo({ top: Math.max(0, elTop - 20), behavior: 'smooth' });
+        } else if (elBottom > containerBottom - 20) {
+          codeContainer.scrollTo({ top: elBottom - codeContainer.clientHeight + 20, behavior: 'smooth' });
+        }
+      }
+    }
+
+    // RENDER CURRENT STEP INTO DOM
+    function renderStep(idx) {
+      if (idx < 0 || idx >= steps.length) return;
+      const step = steps[idx];
+      const n = step.nums.length;
+      const threshold = Math.floor(n / 3);
+
+      // Top Deck Status
+      stepCounterBadge.textContent = `Step: ${idx + 1} / ${steps.length}`;
+      passBadge.textContent = step.pass === 1 ? "Pass 1: Find Candidates" : "Pass 2: Verify Counts";
+      passBadge.className = step.pass === 1 
+        ? "px-2.5 py-1 rounded-md bg-cyan-500/20 border border-cyan-500/30 text-cyan-300 font-semibold"
+        : "px-2.5 py-1 rounded-md bg-amber-500/20 border border-amber-500/30 text-amber-300 font-semibold";
+      
+      phaseBadge.textContent = step.phase;
+      stepScrubber.max = steps.length - 1;
+      stepScrubber.value = idx;
+
+      // Variable Cards
+      varCand1.textContent = step.candidate1;
+      varCount1.textContent = `(cnt: ${step.count1})`;
+      varCand2.textContent = step.candidate2;
+      varCount2.textContent = `(cnt: ${step.count2})`;
+      
+      cand1StatusSub.textContent = step.pass === 1 ? `Surplus: ${step.count1}` : `Verified: ${step.count1} / ${n}`;
+      cand2StatusSub.textContent = step.pass === 1 ? `Surplus: ${step.count2}` : `Verified: ${step.count2} / ${n}`;
+
+      varThreshold.textContent = `> ${threshold}`;
+      thresholdSub.textContent = `n = ${n} (⌊n/3⌋ = ${threshold})`;
+
+      if (step.currentIndex >= 0 && step.currentIndex < n) {
+        varCurrentNum.textContent = step.nums[step.currentIndex];
+        currentNumIndexSub.textContent = `Index: [${step.currentIndex}]`;
+      } else {
+        varCurrentNum.textContent = "-";
+        currentNumIndexSub.textContent = "Index: -";
+      }
+
+      // Narrative description
+      stepDescription.innerHTML = step.desc;
+
+      // 1. Array Stream Pills
+      arrayStreamContainer.innerHTML = '';
+      step.nums.forEach((val, i) => {
+        const isCurrent = (step.currentIndex === i);
+        const isProcessed = (step.currentIndex > i);
+        const pill = document.createElement('div');
+        
+        let borderAndBg = "bg-white/5 border-white/10 text-slate-300";
+        if (isCurrent) {
+          if (step.actionType === 'match1') {
+            borderAndBg = "bg-cyan-500/30 border-cyan-400 text-cyan-200 ring-2 ring-cyan-400/50 scale-110 font-bold";
+          } else if (step.actionType === 'match2') {
+            borderAndBg = "bg-amber-500/30 border-amber-400 text-amber-200 ring-2 ring-amber-400/50 scale-110 font-bold";
+          } else if (step.actionType === 'elect1') {
+            borderAndBg = "bg-cyan-500/40 border-cyan-300 text-cyan-100 ring-2 ring-cyan-300 scale-110 font-bold";
+          } else if (step.actionType === 'elect2') {
+            borderAndBg = "bg-amber-500/40 border-amber-300 text-amber-100 ring-2 ring-amber-300 scale-110 font-bold";
+          } else if (step.actionType === 'clash') {
+            borderAndBg = "bg-rose-500/30 border-rose-400 text-rose-200 ring-2 ring-rose-400/50 scale-110 font-bold";
+          } else {
+            borderAndBg = "bg-purple-500/30 border-purple-400 text-purple-200 ring-2 ring-purple-400/50 scale-110 font-bold";
+          }
+        } else if (isProcessed) {
+          borderAndBg = "bg-white/[0.02] border-white/5 text-slate-500";
+        }
+
+        pill.className = `code-font text-xs px-2.5 py-1.5 rounded-xl border transition-all duration-200 flex items-center gap-1.5 ${borderAndBg}`;
+        pill.innerHTML = `
+          <span class="text-[10px] text-slate-500 font-sans">[${i}]</span>
+          <span>${val}</span>
+          ${isCurrent ? '<span class="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-ping"></span>' : ''}
+        `;
+        arrayStreamContainer.appendChild(pill);
+      });
+
+      if (step.currentIndex >= 0) {
+        streamStatusText.textContent = `${step.pass === 1 ? 'Pass 1' : 'Pass 2'} scanning index ${step.currentIndex} of ${n - 1}`;
+      } else if (step.phase === "Complete") {
+        streamStatusText.textContent = `Both passes completed successfully`;
+      } else {
+        streamStatusText.textContent = step.pass === 1 ? 'Ready for candidate search' : 'Ready for frequency recount';
+      }
+
+      // 2. Dual Candidate Podiums
+      podium1Value.textContent = step.candidate1;
+      podium2Value.textContent = step.candidate2;
+
+      podium1StatusBadge.textContent = `count1 = ${step.count1}`;
+      podium2StatusBadge.textContent = `count2 = ${step.count2}`;
+
+      podium1Pass2Note.textContent = step.pass === 1 ? 'Pass 1: Surplus' : `Pass 2: ${step.count1} occurrences`;
+      podium2Pass2Note.textContent = step.pass === 1 ? 'Pass 1: Surplus' : `Pass 2: ${step.count2} occurrences`;
+
+      const maxVal = Math.max(1, n);
+      podium1Bar.style.width = `${Math.min(100, (step.count1 / maxVal) * 100)}%`;
+      podium2Bar.style.width = `${Math.min(100, (step.count2 / maxVal) * 100)}%`;
+
+      // Reset styling classes
+      podium1Card.classList.remove('winner-anim', 'border-emerald-500/50', 'border-rose-500/50', 'clash-anim');
+      podium2Card.classList.remove('winner-anim', 'border-emerald-500/50', 'border-rose-500/50', 'clash-anim');
+
+      const cand1MeetsThreshold = (step.count1 > threshold);
+      const cand2MeetsThreshold = (step.count2 > threshold);
+
+      // Candidate 1 threshold check happens ONLY at line 42 and later in Java code
+      const cand1Evaluated = (step.line >= 42 && step.pass === 2);
+      if (cand1Evaluated) {
+        if (cand1MeetsThreshold) {
+          podium1Card.classList.add('winner-anim', 'border-emerald-500/50');
+          podium1Icon.className = "fa-solid fa-trophy text-emerald-400";
+          podium1Desc.innerHTML = `<span class="text-emerald-300 font-bold">Qualified!</span> Frequency ${step.count1} &gt; ${threshold}.`;
+        } else {
+          podium1Icon.className = "fa-solid fa-xmark text-rose-400";
+          podium1Desc.innerHTML = `<span class="text-rose-300">Disqualified</span>. Frequency ${step.count1} &le; ${threshold}.`;
+        }
+      } else {
+        podium1Icon.className = "fa-solid fa-crown text-cyan-400";
+        if (step.pass === 1) {
+          podium1Desc.textContent = step.count1 === 0 ? "Leadership vacant (count1 = 0)" : `Active candidate (surplus = ${step.count1})`;
+        } else {
+          podium1Desc.textContent = `Recounted: ${step.count1} occurrences`;
+        }
+      }
+
+      // Candidate 2 threshold check happens ONLY at line 45 and later in Java code
+      const cand2Evaluated = (step.line >= 45 && step.pass === 2);
+      if (cand2Evaluated) {
+        if (cand2MeetsThreshold) {
+          podium2Card.classList.add('winner-anim', 'border-emerald-500/50');
+          podium2Icon.className = "fa-solid fa-trophy text-emerald-400";
+          podium2Desc.innerHTML = `<span class="text-emerald-300 font-bold">Qualified!</span> Frequency ${step.count2} &gt; ${threshold}.`;
+        } else {
+          podium2Icon.className = "fa-solid fa-xmark text-rose-400";
+          podium2Desc.innerHTML = `<span class="text-rose-300">Disqualified</span>. Frequency ${step.count2} &le; ${threshold}.`;
+        }
+      } else {
+        podium2Icon.className = "fa-solid fa-crown text-amber-400";
+        if (step.pass === 1) {
+          podium2Desc.textContent = step.count2 === 0 ? "Leadership vacant (count2 = 0)" : `Active candidate (surplus = ${step.count2})`;
+        } else {
+          podium2Desc.textContent = `Recounted: ${step.count2} occurrences`;
+        }
+      }
+
+      // Triplet cancellation indicator & Action feedback box
+      if (step.actionType === "clash") {
+        tripletCancelIndicator.classList.remove('hidden');
+        podium1Card.classList.add('clash-anim');
+        podium2Card.classList.add('clash-anim');
+        clashActionBadge.className = "px-2.5 py-1 rounded text-[11px] font-semibold bg-rose-500/20 text-rose-300 border border-rose-500/30";
+        clashActionBadge.innerHTML = `<i class="fa-solid fa-triangle-exclamation mr-1"></i>Triplet Clash (count1--, count2--)`;
+        actionFeedbackBox.className = "p-3 rounded-xl bg-rose-500/10 border border-rose-500/20 text-xs flex items-center justify-between gap-3";
+        actionFeedbackIcon.className = "fa-solid fa-heart-crack text-rose-400";
+        actionFeedbackText.textContent = `Neither candidate matched ${step.nums[step.currentIndex]}. Both vote balances decremented.`;
+      } else {
+        tripletCancelIndicator.classList.add('hidden');
+        if (step.actionType === "match1") {
+          clashActionBadge.className = "px-2.5 py-1 rounded text-[11px] font-semibold bg-cyan-500/20 text-cyan-300 border border-cyan-500/30";
+          clashActionBadge.innerHTML = `<i class="fa-solid fa-check mr-1"></i>Cand 1 Reinforced`;
+          actionFeedbackBox.className = "p-3 rounded-xl bg-cyan-500/10 border border-cyan-500/20 text-xs flex items-center justify-between gap-3";
+          actionFeedbackIcon.className = "fa-solid fa-circle-check text-cyan-400";
+          actionFeedbackText.textContent = `Matched Candidate 1 (${step.candidate1}). count1 increased to ${step.count1}.`;
+        } else if (step.actionType === "match2") {
+          clashActionBadge.className = "px-2.5 py-1 rounded text-[11px] font-semibold bg-amber-500/20 text-amber-300 border border-amber-500/30";
+          clashActionBadge.innerHTML = `<i class="fa-solid fa-check mr-1"></i>Cand 2 Reinforced`;
+          actionFeedbackBox.className = "p-3 rounded-xl bg-amber-500/10 border border-amber-500/20 text-xs flex items-center justify-between gap-3";
+          actionFeedbackIcon.className = "fa-solid fa-circle-check text-amber-400";
+          actionFeedbackText.textContent = `Matched Candidate 2 (${step.candidate2}). count2 increased to ${step.count2}.`;
+        } else if (step.actionType === "elect1" || step.actionType === "elect2") {
+          clashActionBadge.className = "px-2.5 py-1 rounded text-[11px] font-semibold bg-indigo-500/20 text-indigo-300 border border-indigo-500/30";
+          clashActionBadge.innerHTML = `<i class="fa-solid fa-arrows-rotate mr-1"></i>New Candidate Set`;
+          actionFeedbackBox.className = "p-3 rounded-xl bg-indigo-500/10 border border-indigo-500/20 text-xs flex items-center justify-between gap-3";
+          actionFeedbackIcon.className = "fa-solid fa-arrows-rotate text-indigo-400";
+          actionFeedbackText.textContent = step.desc.replace(/<[^>]*>?/gm, '');
+        } else if (step.phase === "Complete") {
+          clashActionBadge.className = "px-2.5 py-1 rounded text-[11px] font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30";
+          clashActionBadge.innerHTML = `<i class="fa-solid fa-trophy mr-1"></i>Verification Complete`;
+          actionFeedbackBox.className = "p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-xs flex items-center justify-between gap-3";
+          actionFeedbackIcon.className = "fa-solid fa-trophy text-emerald-400";
+          actionFeedbackText.textContent = `Finished! Majority elements: [${step.result.join(', ')}].`;
+        } else {
+          clashActionBadge.className = "px-2.5 py-1 rounded text-[11px] font-semibold bg-white/5 text-slate-400 border border-white/10";
+          clashActionBadge.textContent = step.pass === 1 ? "Pass 1 Processing" : "Pass 2 Verification";
+          actionFeedbackBox.className = "p-3 rounded-xl bg-white/5 border border-white/10 text-xs flex items-center justify-between gap-3";
+          actionFeedbackIcon.className = "fa-solid fa-circle-info text-cyan-400";
+          actionFeedbackText.textContent = step.desc.replace(/<[^>]*>?/gm, '');
+        }
+      }
+
+      // 3. Final Result Badges
+      if (step.phase === "Complete" || step.result.length > 0) {
+        if (step.result.length === 0) {
+          resultBadges.innerHTML = '<span class="text-slate-400 code-font">[] (None exceeded &lfloor;n/3&rfloor;)</span>';
+        } else {
+          resultBadges.innerHTML = '';
+          step.result.forEach(val => {
+            const badge = document.createElement('span');
+            badge.className = "code-font px-2.5 py-1 rounded-lg bg-emerald-500/20 border border-emerald-400/50 text-emerald-300 font-bold flex items-center gap-1.5 shadow-sm";
+            badge.innerHTML = `<i class="fa-solid fa-star text-[10px] text-amber-300"></i> ${val}`;
+            resultBadges.appendChild(badge);
+          });
+        }
+      } else {
+        resultBadges.innerHTML = '<span class="text-slate-500 italic text-xs">Pending Pass 2 verification</span>';
+      }
+
+      // Reference Frequencies Pill Render
+      renderFrequencies(step.nums, step.candidate1, step.candidate2, step.result, step.phase === "Complete");
+
+      // Synchronize Code View
+      highlightCodeLine(step.line);
+
+      // Synthesized Sound
+      if (step.soundFreq) {
+        playBeep(step.soundFreq, 'sine', 0.08, 0.04);
+      }
+    }
+
+    // RENDER REFERENCE FREQUENCY PILLS
+    function renderFrequencies(nums, cand1, cand2, results, isDone) {
+      const counts = {};
+      nums.forEach(x => { counts[x] = (counts[x] || 0) + 1; });
+      const threshold = Math.floor(nums.length / 3);
+
+      frequencyBadgeContainer.innerHTML = '';
+      Object.keys(counts).forEach(k => {
+        const val = parseInt(k, 10);
+        const count = counts[val];
+        const isTrueWinner = count > threshold;
+        const isSelected = results.includes(val);
+
+        const pill = document.createElement('div');
+        pill.className = `text-[11px] px-2 py-0.5 rounded-lg border flex items-center gap-1.5 transition-all ${
+          isDone && isSelected
+            ? 'bg-emerald-500/20 border-emerald-400 text-emerald-300 font-bold'
+            : (val === cand1)
+              ? 'bg-cyan-500/15 border-cyan-400/40 text-cyan-200'
+              : (val === cand2)
+                ? 'bg-amber-500/15 border-amber-400/40 text-amber-200'
+                : 'bg-black/30 border-white/10 text-slate-400'
+        }`;
+        pill.innerHTML = `
+          <span class="code-font font-semibold">${val}</span>
+          <span class="text-[9px] bg-white/10 px-1 rounded font-sans text-slate-300">${count}x</span>
+          ${isTrueWinner ? '<i class="fa-solid fa-check text-[9px] text-emerald-400"></i>' : ''}
+        `;
+        frequencyBadgeContainer.appendChild(pill);
+      });
+    }
+
+    // PLAYBACK CONTROLLER
+    function setPlaying(playing) {
+      isPlaying = playing;
+      if (isPlaying) {
+        playIcon.className = "fa-solid fa-pause";
+        playText.textContent = "Stop";
+        btnPlay.classList.add('bg-rose-500/20', 'text-rose-300', 'border-rose-500/40');
+        btnPlay.classList.remove('bg-cyan-500/20', 'text-cyan-300', 'border-cyan-500/40');
+
+        playInterval = setInterval(() => {
+          if (currentStepIdx < steps.length - 1) {
+            currentStepIdx++;
+            renderStep(currentStepIdx);
+          } else {
+            setPlaying(false);
+          }
+        }, playSpeed);
+      } else {
+        playIcon.className = "fa-solid fa-play";
+        playText.textContent = "Start";
+        btnPlay.classList.remove('bg-rose-500/20', 'text-rose-300', 'border-rose-500/40');
+        btnPlay.classList.add('bg-cyan-500/20', 'text-cyan-300', 'border-cyan-500/40');
+        if (playInterval) {
+          clearInterval(playInterval);
+          playInterval = null;
+        }
+      }
+    }
+
+    function initSimulation(numsArray) {
+      setPlaying(false);
+      currentNums = [...numsArray];
+      steps = generateSteps(currentNums);
+      currentStepIdx = 0;
+      stepScrubber.max = steps.length - 1;
+      stepScrubber.value = 0;
+      renderStep(0);
+    }
+
+    // EVENT LISTENERS
+    btnPlay.addEventListener('click', () => {
+      if (currentStepIdx >= steps.length - 1) {
+        currentStepIdx = 0;
+        renderStep(0);
+      }
+      setPlaying(!isPlaying);
+    });
+
+    btnNext.addEventListener('click', () => {
+      setPlaying(false);
+      if (currentStepIdx < steps.length - 1) {
+        currentStepIdx++;
+        renderStep(currentStepIdx);
+      }
+    });
+
+    btnPrev.addEventListener('click', () => {
+      setPlaying(false);
+      if (currentStepIdx > 0) {
+        currentStepIdx--;
+        renderStep(currentStepIdx);
+      }
+    });
+
+    btnReset.addEventListener('click', () => {
+      setPlaying(false);
+      currentStepIdx = 0;
+      renderStep(0);
+    });
+
+    stepScrubber.addEventListener('input', (e) => {
+      setPlaying(false);
+      currentStepIdx = parseInt(e.target.value, 10);
+      renderStep(currentStepIdx);
+    });
+
+    // Speed Selector Buttons
+    document.querySelectorAll('.speed-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.speed-btn').forEach(b => {
+          b.classList.remove('bg-cyan-500/30', 'text-cyan-300', 'font-semibold');
+        });
+        btn.classList.add('bg-cyan-500/30', 'text-cyan-300', 'font-semibold');
+        playSpeed = parseInt(btn.dataset.speed, 10);
+        if (isPlaying) {
+          setPlaying(false);
+          setPlaying(true);
+        }
+      });
+    });
+
+    // Audio Toggle
+    btnAudio.addEventListener('click', () => {
+      audioEnabled = !audioEnabled;
+      if (audioEnabled) {
+        audioIcon.className = "fa-solid fa-volume-high";
+        btnAudio.classList.remove('text-slate-600');
+        btnAudio.classList.add('text-slate-400');
+      } else {
+        audioIcon.className = "fa-solid fa-volume-xmark";
+        btnAudio.classList.add('text-slate-600');
+        btnAudio.classList.remove('text-slate-400');
+      }
+    });
+
+    // Preset Selection
+    presetSelect.addEventListener('change', (e) => {
+      const idx = parseInt(e.target.value, 10);
+      initSimulation(PRESETS[idx].nums);
+    });
+
+    // Custom Input Load
+    btnApplyCustom.addEventListener('click', () => {
+      const text = customInput.value.trim();
+      if (!text) return;
+      const parsed = text.split(',')
+        .map(s => parseInt(s.trim(), 10))
+        .filter(n => !isNaN(n));
+      if (parsed.length > 0) {
+        initSimulation(parsed);
+      }
+    });
+
+    // Keyboard Shortcuts (Space: Play/Pause, Arrows: Step)
+    window.addEventListener('keydown', (e) => {
+      if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT') return;
+      if (e.code === 'Space') {
+        e.preventDefault();
+        btnPlay.click();
+      } else if (e.code === 'ArrowRight') {
+        e.preventDefault();
+        btnNext.click();
+      } else if (e.code === 'ArrowLeft') {
+        e.preventDefault();
+        btnPrev.click();
+      }
+    });
+
+    // Initialize with default preset
+    window.onload = function() {
+      initSimulation(PRESETS[0].nums);
+    };
+  </script>
+</body>
+</html>
