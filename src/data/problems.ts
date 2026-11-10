@@ -2788,8 +2788,112 @@ export const PROBLEMS: DSAProblem[] = [
         "number": 1,
         "title": "Two Sum",
         "difficulty": "Easy"
+      },
+      {
+        "number": 560,
+        "title": "Subarray Sum Equals K",
+        "difficulty": "Medium"
       }
     ],
     "leetcodeUrl": "https://leetcode.com/problems/maximum-size-subarray-sum-equals-k/"
+  },
+  {
+    "id": "subarray-sum-equals-k",
+    "number": 560,
+    "title": "Subarray Sum Equals K",
+    "slug": "subarray-sum-equals-k",
+    "difficulty": "Medium",
+    "categories": [
+      "Arrays",
+      "Hashing",
+      "Prefix Sum"
+    ],
+    "description": "Given an array of integers nums and an integer k, return the total number of subarrays whose sum equals to k.\n\nA subarray is a contiguous non-empty sequence of elements within an array.",
+    "inputFormat": "nums = [int], k = int",
+    "outputFormat": "int (total count of subarrays)",
+    "constraints": [
+      "1 <= nums.length <= 2 * 10^4",
+      "-1000 <= nums[i] <= 1000",
+      "-10^7 <= k <= 10^7"
+    ],
+    "examples": [
+      {
+        "exampleNumber": 1,
+        "input": "nums = [1, 1, 1], k = 2",
+        "output": "2",
+        "explanation": "Two subarrays sum to 2: [nums[0], nums[1]] and [nums[1], nums[2]].",
+        "type": "official"
+      },
+      {
+        "exampleNumber": 2,
+        "input": "nums = [1, 2, 3], k = 3",
+        "output": "2",
+        "explanation": "Two subarrays sum to 3: [nums[0], nums[1]] = 1+2=3, and [nums[2]] = 3.",
+        "type": "official"
+      }
+    ],
+    "approach": "Prefix Sum + Frequency Hash Map: Maintain a running sum prefixSum and a map recording frequencies of previously seen prefix sums (initialized with { 0: 1 }). For each number, prefixSum += num. If (prefixSum - k) exists in the map, add its frequency count to the result. Then increment the frequency of prefixSum in the map.",
+    "flowSteps": [
+      {
+        "step": 1,
+        "title": "Initialize Map with Base Offset",
+        "description": "Initialize prefixCount = { 0: 1 } to account for subarrays starting at index 0 whose sum directly equals k. Set prefixSum = 0 and totalCount = 0.",
+        "stateSnapshot": "prefixCount = { 0: 1 }, prefixSum = 0, count = 0",
+        "highlight": "Init"
+      },
+      {
+        "step": 2,
+        "title": "Add & Query Target Complement",
+        "description": "At each element nums[i], prefixSum += nums[i]. Check if complement = (prefixSum - k) exists in prefixCount.",
+        "stateSnapshot": "complement = prefixSum - k",
+        "highlight": "Query"
+      },
+      {
+        "step": 3,
+        "title": "Accumulate & Record Frequency",
+        "description": "If complement is found, add prefixCount[complement] to totalCount. Then increment prefixCount[prefixSum] by 1.",
+        "stateSnapshot": "totalCount += count[comp], count[prefixSum]++",
+        "highlight": "Update"
+      }
+    ],
+    "timeComplexity": "O(n)",
+    "timeComplexityExplanation": "Single linear traversal through the array with O(1) average-time hash map lookups and updates.",
+    "spaceComplexity": "O(n)",
+    "spaceComplexityExplanation": "The hash map stores at most n + 1 distinct prefix sum values.",
+    "visualizerUrl": "/visualizers/subarray_sum_equals_k.html",
+    "keyObservations": [
+      "Subarray sum between indices (j, i] equals prefixSum[i] - prefixSum[j]. Setting this to k yields prefixSum[j] = prefixSum[i] - k.",
+      "Always initialize the map with { 0: 1 } to capture subarrays whose sum equals k starting from index 0.",
+      "Because negative numbers can occur, prefix sums are not monotonically increasing, so a sliding window cannot be used; a hash map is required."
+    ],
+    "importantPattern": "Prefix Sum with Frequency Hash Map",
+    "commonMistakes": [
+      "Forgetting the initial base case prefixCount[0] = 1, missing subarrays that sum to k starting at index 0.",
+      "Attempting two-pointer sliding window on arrays with negative numbers."
+    ],
+    "optimalApproach": "Single-Pass Prefix Sum with Frequency Hash Map",
+    "relatedProblems": [
+      {
+        "number": 325,
+        "title": "Maximum Size Subarray Sum Equals K",
+        "difficulty": "Medium"
+      },
+      {
+        "number": 1480,
+        "title": "Running Sum of 1d Array (Prefix Sum)",
+        "difficulty": "Easy"
+      },
+      {
+        "number": 724,
+        "title": "Find Pivot Index (Balanced Split Array)",
+        "difficulty": "Easy"
+      },
+      {
+        "number": 1,
+        "title": "Two Sum",
+        "difficulty": "Easy"
+      }
+    ],
+    "leetcodeUrl": "https://leetcode.com/problems/subarray-sum-equals-k/"
   }
 ];
