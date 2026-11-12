@@ -95,6 +95,11 @@ export const PROBLEMS: DSAProblem[] = [
         "number": 128,
         "title": "Longest Consecutive Sequence",
         "difficulty": "Medium"
+      },
+      {
+        "number": 15,
+        "title": "3Sum",
+        "difficulty": "Medium"
       }
     ],
     "leetcodeUrl": "https://leetcode.com/problems/two-sum/"
@@ -2689,6 +2694,11 @@ export const PROBLEMS: DSAProblem[] = [
         "number": 453,
         "title": "Minimum Moves to Equal Array Elements",
         "difficulty": "Medium"
+      },
+      {
+        "number": 15,
+        "title": "3Sum",
+        "difficulty": "Medium"
       }
     ],
     "leetcodeUrl": "https://leetcode.com/problems/reverse-pairs/"
@@ -2895,5 +2905,110 @@ export const PROBLEMS: DSAProblem[] = [
       }
     ],
     "leetcodeUrl": "https://leetcode.com/problems/subarray-sum-equals-k/"
+  },
+  {
+    "id": "3sum",
+    "number": 15,
+    "title": "3Sum",
+    "slug": "3sum",
+    "difficulty": "Medium",
+    "categories": [
+      "Arrays",
+      "Two Pointers",
+      "Sorting"
+    ],
+    "description": "Given an integer array nums, return all the triplets [nums[i], nums[j], nums[k]] such that i != j, i != k, and j != k, and nums[i] + nums[j] + nums[k] == 0.\n\nNotice that the solution set must not contain duplicate triplets.",
+    "inputFormat": "nums = [int]",
+    "outputFormat": "[[int, int, int]] (list of unique triplets)",
+    "constraints": [
+      "3 <= nums.length <= 3000",
+      "-10^5 <= nums[i] <= 10^5"
+    ],
+    "examples": [
+      {
+        "exampleNumber": 1,
+        "input": "nums = [-1, 0, 1, 2, -1, -4]",
+        "output": "[[-1, -1, 2], [-1, 0, 1]]",
+        "explanation": "nums[0] + nums[1] + nums[2] = (-1) + 0 + 1 = 0.\nnums[1] + nums[2] + nums[4] = 0 + 1 + (-1) = 0.\nnums[0] + nums[3] + nums[4] = (-1) + 2 + (-1) = 0.\nThe distinct triplets are [-1, 0, 1] and [-1, -1, 2].",
+        "type": "official"
+      },
+      {
+        "exampleNumber": 2,
+        "input": "nums = [0, 1, 1]",
+        "output": "[]",
+        "explanation": "The only possible triplet does not sum up to 0.",
+        "type": "official"
+      },
+      {
+        "exampleNumber": 3,
+        "input": "nums = [0, 0, 0]",
+        "output": "[[0, 0, 0]]",
+        "explanation": "The only possible triplet sums up to 0.",
+        "type": "official"
+      }
+    ],
+    "approach": "Sorting + Two Pointers: First sort nums in O(n log n). Loop through nums with anchor index i. Skip duplicate anchors. For each i, set left = i + 1 and right = n - 1. Calculate sum = nums[i] + nums[left] + nums[right]. If sum == 0, record triplet, advance left, retreat right, and skip identical values on both sides. If sum < 0, advance left; if sum > 0, retreat right.",
+    "flowSteps": [
+      {
+        "step": 1,
+        "title": "Sort Array Ascending",
+        "description": "Sort nums in non-decreasing order so negative values sit on the left and positive values sit on the right.",
+        "stateSnapshot": "Arrays.sort(nums)",
+        "highlight": "Sort"
+      },
+      {
+        "step": 2,
+        "title": "Fix Anchor & Skip Duplicate i",
+        "description": "Iterate i from 0 to n - 3. If i > 0 and nums[i] == nums[i - 1], continue to avoid duplicate triplets.",
+        "stateSnapshot": "if (i > 0 && nums[i] == nums[i-1]) continue",
+        "highlight": "Anchor"
+      },
+      {
+        "step": 3,
+        "title": "Converging Two-Pointer Scan",
+        "description": "Set left = i + 1, right = n - 1. If sum == 0, add triplet and skip duplicates; if sum < 0, left++; if sum > 0, right--.",
+        "stateSnapshot": "sum = nums[i] + nums[left] + nums[right]",
+        "highlight": "Pointers"
+      }
+    ],
+    "timeComplexity": "O(n^2)",
+    "timeComplexityExplanation": "O(n log n) sorting plus O(n) anchor iterations with an O(n) two-pointer convergence scan.",
+    "spaceComplexity": "O(1)",
+    "spaceComplexityExplanation": "O(1) auxiliary space beyond the output array and sorting stack space.",
+    "visualizerUrl": "/visualizers/three_sum_visualizer.html",
+    "keyObservations": [
+      "Sorting transforms 3Sum into n Two Sum (sorted) problems, reducing time complexity from O(n^3) to O(n^2).",
+      "To guarantee unique triplets without a HashSet, skip duplicate elements at the anchor (i), the left pointer, and the right pointer.",
+      "If nums[i] > 0, we can terminate early because the remaining sorted elements are also positive and cannot sum to 0."
+    ],
+    "importantPattern": "Sorting + Converging Two Pointers (Lookaround pattern)",
+    "commonMistakes": [
+      "Forgetting to skip duplicates after finding a match, generating identical triplets.",
+      "Incrementing only left or decrementing only right upon finding a match rather than moving both."
+    ],
+    "optimalApproach": "Sorting + Two Pointers with 3-Level Duplicate Pruning",
+    "relatedProblems": [
+      {
+        "number": 1,
+        "title": "Two Sum",
+        "difficulty": "Easy"
+      },
+      {
+        "number": 493,
+        "title": "Reverse Pairs",
+        "difficulty": "Hard"
+      },
+      {
+        "number": 189,
+        "title": "Rotate Array",
+        "difficulty": "Medium"
+      },
+      {
+        "number": 56,
+        "title": "Meeting Rooms (Interval Overlap)",
+        "difficulty": "Medium"
+      }
+    ],
+    "leetcodeUrl": "https://leetcode.com/problems/3sum/"
   }
 ];

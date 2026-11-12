@@ -1,0 +1,1319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>3Sum (LeetCode 15) - Glassmorphic Visualizer</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: radial-gradient(circle at 12% 18%, #0f172a 0%, #030712 100%);
+      color: #e2e8f0;
+      min-height: 100vh;
+    }
+
+    .code-font {
+      font-family: 'Fira Code', monospace;
+    }
+
+    .glass-panel {
+      background: rgba(15, 23, 42, 0.55);
+      backdrop-filter: blur(22px);
+      -webkit-backdrop-filter: blur(22px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      box-shadow: 0 20px 45px -15px rgba(0, 0, 0, 0.65), inset 0 1px 0 0 rgba(255, 255, 255, 0.08);
+    }
+
+    .glass-box {
+      background: rgba(255, 255, 255, 0.04);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      box-shadow: 0 8px 20px -6px rgba(0, 0, 0, 0.5), inset 0 1px 0 0 rgba(255, 255, 255, 0.12);
+    }
+
+    .glass-button {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .glass-button:hover:not(:disabled) {
+      background: rgba(255, 255, 255, 0.15);
+      border-color: rgba(255, 255, 255, 0.28);
+      transform: translateY(-1px);
+    }
+    .glass-button:active:not(:disabled) {
+      transform: translateY(1px);
+    }
+    .glass-button:disabled {
+      opacity: 0.35;
+      cursor: not-allowed;
+    }
+
+    .code-line {
+      transition: all 0.2s ease;
+      border-left: 3px solid transparent;
+      padding: 2px 10px;
+    }
+    .code-line.active-line {
+      background: rgba(56, 189, 248, 0.18);
+      border-left: 3px solid #38bdf8;
+      color: #ffffff;
+      box-shadow: inset 0 0 16px rgba(56, 189, 248, 0.14);
+    }
+
+    /* Custom scrollbars */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: rgba(15, 23, 42, 0.4);
+    }
+    ::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.18);
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(255, 255, 255, 0.3);
+    }
+
+    @keyframes tripletGlow {
+      0%, 100% { transform: scale(1); filter: drop-shadow(0 0 8px rgba(16, 185, 129, 0.55)); }
+      50% { transform: scale(1.05); filter: drop-shadow(0 0 22px rgba(16, 185, 129, 0.95)); }
+    }
+    .triplet-match-anim {
+      animation: tripletGlow 0.55s ease-in-out;
+    }
+
+    @keyframes skipPulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.45; }
+    }
+    .skip-anim {
+      animation: skipPulse 0.45s ease-in-out;
+    }
+  </style>
+</head>
+<body class="p-4 sm:p-6 lg:p-8 flex flex-col items-center justify-start min-h-screen">
+
+  <!-- Ambient Glass Glow Orbs -->
+  <div class="fixed top-8 left-1/5 w-96 h-96 bg-purple-500/12 rounded-full blur-3xl pointer-events-none -z-10"></div>
+  <div class="fixed top-1/3 right-1/5 w-96 h-96 bg-cyan-500/12 rounded-full blur-3xl pointer-events-none -z-10"></div>
+  <div class="fixed bottom-16 left-1/2 w-80 h-80 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none -z-10"></div>
+
+  <!-- MAIN WRAPPER -->
+  <div class="w-full max-w-7xl flex flex-col gap-6">
+
+    <!-- TOP FROSTED-GLASS CONTROLS DECK -->
+    <header class="glass-panel rounded-2xl p-4 sm:p-5 flex flex-col gap-4 sticky top-4 z-50">
+      <div class="flex flex-wrap items-center justify-between gap-4">
+
+        <!-- Title & Algorithm Metadata -->
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-purple-500 via-cyan-500 to-emerald-500 flex items-center justify-center shadow-lg shadow-cyan-500/20 text-white font-bold text-lg">
+            <i class="fa-solid fa-arrows-left-right-to-line"></i>
+          </div>
+          <div>
+            <h1 class="text-lg sm:text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white via-slate-200 to-slate-400">
+              3Sum Triplet Convergence
+            </h1>
+            <p class="text-xs text-slate-400 flex items-center gap-2">
+              <span class="inline-block w-2 h-2 rounded-full bg-cyan-400 animate-pulse"></span>
+              LeetCode 15 • Sorting + Two Pointers • &Omicron;(n&sup2;) Time • &Omicron;(1) Aux Space
+            </p>
+          </div>
+        </div>
+
+        <!-- Center Playback Buttons: Reset, Prev, Start/Stop, Next -->
+        <div class="flex items-center gap-2 sm:gap-3 bg-white/5 p-1.5 rounded-xl border border-white/10 backdrop-blur-md">
+          <button id="btnReset" class="glass-button text-slate-200 hover:text-white px-3 py-2 rounded-lg text-sm flex items-center gap-1.5" title="Reset to Initial State">
+            <i class="fa-solid fa-rotate-left"></i>
+            <span class="hidden sm:inline">Reset</span>
+          </button>
+          <button id="btnPrev" class="glass-button text-slate-200 hover:text-white px-3 py-2 rounded-lg text-sm flex items-center gap-1.5" title="Previous Step (Left Arrow)">
+            <i class="fa-solid fa-backward-step"></i>
+            <span class="hidden sm:inline">Previous</span>
+          </button>
+          <button id="btnPlay" class="glass-button bg-cyan-500/25 text-cyan-200 hover:bg-cyan-500/35 border-cyan-400/50 px-4 py-2 rounded-lg text-sm font-semibold flex items-center gap-2 shadow-lg shadow-cyan-500/15" title="Start / Stop (Spacebar)">
+            <i class="fa-solid fa-play" id="playIcon"></i>
+            <span id="playText">Start</span>
+          </button>
+          <button id="btnNext" class="glass-button text-slate-200 hover:text-white px-3 py-2 rounded-lg text-sm flex items-center gap-1.5" title="Next Step (Right Arrow)">
+            <span class="hidden sm:inline">Next</span>
+            <i class="fa-solid fa-forward-step"></i>
+          </button>
+        </div>
+
+        <!-- Speed & Audio Controls -->
+        <div class="flex items-center gap-2">
+          <a href="/" class="glass-button px-3 py-2 rounded-xl text-xs font-semibold text-slate-300 hover:text-white flex items-center gap-1.5 border border-white/10 hover:border-indigo-500/40 bg-white/5 shrink-0 transition-all active:scale-95 cursor-pointer" title="Return to DSA Atlas Library"><i class="fa-solid fa-arrow-left text-indigo-400"></i><span>DSA Atlas</span></a>
+          <div class="flex items-center bg-white/5 rounded-xl p-1 border border-white/10 text-xs text-slate-300 backdrop-blur-md">
+            <span class="px-2 py-1 text-slate-400"><i class="fa-solid fa-gauge-high mr-1"></i>Speed</span>
+            <button class="speed-btn px-2 py-1 rounded-lg hover:text-white transition" data-speed="1400">0.5x</button>
+            <button class="speed-btn px-2 py-1 rounded-lg bg-cyan-500/30 text-cyan-200 font-semibold transition" data-speed="750">1x</button>
+            <button class="speed-btn px-2 py-1 rounded-lg hover:text-white transition" data-speed="350">2x</button>
+            <button class="speed-btn px-2 py-1 rounded-lg hover:text-white transition" data-speed="140">4x</button>
+          </div>
+          <button id="btnAudio" class="glass-button p-2.5 rounded-xl text-slate-300 hover:text-cyan-300" title="Toggle Sound Effects">
+            <i class="fa-solid fa-volume-high" id="audioIcon"></i>
+          </button>
+        </div>
+
+      </div>
+
+      <!-- Scrubber Slider & Phase Status Bar -->
+      <div class="flex flex-col sm:flex-row items-center gap-3 pt-2 border-t border-white/10">
+        <div class="flex flex-wrap items-center gap-2 text-xs text-slate-300 w-full sm:w-auto shrink-0">
+          <span id="stepCounterBadge" class="code-font px-2.5 py-1 rounded-md bg-white/5 border border-white/10 text-cyan-300">
+            Step: 0 / 0
+          </span>
+          <span id="phaseBadge" class="px-2.5 py-1 rounded-md bg-purple-500/20 border border-purple-400/30 text-purple-200 font-semibold">
+            Ready
+          </span>
+          <span id="tripletsCountBadge" class="px-2.5 py-1 rounded-md bg-emerald-500/20 border border-emerald-400/30 text-emerald-200 font-bold">
+            Triplets: 0
+          </span>
+        </div>
+        <div class="w-full flex items-center gap-3">
+          <input type="range" id="stepScrubber" min="0" max="0" value="0" class="w-full h-1.5 bg-slate-800/80 rounded-lg appearance-none cursor-pointer accent-cyan-400">
+        </div>
+      </div>
+    </header>
+
+    <!-- PRESETS & CUSTOM INPUT BAR -->
+    <section class="glass-panel rounded-2xl p-4 flex flex-wrap items-center justify-between gap-4">
+      <div class="flex flex-wrap items-center gap-3">
+        <label for="presetSelect" class="text-xs uppercase font-semibold text-slate-300 tracking-wider flex items-center gap-1.5">
+          <i class="fa-solid fa-flask text-cyan-400"></i> Test Cases:
+        </label>
+        <select id="presetSelect" class="bg-slate-900/70 border border-white/15 text-xs sm:text-sm text-slate-200 rounded-xl px-3 py-2 outline-none focus:border-cyan-400 backdrop-blur-md">
+          <option value="0">1: LeetCode Ex 1 ([-1, 0, 1, 2, -1, -4] &rarr; 2 triplets)</option>
+          <option value="1">2: LeetCode Ex 2 ([0, 1, 1] &rarr; [])</option>
+          <option value="2">3: LeetCode Ex 3 ([0, 0, 0] &rarr; [[0, 0, 0]])</option>
+          <option value="3">4: Heavy Duplicates ([-2, 0, 0, 2, 2] &rarr; [[-2, 0, 2]])</option>
+          <option value="4">5: Multiple Triplets ([-4, -2, -2, -2, 0, 1, 2, 2, 2, 3, 4] &rarr; 6 triplets)</option>
+          <option value="5">6: All Negative Numbers ([-5, -3, -2, -1] &rarr; [])</option>
+          <option value="6">7: All Positive Numbers ([1, 2, 3, 4, 5] &rarr; [])</option>
+          <option value="7">8: Symmetric Pairs ([-3, -1, 0, 1, 3] &rarr; 2 triplets)</option>
+          <option value="8">9: Four Zeroes ([0, 0, 0, 0] &rarr; [[0, 0, 0]])</option>
+          <option value="9">10: Unsorted Wide Spread ([3, -2, 1, 0, -1, 2, -3] &rarr; 4 triplets)</option>
+        </select>
+      </div>
+
+      <div class="flex items-center gap-2 flex-grow max-w-md">
+        <input type="text" id="customInput" placeholder="Custom array: -1, 0, 1, 2, -1, -4" class="w-full bg-white/5 border border-white/15 rounded-xl px-3 py-2 text-xs text-slate-200 outline-none focus:border-cyan-400 backdrop-blur-md">
+        <button id="btnApplyCustom" class="glass-button text-xs px-4 py-2 rounded-xl text-cyan-300 font-semibold shrink-0">
+          Load Array
+        </button>
+      </div>
+    </section>
+
+    <!-- MAIN VISUAL STAGE & JAVA CODE SECTION -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+      <!-- LEFT: VISUALIZATION ARENA (7 Cols) -->
+      <section class="lg:col-span-7 flex flex-col gap-6">
+
+        <!-- Pointer & Triplet Sum HUD Cards -->
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+
+          <!-- Anchor i -->
+          <div class="glass-panel rounded-xl p-3 flex flex-col justify-between border-purple-400/25">
+            <span class="text-[11px] text-slate-400 uppercase font-semibold flex items-center justify-between">
+              Anchor (i)
+              <span class="w-2 h-2 rounded-full bg-purple-400"></span>
+            </span>
+            <div class="flex items-baseline gap-2 mt-2">
+              <span id="varIVal" class="code-font text-xl font-bold text-purple-300">-</span>
+              <span id="varIIdx" class="text-xs text-slate-400 code-font">idx: -</span>
+            </div>
+            <span class="text-[10px] text-slate-400 mt-1">Fixed First Element</span>
+          </div>
+
+          <!-- Left Pointer -->
+          <div class="glass-panel rounded-xl p-3 flex flex-col justify-between border-cyan-400/25">
+            <span class="text-[11px] text-slate-400 uppercase font-semibold flex items-center justify-between">
+              Left Ptr
+              <span class="w-2 h-2 rounded-full bg-cyan-400"></span>
+            </span>
+            <div class="flex items-baseline gap-2 mt-2">
+              <span id="varLeftVal" class="code-font text-xl font-bold text-cyan-300">-</span>
+              <span id="varLeftIdx" class="text-xs text-slate-400 code-font">idx: -</span>
+            </div>
+            <span class="text-[10px] text-slate-400 mt-1">Moves Right (++)</span>
+          </div>
+
+          <!-- Right Pointer -->
+          <div class="glass-panel rounded-xl p-3 flex flex-col justify-between border-amber-400/25">
+            <span class="text-[11px] text-slate-400 uppercase font-semibold flex items-center justify-between">
+              Right Ptr
+              <span class="w-2 h-2 rounded-full bg-amber-400"></span>
+            </span>
+            <div class="flex items-baseline gap-2 mt-2">
+              <span id="varRightVal" class="code-font text-xl font-bold text-amber-300">-</span>
+              <span id="varRightIdx" class="text-xs text-slate-400 code-font">idx: -</span>
+            </div>
+            <span class="text-[10px] text-slate-400 mt-1">Moves Left (--)</span>
+          </div>
+
+          <!-- Triplet Sum -->
+          <div class="glass-panel rounded-xl p-3 flex flex-col justify-between border-emerald-400/25">
+            <span class="text-[11px] text-slate-400 uppercase font-semibold flex items-center justify-between">
+              Triplet Sum
+              <i class="fa-solid fa-scale-balanced text-emerald-400"></i>
+            </span>
+            <div class="flex items-baseline gap-2 mt-2">
+              <span id="varSum" class="code-font text-2xl font-black text-slate-200">-</span>
+            </div>
+            <span id="varSumStatus" class="text-[10px] text-slate-400 mt-1">Target = 0</span>
+          </div>
+
+        </div>
+
+        <!-- 1. Glassy Boxes + Value Bars Array Stage -->
+        <div class="glass-panel rounded-2xl p-5 flex flex-col gap-4">
+          <div class="flex flex-wrap items-center justify-between text-xs pb-2 border-b border-white/10 gap-2">
+            <span class="font-semibold text-slate-200 uppercase tracking-wider flex items-center gap-1.5">
+              <i class="fa-solid fa-chart-simple text-cyan-400"></i>
+              Array Elements: <span class="code-font text-slate-300">nums[]</span>
+            </span>
+
+            <!-- View Mode Toggle: Bars + Boxes | Bars Only | Boxes Only -->
+            <div class="flex items-center bg-white/5 p-1 rounded-xl border border-white/10 text-[11px] backdrop-blur-md">
+              <button class="view-mode-btn px-2.5 py-1 rounded-lg bg-cyan-500/30 text-cyan-200 font-semibold transition flex items-center gap-1" data-mode="both">
+                <i class="fa-solid fa-layer-group"></i> Bars + Boxes
+              </button>
+              <button class="view-mode-btn px-2.5 py-1 rounded-lg text-slate-300 hover:text-white transition flex items-center gap-1" data-mode="bars">
+                <i class="fa-solid fa-chart-column"></i> Bars Only
+              </button>
+              <button class="view-mode-btn px-2.5 py-1 rounded-lg text-slate-300 hover:text-white transition flex items-center gap-1" data-mode="boxes">
+                <i class="fa-regular fa-square"></i> Boxes Only
+              </button>
+            </div>
+
+            <div class="flex flex-wrap items-center gap-3 text-[11px]">
+              <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded bg-purple-500/40 border border-purple-400 inline-block"></span> i</span>
+              <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded bg-cyan-500/40 border border-cyan-400 inline-block"></span> left</span>
+              <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded bg-amber-500/40 border border-amber-400 inline-block"></span> right</span>
+              <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded bg-emerald-500/40 border border-emerald-400 inline-block"></span> Sum == 0</span>
+            </div>
+          </div>
+
+          <!-- Interactive Glass Boxes & Bi-Directional Magnitude Bars Container -->
+          <div id="arrayStageContainer" class="flex flex-wrap gap-3.5 p-4 min-h-[210px] bg-white/[0.02] rounded-xl border border-white/10 items-center justify-center overflow-x-auto">
+            <!-- Dynamically populated glassy boxes with bi-directional bars -->
+          </div>
+
+          <!-- Triplet Equation & Pointer Action HUD -->
+          <div id="equationBox" class="p-3.5 rounded-xl bg-white/[0.04] border border-white/10 text-xs flex flex-col sm:flex-row items-center justify-between gap-3 backdrop-blur-md">
+            <div class="flex items-center gap-2.5">
+              <i id="equationIcon" class="fa-solid fa-circle-info text-cyan-400 text-base"></i>
+              <span id="equationText" class="text-slate-200">Ready to sort array and search for unique zero-sum triplets.</span>
+            </div>
+            <div id="equationFormulaBadge" class="hidden text-xs code-font px-3 py-1.5 rounded-lg bg-slate-950/60 border border-white/15 text-slate-200 font-semibold shrink-0">
+              <!-- nums[i] + nums[left] + nums[right] = sum -->
+            </div>
+          </div>
+        </div>
+
+        <!-- 2. RESULT TRIPLETS COLLECTION VAULT (List<List<Integer>> result) -->
+        <div class="glass-panel rounded-2xl p-4 sm:p-5 flex flex-col gap-3">
+          <div class="flex flex-wrap items-center justify-between gap-2 pb-2 border-b border-white/10">
+            <div class="flex items-center gap-2">
+              <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
+              <span class="font-bold text-xs uppercase tracking-wider text-slate-200 flex items-center gap-1.5">
+                <i class="fa-solid fa-layer-group text-emerald-400"></i>
+                Discovered Unique Triplets: <code class="font-mono text-emerald-300">List&lt;List&lt;Integer&gt;&gt; result</code>
+              </span>
+            </div>
+            <span class="text-[11px] text-slate-400">
+              Duplicate triplets automatically prevented via pointer skipping
+            </span>
+          </div>
+
+          <!-- Triplet Glass Cards Container -->
+          <div id="tripletsContainer" class="flex flex-wrap gap-3 p-3.5 min-h-[82px] max-h-[180px] overflow-y-auto bg-white/[0.02] rounded-xl border border-white/10 items-center">
+            <!-- Dynamically populated triplet cards -->
+          </div>
+        </div>
+
+      </section>
+
+      <!-- RIGHT: JAVA CODE CONTAINER WITH SYNCHRONIZED LINE HIGHLIGHTING (5 Cols) -->
+      <section class="lg:col-span-5 flex flex-col gap-4">
+        
+        <div class="glass-panel rounded-2xl p-4 flex flex-col h-full">
+          <div class="flex items-center justify-between pb-3 border-b border-white/10 text-xs">
+            <div class="flex items-center gap-2">
+              <div class="flex gap-1.5">
+                <span class="w-3 h-3 rounded-full bg-rose-500/80 inline-block"></span>
+                <span class="w-3 h-3 rounded-full bg-amber-500/80 inline-block"></span>
+                <span class="w-3 h-3 rounded-full bg-emerald-500/80 inline-block"></span>
+              </div>
+              <span class="code-font text-slate-200 font-semibold ml-2">Solution.java</span>
+            </div>
+            <span class="text-[11px] text-cyan-300 bg-cyan-500/15 px-2.5 py-0.5 rounded border border-cyan-400/25 code-font">
+              Sort + Two Pointers
+            </span>
+          </div>
+
+          <!-- Code Box with Line Numbers -->
+          <div id="codeContainer" class="code-font text-xs sm:text-[13px] leading-relaxed text-slate-300 py-3 overflow-y-auto max-h-[590px] flex-grow select-none">
+            <div class="code-line" id="line1"><span class="text-slate-500 mr-2"> 1</span><span class="text-indigo-400 font-semibold">class</span> <span class="text-amber-300">Solution</span> {</div>
+            <div class="code-line" id="line2"><span class="text-slate-500 mr-2"> 2</span>    <span class="text-indigo-400 font-semibold">public</span> List&lt;List&lt;Integer&gt;&gt; <span class="text-cyan-300">threeSum</span>(<span class="text-indigo-400">int</span>[] nums) {</div>
+            <div class="code-line" id="line3"><span class="text-slate-500 mr-2"> 3</span></div>
+            <div class="code-line" id="line4"><span class="text-slate-500 mr-2"> 4</span>        List&lt;List&lt;Integer&gt;&gt; result = <span class="text-indigo-400 font-semibold">new</span> ArrayList&lt;&gt;();</div>
+            <div class="code-line" id="line5"><span class="text-slate-500 mr-2"> 5</span></div>
+            <div class="code-line" id="line6"><span class="text-slate-500 mr-2"> 6</span>        Arrays.sort(nums);</div>
+            <div class="code-line" id="line7"><span class="text-slate-500 mr-2"> 7</span></div>
+            <div class="code-line" id="line8"><span class="text-slate-500 mr-2"> 8</span>        <span class="text-indigo-400 font-semibold">for</span> (<span class="text-indigo-400">int</span> i = <span class="text-rose-400">0</span>; i &lt; nums.length - <span class="text-rose-400">2</span>; i++) {</div>
+            <div class="code-line" id="line9"><span class="text-slate-500 mr-2"> 9</span></div>
+            <div class="code-line" id="line10"><span class="text-slate-500 mr-2">10</span>            <span class="text-slate-500 italic">// Skip duplicate first elements</span></div>
+            <div class="code-line" id="line11"><span class="text-slate-500 mr-2">11</span>            <span class="text-indigo-400 font-semibold">if</span> (i &gt; <span class="text-rose-400">0</span> &amp;&amp; nums[i] == nums[i - <span class="text-rose-400">1</span>]) {</div>
+            <div class="code-line" id="line12"><span class="text-slate-500 mr-2">12</span>                <span class="text-indigo-400 font-semibold">continue</span>;</div>
+            <div class="code-line" id="line13"><span class="text-slate-500 mr-2">13</span>            }</div>
+            <div class="code-line" id="line14"><span class="text-slate-500 mr-2">14</span></div>
+            <div class="code-line" id="line15"><span class="text-slate-500 mr-2">15</span>            <span class="text-indigo-400 font-semibold">int</span> left = i + <span class="text-rose-400">1</span>;</div>
+            <div class="code-line" id="line16"><span class="text-slate-500 mr-2">16</span>            <span class="text-indigo-400 font-semibold">int</span> right = nums.length - <span class="text-rose-400">1</span>;</div>
+            <div class="code-line" id="line17"><span class="text-slate-500 mr-2">17</span></div>
+            <div class="code-line" id="line18"><span class="text-slate-500 mr-2">18</span>            <span class="text-indigo-400 font-semibold">while</span> (left &lt; right) {</div>
+            <div class="code-line" id="line19"><span class="text-slate-500 mr-2">19</span></div>
+            <div class="code-line" id="line20"><span class="text-slate-500 mr-2">20</span>                <span class="text-indigo-400 font-semibold">int</span> sum = nums[i] + nums[left] + nums[right];</div>
+            <div class="code-line" id="line21"><span class="text-slate-500 mr-2">21</span></div>
+            <div class="code-line" id="line22"><span class="text-slate-500 mr-2">22</span>                <span class="text-indigo-400 font-semibold">if</span> (sum == <span class="text-rose-400">0</span>) {</div>
+            <div class="code-line" id="line23"><span class="text-slate-500 mr-2">23</span>                    result.add(Arrays.asList(</div>
+            <div class="code-line" id="line24"><span class="text-slate-500 mr-2">24</span>                        nums[i], nums[left], nums[right]</div>
+            <div class="code-line" id="line25"><span class="text-slate-500 mr-2">25</span>                    ));</div>
+            <div class="code-line" id="line26"><span class="text-slate-500 mr-2">26</span></div>
+            <div class="code-line" id="line27"><span class="text-slate-500 mr-2">27</span>                    left++;</div>
+            <div class="code-line" id="line28"><span class="text-slate-500 mr-2">28</span>                    right--;</div>
+            <div class="code-line" id="line29"><span class="text-slate-500 mr-2">29</span></div>
+            <div class="code-line" id="line30"><span class="text-slate-500 mr-2">30</span>                    <span class="text-slate-500 italic">// Skip duplicate left values</span></div>
+            <div class="code-line" id="line31"><span class="text-slate-500 mr-2">31</span>                    <span class="text-indigo-400 font-semibold">while</span> (left &lt; right &amp;&amp; nums[left] == nums[left - <span class="text-rose-400">1</span>]) {</div>
+            <div class="code-line" id="line32"><span class="text-slate-500 mr-2">32</span>                        left++;</div>
+            <div class="code-line" id="line33"><span class="text-slate-500 mr-2">33</span>                    }</div>
+            <div class="code-line" id="line34"><span class="text-slate-500 mr-2">34</span></div>
+            <div class="code-line" id="line35"><span class="text-slate-500 mr-2">35</span>                    <span class="text-slate-500 italic">// Skip duplicate right values</span></div>
+            <div class="code-line" id="line36"><span class="text-slate-500 mr-2">36</span>                    <span class="text-indigo-400 font-semibold">while</span> (left &lt; right &amp;&amp; nums[right] == nums[right + <span class="text-rose-400">1</span>]) {</div>
+            <div class="code-line" id="line37"><span class="text-slate-500 mr-2">37</span>                        right--;</div>
+            <div class="code-line" id="line38"><span class="text-slate-500 mr-2">38</span>                    }</div>
+            <div class="code-line" id="line39"><span class="text-slate-500 mr-2">39</span>                }</div>
+            <div class="code-line" id="line40"><span class="text-slate-500 mr-2">40</span>                <span class="text-indigo-400 font-semibold">else if</span> (sum &lt; <span class="text-rose-400">0</span>) {</div>
+            <div class="code-line" id="line41"><span class="text-slate-500 mr-2">41</span>                    left++;</div>
+            <div class="code-line" id="line42"><span class="text-slate-500 mr-2">42</span>                }</div>
+            <div class="code-line" id="line43"><span class="text-slate-500 mr-2">43</span>                <span class="text-indigo-400 font-semibold">else</span> {</div>
+            <div class="code-line" id="line44"><span class="text-slate-500 mr-2">44</span>                    right--;</div>
+            <div class="code-line" id="line45"><span class="text-slate-500 mr-2">45</span>                }</div>
+            <div class="code-line" id="line46"><span class="text-slate-500 mr-2">46</span>            }</div>
+            <div class="code-line" id="line47"><span class="text-slate-500 mr-2">47</span>        }</div>
+            <div class="code-line" id="line48"><span class="text-slate-500 mr-2">48</span></div>
+            <div class="code-line" id="line49"><span class="text-slate-500 mr-2">49</span>        <span class="text-indigo-400 font-semibold">return</span> result;</div>
+            <div class="code-line" id="line50"><span class="text-slate-500 mr-2">50</span>    }</div>
+            <div class="code-line" id="line51"><span class="text-slate-500 mr-2">51</span>}</div>
+          </div>
+
+          <!-- Live Step Narrative Box -->
+          <div class="mt-3 p-3 bg-white/[0.04] border border-white/10 rounded-xl flex items-start gap-2.5 backdrop-blur-md">
+            <i class="fa-solid fa-circle-info text-cyan-400 mt-0.5 text-xs"></i>
+            <div class="text-xs text-slate-200 leading-relaxed" id="stepDescription">
+              Ready to execute 3Sum. Click <b>Start</b> or <b>Next</b> to begin.
+            </div>
+          </div>
+
+        </div>
+
+      </section>
+
+    </div>
+
+    <!-- BOTTOM SECTION: PROBLEM STATEMENT & ARCHITECTURAL SUMMARY -->
+    <footer class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-2">
+
+      <!-- Problem Statement Card -->
+      <div class="glass-panel rounded-2xl p-5 flex flex-col gap-3">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <span class="text-amber-400 font-bold"><i class="fa-solid fa-file-lines mr-1.5"></i>Problem Statement</span>
+            <span class="px-2 py-0.5 rounded text-[11px] font-semibold bg-amber-500/20 text-amber-300 border border-amber-400/30">Medium</span>
+          </div>
+          <span class="text-xs text-slate-400 font-mono">LeetCode 15</span>
+        </div>
+
+        <p class="text-xs text-slate-300 leading-relaxed">
+          Given an integer array <code class="font-mono text-cyan-300">nums</code>, return all the triplets <code class="font-mono text-emerald-300">[nums[i], nums[j], nums[k]]</code> such that <code class="font-mono">i != j</code>, <code class="font-mono">i != k</code>, and <code class="font-mono">j != k</code>, and <code class="font-mono text-amber-300 font-semibold">nums[i] + nums[j] + nums[k] == 0</code>.
+          <br><br>
+          <b>Notice:</b> The solution set must <b>not contain duplicate triplets</b>.
+        </p>
+
+        <div class="space-y-2 pt-2 border-t border-white/10 text-xs text-slate-300">
+          <div class="bg-white/[0.03] p-2.5 rounded-lg border border-white/10 font-mono">
+            <span class="text-slate-400">Example 1:</span><br>
+            <b>Input:</b> nums = [-1, 0, 1, 2, -1, -4]<br>
+            <b>Output:</b> <span class="text-emerald-400 font-bold">[[-1, -1, 2], [-1, 0, 1]]</span>
+          </div>
+          <div class="grid grid-cols-2 gap-2">
+            <div class="bg-white/[0.03] p-2.5 rounded-lg border border-white/10 font-mono">
+              <span class="text-slate-400">Example 2:</span><br>
+              <b>Input:</b> [0, 1, 1]<br>
+              <b>Output:</b> <span class="text-rose-400 font-bold">[]</span>
+            </div>
+            <div class="bg-white/[0.03] p-2.5 rounded-lg border border-white/10 font-mono">
+              <span class="text-slate-400">Example 3:</span><br>
+              <b>Input:</b> [0, 0, 0]<br>
+              <b>Output:</b> <span class="text-emerald-400 font-bold">[[0, 0, 0]]</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="text-[11px] text-slate-400">
+          <b>Constraints:</b> <code class="font-mono text-slate-300">3 &le; nums.length &le; 3000</code>, <code class="font-mono text-slate-300">-10<sup>5</sup> &le; nums[i] &le; 10<sup>5</sup></code>.
+        </div>
+      </div>
+
+      <!-- Architectural & Complexity Summary Card -->
+      <div class="glass-panel rounded-2xl p-5 flex flex-col gap-3">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <span class="text-cyan-400 font-bold"><i class="fa-solid fa-brain mr-1.5"></i>Algorithm Summary & Insights</span>
+          </div>
+          <span class="px-2 py-0.5 rounded text-[11px] font-semibold bg-cyan-500/20 text-cyan-200 border border-cyan-400/30">Sorting + Converging Two Pointers</span>
+        </div>
+
+        <div class="space-y-3 text-xs text-slate-300 leading-relaxed">
+          <div class="p-3 bg-cyan-950/25 border border-cyan-400/20 rounded-xl">
+            <b class="text-cyan-300 flex items-center gap-1.5 mb-1">
+              <i class="fa-solid fa-arrow-up-wide-short"></i> Why Sort First (<code class="font-mono">Arrays.sort(nums)</code>)?
+            </b>
+            Sorting places negative values on the left and positive values on the right. Fixing anchor <code class="font-mono text-purple-300">nums[i]</code> reduces the remaining search to a linear two-pointer scan where <code class="font-mono text-cyan-300">sum &lt; 0</code> cleanly dictates <code class="font-mono">left++</code> (increase sum) and <code class="font-mono text-amber-300">sum &gt; 0</code> dictates <code class="font-mono">right--</code> (decrease sum).
+          </div>
+
+          <div class="p-3 bg-purple-950/25 border border-purple-400/20 rounded-xl">
+            <b class="text-purple-300 flex items-center gap-1.5 mb-1">
+              <i class="fa-solid fa-filter"></i> Three-Level Duplicate Elimination:
+            </b>
+            1. <b>Anchor Guard:</b> <code class="font-mono">if (i &gt; 0 &amp;&amp; nums[i] == nums[i - 1]) continue;</code><br>
+            2. <b>Left Guard:</b> After finding a valid triplet, advance <code class="font-mono">left++</code> past identical neighbors.<br>
+            3. <b>Right Guard:</b> Retreat <code class="font-mono">right--</code> past identical neighbors.
+          </div>
+
+          <div class="grid grid-cols-2 gap-3 pt-1">
+            <div class="p-2.5 bg-white/[0.03] rounded-lg border border-white/10">
+              <span class="text-[11px] text-slate-400 uppercase font-semibold">Time Complexity</span>
+              <div class="text-sm font-bold text-emerald-400 font-mono mt-0.5">&Omicron;(N&sup2;)</div>
+              <p class="text-[10px] text-slate-400 mt-0.5">&Omicron;(N log N) sorting + &Omicron;(N&sup2;) nested anchor & two-pointer sweep.</p>
+            </div>
+            <div class="p-2.5 bg-white/[0.03] rounded-lg border border-white/10">
+              <span class="text-[11px] text-slate-400 uppercase font-semibold">Space Complexity</span>
+              <div class="text-sm font-bold text-cyan-400 font-mono mt-0.5">&Omicron;(1) / &Omicron;(log N)</div>
+              <p class="text-[10px] text-slate-400 mt-0.5">In-place pointer variables (excluding output list & Java Dual-Pivot Quicksort stack).</p>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+    </footer>
+
+  </div>
+
+  <!-- JAVASCRIPT SIMULATION ENGINE -->
+  <script>
+    // TEST CASE PRESETS
+    const PRESETS = [
+      { name: "1: LeetCode Ex 1 ([-1, 0, 1, 2, -1, -4])", nums: [-1, 0, 1, 2, -1, -4] },
+      { name: "2: LeetCode Ex 2 ([0, 1, 1])", nums: [0, 1, 1] },
+      { name: "3: LeetCode Ex 3 ([0, 0, 0])", nums: [0, 0, 0] },
+      { name: "4: Heavy Duplicates ([-2, 0, 0, 2, 2])", nums: [-2, 0, 0, 2, 2] },
+      { name: "5: Multiple Triplets ([-4, -2, -2, -2, 0, 1, 2, 2, 2, 3, 4])", nums: [-4, -2, -2, -2, 0, 1, 2, 2, 2, 3, 4] },
+      { name: "6: All Negative Numbers ([-5, -3, -2, -1])", nums: [-5, -3, -2, -1] },
+      { name: "7: All Positive Numbers ([1, 2, 3, 4, 5])", nums: [1, 2, 3, 4, 5] },
+      { name: "8: Symmetric Pairs ([-3, -1, 0, 1, 3])", nums: [-3, -1, 0, 1, 3] },
+      { name: "9: Four Zeroes ([0, 0, 0, 0])", nums: [0, 0, 0, 0] },
+      { name: "10: Unsorted Wide Spread ([3, -2, 1, 0, -1, 2, -3])", nums: [3, -2, 1, 0, -1, 2, -3] }
+    ];
+
+    // APPLICATION STATE
+    let currentNums = [...PRESETS[0].nums];
+    let steps = [];
+    let currentStepIdx = 0;
+    let isPlaying = false;
+    let playInterval = null;
+    let playSpeed = 750;
+    let audioEnabled = true;
+    let viewMode = 'both'; // 'both' | 'bars' | 'boxes'
+
+    // WEB AUDIO SYNTHESIZER
+    let audioCtx = null;
+    function initAudio() {
+      if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      }
+    }
+    function playBeep(freq = 440, type = 'sine', duration = 0.08, vol = 0.04) {
+      if (!audioEnabled) return;
+      try {
+        initAudio();
+        if (audioCtx.state === 'suspended') {
+          audioCtx.resume();
+        }
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = type;
+        osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+        gain.gain.setValueAtTime(vol, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + duration);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + duration);
+      } catch (e) {}
+    }
+
+    // DOM REFERENCES
+    const btnPlay = document.getElementById('btnPlay');
+    const playIcon = document.getElementById('playIcon');
+    const playText = document.getElementById('playText');
+    const btnPrev = document.getElementById('btnPrev');
+    const btnNext = document.getElementById('btnNext');
+    const btnReset = document.getElementById('btnReset');
+    const btnAudio = document.getElementById('btnAudio');
+    const audioIcon = document.getElementById('audioIcon');
+    const presetSelect = document.getElementById('presetSelect');
+    const customInput = document.getElementById('customInput');
+    const btnApplyCustom = document.getElementById('btnApplyCustom');
+    const stepScrubber = document.getElementById('stepScrubber');
+    const stepCounterBadge = document.getElementById('stepCounterBadge');
+    const phaseBadge = document.getElementById('phaseBadge');
+    const tripletsCountBadge = document.getElementById('tripletsCountBadge');
+
+    const varIVal = document.getElementById('varIVal');
+    const varIIdx = document.getElementById('varIIdx');
+    const varLeftVal = document.getElementById('varLeftVal');
+    const varLeftIdx = document.getElementById('varLeftIdx');
+    const varRightVal = document.getElementById('varRightVal');
+    const varRightIdx = document.getElementById('varRightIdx');
+    const varSum = document.getElementById('varSum');
+    const varSumStatus = document.getElementById('varSumStatus');
+
+    const arrayStageContainer = document.getElementById('arrayStageContainer');
+    const equationBox = document.getElementById('equationBox');
+    const equationIcon = document.getElementById('equationIcon');
+    const equationText = document.getElementById('equationText');
+    const equationFormulaBadge = document.getElementById('equationFormulaBadge');
+    const tripletsContainer = document.getElementById('tripletsContainer');
+    const codeContainer = document.getElementById('codeContainer');
+    const stepDescription = document.getElementById('stepDescription');
+
+    // STEP-BY-STEP EXECUTION TRACE GENERATOR
+    function generateSteps(rawNums) {
+      const trace = [];
+      const unsorted = [...rawNums];
+      const n = unsorted.length;
+      const result = [];
+
+      // Step 1: Initialize result list
+      trace.push({
+        line: 4,
+        phase: "Init Result",
+        nums: [...unsorted],
+        isSorted: false,
+        i: -1,
+        left: -1,
+        right: -1,
+        sum: null,
+        result: [],
+        desc: `Initialized empty list <span class="code-font text-emerald-300">List&lt;List&lt;Integer&gt;&gt; result</span> to store unique zero-sum triplets.`,
+        soundFreq: 340
+      });
+
+      // Step 2: Arrays.sort(nums)
+      const nums = [...unsorted].sort((a, b) => a - b);
+      trace.push({
+        line: 6,
+        phase: "Arrays.sort()",
+        nums: [...nums],
+        isSorted: true,
+        i: -1,
+        left: -1,
+        right: -1,
+        sum: null,
+        result: [],
+        desc: `Sorted array ascending: <span class="code-font text-cyan-300">[${nums.join(', ')}]</span>. Negative values are now on the left and positive values on the right.`,
+        soundFreq: 420
+      });
+
+      // Outer loop: for (int i = 0; i < nums.length - 2; i++)
+      for (let i = 0; i < n - 2; i++) {
+        trace.push({
+          line: 8,
+          phase: `Anchor i = ${i}`,
+          nums: [...nums],
+          isSorted: true,
+          i,
+          left: -1,
+          right: -1,
+          sum: null,
+          result: result.map(r => [...r]),
+          desc: `Outer loop iteration <span class="code-font text-purple-300 font-bold">i = ${i}</span> (value <span class="code-font text-purple-200 font-bold">${nums[i]}</span>).`,
+          soundFreq: 460
+        });
+
+        // Check duplicate anchor
+        if (i > 0 && nums[i] === nums[i - 1]) {
+          trace.push({
+            line: 11,
+            phase: "Skip Duplicate i",
+            nums: [...nums],
+            isSorted: true,
+            i,
+            left: -1,
+            right: -1,
+            sum: null,
+            skippedIdx: i,
+            result: result.map(r => [...r]),
+            desc: `Duplicate anchor detected: <span class="code-font text-rose-300 font-bold">nums[${i}] (${nums[i]}) == nums[${i - 1}] (${nums[i - 1]})</span>. Executing <span class="code-font text-amber-300">continue</span> to avoid duplicate triplets.`,
+            soundFreq: 310
+          });
+          continue;
+        }
+
+        let left = i + 1;
+        let right = n - 1;
+
+        trace.push({
+          line: 15,
+          phase: "Init Left Ptr",
+          nums: [...nums],
+          isSorted: true,
+          i,
+          left,
+          right: -1,
+          sum: null,
+          result: result.map(r => [...r]),
+          desc: `Initialized left pointer: <span class="code-font text-cyan-300 font-bold">left = i + 1 = ${left}</span> (value <span class="code-font text-cyan-200 font-bold">${nums[left]}</span>).`,
+          soundFreq: 480
+        });
+
+        trace.push({
+          line: 16,
+          phase: "Init Right Ptr",
+          nums: [...nums],
+          isSorted: true,
+          i,
+          left,
+          right,
+          sum: null,
+          result: result.map(r => [...r]),
+          desc: `Initialized right pointer: <span class="code-font text-amber-300 font-bold">right = nums.length - 1 = ${right}</span> (value <span class="code-font text-amber-200 font-bold">${nums[right]}</span>).`,
+          soundFreq: 510
+        });
+
+        while (left < right) {
+          const sum = nums[i] + nums[left] + nums[right];
+
+          trace.push({
+            line: 20,
+            phase: "Compute Sum",
+            nums: [...nums],
+            isSorted: true,
+            i,
+            left,
+            right,
+            sum,
+            result: result.map(r => [...r]),
+            desc: `Computed triplet sum: <span class="code-font text-purple-300">${nums[i]}</span> + <span class="code-font text-cyan-300">${nums[left]}</span> + <span class="code-font text-amber-300">${nums[right]}</span> = <span class="code-font font-bold ${sum === 0 ? 'text-emerald-400' : 'text-slate-200'}">${sum}</span>.`,
+            soundFreq: sum === 0 ? 740 : 540
+          });
+
+          if (sum === 0) {
+            const triplet = [nums[i], nums[left], nums[right]];
+            result.push(triplet);
+
+            trace.push({
+              line: 23,
+              phase: "Triplet Found!",
+              nums: [...nums],
+              isSorted: true,
+              i,
+              left,
+              right,
+              sum: 0,
+              isMatch: true,
+              result: result.map(r => [...r]),
+              desc: `<span class="text-emerald-400 font-bold"><i class="fa-solid fa-circle-check mr-1"></i>Zero-Sum Match!</span> Added <span class="code-font text-emerald-300 font-bold">[${triplet.join(', ')}]</span> to <span class="code-font">result</span>.`,
+              soundFreq: 880
+            });
+
+            left++;
+
+            trace.push({
+              line: 27,
+              phase: "left++",
+              nums: [...nums],
+              isSorted: true,
+              i,
+              left,
+              right,
+              sum: null,
+              moveDir: 'left',
+              result: result.map(r => [...r]),
+              desc: `Executing line 27: incremented <span class="code-font text-cyan-300 font-bold">left++ &rarr; ${left}</span> (right remains at <span class="code-font text-amber-300">${right}</span>).`,
+              soundFreq: 560
+            });
+
+            right--;
+
+            trace.push({
+              line: 28,
+              phase: "right--",
+              nums: [...nums],
+              isSorted: true,
+              i,
+              left,
+              right,
+              sum: null,
+              moveDir: 'right',
+              result: result.map(r => [...r]),
+              desc: `Executing line 28: decremented <span class="code-font text-amber-300 font-bold">right-- &rarr; ${right}</span>.`,
+              soundFreq: 600
+            });
+
+            // Skip duplicate left values
+            while (left < right && nums[left] === nums[left - 1]) {
+              const dupLeft = left;
+              left++;
+              trace.push({
+                line: 32,
+                phase: "Skip Dup Left",
+                nums: [...nums],
+                isSorted: true,
+                i,
+                left,
+                right,
+                sum: null,
+                skippedIdx: dupLeft,
+                result: result.map(r => [...r]),
+                desc: `Skipped duplicate left value at index ${dupLeft} (<span class="code-font text-cyan-300">${nums[dupLeft]} == ${nums[dupLeft - 1]}</span>). Advanced <span class="code-font text-cyan-300">left &rarr; ${left}</span>.`,
+                soundFreq: 360
+              });
+            }
+
+            // Skip duplicate right values
+            while (left < right && nums[right] === nums[right + 1]) {
+              const dupRight = right;
+              right--;
+              trace.push({
+                line: 37,
+                phase: "Skip Dup Right",
+                nums: [...nums],
+                isSorted: true,
+                i,
+                left,
+                right,
+                sum: null,
+                skippedIdx: dupRight,
+                result: result.map(r => [...r]),
+                desc: `Skipped duplicate right value at index ${dupRight} (<span class="code-font text-amber-300">${nums[dupRight]} == ${nums[dupRight + 1]}</span>). Retreated <span class="code-font text-amber-300">right &rarr; ${right}</span>.`,
+                soundFreq: 360
+              });
+            }
+
+          } else if (sum < 0) {
+            left++;
+            trace.push({
+              line: 41,
+              phase: "Sum < 0 (left++)",
+              nums: [...nums],
+              isSorted: true,
+              i,
+              left,
+              right,
+              sum,
+              moveDir: 'left',
+              result: result.map(r => [...r]),
+              desc: `Since <span class="code-font text-cyan-300">sum (${sum}) &lt; 0</span>, we need a larger value. Incremented <span class="code-font text-cyan-300 font-bold">left++ &rarr; ${left}</span>.`,
+              soundFreq: 490
+            });
+          } else {
+            right--;
+            trace.push({
+              line: 44,
+              phase: "Sum > 0 (right--)",
+              nums: [...nums],
+              isSorted: true,
+              i,
+              left,
+              right,
+              sum,
+              moveDir: 'right',
+              result: result.map(r => [...r]),
+              desc: `Since <span class="code-font text-amber-300">sum (${sum}) &gt; 0</span>, we need a smaller value. Decremented <span class="code-font text-amber-300 font-bold">right-- &rarr; ${right}</span>.`,
+              soundFreq: 450
+            });
+          }
+        }
+      }
+
+      // Final return
+      trace.push({
+        line: 49,
+        phase: "Complete",
+        nums: [...nums],
+        isSorted: true,
+        i: -1,
+        left: -1,
+        right: -1,
+        sum: null,
+        result: result.map(r => [...r]),
+        desc: `<span class="text-emerald-400 font-bold text-sm"><i class="fa-solid fa-trophy mr-1.5"></i>Execution Complete!</span> Returned <span class="code-font text-emerald-300 font-bold">${result.length}</span> unique zero-sum triplet(s).`,
+        soundFreq: 960
+      });
+
+      return trace;
+    }
+
+    // LOCALIZED ZERO-JUMP CODE LINE HIGHLIGHTER
+    function highlightCodeLine(lineNum) {
+      document.querySelectorAll('.code-line').forEach(el => el.classList.remove('active-line'));
+      const activeEl = document.getElementById(`line${lineNum}`);
+      if (activeEl) {
+        activeEl.classList.add('active-line');
+
+        const containerTop = codeContainer.scrollTop;
+        const containerBottom = containerTop + codeContainer.clientHeight;
+        const elTop = activeEl.offsetTop - codeContainer.offsetTop;
+        const elBottom = elTop + activeEl.clientHeight;
+
+        if (elTop < containerTop + 24) {
+          codeContainer.scrollTo({ top: Math.max(0, elTop - 24), behavior: 'smooth' });
+        } else if (elBottom > containerBottom - 24) {
+          codeContainer.scrollTo({ top: elBottom - codeContainer.clientHeight + 24, behavior: 'smooth' });
+        }
+      }
+    }
+
+    // RENDER CURRENT STEP
+    function renderStep(idx) {
+      if (idx < 0 || idx >= steps.length) return;
+      const step = steps[idx];
+      const n = step.nums.length;
+
+      // Top Deck Badges & Scrubber
+      stepCounterBadge.textContent = `Step: ${idx + 1} / ${steps.length}`;
+      phaseBadge.textContent = step.phase;
+      tripletsCountBadge.textContent = `Triplets: ${step.result.length}`;
+      stepScrubber.max = steps.length - 1;
+      stepScrubber.value = idx;
+
+      // HUD Cards
+      if (step.i >= 0 && step.i < n) {
+        varIVal.textContent = step.nums[step.i];
+        varIIdx.textContent = `idx: ${step.i}`;
+      } else {
+        varIVal.textContent = '-';
+        varIIdx.textContent = 'idx: -';
+      }
+
+      if (step.left >= 0 && step.left < n) {
+        varLeftVal.textContent = step.nums[step.left];
+        varLeftIdx.textContent = `idx: ${step.left}`;
+      } else {
+        varLeftVal.textContent = '-';
+        varLeftIdx.textContent = 'idx: -';
+      }
+
+      if (step.right >= 0 && step.right < n) {
+        varRightVal.textContent = step.nums[step.right];
+        varRightIdx.textContent = `idx: ${step.right}`;
+      } else {
+        varRightVal.textContent = '-';
+        varRightIdx.textContent = 'idx: -';
+      }
+
+      if (step.sum !== null && step.sum !== undefined) {
+        varSum.textContent = step.sum;
+        if (step.sum === 0) {
+          varSum.className = "code-font text-2xl font-black text-emerald-400";
+          varSumStatus.textContent = "Exact Match (0)!";
+          varSumStatus.className = "text-[10px] text-emerald-300 font-bold mt-1";
+        } else if (step.sum < 0) {
+          varSum.className = "code-font text-2xl font-black text-cyan-300";
+          varSumStatus.textContent = "Too Small (< 0)";
+          varSumStatus.className = "text-[10px] text-cyan-300 mt-1";
+        } else {
+          varSum.className = "code-font text-2xl font-black text-amber-300";
+          varSumStatus.textContent = "Too Large (> 0)";
+          varSumStatus.className = "text-[10px] text-amber-300 mt-1";
+        }
+      } else {
+        varSum.textContent = '-';
+        varSum.className = "code-font text-2xl font-black text-slate-300";
+        varSumStatus.textContent = "Target = 0";
+        varSumStatus.className = "text-[10px] text-slate-400 mt-1";
+      }
+
+      // Narrative Description
+      stepDescription.innerHTML = step.desc;
+
+      // Render Glassy Boxes with Bi-Directional Value Bars
+      arrayStageContainer.innerHTML = '';
+      const maxAbs = Math.max(1, ...step.nums.map(v => Math.abs(v)));
+
+      step.nums.forEach((val, index) => {
+        const isI = (step.i === index);
+        const isLeft = (step.left === index);
+        const isRight = (step.right === index);
+        const isSkipped = (step.skippedIdx === index);
+        const isMatchedElement = step.isMatch && (isI || isLeft || isRight);
+
+        // Compute proportional bar height
+        const maxBarH = viewMode === 'bars' ? 68 : 54;
+        const barPx = val === 0 ? 6 : Math.max(14, Math.min(maxBarH, Math.round((Math.abs(val) / maxAbs) * maxBarH)));
+        const barWidthClass = viewMode === 'bars' ? 'w-14' : 'w-11';
+
+        let boxClasses = "glass-box text-slate-200";
+        let pointerBadges = [];
+
+        if (isI) {
+          pointerBadges.push('<span class="text-[10px] px-1.5 py-0.5 rounded bg-purple-500/35 border border-purple-400/50 text-purple-200 font-bold">i</span>');
+        }
+        if (isLeft) {
+          pointerBadges.push('<span class="text-[10px] px-1.5 py-0.5 rounded bg-cyan-500/35 border border-cyan-400/50 text-cyan-200 font-bold">L</span>');
+        }
+        if (isRight) {
+          pointerBadges.push('<span class="text-[10px] px-1.5 py-0.5 rounded bg-amber-500/35 border border-amber-400/50 text-amber-200 font-bold">R</span>');
+        }
+        if (isSkipped) {
+          pointerBadges.push('<span class="text-[10px] px-1.5 py-0.5 rounded bg-rose-500/35 border border-rose-400/50 text-rose-200 font-bold skip-anim">Skip</span>');
+        }
+
+        if (isMatchedElement) {
+          boxClasses = "bg-emerald-500/20 border-emerald-400 text-emerald-100 ring-2 ring-emerald-400/60 scale-105 shadow-lg shadow-emerald-500/25 triplet-match-anim";
+        } else if (isI) {
+          boxClasses = "bg-purple-500/20 border-purple-400/70 text-purple-100 ring-2 ring-purple-400/40 scale-105 shadow-lg shadow-purple-500/20";
+        } else if (isLeft && isRight) {
+          boxClasses = "bg-rose-500/15 border-rose-400/50 text-rose-200";
+        } else if (isLeft) {
+          boxClasses = "bg-cyan-500/20 border-cyan-400/70 text-cyan-100 ring-2 ring-cyan-400/40 scale-105 shadow-lg shadow-cyan-500/20";
+        } else if (isRight) {
+          boxClasses = "bg-amber-500/20 border-amber-400/70 text-amber-100 ring-2 ring-amber-400/40 scale-105 shadow-lg shadow-amber-500/20";
+        } else if (isSkipped) {
+          boxClasses = "bg-rose-500/15 border-rose-400/50 text-rose-200 opacity-75";
+        } else if (step.i !== -1 && index < step.i) {
+          boxClasses = "glass-box opacity-45 text-slate-400";
+        }
+
+        // Bi-directional bar rendering (above center line for >0, below for <0)
+        const halfHClass = viewMode === 'bars' ? 'h-[68px]' : 'h-[54px]';
+        let topBarHtml = `<div class="${halfHClass} w-full flex items-end justify-center"></div>`;
+        let bottomBarHtml = `<div class="${halfHClass} w-full flex items-start justify-center"></div>`;
+
+        if (val > 0) {
+          const fill = isMatchedElement
+            ? 'from-emerald-500/90 to-emerald-300 border-emerald-300/60'
+            : isLeft
+              ? 'from-cyan-500/90 to-cyan-300 border-cyan-300/60'
+              : isRight
+                ? 'from-amber-500/90 to-amber-300 border-amber-300/60'
+                : 'from-cyan-500/75 to-cyan-300/90 border-cyan-300/40';
+          topBarHtml = `
+            <div class="${halfHClass} w-full flex items-end justify-center">
+              <div class="${barWidthClass} rounded-t-lg border-t border-x bg-gradient-to-t ${fill} shadow-md transition-all duration-300 flex items-center justify-center" style="height: ${barPx}px;">
+              </div>
+            </div>
+          `;
+        } else if (val < 0) {
+          const fill = isMatchedElement
+            ? 'from-emerald-500/90 to-emerald-300 border-emerald-300/60'
+            : isI
+              ? 'from-purple-500/90 to-purple-300 border-purple-300/60'
+              : 'from-rose-500/75 to-rose-300/90 border-rose-300/40';
+          bottomBarHtml = `
+            <div class="${halfHClass} w-full flex items-start justify-center">
+              <div class="${barWidthClass} rounded-b-lg border-b border-x bg-gradient-to-b ${fill} shadow-md transition-all duration-300 flex items-center justify-center" style="height: ${barPx}px;">
+              </div>
+            </div>
+          `;
+        } else {
+          topBarHtml = `
+            <div class="${halfHClass} w-full flex items-end justify-center">
+              <div class="${barWidthClass} h-1.5 rounded bg-slate-300/70"></div>
+            </div>
+          `;
+        }
+
+        const card = document.createElement('div');
+        if (viewMode === 'boxes') {
+          card.className = `flex flex-col items-center justify-between p-3.5 rounded-xl border min-w-[78px] min-h-[96px] transition-all duration-200 backdrop-blur-md ${boxClasses}`;
+          card.innerHTML = `
+            <div class="flex items-center justify-between w-full text-[11px] text-slate-400 font-mono min-h-[20px]">
+              <span>[${index}]</span>
+              <div class="flex gap-1">${pointerBadges.join('')}</div>
+            </div>
+            <span class="code-font text-xl font-extrabold my-2">${val}</span>
+            <span class="text-[10px] text-slate-400 font-mono">${val > 0 ? '+pos' : val < 0 ? '-neg' : 'zero'}</span>
+          `;
+        } else if (viewMode === 'bars') {
+          const barContainerRing = isMatchedElement
+            ? 'ring-2 ring-emerald-400/60 bg-emerald-500/10 border-emerald-400/50 scale-105'
+            : isI
+              ? 'ring-2 ring-purple-400/50 bg-purple-500/10 border-purple-400/50 scale-105'
+              : isLeft
+                ? 'ring-2 ring-cyan-400/50 bg-cyan-500/10 border-cyan-400/50 scale-105'
+                : isRight
+                  ? 'ring-2 ring-amber-400/50 bg-amber-500/10 border-amber-400/50 scale-105'
+                  : 'border-white/5 bg-white/[0.015]';
+          card.className = `flex flex-col items-center justify-between p-2.5 rounded-xl border min-w-[76px] transition-all duration-200 ${barContainerRing}`;
+          card.innerHTML = `
+            <div class="flex items-center justify-between w-full text-[10px] text-slate-400 font-mono mb-1 min-h-[20px]">
+              <span>[${index}]</span>
+              <div class="flex gap-0.5">${pointerBadges.join('')}</div>
+            </div>
+            <div class="w-full flex flex-col items-center my-1">
+              ${topBarHtml}
+              <div class="w-full h-[1.5px] bg-white/25"></div>
+              ${bottomBarHtml}
+            </div>
+            <span class="code-font text-base font-extrabold mt-1 text-slate-100">${val}</span>
+          `;
+        } else {
+          // Combined Bars + Boxes
+          card.className = `flex flex-col items-center justify-between p-3 rounded-xl border min-w-[78px] transition-all duration-200 backdrop-blur-md ${boxClasses}`;
+          card.innerHTML = `
+            <div class="flex items-center justify-between w-full text-[10px] text-slate-400 font-mono mb-1 min-h-[20px]">
+              <span>[${index}]</span>
+              <div class="flex gap-0.5">${pointerBadges.join('')}</div>
+            </div>
+
+            <!-- Bi-directional Magnitude Bar Container -->
+            <div class="w-full flex flex-col items-center my-1">
+              ${topBarHtml}
+              <div class="w-full h-[1px] bg-white/20"></div>
+              ${bottomBarHtml}
+            </div>
+
+            <span class="code-font text-base font-extrabold mt-1">${val}</span>
+          `;
+        }
+        arrayStageContainer.appendChild(card);
+      });
+
+      // Equation Box Update
+      if (step.sum !== null && step.sum !== undefined && step.i >= 0 && step.left >= 0 && step.right >= 0) {
+        equationFormulaBadge.classList.remove('hidden');
+        equationFormulaBadge.innerHTML = `
+          (<span class="text-purple-300 font-bold">${step.nums[step.i]}</span>) + 
+          (<span class="text-cyan-300 font-bold">${step.nums[step.left]}</span>) + 
+          (<span class="text-amber-300 font-bold">${step.nums[step.right]}</span>) = 
+          <span class="${step.sum === 0 ? 'text-emerald-300' : 'text-white'} font-bold">${step.sum}</span>
+        `;
+
+        if (step.sum === 0) {
+          equationIcon.className = "fa-solid fa-circle-check text-emerald-400 text-base";
+          equationText.innerHTML = `Zero-sum triplet verified! Recording triplet and converging pointers inward.`;
+          equationBox.className = "p-3.5 rounded-xl bg-emerald-500/15 border border-emerald-400/35 text-xs flex flex-col sm:flex-row items-center justify-between gap-3 backdrop-blur-md";
+        } else if (step.sum < 0) {
+          equationIcon.className = "fa-solid fa-arrow-right text-cyan-400 text-base";
+          equationText.innerHTML = `Sum is negative (${step.sum} &lt; 0) &rarr; Move <span class="text-cyan-300 font-bold">left++</span> to increase sum.`;
+          equationBox.className = "p-3.5 rounded-xl bg-cyan-500/10 border border-cyan-400/25 text-xs flex flex-col sm:flex-row items-center justify-between gap-3 backdrop-blur-md";
+        } else {
+          equationIcon.className = "fa-solid fa-arrow-left text-amber-400 text-base";
+          equationText.innerHTML = `Sum is positive (${step.sum} &gt; 0) &rarr; Move <span class="text-amber-300 font-bold">right--</span> to decrease sum.`;
+          equationBox.className = "p-3.5 rounded-xl bg-amber-500/10 border border-amber-400/25 text-xs flex flex-col sm:flex-row items-center justify-between gap-3 backdrop-blur-md";
+        }
+      } else {
+        equationFormulaBadge.classList.add('hidden');
+        equationIcon.className = "fa-solid fa-circle-info text-cyan-400 text-base";
+        equationText.innerHTML = step.desc;
+        equationBox.className = "p-3.5 rounded-xl bg-white/[0.04] border border-white/10 text-xs flex flex-col sm:flex-row items-center justify-between gap-3 backdrop-blur-md";
+      }
+
+      // Render Discovered Triplets Vault
+      tripletsContainer.innerHTML = '';
+      if (step.result.length === 0) {
+        tripletsContainer.innerHTML = '<span class="text-xs text-slate-400 italic">No zero-sum triplets collected yet.</span>';
+      } else {
+        step.result.forEach((trip, tIdx) => {
+          const isNewest = step.isMatch && (tIdx === step.result.length - 1);
+          const card = document.createElement('div');
+          card.className = `px-3.5 py-2 rounded-xl border text-xs code-font flex items-center gap-2 backdrop-blur-md transition-all ${
+            isNewest
+              ? 'bg-emerald-500/25 border-emerald-400 text-emerald-100 ring-2 ring-emerald-400/50 font-bold triplet-match-anim'
+              : 'glass-box border-emerald-500/30 text-emerald-200'
+          }`;
+          card.innerHTML = `
+            <span class="text-[10px] text-emerald-400/80 font-sans font-semibold">#${tIdx + 1}</span>
+            <span>[<span class="text-purple-300 font-bold">${trip[0]}</span>, <span class="text-cyan-300 font-bold">${trip[1]}</span>, <span class="text-amber-300 font-bold">${trip[2]}</span>]</span>
+          `;
+          tripletsContainer.appendChild(card);
+        });
+      }
+
+      // Highlight active Java code line
+      highlightCodeLine(step.line);
+
+      // Play feedback tone
+      if (step.soundFreq) {
+        playBeep(step.soundFreq, 'sine', 0.08, 0.04);
+      }
+    }
+
+    // PLAYBACK CONTROLS
+    function setPlaying(playing) {
+      isPlaying = playing;
+      if (isPlaying) {
+        playIcon.className = "fa-solid fa-pause";
+        playText.textContent = "Stop";
+        btnPlay.classList.add('bg-rose-500/25', 'text-rose-200', 'border-rose-400/50');
+        btnPlay.classList.remove('bg-cyan-500/25', 'text-cyan-200', 'border-cyan-400/50');
+
+        playInterval = setInterval(() => {
+          if (currentStepIdx < steps.length - 1) {
+            currentStepIdx++;
+            renderStep(currentStepIdx);
+          } else {
+            setPlaying(false);
+          }
+        }, playSpeed);
+      } else {
+        playIcon.className = "fa-solid fa-play";
+        playText.textContent = "Start";
+        btnPlay.classList.remove('bg-rose-500/25', 'text-rose-200', 'border-rose-400/50');
+        btnPlay.classList.add('bg-cyan-500/25', 'text-cyan-200', 'border-cyan-400/50');
+        if (playInterval) {
+          clearInterval(playInterval);
+          playInterval = null;
+        }
+      }
+    }
+
+    function initSimulation(numsArray) {
+      setPlaying(false);
+      currentNums = [...numsArray];
+      steps = generateSteps(currentNums);
+      currentStepIdx = 0;
+      stepScrubber.max = steps.length - 1;
+      stepScrubber.value = 0;
+      renderStep(0);
+    }
+
+    // EVENT LISTENERS
+    btnPlay.addEventListener('click', () => {
+      if (currentStepIdx >= steps.length - 1) {
+        currentStepIdx = 0;
+        renderStep(0);
+      }
+      setPlaying(!isPlaying);
+    });
+
+    btnNext.addEventListener('click', () => {
+      setPlaying(false);
+      if (currentStepIdx < steps.length - 1) {
+        currentStepIdx++;
+        renderStep(currentStepIdx);
+      }
+    });
+
+    btnPrev.addEventListener('click', () => {
+      setPlaying(false);
+      if (currentStepIdx > 0) {
+        currentStepIdx--;
+        renderStep(currentStepIdx);
+      }
+    });
+
+    btnReset.addEventListener('click', () => {
+      setPlaying(false);
+      currentStepIdx = 0;
+      renderStep(0);
+    });
+
+    stepScrubber.addEventListener('input', (e) => {
+      setPlaying(false);
+      currentStepIdx = parseInt(e.target.value, 10);
+      renderStep(currentStepIdx);
+    });
+
+    document.querySelectorAll('.speed-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.speed-btn').forEach(b => {
+          b.classList.remove('bg-cyan-500/30', 'text-cyan-200', 'font-semibold');
+        });
+        btn.classList.add('bg-cyan-500/30', 'text-cyan-200', 'font-semibold');
+        playSpeed = parseInt(btn.dataset.speed, 10);
+        if (isPlaying) {
+          setPlaying(false);
+          setPlaying(true);
+        }
+      });
+    });
+
+    document.querySelectorAll('.view-mode-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.view-mode-btn').forEach(b => {
+          b.classList.remove('bg-cyan-500/30', 'text-cyan-200', 'font-semibold');
+          b.classList.add('text-slate-300');
+        });
+        btn.classList.remove('text-slate-300');
+        btn.classList.add('bg-cyan-500/30', 'text-cyan-200', 'font-semibold');
+        viewMode = btn.dataset.mode;
+        renderStep(currentStepIdx);
+      });
+    });
+
+    btnAudio.addEventListener('click', () => {
+      audioEnabled = !audioEnabled;
+      if (audioEnabled) {
+        audioIcon.className = "fa-solid fa-volume-high";
+        btnAudio.classList.remove('text-slate-600');
+        btnAudio.classList.add('text-slate-300');
+      } else {
+        audioIcon.className = "fa-solid fa-volume-xmark";
+        btnAudio.classList.add('text-slate-600');
+        btnAudio.classList.remove('text-slate-300');
+      }
+    });
+
+    presetSelect.addEventListener('change', (e) => {
+      const idx = parseInt(e.target.value, 10);
+      initSimulation(PRESETS[idx].nums);
+    });
+
+    btnApplyCustom.addEventListener('click', () => {
+      const text = customInput.value.trim();
+      if (!text) return;
+      const parsed = text.split(',')
+        .map(s => parseInt(s.trim(), 10))
+        .filter(n => !isNaN(n));
+      if (parsed.length >= 3) {
+        initSimulation(parsed);
+      }
+    });
+
+    window.addEventListener('keydown', (e) => {
+      if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT') return;
+      if (e.code === 'Space') {
+        e.preventDefault();
+        btnPlay.click();
+      } else if (e.code === 'ArrowRight') {
+        e.preventDefault();
+        btnNext.click();
+      } else if (e.code === 'ArrowLeft') {
+        e.preventDefault();
+        btnPrev.click();
+      }
+    });
+
+    window.onload = function() {
+      initSimulation(PRESETS[0].nums);
+    };
+  </script>
+</body>
+</html>
