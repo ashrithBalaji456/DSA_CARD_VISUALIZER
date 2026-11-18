@@ -1,0 +1,1633 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Next Permutation (LeetCode 31) - Glassmorphic Visualizer</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: radial-gradient(circle at 14% 16%, #0c192c 0%, #030712 100%);
+      color: #e2e8f0;
+      min-height: 100vh;
+    }
+
+    .code-font {
+      font-family: 'Fira Code', monospace;
+    }
+
+    /* Glassmorphic Surface & Controls */
+    .glass-panel {
+      background: rgba(15, 23, 42, 0.56);
+      backdrop-filter: blur(22px);
+      -webkit-backdrop-filter: blur(22px);
+      border: 1px solid rgba(255, 255, 255, 0.11);
+      box-shadow: 0 20px 45px -15px rgba(0, 0, 0, 0.68), inset 0 1px 0 0 rgba(255, 255, 255, 0.09);
+    }
+
+    .glass-button {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .glass-button:hover:not(:disabled) {
+      background: rgba(255, 255, 255, 0.15);
+      border-color: rgba(255, 255, 255, 0.28);
+      transform: translateY(-1px);
+    }
+    .glass-button:active:not(:disabled) {
+      transform: translateY(1px);
+    }
+    .glass-button:disabled {
+      opacity: 0.35;
+      cursor: not-allowed;
+    }
+
+    /* Code Execution Line Highlight */
+    .code-line {
+      transition: all 0.2s ease;
+      border-left: 3px solid transparent;
+      padding: 2px 10px;
+    }
+    .code-line.active-line {
+      background: rgba(56, 189, 248, 0.18);
+      border-left: 3px solid #38bdf8;
+      color: #ffffff;
+      box-shadow: inset 0 0 16px rgba(56, 189, 248, 0.15);
+    }
+
+    /* Glassy Element Cards & Bars */
+    .glass-element-card {
+      background: rgba(255, 255, 255, 0.045);
+      border: 1px solid rgba(255, 255, 255, 0.13);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      transition: border-color 0.25s ease, background 0.25s ease, box-shadow 0.25s ease;
+      will-change: transform;
+    }
+
+    .glass-element-card.pivot-card {
+      background: linear-gradient(180deg, rgba(244, 63, 94, 0.24) 0%, rgba(225, 29, 72, 0.09) 100%);
+      border-color: rgba(251, 113, 133, 0.9);
+      box-shadow: 0 10px 26px -6px rgba(244, 63, 94, 0.38), inset 0 1px 0 rgba(255, 255, 255, 0.25);
+    }
+
+    .glass-element-card.successor-card {
+      background: linear-gradient(180deg, rgba(251, 191, 36, 0.24) 0%, rgba(245, 158, 11, 0.09) 100%);
+      border-color: rgba(251, 191, 36, 0.9);
+      box-shadow: 0 10px 26px -6px rgba(251, 191, 36, 0.38), inset 0 1px 0 rgba(255, 255, 255, 0.25);
+    }
+
+    .glass-element-card.suffix-card {
+      background: rgba(139, 92, 246, 0.10);
+      border-color: rgba(167, 139, 250, 0.35);
+    }
+
+    .glass-element-card.rev-left-card {
+      background: linear-gradient(180deg, rgba(34, 211, 238, 0.22) 0%, rgba(6, 182, 212, 0.08) 100%);
+      border-color: rgba(34, 211, 238, 0.9);
+      box-shadow: 0 10px 24px -6px rgba(34, 211, 238, 0.35);
+    }
+
+    .glass-element-card.rev-right-card {
+      background: linear-gradient(180deg, rgba(168, 85, 247, 0.22) 0%, rgba(147, 51, 234, 0.08) 100%);
+      border-color: rgba(192, 132, 252, 0.9);
+      box-shadow: 0 10px 24px -6px rgba(168, 85, 247, 0.35);
+    }
+
+    /* Lifted State During temp = nums[i] */
+    .glass-element-card.lifted-temp {
+      transform: translateY(-28px) scale(1.06);
+      border-color: rgba(250, 204, 21, 0.95) !important;
+      box-shadow: 0 22px 38px -6px rgba(250, 204, 21, 0.48), inset 0 1px 0 rgba(255, 255, 255, 0.45) !important;
+      z-index: 40;
+    }
+
+    /* Active Swap Source / Target Glow */
+    .glass-element-card.swap-active {
+      border-color: rgba(56, 189, 248, 0.95) !important;
+      box-shadow: 0 14px 30px -4px rgba(56, 189, 248, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.35) !important;
+      z-index: 35;
+    }
+
+    /* Completed Permutation State */
+    .glass-element-card.perm-done {
+      border-color: rgba(52, 211, 153, 0.7);
+      background: linear-gradient(180deg, rgba(16, 185, 129, 0.16) 0%, rgba(5, 150, 105, 0.06) 100%);
+      box-shadow: 0 10px 24px -6px rgba(16, 185, 129, 0.32);
+    }
+
+    @keyframes arcDash {
+      to {
+        stroke-dashoffset: -24;
+      }
+    }
+    .swap-arc-path {
+      stroke-dasharray: 6 6;
+      animation: arcDash 0.8s linear infinite;
+    }
+
+    @keyframes completePulse {
+      0%, 100% { transform: scale(1); filter: drop-shadow(0 0 8px rgba(16, 185, 129, 0.45)); }
+      50% { transform: scale(1.04); filter: drop-shadow(0 0 20px rgba(16, 185, 129, 0.95)); }
+    }
+    .complete-badge-anim {
+      animation: completePulse 0.65s ease-in-out;
+    }
+
+    /* Custom Scrollbars */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: rgba(15, 23, 42, 0.4);
+    }
+    ::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.18);
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(255, 255, 255, 0.3);
+    }
+  </style>
+</head>
+<body class="p-4 sm:p-6 lg:p-8 flex flex-col items-center justify-start min-h-screen">
+
+  <!-- Ambient Glass Glow Orbs -->
+  <div class="fixed top-6 left-1/6 w-96 h-96 bg-cyan-500/14 rounded-full blur-3xl pointer-events-none -z-10"></div>
+  <div class="fixed top-1/3 right-1/6 w-96 h-96 bg-purple-500/14 rounded-full blur-3xl pointer-events-none -z-10"></div>
+  <div class="fixed bottom-12 left-1/2 w-80 h-80 bg-rose-500/10 rounded-full blur-3xl pointer-events-none -z-10"></div>
+
+  <!-- MAIN WRAPPER -->
+  <div class="w-full max-w-7xl flex flex-col gap-6">
+
+    <!-- TOP FROSTED-GLASS CONTROLS DECK -->
+    <header class="glass-panel rounded-2xl p-4 sm:p-5 flex flex-col gap-4 sticky top-4 z-50">
+      <div class="flex flex-wrap items-center justify-between gap-4">
+
+        <!-- Title & Algorithm Metadata -->
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-rose-500 via-purple-500 to-cyan-400 flex items-center justify-center shadow-lg shadow-purple-500/25 text-slate-950 font-bold text-lg">
+            <i class="fa-solid fa-shuffle"></i>
+          </div>
+          <div>
+            <h1 class="text-lg sm:text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white via-purple-100 to-cyan-300">
+              Next Permutation
+            </h1>
+            <p class="text-xs text-slate-400 flex items-center gap-2">
+              <span class="inline-block w-2 h-2 rounded-full bg-cyan-400 animate-pulse"></span>
+              LeetCode 31 • Pivot Breakpoint + Successor Swap + Suffix Reverse • &Omicron;(n) Time • &Omicron;(1) Space
+            </p>
+          </div>
+        </div>
+
+        <!-- Center Playback Controls: Reset, Previous, Start/Stop, Next -->
+        <div class="flex items-center gap-2 sm:gap-3 bg-white/5 p-1.5 rounded-xl border border-white/10 backdrop-blur-md">
+          <button id="btnReset" class="glass-button text-slate-200 hover:text-white px-3 py-2 rounded-lg text-sm flex items-center gap-1.5" title="Reset to Initial State">
+            <i class="fa-solid fa-rotate-left"></i>
+            <span class="hidden sm:inline">Reset</span>
+          </button>
+          <button id="btnPrev" class="glass-button text-slate-200 hover:text-white px-3 py-2 rounded-lg text-sm flex items-center gap-1.5" title="Previous Step (Left Arrow)">
+            <i class="fa-solid fa-backward-step"></i>
+            <span class="hidden sm:inline">Previous</span>
+          </button>
+          <button id="btnPlay" class="glass-button bg-cyan-500/25 text-cyan-200 hover:bg-cyan-500/35 border-cyan-400/50 px-4 py-2 rounded-lg text-sm font-semibold flex items-center gap-2 shadow-lg shadow-cyan-500/15" title="Start / Stop (Spacebar)">
+            <i class="fa-solid fa-play" id="playIcon"></i>
+            <span id="playText">Start</span>
+          </button>
+          <button id="btnNext" class="glass-button text-slate-200 hover:text-white px-3 py-2 rounded-lg text-sm flex items-center gap-1.5" title="Next Step (Right Arrow)">
+            <span class="hidden sm:inline">Next</span>
+            <i class="fa-solid fa-forward-step"></i>
+          </button>
+        </div>
+
+        <!-- Speed & Audio Controls -->
+        <div class="flex items-center gap-2">
+          <a href="/" class="glass-button px-3 py-2 rounded-xl text-xs font-semibold text-slate-300 hover:text-white flex items-center gap-1.5 border border-white/10 hover:border-indigo-500/40 bg-white/5 shrink-0 transition-all active:scale-95 cursor-pointer" title="Return to DSA Atlas Library">
+            <i class="fa-solid fa-arrow-left text-indigo-400"></i>
+            <span>DSA Atlas</span>
+          </a>
+          <div class="flex items-center bg-white/5 rounded-xl p-1 border border-white/10 text-xs text-slate-300 backdrop-blur-md">
+            <span class="px-2 py-1 text-slate-400"><i class="fa-solid fa-gauge-high mr-1"></i>Speed</span>
+            <button class="speed-btn px-2 py-1 rounded-lg hover:text-white transition" data-speed="1350">0.5x</button>
+            <button class="speed-btn px-2 py-1 rounded-lg bg-cyan-500/30 text-cyan-200 font-semibold transition" data-speed="700">1x</button>
+            <button class="speed-btn px-2 py-1 rounded-lg hover:text-white transition" data-speed="340">2x</button>
+            <button class="speed-btn px-2 py-1 rounded-lg hover:text-white transition" data-speed="140">4x</button>
+          </div>
+          <button id="btnAudio" class="glass-button p-2.5 rounded-xl text-slate-300 hover:text-cyan-300" title="Toggle Sound Effects">
+            <i class="fa-solid fa-volume-high" id="audioIcon"></i>
+          </button>
+        </div>
+
+      </div>
+
+      <!-- Scrubber Slider & Status Badges -->
+      <div class="flex flex-col sm:flex-row items-center gap-3 pt-2 border-t border-white/10">
+        <div class="flex flex-wrap items-center gap-2 text-xs text-slate-300 w-full sm:w-auto shrink-0">
+          <span id="stepCounterBadge" class="code-font px-2.5 py-1 rounded-md bg-white/5 border border-white/10 text-cyan-300">
+            Step: 0 / 0
+          </span>
+          <span id="phaseBadge" class="px-2.5 py-1 rounded-md bg-purple-500/20 border border-purple-400/30 text-purple-200 font-semibold">
+            Ready
+          </span>
+          <span id="swapCounterBadge" class="px-2.5 py-1 rounded-md bg-amber-500/20 border border-amber-400/30 text-amber-200 font-bold">
+            Swaps: 0
+          </span>
+        </div>
+        <div class="w-full flex items-center gap-3">
+          <input type="range" id="stepScrubber" min="0" max="0" value="0" class="w-full h-1.5 bg-slate-800/80 rounded-lg appearance-none cursor-pointer accent-cyan-400">
+        </div>
+      </div>
+    </header>
+
+    <!-- TEST CASES & CUSTOM ARRAY BAR -->
+    <section class="glass-panel rounded-2xl p-4 flex flex-wrap items-center justify-between gap-4">
+      <div class="flex flex-wrap items-center gap-3">
+        <label for="presetSelect" class="text-xs uppercase font-semibold text-slate-300 tracking-wider flex items-center gap-1.5">
+          <i class="fa-solid fa-flask text-cyan-400"></i> Test Cases:
+        </label>
+        <select id="presetSelect" class="bg-slate-900/75 border border-white/15 text-xs sm:text-sm text-slate-200 rounded-xl px-3 py-2 outline-none focus:border-cyan-400 backdrop-blur-md">
+          <option value="0">1: Classic Pivot &amp; Suffix ([1, 3, 5, 4, 2] &rarr; [1, 4, 2, 3, 5])</option>
+          <option value="1">2: LeetCode Ex 1 ([1, 2, 3] &rarr; [1, 3, 2])</option>
+          <option value="2">3: LeetCode Ex 2 ([3, 2, 1] &rarr; [1, 2, 3] Wrap-Around)</option>
+          <option value="3">4: LeetCode Ex 3 ([1, 1, 5] &rarr; [1, 5, 1])</option>
+          <option value="4">5: Long Suffix with Duplicates ([1, 5, 8, 4, 7, 6, 5, 3, 1] &rarr; [1, 5, 8, 5, 1, 3, 4, 6, 7])</option>
+          <option value="5">6: Early Pivot ([2, 3, 1] &rarr; [3, 1, 2])</option>
+          <option value="6">7: Duplicate Plateau ([2, 3, 3, 1] &rarr; [3, 1, 2, 3])</option>
+          <option value="7">8: All Identical ([2, 2, 2] &rarr; [2, 2, 2])</option>
+          <option value="8">9: Two Elements Descending ([2, 1] &rarr; [1, 2])</option>
+          <option value="9">10: Single Element ([5] &rarr; [5])</option>
+        </select>
+      </div>
+
+      <div class="flex items-center gap-2 flex-grow max-w-md">
+        <input type="text" id="customArrInput" placeholder="Custom array: 1, 3, 5, 4, 2" class="w-full bg-white/5 border border-white/15 rounded-xl px-3 py-2 text-xs text-slate-200 code-font outline-none focus:border-cyan-400 backdrop-blur-md">
+        <button id="btnApplyCustom" class="glass-button text-xs px-4 py-2 rounded-xl text-cyan-300 font-semibold shrink-0">
+          Load Array
+        </button>
+      </div>
+    </section>
+
+    <!-- MAIN VISUALIZATION & CODE SECTION -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+      <!-- LEFT: 3-STAGE PIPELINE, LIFT & ARC SWAP ARENA (7 Cols) -->
+      <section class="lg:col-span-7 flex flex-col gap-6">
+
+        <!-- 3-Stage Algorithmic Progress Tracker -->
+        <div class="grid grid-cols-3 gap-2.5">
+          <div id="stage1Card" class="glass-panel rounded-xl p-3 border-white/10 transition-all duration-300">
+            <div class="flex items-center justify-between text-[10px] uppercase font-bold tracking-wider text-slate-400">
+              <span>Stage 1</span>
+              <i class="fa-solid fa-magnifying-glass text-rose-400"></i>
+            </div>
+            <div class="text-xs font-semibold text-slate-200 mt-1">Find Break Point (i)</div>
+            <div class="text-[10px] code-font text-slate-400 mt-0.5">nums[i] &lt; nums[i+1]</div>
+          </div>
+
+          <div id="stage2Card" class="glass-panel rounded-xl p-3 border-white/10 transition-all duration-300">
+            <div class="flex items-center justify-between text-[10px] uppercase font-bold tracking-wider text-slate-400">
+              <span>Stage 2</span>
+              <i class="fa-solid fa-arrows-left-right text-amber-400"></i>
+            </div>
+            <div class="text-xs font-semibold text-slate-200 mt-1">Swap Next Greater (j)</div>
+            <div class="text-[10px] code-font text-slate-400 mt-0.5">nums[j] &gt; nums[i]</div>
+          </div>
+
+          <div id="stage3Card" class="glass-panel rounded-xl p-3 border-white/10 transition-all duration-300">
+            <div class="flex items-center justify-between text-[10px] uppercase font-bold tracking-wider text-slate-400">
+              <span>Stage 3</span>
+              <i class="fa-solid fa-rotate text-cyan-400"></i>
+            </div>
+            <div class="text-xs font-semibold text-slate-200 mt-1">Reverse Suffix</div>
+            <div class="text-[10px] code-font text-slate-400 mt-0.5">[i+1 .. n-1]</div>
+          </div>
+        </div>
+
+        <!-- Live Variable Telemetry Cards -->
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+
+          <!-- Pivot Pointer i -->
+          <div class="glass-panel rounded-xl p-3.5 flex flex-col justify-between border-rose-400/35">
+            <span class="text-[11px] text-slate-400 uppercase font-semibold flex items-center justify-between">
+              Pivot Ptr (i)
+              <span class="w-2 h-2 rounded-full bg-rose-400"></span>
+            </span>
+            <div class="flex items-baseline gap-1.5 mt-1.5">
+              <span id="varPivotIdx" class="code-font text-xl font-bold text-rose-300">-</span>
+              <span id="varPivotVal" class="text-[11px] text-slate-400 code-font"></span>
+            </div>
+            <span class="text-[10px] text-rose-200/75 mt-1 code-font">Break point index</span>
+          </div>
+
+          <!-- Successor Pointer j -->
+          <div class="glass-panel rounded-xl p-3.5 flex flex-col justify-between border-amber-400/35">
+            <span class="text-[11px] text-slate-400 uppercase font-semibold flex items-center justify-between">
+              Successor (j)
+              <span class="w-2 h-2 rounded-full bg-amber-400"></span>
+            </span>
+            <div class="flex items-baseline gap-1.5 mt-1.5">
+              <span id="varSuccIdx" class="code-font text-xl font-bold text-amber-300">-</span>
+              <span id="varSuccVal" class="text-[11px] text-slate-400 code-font"></span>
+            </div>
+            <span class="text-[10px] text-amber-200/75 mt-1 code-font">Next greater &gt; nums[i]</span>
+          </div>
+
+          <!-- Reverse Pointers (left, right) -->
+          <div class="glass-panel rounded-xl p-3.5 flex flex-col justify-between border-cyan-400/35">
+            <span class="text-[11px] text-slate-400 uppercase font-semibold flex items-center justify-between">
+              Reverse (L, R)
+              <span class="w-2 h-2 rounded-full bg-cyan-400"></span>
+            </span>
+            <div class="flex items-baseline gap-1.5 mt-1.5">
+              <span id="varRevPtrs" class="code-font text-lg sm:text-xl font-bold text-cyan-300">- , -</span>
+            </div>
+            <span class="text-[10px] text-cyan-200/75 mt-1 code-font">Suffix mirror pair</span>
+          </div>
+
+          <!-- Temp Swap Register -->
+          <div id="tempRegisterCard" class="glass-panel rounded-xl p-3.5 flex flex-col justify-between border-purple-400/35">
+            <span class="text-[11px] text-slate-400 uppercase font-semibold flex items-center justify-between">
+              int temp
+              <i class="fa-solid fa-arrows-rotate text-amber-400 text-[10px]"></i>
+            </span>
+            <div class="flex items-baseline gap-1.5 mt-1.5">
+              <span id="varTempVal" class="code-font text-xl font-black text-slate-500">null</span>
+            </div>
+            <span id="varSwapIndices" class="text-[10px] text-amber-200/80 mt-1 code-font">Swap register</span>
+          </div>
+
+        </div>
+
+        <!-- PERMUTATION ARENA: GLASSY BOXES & BARS WITH LIFT-AND-ARC MOVEMENT -->
+        <div class="glass-panel rounded-2xl p-5 flex flex-col gap-4">
+          <div class="flex flex-wrap items-center justify-between text-xs pb-2 border-b border-white/10 gap-2">
+            <span class="font-semibold text-slate-200 uppercase tracking-wider flex items-center gap-1.5">
+              <i class="fa-solid fa-layer-group text-cyan-400"></i>
+              Array Elements: <span class="code-font text-slate-300">nums[]</span>
+            </span>
+
+            <!-- Switchable View Mode: Bars + Boxes | Bars Only | Boxes Only -->
+            <div class="flex items-center bg-white/5 rounded-xl p-1 border border-white/10 text-[11px] backdrop-blur-md">
+              <button class="view-mode-btn px-2.5 py-1 rounded-lg bg-cyan-500/30 text-cyan-200 font-semibold transition" data-mode="both">
+                Bars + Boxes
+              </button>
+              <button class="view-mode-btn px-2.5 py-1 rounded-lg text-slate-300 hover:text-white transition" data-mode="bars">
+                Bars Only
+              </button>
+              <button class="view-mode-btn px-2.5 py-1 rounded-lg text-slate-300 hover:text-white transition" data-mode="boxes">
+                Boxes Only
+              </button>
+            </div>
+          </div>
+
+          <!-- Legend Row -->
+          <div class="flex flex-wrap items-center justify-between text-[11px] text-slate-300 px-1 gap-2">
+            <div class="flex flex-wrap items-center gap-3">
+              <span class="flex items-center gap-1.5">
+                <span class="w-2.5 h-2.5 rounded-sm bg-rose-500 inline-block"></span> i (Pivot)
+              </span>
+              <span class="flex items-center gap-1.5">
+                <span class="w-2.5 h-2.5 rounded-sm bg-amber-400 inline-block"></span> j (Successor)
+              </span>
+              <span class="flex items-center gap-1.5">
+                <span class="w-2.5 h-2.5 rounded-sm bg-cyan-400 inline-block"></span> L / R (Reverse)
+              </span>
+              <span class="flex items-center gap-1.5">
+                <span class="w-2.5 h-2.5 rounded-sm bg-purple-400/50 border border-purple-300 inline-block"></span> Non-Increasing Suffix
+              </span>
+            </div>
+            <span class="code-font text-[10px] text-slate-400">Initial: <span id="initialPermTag" class="text-slate-200">[]</span></span>
+          </div>
+
+          <!-- Interactive Arena with Overhead Swap Trajectory Arc Overlay -->
+          <div id="arenaWrapper" class="relative w-full pt-12 pb-4 px-4 rounded-xl bg-white/[0.02] border border-white/10 overflow-x-auto">
+            <!-- SVG Overhead Swap Trajectory Arc Layer -->
+            <svg id="swapArcSvg" class="absolute top-0 left-0 w-full h-14 pointer-events-none z-30 overflow-visible"></svg>
+
+            <!-- Glassy Element Boxes & Bars Container -->
+            <div id="arrayArena" class="relative min-h-[225px] flex items-end justify-center gap-3 sm:gap-4 pt-4">
+              <!-- Populated dynamically with stable item IDs for smooth FLIP lift-and-arc transitions -->
+            </div>
+          </div>
+
+          <!-- Structural Zone Partition Bar (Locked Prefix | Pivot | Decreasing Suffix) -->
+          <div class="flex flex-col gap-1.5">
+            <div class="flex items-center justify-between text-[11px] text-slate-400 px-1">
+              <span class="font-semibold uppercase tracking-wider text-slate-300">
+                <i class="fa-solid fa-diagram-project text-purple-400 mr-1"></i> Permutation Structure Regions
+              </span>
+              <span class="code-font text-[10px]">Prefix [0..i-1] | Pivot [i] | Suffix [i+1..n-1]</span>
+            </div>
+            <div id="zonesBarContainer" class="w-full grid gap-1.5 text-[10px] code-font">
+              <!-- Populated dynamically per index -->
+            </div>
+          </div>
+
+          <!-- Live Decision & Swap Telemetry Banner -->
+          <div id="decisionBanner" class="p-3.5 rounded-xl bg-white/[0.04] border border-white/10 text-xs flex flex-col sm:flex-row items-center justify-between gap-3 backdrop-blur-md">
+            <div class="flex items-center gap-2.5">
+              <i id="decisionIcon" class="fa-solid fa-circle-info text-cyan-400 text-base"></i>
+              <span id="decisionText" class="text-slate-200">Ready to compute the lexicographically next greater permutation in-place.</span>
+            </div>
+            <div id="swapBadgePill" class="hidden text-xs code-font px-3 py-1.5 rounded-lg bg-amber-500/20 border border-amber-400/40 text-amber-200 font-semibold shrink-0">
+              <!-- e.g. swap(nums, 1, 3) -->
+            </div>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- RIGHT: SYNCHRONIZED JAVA CODE CONTAINER (5 Cols) -->
+      <section class="lg:col-span-5 flex flex-col gap-4">
+
+        <div class="glass-panel rounded-2xl p-4 flex flex-col h-full">
+          <div class="flex items-center justify-between pb-3 border-b border-white/10 text-xs">
+            <div class="flex items-center gap-2">
+              <div class="flex gap-1.5">
+                <span class="w-3 h-3 rounded-full bg-rose-500/80 inline-block"></span>
+                <span class="w-3 h-3 rounded-full bg-amber-500/80 inline-block"></span>
+                <span class="w-3 h-3 rounded-full bg-emerald-500/80 inline-block"></span>
+              </div>
+              <span class="code-font text-slate-200 font-semibold ml-2">Solution.java</span>
+            </div>
+            <span class="text-[11px] text-cyan-300 bg-cyan-500/15 px-2.5 py-0.5 rounded border border-cyan-400/25 code-font">
+              In-Place Lexicographic
+            </span>
+          </div>
+
+          <!-- Code Lines with Zero-Jump Localized Scroll -->
+          <div id="codeContainer" class="code-font text-xs sm:text-[13px] leading-relaxed text-slate-300 py-3 overflow-y-auto max-h-[560px] flex-grow select-none">
+            <div class="code-line" id="line1"><span class="text-slate-500 mr-2"> 1</span><span class="text-indigo-400 font-semibold">class</span> <span class="text-amber-300">Solution</span> {</div>
+            <div class="code-line" id="line2"><span class="text-slate-500 mr-2"> 2</span>    <span class="text-indigo-400 font-semibold">public void</span> <span class="text-cyan-300">nextPermutation</span>(<span class="text-indigo-400">int</span>[] nums) {</div>
+            <div class="code-line" id="line3"><span class="text-slate-500 mr-2"> 3</span></div>
+            <div class="code-line" id="line4"><span class="text-slate-500 mr-2"> 4</span>        <span class="text-indigo-400 font-semibold">int</span> n = nums.length;</div>
+            <div class="code-line" id="line5"><span class="text-slate-500 mr-2"> 5</span>        <span class="text-indigo-400 font-semibold">int</span> i = n - <span class="text-rose-400">2</span>;</div>
+            <div class="code-line" id="line6"><span class="text-slate-500 mr-2"> 6</span></div>
+            <div class="code-line" id="line7"><span class="text-slate-500 mr-2"> 7</span>        <span class="text-slate-500 italic">// Step 1: Find the break point</span></div>
+            <div class="code-line" id="line8"><span class="text-slate-500 mr-2"> 8</span>        <span class="text-indigo-400 font-semibold">while</span> (i &gt;= <span class="text-rose-400">0</span> &amp;&amp; nums[i] &gt;= nums[i + <span class="text-rose-400">1</span>]) {</div>
+            <div class="code-line" id="line9"><span class="text-slate-500 mr-2"> 9</span>            i--;</div>
+            <div class="code-line" id="line10"><span class="text-slate-500 mr-2">10</span>        }</div>
+            <div class="code-line" id="line11"><span class="text-slate-500 mr-2">11</span></div>
+            <div class="code-line" id="line12"><span class="text-slate-500 mr-2">12</span>        <span class="text-slate-500 italic">// Step 2: Find the next greater element and swap</span></div>
+            <div class="code-line" id="line13"><span class="text-slate-500 mr-2">13</span>        <span class="text-indigo-400 font-semibold">if</span> (i &gt;= <span class="text-rose-400">0</span>) {</div>
+            <div class="code-line" id="line14"><span class="text-slate-500 mr-2">14</span></div>
+            <div class="code-line" id="line15"><span class="text-slate-500 mr-2">15</span>            <span class="text-indigo-400 font-semibold">int</span> j = n - <span class="text-rose-400">1</span>;</div>
+            <div class="code-line" id="line16"><span class="text-slate-500 mr-2">16</span></div>
+            <div class="code-line" id="line17"><span class="text-slate-500 mr-2">17</span>            <span class="text-indigo-400 font-semibold">while</span> (nums[j] &lt;= nums[i]) {</div>
+            <div class="code-line" id="line18"><span class="text-slate-500 mr-2">18</span>                j--;</div>
+            <div class="code-line" id="line19"><span class="text-slate-500 mr-2">19</span>            }</div>
+            <div class="code-line" id="line20"><span class="text-slate-500 mr-2">20</span></div>
+            <div class="code-line" id="line21"><span class="text-slate-500 mr-2">21</span>            swap(nums, i, j);</div>
+            <div class="code-line" id="line22"><span class="text-slate-500 mr-2">22</span>        }</div>
+            <div class="code-line" id="line23"><span class="text-slate-500 mr-2">23</span></div>
+            <div class="code-line" id="line24"><span class="text-slate-500 mr-2">24</span>        <span class="text-slate-500 italic">// Step 3: Reverse the suffix</span></div>
+            <div class="code-line" id="line25"><span class="text-slate-500 mr-2">25</span>        reverse(nums, i + <span class="text-rose-400">1</span>, n - <span class="text-rose-400">1</span>);</div>
+            <div class="code-line" id="line26"><span class="text-slate-500 mr-2">26</span>    }</div>
+            <div class="code-line" id="line27"><span class="text-slate-500 mr-2">27</span></div>
+            <div class="code-line" id="line28"><span class="text-slate-500 mr-2">28</span>    <span class="text-indigo-400 font-semibold">private void</span> <span class="text-cyan-300">swap</span>(<span class="text-indigo-400">int</span>[] nums, <span class="text-indigo-400">int</span> i, <span class="text-indigo-400">int</span> j) {</div>
+            <div class="code-line" id="line29"><span class="text-slate-500 mr-2">29</span></div>
+            <div class="code-line" id="line30"><span class="text-slate-500 mr-2">30</span>        <span class="text-indigo-400 font-semibold">int</span> temp = nums[i];</div>
+            <div class="code-line" id="line31"><span class="text-slate-500 mr-2">31</span>        nums[i] = nums[j];</div>
+            <div class="code-line" id="line32"><span class="text-slate-500 mr-2">32</span>        nums[j] = temp;</div>
+            <div class="code-line" id="line33"><span class="text-slate-500 mr-2">33</span>    }</div>
+            <div class="code-line" id="line34"><span class="text-slate-500 mr-2">34</span></div>
+            <div class="code-line" id="line35"><span class="text-slate-500 mr-2">35</span>    <span class="text-indigo-400 font-semibold">private void</span> <span class="text-cyan-300">reverse</span>(<span class="text-indigo-400">int</span>[] nums, <span class="text-indigo-400">int</span> left, <span class="text-indigo-400">int</span> right) {</div>
+            <div class="code-line" id="line36"><span class="text-slate-500 mr-2">36</span></div>
+            <div class="code-line" id="line37"><span class="text-slate-500 mr-2">37</span>        <span class="text-indigo-400 font-semibold">while</span> (left &lt; right) {</div>
+            <div class="code-line" id="line38"><span class="text-slate-500 mr-2">38</span></div>
+            <div class="code-line" id="line39"><span class="text-slate-500 mr-2">39</span>            swap(nums, left, right);</div>
+            <div class="code-line" id="line40"><span class="text-slate-500 mr-2">40</span></div>
+            <div class="code-line" id="line41"><span class="text-slate-500 mr-2">41</span>            left++;</div>
+            <div class="code-line" id="line42"><span class="text-slate-500 mr-2">42</span>            right--;</div>
+            <div class="code-line" id="line43"><span class="text-slate-500 mr-2">43</span>        }</div>
+            <div class="code-line" id="line44"><span class="text-slate-500 mr-2">44</span>    }</div>
+            <div class="code-line" id="line45"><span class="text-slate-500 mr-2">45</span>}</div>
+          </div>
+
+          <!-- Live Step Narrative Box -->
+          <div class="mt-3 p-3 bg-white/[0.04] border border-white/10 rounded-xl flex items-start gap-2.5 backdrop-blur-md">
+            <i class="fa-solid fa-circle-info text-cyan-400 mt-0.5 text-xs"></i>
+            <div class="text-xs text-slate-200 leading-relaxed" id="stepDescription">
+              Ready to run Next Permutation. Click <b>Start</b> or <b>Next</b> to step through.
+            </div>
+          </div>
+
+        </div>
+
+      </section>
+
+    </div>
+
+    <!-- BOTTOM SECTION: PROBLEM STATEMENT & ARCHITECTURAL SUMMARY -->
+    <footer class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-2">
+
+      <!-- Problem Statement Card -->
+      <div class="glass-panel rounded-2xl p-5 flex flex-col gap-3">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <span class="text-amber-400 font-bold"><i class="fa-solid fa-file-lines mr-1.5"></i>Problem Statement</span>
+            <span class="px-2 py-0.5 rounded text-[11px] font-semibold bg-amber-500/20 text-amber-300 border border-amber-400/30">Medium</span>
+          </div>
+          <span class="text-xs text-slate-400 font-mono">LeetCode 31</span>
+        </div>
+
+        <p class="text-xs text-slate-300 leading-relaxed">
+          A <b>permutation</b> of an array of integers is an arrangement of its members into a sequence or linear order. The <b>next permutation</b> of an array of integers is the next lexicographically greater permutation of its integer.
+          <br><br>
+          If such an arrangement is not possible (i.e., the array is sorted in descending order), the array must be rearranged as the lowest possible order (sorted in ascending order). The replacement must be <b>in-place</b> and use only <b>constant extra memory</b>.
+        </p>
+
+        <div class="space-y-2 pt-2 border-t border-white/10 text-xs text-slate-300">
+          <div class="bg-white/[0.03] p-2.5 rounded-lg border border-white/10 font-mono">
+            <span class="text-slate-400">Example 1:</span>
+            <b>Input:</b> nums = [1,2,3] &rarr; <b>Output:</b> <span class="text-emerald-400 font-bold">[1,3,2]</span>
+          </div>
+          <div class="bg-white/[0.03] p-2.5 rounded-lg border border-white/10 font-mono">
+            <span class="text-slate-400">Example 2:</span>
+            <b>Input:</b> nums = [3,2,1] &rarr; <b>Output:</b> <span class="text-emerald-400 font-bold">[1,2,3]</span>
+          </div>
+          <div class="bg-white/[0.03] p-2.5 rounded-lg border border-white/10 font-mono">
+            <span class="text-slate-400">Example 3:</span>
+            <b>Input:</b> nums = [1,1,5] &rarr; <b>Output:</b> <span class="text-emerald-400 font-bold">[1,5,1]</span>
+          </div>
+        </div>
+
+        <div class="text-[11px] text-slate-400">
+          <b>Constraints:</b> <code class="font-mono text-slate-300">1 &le; nums.length &le; 100</code>, <code class="font-mono text-slate-300">0 &le; nums[i] &le; 100</code>.
+        </div>
+      </div>
+
+      <!-- Algorithm Summary & Lexicographic Proof Card -->
+      <div class="glass-panel rounded-2xl p-5 flex flex-col gap-3">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <span class="text-cyan-400 font-bold"><i class="fa-solid fa-brain mr-1.5"></i>Algorithm Summary &amp; 3-Step Logic</span>
+          </div>
+          <span class="px-2 py-0.5 rounded text-[11px] font-semibold bg-purple-500/20 text-purple-200 border border-purple-400/30">O(1) Aux Space</span>
+        </div>
+
+        <div class="space-y-3 text-xs text-slate-300 leading-relaxed">
+          <div class="p-3 bg-purple-950/30 border border-purple-400/25 rounded-xl">
+            <b class="text-purple-300 flex items-center gap-1.5 mb-1">
+              <i class="fa-solid fa-stairs"></i> Three-Phase In-Place Construction:
+            </b>
+            <ol class="list-decimal list-inside space-y-0.5 text-slate-300">
+              <li><b>Find Break Point (<code class="font-mono text-rose-300">i</code>):</b> Scan right-to-left for the first drop <code class="font-mono">nums[i] &lt; nums[i + 1]</code>. Everything to the right (<code class="font-mono">[i+1..n-1]</code>) is already maximized in descending order.</li>
+              <li><b>Swap Next Greater (<code class="font-mono text-amber-300">j</code>):</b> If <code class="font-mono">i &ge; 0</code>, find the rightmost element <code class="font-mono">nums[j] &gt; nums[i]</code> and swap them to make the smallest possible increase at index <code class="font-mono">i</code>.</li>
+              <li><b>Reverse Suffix (<code class="font-mono text-cyan-300">[i+1..n-1]</code>):</b> Because the suffix remains non-increasing after swapping, reversing it sorts it ascending in <code class="font-mono">&Omicron;(n)</code> time.</li>
+            </ol>
+          </div>
+
+          <div class="grid grid-cols-2 gap-3 pt-1">
+            <div class="p-2.5 bg-white/[0.03] rounded-lg border border-white/10">
+              <span class="text-[11px] text-slate-400 uppercase font-semibold">Time Complexity</span>
+              <div class="text-sm font-bold text-emerald-400 font-mono mt-0.5">&Omicron;(N)</div>
+              <p class="text-[10px] text-slate-400 mt-0.5">At most two linear right-to-left scans and one suffix reversal.</p>
+            </div>
+            <div class="p-2.5 bg-white/[0.03] rounded-lg border border-white/10">
+              <span class="text-[11px] text-slate-400 uppercase font-semibold">Space Complexity</span>
+              <div class="text-sm font-bold text-cyan-400 font-mono mt-0.5">&Omicron;(1)</div>
+              <p class="text-[10px] text-slate-400 mt-0.5">Modifies <code class="font-mono">nums</code> directly in-place using scalar pointers and <code class="font-mono">temp</code>.</p>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+    </footer>
+
+  </div>
+
+  <!-- JAVASCRIPT SIMULATION ENGINE WITH PHYSICAL FLIP LIFT-AND-ARC ANIMATIONS -->
+  <script>
+    // 10 COMPREHENSIVE PRESETS
+    const PRESETS = [
+      { name: "1: Classic Pivot & Suffix ([1, 3, 5, 4, 2])", nums: [1, 3, 5, 4, 2] },
+      { name: "2: LeetCode Ex 1 ([1, 2, 3])", nums: [1, 2, 3] },
+      { name: "3: LeetCode Ex 2 ([3, 2, 1])", nums: [3, 2, 1] },
+      { name: "4: LeetCode Ex 3 ([1, 1, 5])", nums: [1, 1, 5] },
+      { name: "5: Long Suffix with Duplicates ([1, 5, 8, 4, 7, 6, 5, 3, 1])", nums: [1, 5, 8, 4, 7, 6, 5, 3, 1] },
+      { name: "6: Early Pivot ([2, 3, 1])", nums: [2, 3, 1] },
+      { name: "7: Duplicate Plateau ([2, 3, 3, 1])", nums: [2, 3, 3, 1] },
+      { name: "8: All Identical ([2, 2, 2])", nums: [2, 2, 2] },
+      { name: "9: Two Elements Descending ([2, 1])", nums: [2, 1] },
+      { name: "10: Single Element ([5])", nums: [5] }
+    ];
+
+    // APPLICATION STATE
+    let currentNums = [...PRESETS[0].nums];
+    let steps = [];
+    let currentStepIdx = 0;
+    let isPlaying = false;
+    let playInterval = null;
+    let playSpeed = 700;
+    let audioEnabled = true;
+    let viewMode = 'both'; // 'both' | 'bars' | 'boxes'
+
+    // WEB AUDIO SYNTHESIZER
+    let audioCtx = null;
+    function initAudio() {
+      if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      }
+    }
+    function playTone(freq = 440, type = 'sine', duration = 0.08, vol = 0.035) {
+      if (!audioEnabled) return;
+      try {
+        initAudio();
+        if (audioCtx.state === 'suspended') {
+          audioCtx.resume();
+        }
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = type;
+        osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+        gain.gain.setValueAtTime(vol, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + duration);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + duration);
+      } catch (e) {}
+    }
+
+    // DOM REFERENCES
+    const btnPlay = document.getElementById('btnPlay');
+    const playIcon = document.getElementById('playIcon');
+    const playText = document.getElementById('playText');
+    const btnPrev = document.getElementById('btnPrev');
+    const btnNext = document.getElementById('btnNext');
+    const btnReset = document.getElementById('btnReset');
+    const btnAudio = document.getElementById('btnAudio');
+    const audioIcon = document.getElementById('audioIcon');
+    const presetSelect = document.getElementById('presetSelect');
+    const customArrInput = document.getElementById('customArrInput');
+    const btnApplyCustom = document.getElementById('btnApplyCustom');
+    const stepScrubber = document.getElementById('stepScrubber');
+    const stepCounterBadge = document.getElementById('stepCounterBadge');
+    const phaseBadge = document.getElementById('phaseBadge');
+    const swapCounterBadge = document.getElementById('swapCounterBadge');
+
+    const stage1Card = document.getElementById('stage1Card');
+    const stage2Card = document.getElementById('stage2Card');
+    const stage3Card = document.getElementById('stage3Card');
+
+    const varPivotIdx = document.getElementById('varPivotIdx');
+    const varPivotVal = document.getElementById('varPivotVal');
+    const varSuccIdx = document.getElementById('varSuccIdx');
+    const varSuccVal = document.getElementById('varSuccVal');
+    const varRevPtrs = document.getElementById('varRevPtrs');
+    const varTempVal = document.getElementById('varTempVal');
+    const varSwapIndices = document.getElementById('varSwapIndices');
+    const tempRegisterCard = document.getElementById('tempRegisterCard');
+
+    const initialPermTag = document.getElementById('initialPermTag');
+    const arenaWrapper = document.getElementById('arenaWrapper');
+    const swapArcSvg = document.getElementById('swapArcSvg');
+    const arrayArena = document.getElementById('arrayArena');
+    const zonesBarContainer = document.getElementById('zonesBarContainer');
+
+    const decisionBanner = document.getElementById('decisionBanner');
+    const decisionIcon = document.getElementById('decisionIcon');
+    const decisionText = document.getElementById('decisionText');
+    const swapBadgePill = document.getElementById('swapBadgePill');
+    const codeContainer = document.getElementById('codeContainer');
+    const stepDescription = document.getElementById('stepDescription');
+
+    // STRICT LINE-BY-LINE EXECUTION TRACE GENERATOR WITH STABLE ITEM IDS
+    function generateSteps(numsArr) {
+      const trace = [];
+      const items = numsArr.map((val, idx) => ({ id: idx, val }));
+      const n = items.length;
+
+      let i = n - 2;
+      let j = -1;
+      let swapCount = 0;
+
+      const snapshot = () => items.map(it => ({ ...it }));
+
+      // Line 2: Method entry
+      trace.push({
+        line: 2,
+        stage: 0,
+        phase: "Start",
+        items: snapshot(),
+        i: null,
+        j: -1,
+        revLeft: -1,
+        revRight: -1,
+        pivotLocked: false,
+        swapCount,
+        tempVal: null,
+        desc: `Entered <span class="code-font text-cyan-300 font-bold">nextPermutation</span> with <span class="code-font text-slate-100">[${items.map(it => it.val).join(', ')}]</span> (<span class="code-font">n = ${n}</span>).`,
+        soundFreq: 330
+      });
+
+      // Line 4 & 5: int n = nums.length; int i = n - 2;
+      trace.push({
+        line: 5,
+        stage: 1,
+        phase: `Init i = ${i}`,
+        items: snapshot(),
+        i,
+        j: -1,
+        revLeft: -1,
+        revRight: -1,
+        pivotLocked: false,
+        swapCount,
+        tempVal: null,
+        desc: `Initialized <span class="code-font text-rose-300 font-bold">i = n - 2 = ${i}</span> to scan right-to-left for the first decreasing break point.`,
+        soundFreq: 380
+      });
+
+      // Step 1: Find the break point
+      while (i >= 0 && items[i].val >= items[i + 1].val) {
+        trace.push({
+          line: 8,
+          stage: 1,
+          phase: `Scan Pivot i=${i}`,
+          items: snapshot(),
+          i,
+          j: -1,
+          revLeft: -1,
+          revRight: -1,
+          pivotLocked: false,
+          swapCount,
+          tempVal: null,
+          desc: `Check <span class="code-font text-rose-300">nums[${i}] (${items[i].val}) &ge; nums[${i + 1}] (${items[i + 1].val})</span> is <b>true</b> (still non-increasing suffix).`,
+          soundFreq: 420
+        });
+
+        const prevI = i;
+        i--;
+        trace.push({
+          line: 9,
+          stage: 1,
+          phase: `i-- (${prevI} → ${i})`,
+          items: snapshot(),
+          i,
+          j: -1,
+          revLeft: -1,
+          revRight: -1,
+          pivotLocked: false,
+          swapCount,
+          tempVal: null,
+          desc: `Decremented <span class="code-font text-rose-300 font-bold">i--</span> (${prevI} &rarr; ${i}).`,
+          soundFreq: 400
+        });
+      }
+
+      // Line 8: while loop exits
+      if (i >= 0) {
+        trace.push({
+          line: 8,
+          stage: 1,
+          phase: `Break Point i=${i}`,
+          items: snapshot(),
+          i,
+          j: -1,
+          revLeft: -1,
+          revRight: -1,
+          pivotLocked: true,
+          swapCount,
+          tempVal: null,
+          desc: `<span class="text-rose-300 font-bold"><i class="fa-solid fa-location-crosshairs mr-1"></i>Break Point Found!</span> <span class="code-font text-rose-200 font-bold">nums[${i}] (${items[i].val}) &lt; nums[${i + 1}] (${items[i + 1].val})</span>. Pivot locked at <span class="code-font text-rose-300 font-bold">i = ${i}</span>.`,
+          soundFreq: 560
+        });
+      } else {
+        trace.push({
+          line: 8,
+          stage: 1,
+          phase: `No Break Point (i=-1)`,
+          items: snapshot(),
+          i,
+          j: -1,
+          revLeft: -1,
+          revRight: -1,
+          pivotLocked: true,
+          swapCount,
+          tempVal: null,
+          desc: `<span class="code-font text-amber-300 font-bold">i = ${i} (&lt; 0)</span>: Entire array is non-increasing (already the highest permutation). Exiting Step 1.`,
+          soundFreq: 480
+        });
+      }
+
+      // Helper to record step-by-step swap(nums, a, b) with explicit callLine (21 vs 39)
+      function recordSwap(a, b, callLine, stageNum, reasonText, stateOverrides = {}) {
+        swapCount++;
+        const itemA = { ...items[a] };
+        const itemB = { ...items[b] };
+
+        // Call swap(nums, a, b)
+        trace.push({
+          line: callLine,
+          stage: stageNum,
+          phase: `Call swap(${a}, ${b})`,
+          items: snapshot(),
+          i,
+          j,
+          revLeft: stateOverrides.revLeft ?? -1,
+          revRight: stateOverrides.revRight ?? -1,
+          pivotLocked: true,
+          swapCount,
+          tempVal: null,
+          swapPair: [a, b],
+          swapLabel: `swap(nums, ${a}, ${b})`,
+          desc: `${reasonText} Calling <span class="code-font text-amber-300 font-bold">swap(nums, ${a}, ${b})</span>.`,
+          soundFreq: 520
+        });
+
+        // Line 30: int temp = nums[a]; -> Lift element at a upward!
+        trace.push({
+          line: 30,
+          stage: stageNum,
+          phase: `Lift nums[${a}]`,
+          items: snapshot(),
+          i,
+          j,
+          revLeft: stateOverrides.revLeft ?? -1,
+          revRight: stateOverrides.revRight ?? -1,
+          pivotLocked: true,
+          swapCount,
+          tempVal: itemA.val,
+          liftedIdx: a,
+          swapPair: [a, b],
+          swapLabel: `temp = nums[${a}] (${itemA.val})`,
+          desc: `Lifted <span class="code-font text-amber-300 font-bold">nums[${a}] (${itemA.val})</span> into <span class="code-font text-amber-200 font-bold">temp</span>.`,
+          soundFreq: 600
+        });
+
+        // Perform actual swap so FLIP glides elements over top!
+        items[a] = itemB;
+        items[b] = itemA;
+
+        // Line 31 & 32: Move nums[b] over top to [a] and place temp into [b]
+        trace.push({
+          line: 31,
+          stage: stageNum,
+          phase: `Move [${b}] ↔ [${a}]`,
+          items: snapshot(),
+          i,
+          j,
+          revLeft: stateOverrides.revLeft ?? -1,
+          revRight: stateOverrides.revRight ?? -1,
+          pivotLocked: true,
+          swapCount,
+          tempVal: itemA.val,
+          swapPair: [a, b],
+          swapLabel: `nums[${a}] = ${itemB.val}, nums[${b}] = ${itemA.val}`,
+          desc: `Moved <span class="code-font text-cyan-300 font-bold">${itemB.val}</span> over top into <span class="code-font">[${a}]</span> and placed <span class="code-font text-amber-300 font-bold">temp (${itemA.val})</span> into <span class="code-font">[${b}]</span>.`,
+          soundFreq: 760
+        });
+      }
+
+      // Step 2: Find next greater element and swap (Line 13)
+      trace.push({
+        line: 13,
+        stage: 2,
+        phase: i >= 0 ? "i >= 0 (True)" : "i >= 0 (False)",
+        items: snapshot(),
+        i,
+        j: -1,
+        revLeft: -1,
+        revRight: -1,
+        pivotLocked: true,
+        swapCount,
+        tempVal: null,
+        desc: i >= 0
+          ? `Condition <span class="code-font text-amber-300 font-bold">i (${i}) &ge; 0</span> is <b>true</b>. Searching suffix for smallest element strictly greater than <span class="code-font text-rose-300">nums[${i}] = ${items[i].val}</span>.`
+          : `Condition <span class="code-font text-slate-300">i (${i}) &ge; 0</span> is <b>false</b>. Skipping Step 2 swap and jumping directly to reverse the entire array.`,
+        soundFreq: 490
+      });
+
+      if (i >= 0) {
+        // Line 15: int j = n - 1;
+        j = n - 1;
+        trace.push({
+          line: 15,
+          stage: 2,
+          phase: `Init j = ${j}`,
+          items: snapshot(),
+          i,
+          j,
+          revLeft: -1,
+          revRight: -1,
+          pivotLocked: true,
+          swapCount,
+          tempVal: null,
+          desc: `Initialized <span class="code-font text-amber-300 font-bold">j = n - 1 = ${j}</span> at the rightmost end of the suffix.`,
+          soundFreq: 510
+        });
+
+        while (items[j].val <= items[i].val) {
+          trace.push({
+            line: 17,
+            stage: 2,
+            phase: `Check j=${j}`,
+            items: snapshot(),
+            i,
+            j,
+            revLeft: -1,
+            revRight: -1,
+            pivotLocked: true,
+            swapCount,
+            tempVal: null,
+            desc: `Check <span class="code-font text-amber-300">nums[${j}] (${items[j].val}) &le; nums[${i}] (${items[i].val})</span> is <b>true</b> &rarr; not strictly greater.`,
+            soundFreq: 470
+          });
+
+          const prevJ = j;
+          j--;
+          trace.push({
+            line: 18,
+            stage: 2,
+            phase: `j-- (${prevJ} → ${j})`,
+            items: snapshot(),
+            i,
+            j,
+            revLeft: -1,
+            revRight: -1,
+            pivotLocked: true,
+            swapCount,
+            tempVal: null,
+            desc: `Decremented <span class="code-font text-amber-300 font-bold">j--</span> (${prevJ} &rarr; ${j}).`,
+            soundFreq: 450
+          });
+        }
+
+        // Line 17 exits: Found successor j!
+        trace.push({
+          line: 17,
+          stage: 2,
+          phase: `Successor j=${j}`,
+          items: snapshot(),
+          i,
+          j,
+          revLeft: -1,
+          revRight: -1,
+          pivotLocked: true,
+          swapCount,
+          tempVal: null,
+          desc: `<span class="text-amber-300 font-bold"><i class="fa-solid fa-check mr-1"></i>Next Greater Found!</span> <span class="code-font text-amber-200 font-bold">nums[${j}] (${items[j].val}) &gt; nums[${i}] (${items[i].val})</span>.`,
+          soundFreq: 620
+        });
+
+        // Line 21: swap(nums, i, j);
+        recordSwap(i, j, 21, 2, `Swapping pivot <span class="code-font text-rose-300">${items[i].val}</span> with next greater <span class="code-font text-amber-300">${items[j].val}</span>.`);
+      }
+
+      // Step 3: Reverse the suffix (Line 25)
+      let left = i + 1;
+      let right = n - 1;
+      j = -1;
+
+      trace.push({
+        line: 25,
+        stage: 3,
+        phase: `Reverse [${left}..${right}]`,
+        items: snapshot(),
+        i,
+        j: -1,
+        revLeft: left,
+        revRight: right,
+        pivotLocked: true,
+        swapCount,
+        tempVal: null,
+        desc: `Calling <span class="code-font text-cyan-300 font-bold">reverse(nums, ${left}, ${right})</span> to arrange suffix <span class="code-font">[${left}..${right}]</span> in lowest ascending order.`,
+        soundFreq: 540
+      });
+
+      while (left < right) {
+        trace.push({
+          line: 37,
+          stage: 3,
+          phase: `Rev [${left}, ${right}]`,
+          items: snapshot(),
+          i,
+          j: -1,
+          revLeft: left,
+          revRight: right,
+          pivotLocked: true,
+          swapCount,
+          tempVal: null,
+          desc: `Reverse loop check <span class="code-font text-cyan-300">left (${left}) &lt; right (${right})</span> is <b>true</b>.`,
+          soundFreq: 560
+        });
+
+        recordSwap(
+          left,
+          right,
+          39,
+          3,
+          `Reversing suffix pair <span class="code-font text-cyan-300">[${left}]</span> &amp; <span class="code-font text-purple-300">[${right}]</span>.`,
+          { revLeft: left, revRight: right }
+        );
+
+        const prevL = left;
+        left++;
+        trace.push({
+          line: 41,
+          stage: 3,
+          phase: "left++",
+          items: snapshot(),
+          i,
+          j: -1,
+          revLeft: left,
+          revRight: right,
+          pivotLocked: true,
+          swapCount,
+          tempVal: null,
+          desc: `Advanced <span class="code-font text-cyan-300 font-bold">left++</span> (${prevL} &rarr; ${left}).`,
+          soundFreq: 580
+        });
+
+        const prevR = right;
+        right--;
+        trace.push({
+          line: 42,
+          stage: 3,
+          phase: "right--",
+          items: snapshot(),
+          i,
+          j: -1,
+          revLeft: left,
+          revRight: right,
+          pivotLocked: true,
+          swapCount,
+          tempVal: null,
+          desc: `Retreated <span class="code-font text-purple-300 font-bold">right--</span> (${prevR} &rarr; ${right}).`,
+          soundFreq: 600
+        });
+      }
+
+      // Line 37 exits
+      trace.push({
+        line: 37,
+        stage: 3,
+        phase: "Suffix Sorted",
+        items: snapshot(),
+        i,
+        j: -1,
+        revLeft: left,
+        revRight: right,
+        pivotLocked: true,
+        swapCount,
+        tempVal: null,
+        desc: `Condition <span class="code-font text-cyan-300">left (${left}) &lt; right (${right})</span> is <b>false</b>. Suffix reversal complete.`,
+        soundFreq: 700
+      });
+
+      // Line 26: Complete
+      trace.push({
+        line: 26,
+        stage: 3,
+        phase: "Complete",
+        items: snapshot(),
+        i: -1,
+        j: -1,
+        revLeft: -1,
+        revRight: -1,
+        pivotLocked: true,
+        swapCount,
+        tempVal: null,
+        isComplete: true,
+        desc: `<span class="text-emerald-400 font-bold text-sm"><i class="fa-solid fa-trophy mr-1.5"></i>Next Permutation Ready!</span> Result: <span class="code-font text-emerald-300 font-bold text-sm">[${items.map(it => it.val).join(', ')}]</span> in <span class="code-font text-amber-300 font-bold">${swapCount}</span> swaps.`,
+        soundFreq: 960
+      });
+
+      return trace;
+    }
+
+    // LOCALIZED ZERO-JUMP CODE LINE HIGHLIGHTER
+    function highlightCodeLine(lineNum) {
+      document.querySelectorAll('.code-line').forEach(el => el.classList.remove('active-line'));
+      const activeEl = document.getElementById(`line${lineNum}`);
+      if (activeEl) {
+        activeEl.classList.add('active-line');
+
+        const containerTop = codeContainer.scrollTop;
+        const containerBottom = containerTop + codeContainer.clientHeight;
+        const elTop = activeEl.offsetTop - codeContainer.offsetTop;
+        const elBottom = elTop + activeEl.clientHeight;
+
+        if (elTop < containerTop + 24) {
+          codeContainer.scrollTo({ top: Math.max(0, elTop - 24), behavior: 'smooth' });
+        } else if (elBottom > containerBottom - 24) {
+          codeContainer.scrollTo({ top: elBottom - codeContainer.clientHeight + 24, behavior: 'smooth' });
+        }
+      }
+    }
+
+    // DRAW OVERHEAD CURVED SWAP TRAJECTORY ARC BETWEEN INDEX a AND INDEX b
+    function drawSwapArc(a, b, labelText) {
+      swapArcSvg.innerHTML = '';
+      if (a === undefined || b === undefined || a < 0 || b < 0) return;
+
+      const elA = arrayArena.querySelector(`[data-index="${a}"]`);
+      const elB = arrayArena.querySelector(`[data-index="${b}"]`);
+      if (!elA || !elB) return;
+
+      const wrapperRect = arenaWrapper.getBoundingClientRect();
+      const rectA = elA.getBoundingClientRect();
+      const rectB = elB.getBoundingClientRect();
+
+      const x1 = (rectA.left - wrapperRect.left) + rectA.width / 2;
+      const x2 = (rectB.left - wrapperRect.left) + rectB.width / 2;
+      const yBase = 48;
+
+      if (a === b) {
+        swapArcSvg.innerHTML = `
+          <path d="M ${x1 - 12} ${yBase} C ${x1 - 24} 6, ${x1 + 24} 6, ${x1 + 12} ${yBase}"
+                fill="none" stroke="#fbbf24" stroke-width="2.2" class="swap-arc-path" />
+          <polygon points="${x1 + 12},${yBase + 2} ${x1 + 7},${yBase - 6} ${x1 + 17},${yBase - 5}" fill="#fbbf24" />
+          <rect x="${x1 - 44}" y="2" width="88" height="18" rx="6" fill="rgba(15, 23, 42, 0.92)" stroke="rgba(251, 191, 36, 0.65)" />
+          <text x="${x1}" y="14" text-anchor="middle" fill="#fde68a" font-size="10" font-family="Fira Code, monospace" font-weight="700">${labelText}</text>
+        `;
+        return;
+      }
+
+      const midX = (x1 + x2) / 2;
+      const archY = 6;
+
+      swapArcSvg.innerHTML = `
+        <path d="M ${x1} ${yBase} Q ${midX} ${archY}, ${x2} ${yBase}"
+              fill="none" stroke="#38bdf8" stroke-width="2.4" class="swap-arc-path" />
+        <circle cx="${x1}" cy="${yBase}" r="4" fill="#fbbf24" />
+        <polygon points="${x2},${yBase + 2} ${x2 - 5},${yBase - 7} ${x2 + 5},${yBase - 7}" fill="#38bdf8" />
+        <rect x="${midX - 68}" y="2" width="136" height="19" rx="6" fill="rgba(15, 23, 42, 0.94)" stroke="rgba(56, 189, 248, 0.65)" />
+        <text x="${midX}" y="14.5" text-anchor="middle" fill="#bae6fd" font-size="10" font-family="Fira Code, monospace" font-weight="700">${labelText}</text>
+      `;
+    }
+
+    // RENDER CURRENT STEP WITH FLIP LIFT-AND-ARC MOVEMENT
+    function renderStep(idx, animateMovement = true) {
+      if (idx < 0 || idx >= steps.length) return;
+      const step = steps[idx];
+      const items = step.items;
+      const n = items.length;
+      const maxAbs = Math.max(1, ...items.map(it => Math.abs(it.val)));
+
+      // Capture old horizontal screen X positions of existing DOM elements by item.id (FLIP: First)
+      const prevLeftMap = new Map();
+      if (animateMovement) {
+        arrayArena.querySelectorAll('[data-item-id]').forEach(el => {
+          const itemId = parseInt(el.dataset.itemId, 10);
+          prevLeftMap.set(itemId, el.getBoundingClientRect().left);
+        });
+      }
+
+      // Update Header Scrubber & Badges
+      stepCounterBadge.textContent = `Step: ${idx + 1} / ${steps.length}`;
+      phaseBadge.textContent = step.phase;
+      swapCounterBadge.textContent = `Swaps: ${step.swapCount}`;
+      stepScrubber.max = steps.length - 1;
+      stepScrubber.value = idx;
+      initialPermTag.textContent = `[${currentNums.join(', ')}]`;
+
+      // Highlight Active Stage Card (1, 2, or 3)
+      [stage1Card, stage2Card, stage3Card].forEach((card, sIdx) => {
+        const stageNum = sIdx + 1;
+        if (step.stage === stageNum && !step.isComplete) {
+          card.classList.add('border-cyan-400/70', 'bg-cyan-500/10', 'shadow-lg', 'shadow-cyan-500/10');
+          card.classList.remove('border-white/10');
+        } else if (step.isComplete || step.stage > stageNum) {
+          card.classList.add('border-emerald-400/40', 'bg-emerald-500/[0.05]');
+          card.classList.remove('border-cyan-400/70', 'bg-cyan-500/10', 'border-white/10');
+        } else {
+          card.classList.remove('border-cyan-400/70', 'bg-cyan-500/10', 'border-emerald-400/40', 'bg-emerald-500/[0.05]');
+          card.classList.add('border-white/10');
+        }
+      });
+
+      // Update Telemetry HUD Cards
+      if (step.i !== null && step.i !== undefined) {
+        varPivotIdx.textContent = step.i;
+        varPivotVal.textContent = step.i >= 0 && step.i < n ? `(val: ${items[step.i].val})` : '(none)';
+      } else {
+        varPivotIdx.textContent = '-';
+        varPivotVal.textContent = '';
+      }
+
+      if (step.j >= 0 && step.j < n) {
+        varSuccIdx.textContent = step.j;
+        varSuccVal.textContent = `(val: ${items[step.j].val})`;
+      } else {
+        varSuccIdx.textContent = '-';
+        varSuccVal.textContent = '';
+      }
+
+      if (step.revLeft >= 0 && step.revRight >= 0) {
+        varRevPtrs.textContent = `${step.revLeft} , ${step.revRight}`;
+      } else {
+        varRevPtrs.textContent = '- , -';
+      }
+
+      if (step.tempVal !== null && step.tempVal !== undefined) {
+        varTempVal.textContent = step.tempVal;
+        varTempVal.className = "code-font text-xl font-black text-amber-300";
+        varSwapIndices.textContent = step.swapPair ? `i=${step.swapPair[0]}, j=${step.swapPair[1]}` : 'Active swap';
+        tempRegisterCard.classList.add('border-amber-400', 'bg-amber-500/10');
+      } else {
+        varTempVal.textContent = 'null';
+        varTempVal.className = "code-font text-xl font-black text-slate-500";
+        varSwapIndices.textContent = 'Swap register';
+        tempRegisterCard.classList.remove('border-amber-400', 'bg-amber-500/10');
+      }
+
+      // Narrative Description
+      stepDescription.innerHTML = step.desc;
+
+      // 1. Render Glassy Boxes & Bars
+      arrayArena.innerHTML = '';
+
+      items.forEach((item, index) => {
+        const val = item.val;
+        const isPivot = (step.i === index && step.i >= 0);
+        const isSuccessor = (step.j === index && step.j >= 0);
+        const isRevLeft = (step.revLeft === index && step.revLeft >= 0);
+        const isRevRight = (step.revRight === index && step.revRight >= 0);
+        const isInSuffix = (step.i !== null && step.i !== undefined && index > step.i && !step.isComplete);
+        const isLifted = (step.liftedIdx === index);
+        const isSwapActive = step.swapPair && (step.swapPair[0] === index || step.swapPair[1] === index);
+
+        const card = document.createElement('div');
+        card.dataset.itemId = item.id;
+        card.dataset.index = index;
+
+        let classes = 'glass-element-card relative rounded-2xl p-2.5 flex flex-col items-center justify-between select-none shrink-0 ';
+        classes += viewMode === 'bars' ? 'w-14 sm:w-16 min-h-[215px] ' : viewMode === 'boxes' ? 'w-16 sm:w-20 min-h-[126px] ' : 'w-16 sm:w-20 min-h-[225px] ';
+
+        if (isLifted) {
+          classes += 'lifted-temp ';
+        } else if (isSwapActive) {
+          classes += 'swap-active ';
+        } else if (step.isComplete) {
+          classes += 'perm-done ';
+        } else if (isPivot) {
+          classes += 'pivot-card ';
+        } else if (isSuccessor) {
+          classes += 'successor-card ';
+        } else if (isRevLeft) {
+          classes += 'rev-left-card ';
+        } else if (isRevRight) {
+          classes += 'rev-right-card ';
+        } else if (isInSuffix) {
+          classes += 'suffix-card ';
+        }
+
+        card.className = classes;
+
+        // Pointer Badges Row
+        const ptrBadges = [];
+        if (isPivot) ptrBadges.push(`<span class="px-1.5 py-0.2 rounded bg-rose-500 text-white font-extrabold text-[9px] code-font shadow">i</span>`);
+        if (isSuccessor) ptrBadges.push(`<span class="px-1.5 py-0.2 rounded bg-amber-400 text-slate-950 font-extrabold text-[9px] code-font shadow">j</span>`);
+        if (isRevLeft && isRevRight) {
+          ptrBadges.push(`<span class="px-1.5 py-0.2 rounded bg-emerald-400 text-slate-950 font-extrabold text-[9px] code-font shadow">L=R</span>`);
+        } else {
+          if (isRevLeft) ptrBadges.push(`<span class="px-1.5 py-0.2 rounded bg-cyan-400 text-slate-950 font-extrabold text-[9px] code-font shadow">L</span>`);
+          if (isRevRight) ptrBadges.push(`<span class="px-1.5 py-0.2 rounded bg-purple-400 text-slate-950 font-extrabold text-[9px] code-font shadow">R</span>`);
+        }
+
+        const topHeader = `
+          <div class="w-full flex items-center justify-between text-[10px] code-font min-h-[18px]">
+            <span class="text-slate-400">[${index}]</span>
+            <div class="flex items-center gap-0.5">${ptrBadges.join('')}</div>
+          </div>
+        `;
+
+        // Magnitude Bar Section (for 'both' and 'bars' modes)
+        let barSection = '';
+        if (viewMode === 'both' || viewMode === 'bars') {
+          const barPct = val === 0 ? 10 : Math.max(18, (Math.abs(val) / maxAbs) * 100);
+          let barStyle = 'bg-gradient-to-t from-slate-600/80 via-slate-500/80 to-slate-400/90 border-t border-slate-200/70';
+          if (step.isComplete) {
+            barStyle = 'bg-gradient-to-t from-emerald-600 via-emerald-500 to-emerald-400 border-t border-emerald-200 shadow-[0_0_16px_rgba(16,185,129,0.45)]';
+          } else if (isLifted || isSwapActive) {
+            barStyle = 'bg-gradient-to-t from-sky-600 via-cyan-500 to-cyan-300 border-t border-white shadow-[0_0_18px_rgba(56,189,248,0.6)]';
+          } else if (isPivot) {
+            barStyle = 'bg-gradient-to-t from-rose-600 via-rose-500 to-rose-400 border-t border-rose-200 shadow-[0_0_16px_rgba(244,63,94,0.5)]';
+          } else if (isSuccessor) {
+            barStyle = 'bg-gradient-to-t from-amber-600 via-amber-500 to-amber-300 border-t border-amber-100 shadow-[0_0_16px_rgba(251,191,36,0.5)]';
+          } else if (isRevLeft) {
+            barStyle = 'bg-gradient-to-t from-cyan-600 via-cyan-500 to-cyan-300 border-t border-cyan-100 shadow-[0_0_16px_rgba(34,211,238,0.5)]';
+          } else if (isRevRight) {
+            barStyle = 'bg-gradient-to-t from-purple-600 via-purple-500 to-purple-300 border-t border-purple-100 shadow-[0_0_16px_rgba(168,85,247,0.5)]';
+          } else if (isInSuffix) {
+            barStyle = 'bg-gradient-to-t from-indigo-700/85 via-purple-500/75 to-purple-400/85 border-t border-purple-200/70';
+          }
+
+          barSection = `
+            <div class="w-full h-28 flex items-end justify-center my-1.5">
+              <div class="w-9 sm:w-11 rounded-t-lg transition-all duration-300 flex items-center justify-center ${barStyle}"
+                   style="height: ${barPct}%;">
+                <span class="code-font text-xs font-black text-white drop-shadow">${val}</span>
+              </div>
+            </div>
+          `;
+        }
+
+        // Lifted Temp Badge
+        const liftedChip = isLifted
+          ? `<span class="absolute -top-6 left-1/2 -translate-x-1/2 px-2 py-0.5 rounded-md bg-amber-400 text-slate-950 code-font text-[9px] font-extrabold shadow-lg whitespace-nowrap">temp = ${val}</span>`
+          : '';
+
+        // Role Footer Pill
+        let roleLabel = 'elem';
+        let roleClass = 'bg-white/[0.04] text-slate-400 border-white/10';
+        if (step.isComplete) {
+          roleLabel = 'next';
+          roleClass = 'bg-emerald-500/20 text-emerald-200 border-emerald-400/40';
+        } else if (isPivot) {
+          roleLabel = 'pivot';
+          roleClass = 'bg-rose-500/25 text-rose-200 border-rose-400/45 font-bold';
+        } else if (isSuccessor) {
+          roleLabel = 'succ';
+          roleClass = 'bg-amber-500/25 text-amber-200 border-amber-400/45 font-bold';
+        } else if (isRevLeft || isRevRight) {
+          roleLabel = 'rev';
+          roleClass = 'bg-cyan-500/25 text-cyan-200 border-cyan-400/45 font-bold';
+        } else if (isInSuffix) {
+          roleLabel = 'suffix';
+          roleClass = 'bg-purple-500/20 text-purple-200 border-purple-400/35';
+        }
+
+        const bottomFooter = `
+          <div class="w-full flex flex-col items-center gap-1">
+            ${viewMode === 'boxes' ? `<span class="code-font text-2xl font-extrabold my-1.5 text-white">${val}</span>` : ''}
+            <span class="text-[9px] code-font px-1.5 py-0.5 rounded border ${roleClass}">
+              ${roleLabel}
+            </span>
+          </div>
+        `;
+
+        card.innerHTML = `${liftedChip}${topHeader}${barSection}${bottomFooter}`;
+        arrayArena.appendChild(card);
+      });
+
+      // 2. Execute Physical FLIP Lift-and-Arc Glide Animation When Elements Swap!
+      if (animateMovement && prevLeftMap.size > 0) {
+        arrayArena.querySelectorAll('[data-item-id]').forEach(el => {
+          const itemId = parseInt(el.dataset.itemId, 10);
+          const oldLeft = prevLeftMap.get(itemId);
+          if (oldLeft !== undefined) {
+            const newLeft = el.getBoundingClientRect().left;
+            const deltaX = oldLeft - newLeft;
+
+            if (Math.abs(deltaX) > 2) {
+              // Lift high above other bars/boxes (-44px) and glide smoothly over the top to the target slot!
+              const animDuration = Math.min(540, Math.max(240, playSpeed * 0.78));
+              el.style.zIndex = '50';
+              const anim = el.animate([
+                { transform: `translate(${deltaX}px, 0px) scale(1)` },
+                { transform: `translate(${deltaX * 0.75}px, -44px) scale(1.07)`, offset: 0.3 },
+                { transform: `translate(${deltaX * 0.25}px, -44px) scale(1.07)`, offset: 0.7 },
+                { transform: `translate(0px, 0px) scale(1)` }
+              ], {
+                duration: animDuration,
+                easing: 'cubic-bezier(0.22, 1, 0.36, 1)'
+              });
+              anim.onfinish = () => {
+                el.style.zIndex = '';
+              };
+            }
+          }
+        });
+      }
+
+      // 3. Draw Overhead Swap Arc SVG
+      if (step.swapPair) {
+        requestAnimationFrame(() => drawSwapArc(step.swapPair[0], step.swapPair[1], step.swapLabel));
+      } else {
+        swapArcSvg.innerHTML = '';
+      }
+
+      // 4. Render Permutation Structure Regions Bar
+      zonesBarContainer.innerHTML = '';
+      zonesBarContainer.style.gridTemplateColumns = `repeat(${n}, minmax(0, 1fr))`;
+
+      for (let idxCell = 0; idxCell < n; idxCell++) {
+        const zoneCell = document.createElement('div');
+        let zStyle = 'bg-white/[0.04] border-white/10 text-slate-400';
+        let zLabel = 'scan';
+
+        if (step.isComplete) {
+          zStyle = 'bg-emerald-500/20 border-emerald-400/40 text-emerald-200 font-bold';
+          zLabel = 'done';
+        } else if (step.i !== null && step.i !== undefined) {
+          if (idxCell === step.i && step.i >= 0) {
+            zStyle = 'bg-rose-500/25 border-rose-400/50 text-rose-200 font-bold';
+            zLabel = 'pivot';
+          } else if (idxCell > step.i) {
+            zStyle = 'bg-purple-500/20 border-purple-400/40 text-purple-200 font-semibold';
+            zLabel = step.stage === 3 ? 'rev' : 'suffix';
+          } else if (step.pivotLocked) {
+            zStyle = 'bg-slate-700/40 border-slate-500/35 text-slate-300';
+            zLabel = 'prefix';
+          }
+        }
+
+        zoneCell.className = `py-1 px-1 rounded-md border text-center truncate transition-all duration-300 ${zStyle}`;
+        zoneCell.textContent = zLabel;
+        zonesBarContainer.appendChild(zoneCell);
+      }
+
+      // 5. Update Decision Banner & Swap Badge Pill
+      if (step.swapLabel) {
+        swapBadgePill.classList.remove('hidden');
+        swapBadgePill.textContent = step.swapLabel;
+      } else {
+        swapBadgePill.classList.add('hidden');
+      }
+
+      if (step.isComplete) {
+        decisionIcon.className = "fa-solid fa-trophy text-emerald-400 text-base";
+        decisionBanner.className = "p-3.5 rounded-xl bg-emerald-500/15 border border-emerald-400/35 text-xs flex flex-col sm:flex-row items-center justify-between gap-3 backdrop-blur-md";
+        swapCounterBadge.classList.add('complete-badge-anim');
+        setTimeout(() => swapCounterBadge.classList.remove('complete-badge-anim'), 650);
+      } else if (step.swapPair) {
+        decisionIcon.className = "fa-solid fa-arrows-rotate text-amber-400 text-base";
+        decisionBanner.className = "p-3.5 rounded-xl bg-amber-500/12 border border-amber-400/30 text-xs flex flex-col sm:flex-row items-center justify-between gap-3 backdrop-blur-md";
+      } else {
+        decisionIcon.className = "fa-solid fa-circle-info text-cyan-400 text-base";
+        decisionBanner.className = "p-3.5 rounded-xl bg-white/[0.04] border border-white/10 text-xs flex flex-col sm:flex-row items-center justify-between gap-3 backdrop-blur-md";
+      }
+      decisionText.innerHTML = step.desc;
+
+      // 6. Highlight Active Java Line & Play Audio Tone
+      highlightCodeLine(step.line);
+      if (step.soundFreq) {
+        playTone(step.soundFreq, 'sine', 0.08, 0.035);
+      }
+    }
+
+    // PLAYBACK CONTROLLER
+    function setPlaying(playing) {
+      isPlaying = playing;
+      if (isPlaying) {
+        playIcon.className = "fa-solid fa-pause";
+        playText.textContent = "Stop";
+        btnPlay.classList.add('bg-rose-500/25', 'text-rose-200', 'border-rose-400/50');
+        btnPlay.classList.remove('bg-cyan-500/25', 'text-cyan-200', 'border-cyan-400/50');
+
+        playInterval = setInterval(() => {
+          if (currentStepIdx < steps.length - 1) {
+            currentStepIdx++;
+            renderStep(currentStepIdx, true);
+          } else {
+            setPlaying(false);
+          }
+        }, playSpeed);
+      } else {
+        playIcon.className = "fa-solid fa-play";
+        playText.textContent = "Start";
+        btnPlay.classList.remove('bg-rose-500/25', 'text-rose-200', 'border-rose-400/50');
+        btnPlay.classList.add('bg-cyan-500/25', 'text-cyan-200', 'border-cyan-400/50');
+        if (playInterval) {
+          clearInterval(playInterval);
+          playInterval = null;
+        }
+      }
+    }
+
+    function initSimulation(numsArr) {
+      setPlaying(false);
+      currentNums = [...numsArr];
+      steps = generateSteps(currentNums);
+      currentStepIdx = 0;
+      stepScrubber.max = steps.length - 1;
+      stepScrubber.value = 0;
+      renderStep(0, false);
+    }
+
+    // EVENT LISTENERS
+    btnPlay.addEventListener('click', () => {
+      if (currentStepIdx >= steps.length - 1) {
+        currentStepIdx = 0;
+        renderStep(0, false);
+      }
+      setPlaying(!isPlaying);
+    });
+
+    btnNext.addEventListener('click', () => {
+      setPlaying(false);
+      if (currentStepIdx < steps.length - 1) {
+        currentStepIdx++;
+        renderStep(currentStepIdx, true);
+      }
+    });
+
+    btnPrev.addEventListener('click', () => {
+      setPlaying(false);
+      if (currentStepIdx > 0) {
+        currentStepIdx--;
+        renderStep(currentStepIdx, true);
+      }
+    });
+
+    btnReset.addEventListener('click', () => {
+      setPlaying(false);
+      currentStepIdx = 0;
+      renderStep(0, false);
+    });
+
+    stepScrubber.addEventListener('input', (e) => {
+      setPlaying(false);
+      currentStepIdx = parseInt(e.target.value, 10);
+      renderStep(currentStepIdx, false);
+    });
+
+    document.querySelectorAll('.speed-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.speed-btn').forEach(b => {
+          b.classList.remove('bg-cyan-500/30', 'text-cyan-200', 'font-semibold');
+        });
+        btn.classList.add('bg-cyan-500/30', 'text-cyan-200', 'font-semibold');
+        playSpeed = parseInt(btn.dataset.speed, 10);
+        if (isPlaying) {
+          setPlaying(false);
+          setPlaying(true);
+        }
+      });
+    });
+
+    document.querySelectorAll('.view-mode-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.view-mode-btn').forEach(b => {
+          b.classList.remove('bg-cyan-500/30', 'text-cyan-200', 'font-semibold');
+          b.classList.add('text-slate-300');
+        });
+        btn.classList.add('bg-cyan-500/30', 'text-cyan-200', 'font-semibold');
+        btn.classList.remove('text-slate-300');
+        viewMode = btn.dataset.mode;
+        renderStep(currentStepIdx, false);
+      });
+    });
+
+    btnAudio.addEventListener('click', () => {
+      audioEnabled = !audioEnabled;
+      if (audioEnabled) {
+        audioIcon.className = "fa-solid fa-volume-high";
+        btnAudio.classList.remove('text-slate-600');
+        btnAudio.classList.add('text-slate-300');
+      } else {
+        audioIcon.className = "fa-solid fa-volume-xmark";
+        btnAudio.classList.add('text-slate-600');
+        btnAudio.classList.remove('text-slate-300');
+      }
+    });
+
+    presetSelect.addEventListener('change', (e) => {
+      const idx = parseInt(e.target.value, 10);
+      customArrInput.value = PRESETS[idx].nums.join(', ');
+      initSimulation(PRESETS[idx].nums);
+    });
+
+    btnApplyCustom.addEventListener('click', () => {
+      const text = customArrInput.value.trim();
+      if (!text) return;
+      const parsed = text.split(',')
+        .map(s => parseInt(s.trim(), 10))
+        .filter(n => !isNaN(n));
+
+      if (parsed.length >= 1) {
+        customArrInput.value = parsed.join(', ');
+        initSimulation(parsed);
+      }
+    });
+
+    window.addEventListener('resize', () => {
+      const step = steps[currentStepIdx];
+      if (step && step.swapPair) {
+        drawSwapArc(step.swapPair[0], step.swapPair[1], step.swapLabel);
+      }
+    });
+
+    window.addEventListener('keydown', (e) => {
+      if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT') return;
+      if (e.code === 'Space') {
+        e.preventDefault();
+        btnPlay.click();
+      } else if (e.code === 'ArrowRight') {
+        e.preventDefault();
+        btnNext.click();
+      } else if (e.code === 'ArrowLeft') {
+        e.preventDefault();
+        btnPrev.click();
+      }
+    });
+
+    window.onload = function() {
+      customArrInput.value = PRESETS[0].nums.join(', ');
+      initSimulation(PRESETS[0].nums);
+    };
+  </script>
+</body>
+</html>

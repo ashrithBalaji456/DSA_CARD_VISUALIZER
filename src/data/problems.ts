@@ -97,8 +97,8 @@ export const PROBLEMS: DSAProblem[] = [
         "difficulty": "Medium"
       },
       {
-        "number": 15,
-        "title": "3Sum",
+        "number": 167,
+        "title": "Two Sum II - Input Array Is Sorted",
         "difficulty": "Medium"
       }
     ],
@@ -183,6 +183,11 @@ export const PROBLEMS: DSAProblem[] = [
       {
         "number": 1941,
         "title": "Check if All Characters Have Equal Number of Occurrences",
+        "difficulty": "Easy"
+      },
+      {
+        "number": 125,
+        "title": "Valid Palindrome",
         "difficulty": "Easy"
       }
     ],
@@ -935,11 +940,6 @@ export const PROBLEMS: DSAProblem[] = [
       {
         "number": 238,
         "title": "Product of Array Except Self",
-        "difficulty": "Medium"
-      },
-      {
-        "number": 325,
-        "title": "Maximum Size Subarray Sum Equals K",
         "difficulty": "Medium"
       }
     ],
@@ -1983,11 +1983,6 @@ export const PROBLEMS: DSAProblem[] = [
         "number": 238,
         "title": "Product of Array Except Self",
         "difficulty": "Medium"
-      },
-      {
-        "number": 325,
-        "title": "Maximum Size Subarray Sum Equals K",
-        "difficulty": "Medium"
       }
     ],
     "leetcodeUrl": "https://leetcode.com/problems/running-sum-of-1d-array/"
@@ -2256,9 +2251,9 @@ export const PROBLEMS: DSAProblem[] = [
         "difficulty": "Medium"
       },
       {
-        "number": 493,
-        "title": "Reverse Pairs",
-        "difficulty": "Hard"
+        "number": 31,
+        "title": "Next Permutation",
+        "difficulty": "Medium"
       }
     ],
     "leetcodeUrl": "https://leetcode.com/problems/rotate-array/"
@@ -2694,11 +2689,6 @@ export const PROBLEMS: DSAProblem[] = [
         "number": 453,
         "title": "Minimum Moves to Equal Array Elements",
         "difficulty": "Medium"
-      },
-      {
-        "number": 15,
-        "title": "3Sum",
-        "difficulty": "Medium"
       }
     ],
     "leetcodeUrl": "https://leetcode.com/problems/reverse-pairs/"
@@ -2798,11 +2788,6 @@ export const PROBLEMS: DSAProblem[] = [
         "number": 1,
         "title": "Two Sum",
         "difficulty": "Easy"
-      },
-      {
-        "number": 560,
-        "title": "Subarray Sum Equals K",
-        "difficulty": "Medium"
       }
     ],
     "leetcodeUrl": "https://leetcode.com/problems/maximum-size-subarray-sum-equals-k/"
@@ -3007,8 +2992,727 @@ export const PROBLEMS: DSAProblem[] = [
         "number": 56,
         "title": "Meeting Rooms (Interval Overlap)",
         "difficulty": "Medium"
+      },
+      {
+        "number": 167,
+        "title": "Two Sum II - Input Array Is Sorted",
+        "difficulty": "Medium"
+      },
+      {
+        "number": 11,
+        "title": "Container With Most Water",
+        "difficulty": "Medium"
       }
     ],
     "leetcodeUrl": "https://leetcode.com/problems/3sum/"
+  },
+  {
+    "id": "next-permutation",
+    "number": 31,
+    "title": "Next Permutation",
+    "slug": "next-permutation",
+    "difficulty": "Medium",
+    "categories": [
+      "Arrays",
+      "Two Pointers"
+    ],
+    "description": "A permutation of an array of integers is an arrangement of its members into a sequence or linear order.\n\nThe next permutation of an array of integers is the next lexicographically greater permutation of its integer. More formally, if all the permutations of the array are sorted in one container according to their lexicographical order using the default number comparison, then the next permutation of that array is the permutation that follows it in the sorted container. If such arrangement is not possible, the array must be rearranged as the lowest possible order (i.e., sorted in ascending order).\n\nGiven an array of integers nums, find the next permutation of nums. The replacement must be in place and use only constant extra memory.",
+    "inputFormat": "nums = [int]",
+    "outputFormat": "void (rearrange nums in place)",
+    "constraints": [
+      "1 <= nums.length <= 100",
+      "0 <= nums[i] <= 100"
+    ],
+    "examples": [
+      {
+        "exampleNumber": 1,
+        "input": "nums = [1, 2, 3]",
+        "output": "[1, 3, 2]",
+        "explanation": "The next lexicographical permutation of [1, 2, 3] is [1, 3, 2].",
+        "type": "official"
+      },
+      {
+        "exampleNumber": 2,
+        "input": "nums = [3, 2, 1]",
+        "output": "[1, 2, 3]",
+        "explanation": "[3, 2, 1] is the largest permutation, so wrap around to the smallest [1, 2, 3].",
+        "type": "official"
+      },
+      {
+        "exampleNumber": 3,
+        "input": "nums = [1, 1, 5]",
+        "output": "[1, 5, 1]",
+        "explanation": "Next lexicographical permutation is [1, 5, 1].",
+        "type": "official"
+      }
+    ],
+    "approach": "Three-Step In-Place Pivot Algorithm: 1. Find pivot: scan right-to-left to find first index i where nums[i] < nums[i+1]. 2. Find successor: if pivot exists, scan right-to-left to find smallest nums[j] > nums[i] and swap nums[i] with nums[j]. 3. Reverse suffix: reverse all elements from i + 1 to end to obtain the minimal lexicographical tail.",
+    "flowSteps": [
+      {
+        "step": 1,
+        "title": "Find Pivot Breakpoint",
+        "description": "Traverse backwards from index n - 2 to find the first index i where nums[i] < nums[i+1]. If none found, the whole array is descending.",
+        "stateSnapshot": "while (i >= 0 && nums[i] >= nums[i+1]) i--",
+        "highlight": "Pivot"
+      },
+      {
+        "step": 2,
+        "title": "Swap with Next Greater Element",
+        "description": "If pivot i >= 0, find index j from the right where nums[j] > nums[i], then swap nums[i] and nums[j].",
+        "stateSnapshot": "swap(nums, i, j)",
+        "highlight": "Swap"
+      },
+      {
+        "step": 3,
+        "title": "Reverse Descending Suffix",
+        "description": "Reverse elements from index i + 1 through n - 1 using two pointers to convert descending suffix into smallest ascending sequence.",
+        "stateSnapshot": "reverse(nums, i + 1, n - 1)",
+        "highlight": "Reverse"
+      }
+    ],
+    "timeComplexity": "O(n)",
+    "timeComplexityExplanation": "At most two backwards scans of length n and one half-array reversal, strictly linear O(n).",
+    "spaceComplexity": "O(1)",
+    "spaceComplexityExplanation": "Mutates the input array completely in place without auxiliary data structures.",
+    "visualizerUrl": "/visualizers/next_permutation_visualizer.html",
+    "keyObservations": [
+      "Any suffix that is non-increasing is already at its maximum lexicographical configuration and cannot be increased.",
+      "The first element from the right that drops (nums[i] < nums[i+1]) is the highest-value position that can be made larger.",
+      "Reversing the descending suffix guarantees the minimal lexicographical increment after the swap."
+    ],
+    "importantPattern": "Lexicographic Pivot Breakpoint + Suffix Reversal",
+    "commonMistakes": [
+      "Forgetting to handle arrays that are already in strictly descending order (must reverse whole array).",
+      "Finding the maximum element in suffix instead of the smallest element strictly greater than nums[i]."
+    ],
+    "optimalApproach": "Single-Pass Pivot Search with In-Place Suffix Reversal",
+    "relatedProblems": [
+      {
+        "number": 189,
+        "title": "Rotate Array",
+        "difficulty": "Medium"
+      },
+      {
+        "number": 15,
+        "title": "3Sum",
+        "difficulty": "Medium"
+      },
+      {
+        "number": 75,
+        "title": "Sort Colors",
+        "difficulty": "Medium"
+      },
+      {
+        "number": 493,
+        "title": "Reverse Pairs",
+        "difficulty": "Hard"
+      }
+    ],
+    "leetcodeUrl": "https://leetcode.com/problems/next-permutation/"
+  },
+  {
+    "id": "sort-colors",
+    "number": 75,
+    "title": "Sort Colors",
+    "slug": "sort-colors",
+    "difficulty": "Medium",
+    "categories": [
+      "Arrays",
+      "Two Pointers",
+      "Sorting"
+    ],
+    "description": "Given an array nums with n objects colored red, white, or blue, sort them in-place so that objects of the same color are adjacent, with the colors in the order red, white, and blue.\n\nWe will use the integers 0, 1, and 2 to represent the color red, white, and blue, respectively.\n\nYou must solve this problem without using the library's sort function and in one pass with constant extra space.",
+    "inputFormat": "nums = [int] containing only 0s, 1s, and 2s",
+    "outputFormat": "void (rearrange nums in place)",
+    "constraints": [
+      "n == nums.length",
+      "1 <= n <= 300",
+      "nums[i] is either 0, 1, or 2"
+    ],
+    "examples": [
+      {
+        "exampleNumber": 1,
+        "input": "nums = [2, 0, 2, 1, 1, 0]",
+        "output": "[0, 0, 1, 1, 2, 2]",
+        "explanation": "Zeros are partitioned to front, ones in the middle, and twos at the back.",
+        "type": "official"
+      },
+      {
+        "exampleNumber": 2,
+        "input": "nums = [2, 0, 1]",
+        "output": "[0, 1, 2]",
+        "explanation": "Values sorted in place to red (0), white (1), and blue (2).",
+        "type": "official"
+      }
+    ],
+    "approach": "Dutch National Flag 3-Way Partitioning: Maintain three pointers: low (next slot for 0), mid (current element under inspection), and high (next slot for 2). While mid <= high: if nums[mid] == 0, swap nums[low] and nums[mid], increment low and mid; if nums[mid] == 1, increment mid; if nums[mid] == 2, swap nums[mid] and nums[high], decrement high (do not increment mid since swapped element is uninspected).",
+    "flowSteps": [
+      {
+        "step": 1,
+        "title": "Initialize Tri-Pointers",
+        "description": "Set low = 0 (boundary of 0s), mid = 0 (current scanner), and high = n - 1 (boundary of 2s).",
+        "stateSnapshot": "low = 0, mid = 0, high = n - 1",
+        "highlight": "Init"
+      },
+      {
+        "step": 2,
+        "title": "Inspect & Route Element",
+        "description": "If nums[mid] == 0: swap(low++, mid++). If nums[mid] == 1: mid++. If nums[mid] == 2: swap(mid, high--).",
+        "stateSnapshot": "nums[mid] matches 0, 1, or 2",
+        "highlight": "Partition"
+      },
+      {
+        "step": 3,
+        "title": "Converge & Complete",
+        "description": "Continue until mid > high, partitioning array cleanly into [0...low-1] as 0s, [low...high] as 1s, and [high+1...n-1] as 2s.",
+        "stateSnapshot": "mid > high -> Sorted",
+        "highlight": "Finish"
+      }
+    ],
+    "timeComplexity": "O(n)",
+    "timeComplexityExplanation": "Single-pass algorithm where either mid increments or high decrements on each step, guaranteeing at most n operations.",
+    "spaceComplexity": "O(1)",
+    "spaceComplexityExplanation": "Operates strictly in place using three integer pointers.",
+    "visualizerUrl": "/visualizers/sort_colors_visualizer.html",
+    "keyObservations": [
+      "When swapping nums[mid] with nums[low], nums[low] is guaranteed to be 1, so mid can safely advance.",
+      "When swapping nums[mid] with nums[high], the element arriving at mid from high is unknown, so mid must NOT advance until checked.",
+      "Solves the 3-category sorting problem in exactly one linear pass without auxiliary counting arrays."
+    ],
+    "importantPattern": "Dutch National Flag 3-Way Partitioning",
+    "commonMistakes": [
+      "Advancing mid after swapping with high, causing uninspected elements from the back to be skipped.",
+      "Using two-pass counting sort instead of the required one-pass in-place algorithm."
+    ],
+    "optimalApproach": "One-Pass Dutch National Flag Algorithm",
+    "relatedProblems": [
+      {
+        "number": 31,
+        "title": "Next Permutation",
+        "difficulty": "Medium"
+      },
+      {
+        "number": 15,
+        "title": "3Sum",
+        "difficulty": "Medium"
+      },
+      {
+        "number": 189,
+        "title": "Rotate Array",
+        "difficulty": "Medium"
+      },
+      {
+        "number": 167,
+        "title": "Two Sum II - Input Array Is Sorted",
+        "difficulty": "Medium"
+      }
+    ],
+    "leetcodeUrl": "https://leetcode.com/problems/sort-colors/"
+  },
+  {
+    "id": "valid-palindrome",
+    "number": 125,
+    "title": "Valid Palindrome",
+    "slug": "valid-palindrome",
+    "difficulty": "Easy",
+    "categories": [
+      "Two Pointers",
+      "Strings"
+    ],
+    "description": "A phrase is a palindrome if, after converting all uppercase letters into lowercase letters and removing all non-alphanumeric characters, it reads the same forward and backward. Alphanumeric characters include letters and numbers.\n\nGiven a string s, return true if it is a palindrome, or false otherwise.",
+    "inputFormat": "s = string",
+    "outputFormat": "boolean (true if palindrome, false otherwise)",
+    "constraints": [
+      "1 <= s.length <= 2 * 10^5",
+      "s consists only of printable ASCII characters"
+    ],
+    "examples": [
+      {
+        "exampleNumber": 1,
+        "input": "s = \"A man, a plan, a canal: Panama\"",
+        "output": "true",
+        "explanation": "\"amanaplanacanalpanama\" is a palindrome.",
+        "type": "official"
+      },
+      {
+        "exampleNumber": 2,
+        "input": "s = \"race a car\"",
+        "output": "false",
+        "explanation": "\"raceacar\" is not a palindrome.",
+        "type": "official"
+      },
+      {
+        "exampleNumber": 3,
+        "input": "s = \" \"",
+        "output": "true",
+        "explanation": "s is an empty string \"\" after removing non-alphanumeric characters. An empty string reads the same forward and backward.",
+        "type": "official"
+      }
+    ],
+    "approach": "In-Place Converging Two Pointers: Position left = 0 and right = s.length - 1. While left < right, skip non-alphanumeric characters at both ends. Compare Character.toLowerCase(s[left]) with Character.toLowerCase(s[right]). If unequal, return false. Otherwise increment left and decrement right. If pointers meet without mismatch, return true.",
+    "flowSteps": [
+      {
+        "step": 1,
+        "title": "Initialize Edge Pointers",
+        "description": "Initialize left = 0 at start and right = s.length - 1 at end.",
+        "stateSnapshot": "left = 0, right = n - 1",
+        "highlight": "Init"
+      },
+      {
+        "step": 2,
+        "title": "Skip Non-Alphanumeric Chars",
+        "description": "Advance left while left < right and !isLetterOrDigit(s[left]). Decrement right while left < right and !isLetterOrDigit(s[right]).",
+        "stateSnapshot": "Skip punctuation & spaces",
+        "highlight": "Filter"
+      },
+      {
+        "step": 3,
+        "title": "Case-Insensitive Match",
+        "description": "Compare toLower(s[left]) === toLower(s[right]). If mismatch, return false; otherwise left++, right--.",
+        "stateSnapshot": "toLower(s[left]) === toLower(s[right])",
+        "highlight": "Compare"
+      }
+    ],
+    "timeComplexity": "O(n)",
+    "timeComplexityExplanation": "Each character is inspected by either left or right pointer at most once, running in strictly O(n) time.",
+    "spaceComplexity": "O(1)",
+    "spaceComplexityExplanation": "Requires no string copies, regex filtering buffers, or reversed string allocations.",
+    "visualizerUrl": "/visualizers/valid_palindrome_visualizer.html",
+    "keyObservations": [
+      "Pre-filtering the string with regex or building a new string requires O(n) extra heap memory; two pointers do it in O(1) space.",
+      "Numbers ('0'-'9') are alphanumeric and must match identically without case conversion.",
+      "An empty string or string with only non-alphanumeric characters is trivially a valid palindrome."
+    ],
+    "importantPattern": "Two Pointers Converging with Predicate Skip",
+    "commonMistakes": [
+      "Filtering out digits or treating them as invalid characters.",
+      "Creating new filtered strings or using regex replacements that consume O(n) memory."
+    ],
+    "optimalApproach": "In-Place Two-Pointer Scan with Character Filtering",
+    "relatedProblems": [
+      {
+        "number": 167,
+        "title": "Two Sum II - Input Array Is Sorted",
+        "difficulty": "Medium"
+      },
+      {
+        "number": 11,
+        "title": "Container With Most Water",
+        "difficulty": "Medium"
+      },
+      {
+        "number": 242,
+        "title": "Valid Anagram",
+        "difficulty": "Easy"
+      },
+      {
+        "number": 1446,
+        "title": "Consecutive Characters (Longest Equal Run)",
+        "difficulty": "Easy"
+      }
+    ],
+    "leetcodeUrl": "https://leetcode.com/problems/valid-palindrome/"
+  },
+  {
+    "id": "two-sum-ii-input-array-is-sorted",
+    "number": 167,
+    "title": "Two Sum II - Input Array Is Sorted",
+    "slug": "two-sum-ii-input-array-is-sorted",
+    "difficulty": "Medium",
+    "categories": [
+      "Two Pointers",
+      "Arrays"
+    ],
+    "description": "Given a 1-indexed array of integers numbers that is already sorted in non-decreasing order, find two numbers such that they add up to a specific target number. Let these two numbers be numbers[index1] and numbers[index2] where 1 <= index1 < index2 <= numbers.length.\n\nReturn the indices of the two numbers, index1 and index2, added by one as an integer array [index1, index2] of length 2.\n\nThe tests are generated such that there is exactly one solution. You may not use the same element twice.\n\nYour solution must use only constant extra space.",
+    "inputFormat": "numbers = [int] (sorted non-decreasing), target = int",
+    "outputFormat": "[int, int] (1-based indices)",
+    "constraints": [
+      "2 <= numbers.length <= 3 * 10^4",
+      "-1000 <= numbers[i] <= 1000",
+      "numbers is sorted in non-decreasing order",
+      "-1000 <= target <= 1000",
+      "The tests are generated such that there is exactly one solution"
+    ],
+    "examples": [
+      {
+        "exampleNumber": 1,
+        "input": "numbers = [2, 7, 11, 15], target = 9",
+        "output": "[1, 2]",
+        "explanation": "The sum of 2 and 7 is 9. Therefore, index1 = 1, index2 = 2. We return [1, 2].",
+        "type": "official"
+      },
+      {
+        "exampleNumber": 2,
+        "input": "numbers = [2, 3, 4], target = 6",
+        "output": "[1, 3]",
+        "explanation": "The sum of 2 and 4 is 6. Therefore index1 = 1, index2 = 3. We return [1, 3].",
+        "type": "official"
+      },
+      {
+        "exampleNumber": 3,
+        "input": "numbers = [-1, 0], target = -1",
+        "output": "[1, 2]",
+        "explanation": "The sum of -1 and 0 is -1. Therefore index1 = 1, index2 = 2. We return [1, 2].",
+        "type": "official"
+      }
+    ],
+    "approach": "Two-Pointer Bilateral Convergence: Initialize left = 0 at start and right = numbers.length - 1 at end. Compute currentSum = numbers[left] + numbers[right]. If currentSum == target, return [left + 1, right + 1]. If currentSum < target, advance left to increase the sum. If currentSum > target, retreat right to decrease the sum.",
+    "flowSteps": [
+      {
+        "step": 1,
+        "title": "Initialize Boundaries",
+        "description": "Place left at index 0 and right at index n - 1.",
+        "stateSnapshot": "left = 0, right = n - 1",
+        "highlight": "Init"
+      },
+      {
+        "step": 2,
+        "title": "Evaluate Sum vs Target",
+        "description": "Calculate currentSum = numbers[left] + numbers[right]. If currentSum < target: left++. If currentSum > target: right--.",
+        "stateSnapshot": "currentSum = numbers[left] + numbers[right]",
+        "highlight": "Evaluate"
+      },
+      {
+        "step": 3,
+        "title": "Target Found",
+        "description": "When currentSum === target, return 1-based indices [left + 1, right + 1].",
+        "stateSnapshot": "return [left + 1, right + 1]",
+        "highlight": "Match"
+      }
+    ],
+    "timeComplexity": "O(n)",
+    "timeComplexityExplanation": "Each step moves either left rightward or right leftward, guaranteeing at most n pointer moves.",
+    "spaceComplexity": "O(1)",
+    "spaceComplexityExplanation": "Operates strictly in constant auxiliary memory without hash tables.",
+    "visualizerUrl": "/visualizers/two_sum_ii_visualizer.html",
+    "keyObservations": [
+      "Because the array is already sorted, increasing left strictly increases the sum, and decreasing right strictly decreases the sum.",
+      "The sorted property eliminates the need for hash map memory, reducing space complexity from O(n) to O(1).",
+      "Problem requires 1-based index return format."
+    ],
+    "importantPattern": "Bilateral Converging Two Pointers on Sorted Arrays",
+    "commonMistakes": [
+      "Returning 0-based indices instead of the requested 1-based indices.",
+      "Using a hash map when the problem strictly constrains extra space to O(1)."
+    ],
+    "optimalApproach": "Two-Pointer Converging Search",
+    "relatedProblems": [
+      {
+        "number": 1,
+        "title": "Two Sum",
+        "difficulty": "Easy"
+      },
+      {
+        "number": 15,
+        "title": "3Sum",
+        "difficulty": "Medium"
+      },
+      {
+        "number": 11,
+        "title": "Container With Most Water",
+        "difficulty": "Medium"
+      },
+      {
+        "number": 125,
+        "title": "Valid Palindrome",
+        "difficulty": "Easy"
+      }
+    ],
+    "leetcodeUrl": "https://leetcode.com/problems/two-sum-ii-input-array-is-sorted/"
+  },
+  {
+    "id": "calculate-digit-sum-of-a-string",
+    "number": 2243,
+    "title": "Calculate Digit Sum of a String",
+    "slug": "calculate-digit-sum-of-a-string",
+    "difficulty": "Easy",
+    "categories": [
+      "Strings",
+      "Simulation"
+    ],
+    "description": "You are given a string s consisting of digits and an integer k.\n\nA round can be completed if the length of s is greater than k. In one round, do the following:\n1. Divide s into consecutive groups of size k such that the first k characters are in the first group, the next k characters are in the second group, and so on. Note that the size of the last group can be smaller than k.\n2. Replace each group of digits with a string representing the sum of all its digits. For example, \"346\" is replaced with 13 because 3 + 4 + 6 = 13.\n3. Merge consecutive new digit strings together, in order, to form a new string.\n\nRepeat the process until the string's length is less than or equal to k. Return s after all rounds have been completed.",
+    "inputFormat": "s = string, k = int",
+    "outputFormat": "string",
+    "constraints": [
+      "1 <= s.length <= 100",
+      "2 <= k <= 100",
+      "s consists of digits only"
+    ],
+    "examples": [
+      {
+        "exampleNumber": 1,
+        "input": "s = \"11111222223\", k = 3",
+        "output": "\"135\"",
+        "explanation": "- For round 1, divide s into groups of size 3: \"111\", \"112\", \"222\", and \"23\".\n  Replace each group with sum: 1+1+1=3, 1+1+2=4, 2+2+2=6, 2+3=5. New string: \"3465\".\n- For round 2, divide \"3465\" into groups of 3: \"346\" and \"5\".\n  Sums: 3+4+6=13, 5=5. New string: \"135\".\n- String length is 3 <= k, so process stops. Output is \"135\".",
+        "type": "official"
+      },
+      {
+        "exampleNumber": 2,
+        "input": "s = \"00000000\", k = 3",
+        "output": "\"000\"",
+        "explanation": "- Round 1: \"000\" -> \"0\", \"000\" -> \"0\", \"00\" -> \"0\". New string: \"000\".\n- Length is 3 <= k. Stop and return \"000\".",
+        "type": "official"
+      }
+    ],
+    "approach": "Iterative Chunk Partition & Summation: While s.length > k, construct a new StringBuilder. Step through index i by increments of k. For each window s[i .. min(i+k, s.length)], sum numeric values of chars (char - '0'), convert sum to string, and append to the builder. Update s with the merged result until length <= k.",
+    "flowSteps": [
+      {
+        "step": 1,
+        "title": "Check Termination Condition",
+        "description": "Check if s.length <= k. If so, return s immediately.",
+        "stateSnapshot": "while (s.length > k)",
+        "highlight": "Check"
+      },
+      {
+        "step": 2,
+        "title": "Partition into Groups of k",
+        "description": "Iterate i from 0 to s.length with step k. Slice chunk s.substring(i, min(i+k, s.length)).",
+        "stateSnapshot": "chunk = s.substring(i, min(i+k, n))",
+        "highlight": "Chunk"
+      },
+      {
+        "step": 3,
+        "title": "Sum & Concatenate",
+        "description": "Sum digits in chunk, append stringified sum to next round's StringBuilder, and repeat until s.length <= k.",
+        "stateSnapshot": "nextStr.append(chunkSum)",
+        "highlight": "Transform"
+      }
+    ],
+    "timeComplexity": "O(n * log_k(n))",
+    "timeComplexityExplanation": "In each round, the string shrinks roughly by a factor of k (since sum of k digits <= 9k, having at most log10(9k) digits).",
+    "spaceComplexity": "O(n)",
+    "spaceComplexityExplanation": "Allocates intermediate StringBuilders to hold transformed chunk sum strings during each round.",
+    "visualizerUrl": "/visualizers/calculate_digit_sum_of_a_string_visualizer.html",
+    "keyObservations": [
+      "The last chunk may have fewer than k digits, but must be summed identically.",
+      "The sum can produce multi-digit strings (e.g. 9+9+9 = 27), which contribute multiple characters to the next round.",
+      "Because k >= 2, each round strictly shrinks the string length, guaranteeing termination."
+    ],
+    "importantPattern": "Chunk-Based String Reduction Simulation",
+    "commonMistakes": [
+      "Forgetting that the last chunk can be shorter than k digits.",
+      "Assuming chunk sums are always single digits."
+    ],
+    "optimalApproach": "StringBuilder Chunk Slicing Simulation",
+    "relatedProblems": [
+      {
+        "number": 1446,
+        "title": "Consecutive Characters (Longest Equal Run)",
+        "difficulty": "Easy"
+      },
+      {
+        "number": 1941,
+        "title": "Check if All Characters Have Equal Number of Occurrences",
+        "difficulty": "Easy"
+      },
+      {
+        "number": 125,
+        "title": "Valid Palindrome",
+        "difficulty": "Easy"
+      },
+      {
+        "number": 242,
+        "title": "Valid Anagram",
+        "difficulty": "Easy"
+      }
+    ],
+    "leetcodeUrl": "https://leetcode.com/problems/calculate-digit-sum-of-a-string/"
+  },
+  {
+    "id": "trapping-rain-water",
+    "number": 42,
+    "title": "Trapping Rain Water",
+    "slug": "trapping-rain-water",
+    "difficulty": "Hard",
+    "categories": [
+      "Two Pointers",
+      "Arrays"
+    ],
+    "description": "Given n non-negative integers representing an elevation map where the width of each bar is 1, compute how much water it can trap after raining.",
+    "inputFormat": "height = [int]",
+    "outputFormat": "int (total trapped water units)",
+    "constraints": [
+      "n == height.length",
+      "1 <= n <= 2 * 10^4",
+      "0 <= height[i] <= 10^5"
+    ],
+    "examples": [
+      {
+        "exampleNumber": 1,
+        "input": "height = [0, 1, 0, 2, 1, 0, 1, 3, 2, 1, 2, 1]",
+        "output": "6",
+        "explanation": "The elevation map traps 6 units of rain water between peaks.",
+        "type": "official"
+      },
+      {
+        "exampleNumber": 2,
+        "input": "height = [4, 2, 0, 3, 2, 5]",
+        "output": "9",
+        "explanation": "Between bar 4 and bar 5, a total of 9 units of water are trapped.",
+        "type": "official"
+      }
+    ],
+    "approach": "Two Pointers with Running Maxima: Place left = 0 and right = n - 1. Track leftMax and rightMax. Water trapped above index i is determined by min(leftMax, rightMax) - height[i]. If height[left] <= height[right]: if height[left] >= leftMax, update leftMax; else water += leftMax - height[left]; then left++. Otherwise: if height[right] >= rightMax, update rightMax; else water += rightMax - height[right]; then right--.",
+    "flowSteps": [
+      {
+        "step": 1,
+        "title": "Initialize Dual Pointers & Maxima",
+        "description": "Set left = 0, right = n - 1, leftMax = 0, rightMax = 0, and totalWater = 0.",
+        "stateSnapshot": "left = 0, right = n - 1, leftMax = 0, rightMax = 0",
+        "highlight": "Init"
+      },
+      {
+        "step": 2,
+        "title": "Compare Boundary Heights",
+        "description": "Compare height[left] and height[right]. The smaller side is the limiting barrier that decides water depth.",
+        "stateSnapshot": "height[left] <= height[right] ? Process Left : Process Right",
+        "highlight": "Bottleneck"
+      },
+      {
+        "step": 3,
+        "title": "Trap Water & Advance",
+        "description": "Accumulate trapped water (max(0, currentMax - height[curr])) and advance the corresponding pointer until left > right.",
+        "stateSnapshot": "totalWater += max - height[i]",
+        "highlight": "Accumulate"
+      }
+    ],
+    "timeComplexity": "O(n)",
+    "timeComplexityExplanation": "Each position in the array is visited exactly once as left and right pointers converge.",
+    "spaceComplexity": "O(1)",
+    "spaceComplexityExplanation": "Maintains only four scalar variables (left, right, leftMax, rightMax) without prefix/suffix arrays or stacks.",
+    "visualizerUrl": "/visualizers/trapping_rain_water_visualizer.html",
+    "keyObservations": [
+      "Water level above any bar is strictly governed by min(maxLeft, maxRight) - height.",
+      "If height[left] < height[right], we know with certainty that leftMax < rightMax (or bounded by right's height), so the water trapped at left depends only on leftMax.",
+      "Reduces space complexity from O(n) (prefix/suffix arrays or monotonic stack) down to O(1)."
+    ],
+    "importantPattern": "Two Pointers Converging on Limiting Bottleneck",
+    "commonMistakes": [
+      "Using precomputed prefix-max arrays and suffix-max arrays when O(1) space is achievable.",
+      "Moving both pointers inward simultaneously without verifying which side is the true limiting barrier."
+    ],
+    "optimalApproach": "Two-Pointer Running Maxima Convergence",
+    "relatedProblems": [
+      {
+        "number": 11,
+        "title": "Container With Most Water",
+        "difficulty": "Medium"
+      },
+      {
+        "number": 15,
+        "title": "3Sum",
+        "difficulty": "Medium"
+      },
+      {
+        "number": 167,
+        "title": "Two Sum II - Input Array Is Sorted",
+        "difficulty": "Medium"
+      },
+      {
+        "number": 53,
+        "title": "Maximum Subarray (Max Inventory Increase)",
+        "difficulty": "Medium"
+      }
+    ],
+    "leetcodeUrl": "https://leetcode.com/problems/trapping-rain-water/"
+  },
+  {
+    "id": "container-with-most-water",
+    "number": 11,
+    "title": "Container With Most Water",
+    "slug": "container-with-most-water",
+    "difficulty": "Medium",
+    "categories": [
+      "Two Pointers",
+      "Arrays",
+      "Greedy"
+    ],
+    "description": "You are given an integer array height of length n. There are n vertical lines drawn such that the two endpoints of the ith line are (i, 0) and (i, height[i]).\n\nFind two lines that together with the x-axis form a container, such that the container contains the most water.\n\nReturn the maximum amount of water a container can store.\n\nNotice that you may not slant the container.",
+    "inputFormat": "height = [int]",
+    "outputFormat": "int (maximum water area)",
+    "constraints": [
+      "n == height.length",
+      "2 <= n <= 10^5",
+      "0 <= height[i] <= 10^4"
+    ],
+    "examples": [
+      {
+        "exampleNumber": 1,
+        "input": "height = [1, 8, 6, 2, 5, 4, 8, 3, 7]",
+        "output": "49",
+        "explanation": "The vertical lines are at index 1 (height 8) and index 8 (height 7). Width = 8 - 1 = 7. Height = min(8, 7) = 7. Area = 7 * 7 = 49.",
+        "type": "official"
+      },
+      {
+        "exampleNumber": 2,
+        "input": "height = [1, 1]",
+        "output": "1",
+        "explanation": "Width is 1, min height is 1, maximum area is 1.",
+        "type": "official"
+      }
+    ],
+    "approach": "Greedy Shrinking Two Pointers: Start with the widest possible container by setting left = 0 and right = n - 1. In each step, calculate area = (right - left) * min(height[left], height[right]) and update maxArea. Since area is limited by the shorter line, moving the taller line inward would decrease width while height cannot exceed the shorter line, guaranteeing a smaller area. Therefore, greedily advance the pointer at the shorter line.",
+    "flowSteps": [
+      {
+        "step": 1,
+        "title": "Initialize Maximum Width",
+        "description": "Start at maximum possible width: left = 0, right = n - 1, and maxArea = 0.",
+        "stateSnapshot": "left = 0, right = n - 1, maxArea = 0",
+        "highlight": "Init"
+      },
+      {
+        "step": 2,
+        "title": "Compute Area & Update Maximum",
+        "description": "Calculate currentArea = (right - left) * min(height[left], height[right]). Update maxArea = max(maxArea, currentArea).",
+        "stateSnapshot": "area = (right - left) * min(h[l], h[r])",
+        "highlight": "Calculate"
+      },
+      {
+        "step": 3,
+        "title": "Greedily Advance Shorter Line",
+        "description": "If height[left] < height[right], increment left; otherwise decrement right. Repeat until left >= right.",
+        "stateSnapshot": "height[left] < height[right] ? left++ : right--",
+        "highlight": "Advance"
+      }
+    ],
+    "timeComplexity": "O(n)",
+    "timeComplexityExplanation": "Pointers start at opposite ends and move toward each other by 1 on each step, running in strictly O(n) time.",
+    "spaceComplexity": "O(1)",
+    "spaceComplexityExplanation": "Requires only constant extra memory for pointer indices and area trackers.",
+    "visualizerUrl": "/visualizers/container_with_most_water_visualizer.html",
+    "keyObservations": [
+      "Width decreases on every single step. To find a larger area with smaller width, we MUST find taller lines.",
+      "The shorter line is the limiting bottleneck; moving the taller line can never produce a larger area.",
+      "Greedily discarding the shorter line prunes an entire row/column of inferior pairs in O(1) decision time."
+    ],
+    "importantPattern": "Two-Pointer Inward Contraction with Greedy Elimination",
+    "commonMistakes": [
+      "Moving both pointers inward simultaneously.",
+      "Moving the pointer corresponding to the taller line, which mathematically cannot yield an area larger than the current one."
+    ],
+    "optimalApproach": "Greedy Two Pointers Converging on Shorter Bar",
+    "relatedProblems": [
+      {
+        "number": 42,
+        "title": "Trapping Rain Water",
+        "difficulty": "Hard"
+      },
+      {
+        "number": 167,
+        "title": "Two Sum II - Input Array Is Sorted",
+        "difficulty": "Medium"
+      },
+      {
+        "number": 15,
+        "title": "3Sum",
+        "difficulty": "Medium"
+      },
+      {
+        "number": 125,
+        "title": "Valid Palindrome",
+        "difficulty": "Easy"
+      }
+    ],
+    "leetcodeUrl": "https://leetcode.com/problems/container-with-most-water/"
   }
 ];
