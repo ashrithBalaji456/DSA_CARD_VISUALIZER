@@ -1,0 +1,1835 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>4Sum (LeetCode 18) - Glassmorphic Visualizer</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: radial-gradient(circle at 14% 16%, #0c192c 0%, #030712 100%);
+      color: #e2e8f0;
+      min-height: 100vh;
+    }
+
+    .code-font {
+      font-family: 'Fira Code', monospace;
+    }
+
+    /* Glassmorphic Surface & Controls */
+    .glass-panel {
+      background: rgba(15, 23, 42, 0.56);
+      backdrop-filter: blur(22px);
+      -webkit-backdrop-filter: blur(22px);
+      border: 1px solid rgba(255, 255, 255, 0.11);
+      box-shadow: 0 20px 45px -15px rgba(0, 0, 0, 0.68), inset 0 1px 0 0 rgba(255, 255, 255, 0.09);
+    }
+
+    .glass-button {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .glass-button:hover:not(:disabled) {
+      background: rgba(255, 255, 255, 0.15);
+      border-color: rgba(255, 255, 255, 0.28);
+      transform: translateY(-1px);
+    }
+    .glass-button:active:not(:disabled) {
+      transform: translateY(1px);
+    }
+    .glass-button:disabled {
+      opacity: 0.35;
+      cursor: not-allowed;
+    }
+
+    /* Code Execution Line Highlight */
+    .code-line {
+      transition: all 0.2s ease;
+      border-left: 3px solid transparent;
+      padding: 2px 10px;
+    }
+    .code-line.active-line {
+      background: rgba(56, 189, 248, 0.18);
+      border-left: 3px solid #38bdf8;
+      color: #ffffff;
+      box-shadow: inset 0 0 16px rgba(56, 189, 248, 0.15);
+    }
+
+    /* Glassy Element Cards & Bi-Directional Bars */
+    .glass-element-card {
+      background: rgba(255, 255, 255, 0.045);
+      border: 1px solid rgba(255, 255, 255, 0.13);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      transition: border-color 0.25s ease, background 0.25s ease, box-shadow 0.25s ease, opacity 0.25s ease;
+      will-change: transform;
+    }
+
+    .glass-element-card.dimmed-card {
+      opacity: 0.42;
+    }
+
+    .glass-element-card.ptr-i-card {
+      background: linear-gradient(180deg, rgba(168, 85, 247, 0.24) 0%, rgba(126, 34, 206, 0.09) 100%);
+      border-color: rgba(192, 132, 252, 0.9);
+      box-shadow: 0 10px 26px -6px rgba(168, 85, 247, 0.38), inset 0 1px 0 rgba(255, 255, 255, 0.25);
+    }
+
+    .glass-element-card.ptr-j-card {
+      background: linear-gradient(180deg, rgba(236, 72, 153, 0.24) 0%, rgba(190, 24, 93, 0.09) 100%);
+      border-color: rgba(244, 114, 182, 0.9);
+      box-shadow: 0 10px 26px -6px rgba(236, 72, 153, 0.38), inset 0 1px 0 rgba(255, 255, 255, 0.25);
+    }
+
+    .glass-element-card.ptr-left-card {
+      background: linear-gradient(180deg, rgba(34, 211, 238, 0.24) 0%, rgba(6, 182, 212, 0.09) 100%);
+      border-color: rgba(34, 211, 238, 0.9);
+      box-shadow: 0 10px 26px -6px rgba(34, 211, 238, 0.38), inset 0 1px 0 rgba(255, 255, 255, 0.25);
+    }
+
+    .glass-element-card.ptr-right-card {
+      background: linear-gradient(180deg, rgba(251, 191, 36, 0.24) 0%, rgba(245, 158, 11, 0.09) 100%);
+      border-color: rgba(251, 191, 36, 0.9);
+      box-shadow: 0 10px 26px -6px rgba(251, 191, 36, 0.38), inset 0 1px 0 rgba(255, 255, 255, 0.25);
+    }
+
+    .glass-element-card.match-quad-card {
+      background: linear-gradient(180deg, rgba(16, 185, 129, 0.28) 0%, rgba(5, 150, 105, 0.12) 100%);
+      border-color: rgba(52, 211, 153, 0.95);
+      box-shadow: 0 14px 32px -4px rgba(16, 185, 129, 0.48), inset 0 1px 0 rgba(255, 255, 255, 0.35);
+      z-index: 25;
+    }
+
+    .glass-element-card.skip-dup-card {
+      background: linear-gradient(180deg, rgba(244, 63, 94, 0.22) 0%, rgba(225, 29, 72, 0.08) 100%);
+      border-color: rgba(251, 113, 133, 0.85);
+      border-style: dashed;
+    }
+
+    @keyframes arcDash {
+      to {
+        stroke-dashoffset: -24;
+      }
+    }
+    .sort-arc-path {
+      stroke-dasharray: 5 5;
+      animation: arcDash 0.85s linear infinite;
+    }
+
+    @keyframes quadPop {
+      0% { transform: scale(0.8) translateY(8px); opacity: 0; }
+      70% { transform: scale(1.06) translateY(-2px); opacity: 1; }
+      100% { transform: scale(1) translateY(0); opacity: 1; }
+    }
+    .quad-card-pop {
+      animation: quadPop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+    }
+
+    /* Custom Scrollbars */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: rgba(15, 23, 42, 0.4);
+    }
+    ::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.18);
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(255, 255, 255, 0.3);
+    }
+  </style>
+</head>
+<body class="p-4 sm:p-6 lg:p-8 flex flex-col items-center justify-start min-h-screen">
+
+  <!-- Ambient Glass Glow Orbs -->
+  <div class="fixed top-6 left-1/6 w-96 h-96 bg-purple-500/14 rounded-full blur-3xl pointer-events-none -z-10"></div>
+  <div class="fixed top-1/3 right-1/6 w-96 h-96 bg-cyan-500/14 rounded-full blur-3xl pointer-events-none -z-10"></div>
+  <div class="fixed bottom-12 left-1/2 w-80 h-80 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none -z-10"></div>
+
+  <!-- MAIN WRAPPER -->
+  <div class="w-full max-w-7xl flex flex-col gap-6">
+
+    <!-- TOP FROSTED-GLASS CONTROLS DECK -->
+    <header class="glass-panel rounded-2xl p-4 sm:p-5 flex flex-col gap-4 sticky top-4 z-50">
+      <div class="flex flex-wrap items-center justify-between gap-4">
+
+        <!-- Title & Algorithm Metadata -->
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-purple-500 via-pink-500 to-cyan-400 flex items-center justify-center shadow-lg shadow-purple-500/25 text-slate-950 font-bold text-lg">
+            <i class="fa-solid fa-cubes-stacked"></i>
+          </div>
+          <div>
+            <h1 class="text-lg sm:text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white via-purple-100 to-cyan-300">
+              4Sum Unique Quadruplets
+            </h1>
+            <p class="text-xs text-slate-400 flex items-center gap-2">
+              <span class="inline-block w-2 h-2 rounded-full bg-cyan-400 animate-pulse"></span>
+              LeetCode 18 • Sorting + Dual Anchors (i, j) + Converging Pointers (L, R) • &Omicron;(n&sup3;) Time
+            </p>
+          </div>
+        </div>
+
+        <!-- Center Playback Controls: Reset, Previous, Start/Stop, Next -->
+        <div class="flex items-center gap-2 sm:gap-3 bg-white/5 p-1.5 rounded-xl border border-white/10 backdrop-blur-md">
+          <button id="btnReset" class="glass-button text-slate-200 hover:text-white px-3 py-2 rounded-lg text-sm flex items-center gap-1.5" title="Reset to Initial State">
+            <i class="fa-solid fa-rotate-left"></i>
+            <span class="hidden sm:inline">Reset</span>
+          </button>
+          <button id="btnPrev" class="glass-button text-slate-200 hover:text-white px-3 py-2 rounded-lg text-sm flex items-center gap-1.5" title="Previous Step (Left Arrow)">
+            <i class="fa-solid fa-backward-step"></i>
+            <span class="hidden sm:inline">Previous</span>
+          </button>
+          <button id="btnPlay" class="glass-button bg-cyan-500/25 text-cyan-200 hover:bg-cyan-500/35 border-cyan-400/50 px-4 py-2 rounded-lg text-sm font-semibold flex items-center gap-2 shadow-lg shadow-cyan-500/15" title="Start / Stop (Spacebar)">
+            <i class="fa-solid fa-play" id="playIcon"></i>
+            <span id="playText">Start</span>
+          </button>
+          <button id="btnNext" class="glass-button text-slate-200 hover:text-white px-3 py-2 rounded-lg text-sm flex items-center gap-1.5" title="Next Step (Right Arrow)">
+            <span class="hidden sm:inline">Next</span>
+            <i class="fa-solid fa-forward-step"></i>
+          </button>
+        </div>
+
+        <!-- Speed & Audio Controls -->
+        <div class="flex items-center gap-2">
+          <a href="/" class="glass-button px-3 py-2 rounded-xl text-xs font-semibold text-slate-300 hover:text-white flex items-center gap-1.5 border border-white/10 hover:border-indigo-500/40 bg-white/5 shrink-0 transition-all active:scale-95 cursor-pointer" title="Return to DSA Atlas Library">
+            <i class="fa-solid fa-arrow-left text-indigo-400"></i>
+            <span>DSA Atlas</span>
+          </a>
+          <div class="flex items-center bg-white/5 rounded-xl p-1 border border-white/10 text-xs text-slate-300 backdrop-blur-md">
+            <span class="px-2 py-1 text-slate-400"><i class="fa-solid fa-gauge-high mr-1"></i>Speed</span>
+            <button class="speed-btn px-2 py-1 rounded-lg hover:text-white transition" data-speed="1300">0.5x</button>
+            <button class="speed-btn px-2 py-1 rounded-lg bg-cyan-500/30 text-cyan-200 font-semibold transition" data-speed="650">1x</button>
+            <button class="speed-btn px-2 py-1 rounded-lg hover:text-white transition" data-speed="280">2x</button>
+            <button class="speed-btn px-2 py-1 rounded-lg hover:text-white transition" data-speed="100">4x</button>
+          </div>
+          <button id="btnAudio" class="glass-button p-2.5 rounded-xl text-slate-300 hover:text-cyan-300" title="Toggle Sound Effects">
+            <i class="fa-solid fa-volume-high" id="audioIcon"></i>
+          </button>
+        </div>
+
+      </div>
+
+      <!-- Scrubber Slider & Status Badges -->
+      <div class="flex flex-col sm:flex-row items-center gap-3 pt-2 border-t border-white/10">
+        <div class="flex flex-wrap items-center gap-2 text-xs text-slate-300 w-full sm:w-auto shrink-0">
+          <span id="stepCounterBadge" class="code-font px-2.5 py-1 rounded-md bg-white/5 border border-white/10 text-cyan-300">
+            Step: 0 / 0
+          </span>
+          <span id="phaseBadge" class="px-2.5 py-1 rounded-md bg-purple-500/20 border border-purple-400/30 text-purple-200 font-semibold">
+            Ready
+          </span>
+          <span id="targetHeaderBadge" class="px-2.5 py-1 rounded-md bg-amber-500/20 border border-amber-400/30 text-amber-200 font-bold">
+            Target: 0
+          </span>
+          <span id="quadCountBadge" class="px-2.5 py-1 rounded-md bg-emerald-500/20 border border-emerald-400/30 text-emerald-200 font-bold">
+            Quadruplets: 0
+          </span>
+        </div>
+        <div class="w-full flex items-center gap-3">
+          <input type="range" id="stepScrubber" min="0" max="0" value="0" class="w-full h-1.5 bg-slate-800/80 rounded-lg appearance-none cursor-pointer accent-cyan-400">
+        </div>
+      </div>
+    </header>
+
+    <!-- TEST CASES & CUSTOM (NUMS, TARGET) BAR -->
+    <section class="glass-panel rounded-2xl p-4 flex flex-wrap items-center justify-between gap-4">
+      <div class="flex flex-wrap items-center gap-3">
+        <label for="presetSelect" class="text-xs uppercase font-semibold text-slate-300 tracking-wider flex items-center gap-1.5">
+          <i class="fa-solid fa-flask text-cyan-400"></i> Test Cases:
+        </label>
+        <select id="presetSelect" class="bg-slate-900/75 border border-white/15 text-xs sm:text-sm text-slate-200 rounded-xl px-3 py-2 outline-none focus:border-cyan-400 backdrop-blur-md">
+          <option value="0">1: LeetCode Ex 1 ([1, 0, -1, 0, -2, 2], target = 0 &rarr; 3 quads)</option>
+          <option value="1">2: LeetCode Ex 2 ([2, 2, 2, 2, 2], target = 8 &rarr; [[2, 2, 2, 2]])</option>
+          <option value="2">3: 32-Bit Overflow Trap ([1000000000, 1000000000, 1000000000, 1000000000], target = -294967296 &rarr; [])</option>
+          <option value="3">4: Exact 4 Elements Match ([4, -3, 2, -1], target = 2 &rarr; [[-3, -1, 2, 4]])</option>
+          <option value="4">5: Negative Target ([-2, -5, 0, -1, -4, -3], target = -10 &rarr; 3 quads)</option>
+          <option value="5">6: Heavy Duplicates ([-1, 2, 0, -2, 1, -1, 0, 1], target = 0 &rarr; 3 quads)</option>
+          <option value="6">7: All Zeros ([0, 0, 0, 0, 0], target = 0 &rarr; [[0, 0, 0, 0]])</option>
+          <option value="7">8: Positive Mix ([6, 1, 5, 2, 4, 3], target = 14 &rarr; 3 quads)</option>
+          <option value="8">9: No Valid Quadruplet ([5, 1, 4, 2, 3], target = 50 &rarr; [])</option>
+          <option value="9">10: Fewer Than 4 Elements ([3, 1, 2], target = 6 &rarr; [])</option>
+        </select>
+      </div>
+
+      <div class="flex flex-wrap items-center gap-2 flex-grow max-w-lg">
+        <input type="text" id="customArrInput" placeholder="Array: 1, 0, -1, 0, -2, 2" class="flex-1 min-w-[140px] bg-white/5 border border-white/15 rounded-xl px-3 py-2 text-xs text-slate-200 code-font outline-none focus:border-cyan-400 backdrop-blur-md">
+        <input type="number" id="customTargetInput" value="0" placeholder="target" class="w-24 bg-white/5 border border-white/15 rounded-xl px-2.5 py-2 text-xs text-slate-200 code-font outline-none focus:border-cyan-400 backdrop-blur-md" title="Target sum">
+        <button id="btnApplyCustom" class="glass-button text-xs px-4 py-2 rounded-xl text-cyan-300 font-semibold shrink-0">
+          Load Input
+        </button>
+      </div>
+    </section>
+
+    <!-- MAIN VISUALIZATION & CODE SECTION -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+      <!-- LEFT: FOUR-POINTER TELEMETRY, GLASSY BOXES & BARS, RESULT VAULT (7 Cols) -->
+      <section class="lg:col-span-7 flex flex-col gap-6">
+
+        <!-- Live Four-Pointer & Long Sum Telemetry Cards -->
+        <div class="grid grid-cols-2 sm:grid-cols-5 gap-3">
+
+          <!-- Anchor i -->
+          <div class="glass-panel rounded-xl p-3 flex flex-col justify-between border-purple-400/35">
+            <span class="text-[11px] text-slate-400 uppercase font-semibold flex items-center justify-between">
+              Anchor (i)
+              <span class="w-2 h-2 rounded-full bg-purple-400"></span>
+            </span>
+            <div class="flex items-baseline gap-1.5 mt-1.5">
+              <span id="varIVal" class="code-font text-lg sm:text-xl font-bold text-purple-300">-</span>
+              <span id="varIIdx" class="text-[10px] text-slate-400 code-font">idx:-</span>
+            </div>
+            <span class="text-[10px] text-purple-200/75 mt-1 code-font">1st element</span>
+          </div>
+
+          <!-- Anchor j -->
+          <div class="glass-panel rounded-xl p-3 flex flex-col justify-between border-pink-400/35">
+            <span class="text-[11px] text-slate-400 uppercase font-semibold flex items-center justify-between">
+              Anchor (j)
+              <span class="w-2 h-2 rounded-full bg-pink-400"></span>
+            </span>
+            <div class="flex items-baseline gap-1.5 mt-1.5">
+              <span id="varJVal" class="code-font text-lg sm:text-xl font-bold text-pink-300">-</span>
+              <span id="varJIdx" class="text-[10px] text-slate-400 code-font">idx:-</span>
+            </div>
+            <span class="text-[10px] text-pink-200/75 mt-1 code-font">2nd element</span>
+          </div>
+
+          <!-- Left Ptr -->
+          <div class="glass-panel rounded-xl p-3 flex flex-col justify-between border-cyan-400/35">
+            <span class="text-[11px] text-slate-400 uppercase font-semibold flex items-center justify-between">
+              Left (L)
+              <span class="w-2 h-2 rounded-full bg-cyan-400"></span>
+            </span>
+            <div class="flex items-baseline gap-1.5 mt-1.5">
+              <span id="varLeftVal" class="code-font text-lg sm:text-xl font-bold text-cyan-300">-</span>
+              <span id="varLeftIdx" class="text-[10px] text-slate-400 code-font">idx:-</span>
+            </div>
+            <span class="text-[10px] text-cyan-200/75 mt-1 code-font">3rd element</span>
+          </div>
+
+          <!-- Right Ptr -->
+          <div class="glass-panel rounded-xl p-3 flex flex-col justify-between border-amber-400/35">
+            <span class="text-[11px] text-slate-400 uppercase font-semibold flex items-center justify-between">
+              Right (R)
+              <span class="w-2 h-2 rounded-full bg-amber-400"></span>
+            </span>
+            <div class="flex items-baseline gap-1.5 mt-1.5">
+              <span id="varRightVal" class="code-font text-lg sm:text-xl font-bold text-amber-300">-</span>
+              <span id="varRightIdx" class="text-[10px] text-slate-400 code-font">idx:-</span>
+            </div>
+            <span class="text-[10px] text-amber-200/75 mt-1 code-font">4th element</span>
+          </div>
+
+          <!-- 64-Bit Long Quadruplet Sum -->
+          <div class="glass-panel rounded-xl p-3 flex flex-col justify-between border-emerald-400/35 col-span-2 sm:col-span-1">
+            <span class="text-[11px] text-slate-400 uppercase font-semibold flex items-center justify-between">
+              long sum
+              <i class="fa-solid fa-scale-balanced text-emerald-400 text-[10px]"></i>
+            </span>
+            <div class="flex items-baseline gap-1 mt-1.5 overflow-hidden">
+              <span id="varQuadSum" class="code-font text-base sm:text-lg font-black text-sky-300 truncate">-</span>
+            </div>
+            <span id="varTargetRel" class="text-[10px] text-slate-400 mt-1 code-font">Target = 0</span>
+          </div>
+
+        </div>
+
+        <!-- ARRAY ARENA: GLASSY BOXES & BI-DIRECTIONAL MAGNITUDE BARS -->
+        <div class="glass-panel rounded-2xl p-5 flex flex-col gap-4">
+          <div class="flex flex-wrap items-center justify-between text-xs pb-2 border-b border-white/10 gap-2">
+            <span class="font-semibold text-slate-200 uppercase tracking-wider flex items-center gap-1.5">
+              <i class="fa-solid fa-chart-simple text-cyan-400"></i>
+              Array Elements: <span class="code-font text-slate-300">nums[]</span>
+            </span>
+
+            <!-- Switchable View Mode: Bars + Boxes | Bars Only | Boxes Only -->
+            <div class="flex items-center bg-white/5 rounded-xl p-1 border border-white/10 text-[11px] backdrop-blur-md">
+              <button class="view-mode-btn px-2.5 py-1 rounded-lg bg-cyan-500/30 text-cyan-200 font-semibold transition" data-mode="both">
+                Bars + Boxes
+              </button>
+              <button class="view-mode-btn px-2.5 py-1 rounded-lg text-slate-300 hover:text-white transition" data-mode="bars">
+                Bars Only
+              </button>
+              <button class="view-mode-btn px-2.5 py-1 rounded-lg text-slate-300 hover:text-white transition" data-mode="boxes">
+                Boxes Only
+              </button>
+            </div>
+          </div>
+
+          <!-- Four-Pointer Legend Row -->
+          <div class="flex flex-wrap items-center justify-between text-[11px] text-slate-300 px-1 gap-2">
+            <div class="flex flex-wrap items-center gap-3">
+              <span class="flex items-center gap-1.5">
+                <span class="w-2.5 h-2.5 rounded-sm bg-purple-500 inline-block"></span> i
+              </span>
+              <span class="flex items-center gap-1.5">
+                <span class="w-2.5 h-2.5 rounded-sm bg-pink-500 inline-block"></span> j
+              </span>
+              <span class="flex items-center gap-1.5">
+                <span class="w-2.5 h-2.5 rounded-sm bg-cyan-400 inline-block"></span> left (L)
+              </span>
+              <span class="flex items-center gap-1.5">
+                <span class="w-2.5 h-2.5 rounded-sm bg-amber-400 inline-block"></span> right (R)
+              </span>
+              <span class="flex items-center gap-1.5">
+                <span class="w-2.5 h-2.5 rounded-sm bg-emerald-400 inline-block"></span> sum == target
+              </span>
+            </div>
+            <span id="sortStateTag" class="code-font text-[10px] px-2 py-0.5 rounded bg-white/5 border border-white/10 text-slate-400">
+              Unsorted Input
+            </span>
+          </div>
+
+          <!-- Interactive Arena with Overhead Sort Trajectory Arc Overlay -->
+          <div id="arenaWrapper" class="relative w-full pt-12 pb-4 px-4 rounded-xl bg-white/[0.02] border border-white/10 overflow-x-auto">
+            <!-- SVG Overhead Trajectory Arc Layer for Arrays.sort(nums) -->
+            <svg id="sortArcSvg" class="absolute top-0 left-0 w-full h-14 pointer-events-none z-30 overflow-visible"></svg>
+
+            <!-- Glassy Element Boxes & Wide Bi-Directional Bars Container -->
+            <div id="arrayArena" class="relative min-h-[245px] flex items-center justify-center gap-2.5 sm:gap-3.5 pt-2">
+              <!-- Populated dynamically with stable item IDs for smooth FLIP lift-and-glide transitions -->
+            </div>
+          </div>
+
+          <!-- Live 4-Term Equation & Decision Banner -->
+          <div id="decisionBanner" class="p-3.5 rounded-xl bg-white/[0.04] border border-white/10 text-xs flex flex-col sm:flex-row items-center justify-between gap-3 backdrop-blur-md">
+            <div class="flex items-center gap-2.5">
+              <i id="decisionIcon" class="fa-solid fa-circle-info text-cyan-400 text-base"></i>
+              <span id="decisionText" class="text-slate-200">Ready to sort nums[] and search for unique quadruplets summing to target.</span>
+            </div>
+            <div id="equationPill" class="hidden text-xs code-font px-3 py-1.5 rounded-lg bg-slate-950/70 border border-white/15 text-sky-200 font-semibold shrink-0">
+              <!-- e.g. (-2) + (-1) + 1 + 2 = 0 -->
+            </div>
+          </div>
+        </div>
+
+        <!-- DISCOVERED UNIQUE QUADRUPLETS VAULT (List<List<Integer>> result) -->
+        <div class="glass-panel rounded-2xl p-4 flex flex-col gap-3">
+          <div class="flex items-center justify-between text-xs pb-2 border-b border-white/10">
+            <span class="font-semibold text-slate-200 uppercase tracking-wider flex items-center gap-1.5">
+              <i class="fa-solid fa-vault text-emerald-400"></i>
+              Discovered Unique Quadruplets: <span class="code-font text-emerald-300">result</span>
+            </span>
+            <span id="vaultCountTag" class="code-font text-[11px] text-emerald-300 bg-emerald-500/15 px-2 py-0.5 rounded border border-emerald-400/30">
+              0 found
+            </span>
+          </div>
+
+          <div id="quadVaultContainer" class="min-h-[68px] p-3 rounded-xl bg-white/[0.02] border border-white/10 flex flex-wrap items-center gap-2.5">
+            <span class="text-xs text-slate-500 italic">No quadruplets added yet — valid matches [nums[i], nums[j], nums[left], nums[right]] appear here.</span>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- RIGHT: SYNCHRONIZED JAVA CODE CONTAINER (5 Cols) -->
+      <section class="lg:col-span-5 flex flex-col gap-4">
+
+        <div class="glass-panel rounded-2xl p-4 flex flex-col h-full">
+          <div class="flex items-center justify-between pb-3 border-b border-white/10 text-xs">
+            <div class="flex items-center gap-2">
+              <div class="flex gap-1.5">
+                <span class="w-3 h-3 rounded-full bg-rose-500/80 inline-block"></span>
+                <span class="w-3 h-3 rounded-full bg-amber-500/80 inline-block"></span>
+                <span class="w-3 h-3 rounded-full bg-emerald-500/80 inline-block"></span>
+              </div>
+              <span class="code-font text-slate-200 font-semibold ml-2">Solution.java</span>
+            </div>
+            <span class="text-[11px] text-cyan-300 bg-cyan-500/15 px-2.5 py-0.5 rounded border border-cyan-400/25 code-font">
+              Sort + 4 Pointers
+            </span>
+          </div>
+
+          <!-- Code Lines with Zero-Jump Localized Scroll -->
+          <div id="codeContainer" class="code-font text-xs sm:text-[13px] leading-relaxed text-slate-300 py-3 overflow-y-auto max-h-[620px] flex-grow select-none">
+            <div class="code-line" id="line1"><span class="text-slate-500 mr-2"> 1</span><span class="text-indigo-400 font-semibold">import</span> java.util.*;</div>
+            <div class="code-line" id="line2"><span class="text-slate-500 mr-2"> 2</span></div>
+            <div class="code-line" id="line3"><span class="text-slate-500 mr-2"> 3</span><span class="text-indigo-400 font-semibold">class</span> <span class="text-amber-300">Solution</span> {</div>
+            <div class="code-line" id="line4"><span class="text-slate-500 mr-2"> 4</span>    <span class="text-indigo-400 font-semibold">public</span> List&lt;List&lt;Integer&gt;&gt; <span class="text-cyan-300">fourSum</span>(<span class="text-indigo-400">int</span>[] nums, <span class="text-indigo-400">int</span> target) {</div>
+            <div class="code-line" id="line5"><span class="text-slate-500 mr-2"> 5</span></div>
+            <div class="code-line" id="line6"><span class="text-slate-500 mr-2"> 6</span>        List&lt;List&lt;Integer&gt;&gt; result = <span class="text-indigo-400 font-semibold">new</span> ArrayList&lt;&gt;();</div>
+            <div class="code-line" id="line7"><span class="text-slate-500 mr-2"> 7</span></div>
+            <div class="code-line" id="line8"><span class="text-slate-500 mr-2"> 8</span>        Arrays.sort(nums);</div>
+            <div class="code-line" id="line9"><span class="text-slate-500 mr-2"> 9</span></div>
+            <div class="code-line" id="line10"><span class="text-slate-500 mr-2">10</span>        <span class="text-indigo-400 font-semibold">int</span> n = nums.length;</div>
+            <div class="code-line" id="line11"><span class="text-slate-500 mr-2">11</span></div>
+            <div class="code-line" id="line12"><span class="text-slate-500 mr-2">12</span>        <span class="text-indigo-400 font-semibold">for</span> (<span class="text-indigo-400">int</span> i = <span class="text-rose-400">0</span>; i &lt; n - <span class="text-rose-400">3</span>; i++) {</div>
+            <div class="code-line" id="line13"><span class="text-slate-500 mr-2">13</span></div>
+            <div class="code-line" id="line14"><span class="text-slate-500 mr-2">14</span>            <span class="text-slate-500 italic">// Skip duplicate first elements</span></div>
+            <div class="code-line" id="line15"><span class="text-slate-500 mr-2">15</span>            <span class="text-indigo-400 font-semibold">if</span> (i &gt; <span class="text-rose-400">0</span> &amp;&amp; nums[i] == nums[i - <span class="text-rose-400">1</span>]) {</div>
+            <div class="code-line" id="line16"><span class="text-slate-500 mr-2">16</span>                <span class="text-indigo-400 font-semibold">continue</span>;</div>
+            <div class="code-line" id="line17"><span class="text-slate-500 mr-2">17</span>            }</div>
+            <div class="code-line" id="line18"><span class="text-slate-500 mr-2">18</span></div>
+            <div class="code-line" id="line19"><span class="text-slate-500 mr-2">19</span>            <span class="text-indigo-400 font-semibold">for</span> (<span class="text-indigo-400">int</span> j = i + <span class="text-rose-400">1</span>; j &lt; n - <span class="text-rose-400">2</span>; j++) {</div>
+            <div class="code-line" id="line20"><span class="text-slate-500 mr-2">20</span></div>
+            <div class="code-line" id="line21"><span class="text-slate-500 mr-2">21</span>                <span class="text-slate-500 italic">// Skip duplicate second elements</span></div>
+            <div class="code-line" id="line22"><span class="text-slate-500 mr-2">22</span>                <span class="text-indigo-400 font-semibold">if</span> (j &gt; i + <span class="text-rose-400">1</span> &amp;&amp; nums[j] == nums[j - <span class="text-rose-400">1</span>]) {</div>
+            <div class="code-line" id="line23"><span class="text-slate-500 mr-2">23</span>                    <span class="text-indigo-400 font-semibold">continue</span>;</div>
+            <div class="code-line" id="line24"><span class="text-slate-500 mr-2">24</span>                }</div>
+            <div class="code-line" id="line25"><span class="text-slate-500 mr-2">25</span></div>
+            <div class="code-line" id="line26"><span class="text-slate-500 mr-2">26</span>                <span class="text-indigo-400 font-semibold">int</span> left = j + <span class="text-rose-400">1</span>;</div>
+            <div class="code-line" id="line27"><span class="text-slate-500 mr-2">27</span>                <span class="text-indigo-400 font-semibold">int</span> right = n - <span class="text-rose-400">1</span>;</div>
+            <div class="code-line" id="line28"><span class="text-slate-500 mr-2">28</span></div>
+            <div class="code-line" id="line29"><span class="text-slate-500 mr-2">29</span>                <span class="text-indigo-400 font-semibold">while</span> (left &lt; right) {</div>
+            <div class="code-line" id="line30"><span class="text-slate-500 mr-2">30</span></div>
+            <div class="code-line" id="line31"><span class="text-slate-500 mr-2">31</span>                    <span class="text-indigo-400 font-semibold">long</span> sum = (<span class="text-indigo-400">long</span>) nums[i] + nums[j]</div>
+            <div class="code-line" id="line32"><span class="text-slate-500 mr-2">32</span>                               + nums[left] + nums[right];</div>
+            <div class="code-line" id="line33"><span class="text-slate-500 mr-2">33</span></div>
+            <div class="code-line" id="line34"><span class="text-slate-500 mr-2">34</span>                    <span class="text-indigo-400 font-semibold">if</span> (sum == target) {</div>
+            <div class="code-line" id="line35"><span class="text-slate-500 mr-2">35</span></div>
+            <div class="code-line" id="line36"><span class="text-slate-500 mr-2">36</span>                        result.add(Arrays.asList(</div>
+            <div class="code-line" id="line37"><span class="text-slate-500 mr-2">37</span>                            nums[i], nums[j],</div>
+            <div class="code-line" id="line38"><span class="text-slate-500 mr-2">38</span>                            nums[left], nums[right]</div>
+            <div class="code-line" id="line39"><span class="text-slate-500 mr-2">39</span>                        ));</div>
+            <div class="code-line" id="line40"><span class="text-slate-500 mr-2">40</span></div>
+            <div class="code-line" id="line41"><span class="text-slate-500 mr-2">41</span>                        left++;</div>
+            <div class="code-line" id="line42"><span class="text-slate-500 mr-2">42</span>                        right--;</div>
+            <div class="code-line" id="line43"><span class="text-slate-500 mr-2">43</span></div>
+            <div class="code-line" id="line44"><span class="text-slate-500 mr-2">44</span>                        <span class="text-slate-500 italic">// Skip duplicate third elements</span></div>
+            <div class="code-line" id="line45"><span class="text-slate-500 mr-2">45</span>                        <span class="text-indigo-400 font-semibold">while</span> (left &lt; right &amp;&amp;</div>
+            <div class="code-line" id="line46"><span class="text-slate-500 mr-2">46</span>                               nums[left] == nums[left - <span class="text-rose-400">1</span>]) {</div>
+            <div class="code-line" id="line47"><span class="text-slate-500 mr-2">47</span>                            left++;</div>
+            <div class="code-line" id="line48"><span class="text-slate-500 mr-2">48</span>                        }</div>
+            <div class="code-line" id="line49"><span class="text-slate-500 mr-2">49</span></div>
+            <div class="code-line" id="line50"><span class="text-slate-500 mr-2">50</span>                        <span class="text-slate-500 italic">// Skip duplicate fourth elements</span></div>
+            <div class="code-line" id="line51"><span class="text-slate-500 mr-2">51</span>                        <span class="text-indigo-400 font-semibold">while</span> (left &lt; right &amp;&amp;</div>
+            <div class="code-line" id="line52"><span class="text-slate-500 mr-2">52</span>                               nums[right] == nums[right + <span class="text-rose-400">1</span>]) {</div>
+            <div class="code-line" id="line53"><span class="text-slate-500 mr-2">53</span>                            right--;</div>
+            <div class="code-line" id="line54"><span class="text-slate-500 mr-2">54</span>                        }</div>
+            <div class="code-line" id="line55"><span class="text-slate-500 mr-2">55</span></div>
+            <div class="code-line" id="line56"><span class="text-slate-500 mr-2">56</span>                    } <span class="text-indigo-400 font-semibold">else if</span> (sum &lt; target) {</div>
+            <div class="code-line" id="line57"><span class="text-slate-500 mr-2">57</span></div>
+            <div class="code-line" id="line58"><span class="text-slate-500 mr-2">58</span>                        left++;</div>
+            <div class="code-line" id="line59"><span class="text-slate-500 mr-2">59</span></div>
+            <div class="code-line" id="line60"><span class="text-slate-500 mr-2">60</span>                    } <span class="text-indigo-400 font-semibold">else</span> {</div>
+            <div class="code-line" id="line61"><span class="text-slate-500 mr-2">61</span></div>
+            <div class="code-line" id="line62"><span class="text-slate-500 mr-2">62</span>                        right--;</div>
+            <div class="code-line" id="line63"><span class="text-slate-500 mr-2">63</span>                    }</div>
+            <div class="code-line" id="line64"><span class="text-slate-500 mr-2">64</span>                }</div>
+            <div class="code-line" id="line65"><span class="text-slate-500 mr-2">65</span>            }</div>
+            <div class="code-line" id="line66"><span class="text-slate-500 mr-2">66</span>        }</div>
+            <div class="code-line" id="line67"><span class="text-slate-500 mr-2">67</span></div>
+            <div class="code-line" id="line68"><span class="text-slate-500 mr-2">68</span>        <span class="text-indigo-400 font-semibold">return</span> result;</div>
+            <div class="code-line" id="line69"><span class="text-slate-500 mr-2">69</span>    }</div>
+            <div class="code-line" id="line70"><span class="text-slate-500 mr-2">70</span>}</div>
+          </div>
+
+          <!-- Live Step Narrative Box -->
+          <div class="mt-3 p-3 bg-white/[0.04] border border-white/10 rounded-xl flex items-start gap-2.5 backdrop-blur-md">
+            <i class="fa-solid fa-circle-info text-cyan-400 mt-0.5 text-xs"></i>
+            <div class="text-xs text-slate-200 leading-relaxed" id="stepDescription">
+              Ready to run 4Sum. Click <b>Start</b> or <b>Next</b> to step through.
+            </div>
+          </div>
+
+        </div>
+
+      </section>
+
+    </div>
+
+    <!-- BOTTOM SECTION: PROBLEM STATEMENT & ARCHITECTURAL SUMMARY -->
+    <footer class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-2">
+
+      <!-- Problem Statement Card -->
+      <div class="glass-panel rounded-2xl p-5 flex flex-col gap-3">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <span class="text-amber-400 font-bold"><i class="fa-solid fa-file-lines mr-1.5"></i>Problem Statement</span>
+            <span class="px-2 py-0.5 rounded text-[11px] font-semibold bg-amber-500/20 text-amber-300 border border-amber-400/30">Medium</span>
+          </div>
+          <span class="text-xs text-slate-400 font-mono">LeetCode 18</span>
+        </div>
+
+        <p class="text-xs text-slate-300 leading-relaxed">
+          Given an array <code class="font-mono text-cyan-300">nums</code> of <code class="font-mono">n</code> integers, return an array of all the <b>unique quadruplets</b> <code class="font-mono">[nums[a], nums[b], nums[c], nums[d]]</code> such that:
+          <br>&bull; <code class="font-mono">0 &le; a, b, c, d &lt; n</code>
+          <br>&bull; <code class="font-mono">a</code>, <code class="font-mono">b</code>, <code class="font-mono">c</code>, and <code class="font-mono">d</code> are <b>distinct</b>.
+          <br>&bull; <code class="font-mono">nums[a] + nums[b] + nums[c] + nums[d] == target</code>
+          <br>You may return the answer in any order.
+        </p>
+
+        <div class="space-y-2 pt-2 border-t border-white/10 text-xs text-slate-300">
+          <div class="bg-white/[0.03] p-2.5 rounded-lg border border-white/10 font-mono">
+            <span class="text-slate-400">Example 1:</span><br>
+            <b>Input:</b> nums = [1,0,-1,0,-2,2], target = 0<br>
+            <b>Output:</b> <span class="text-emerald-400 font-bold">[[-2,-1,1,2],[-2,0,0,2],[-1,0,0,1]]</span>
+          </div>
+          <div class="bg-white/[0.03] p-2.5 rounded-lg border border-white/10 font-mono">
+            <span class="text-slate-400">Example 2:</span><br>
+            <b>Input:</b> nums = [2,2,2,2,2], target = 8 &rarr; <b>Output:</b> <span class="text-emerald-400 font-bold">[[2,2,2,2]]</span>
+          </div>
+        </div>
+
+        <div class="text-[11px] text-slate-400">
+          <b>Constraints:</b> <code class="font-mono text-slate-300">1 &le; nums.length &le; 200</code>, <code class="font-mono text-slate-300">-10<sup>9</sup> &le; nums[i], target &le; 10<sup>9</sup></code>.
+        </div>
+      </div>
+
+      <!-- Algorithm Summary & Complexity Card -->
+      <div class="glass-panel rounded-2xl p-5 flex flex-col gap-3">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <span class="text-cyan-400 font-bold"><i class="fa-solid fa-brain mr-1.5"></i>Algorithm Summary &amp; Key Safeguards</span>
+          </div>
+          <span class="px-2 py-0.5 rounded text-[11px] font-semibold bg-purple-500/20 text-purple-200 border border-purple-400/30">Sort + 2-Sum Reduction</span>
+        </div>
+
+        <div class="space-y-3 text-xs text-slate-300 leading-relaxed">
+          <div class="p-3 bg-purple-950/30 border border-purple-400/25 rounded-xl">
+            <b class="text-purple-300 flex items-center gap-1.5 mb-1">
+              <i class="fa-solid fa-layer-group"></i> Reduction from 4Sum to Two Pointers:
+            </b>
+            Sorting <code class="font-mono">nums</code> first (<code class="font-mono">&Omicron;(N log N)</code>) enables two key optimizations:
+            <ul class="list-disc list-inside mt-1 space-y-0.5 text-slate-300">
+              <li><b>Duplicate Pruning:</b> Identical adjacent values for <code class="font-mono">i</code>, <code class="font-mono">j</code>, <code class="font-mono">left</code>, and <code class="font-mono">right</code> are skipped in <code class="font-mono">&Omicron;(1)</code> without needing a <code class="font-mono">HashSet</code>.</li>
+              <li><b>Monotonic Search:</b> Fixing <code class="font-mono">(i, j)</code> reduces the inner problem to sorted Two Sum on <code class="font-mono">[j+1 .. n-1]</code>.</li>
+            </ul>
+          </div>
+
+          <div class="p-3 bg-amber-950/25 border border-amber-400/20 rounded-xl">
+            <b class="text-amber-300 flex items-center gap-1.5 mb-1">
+              <i class="fa-solid fa-shield-halved"></i> Preventing 32-Bit Signed Integer Overflow:
+            </b>
+            Since each <code class="font-mono">nums[k]</code> can be up to <code class="font-mono">&plusmn;10<sup>9</sup></code>, adding four integers can reach <code class="font-mono">&plusmn;4 &times; 10<sup>9</sup></code>, overflowing Java's 32-bit <code class="font-mono">int</code> (<code class="font-mono">&plusmn;2.14 &times; 10<sup>9</sup></code>). Casting <code class="font-mono text-emerald-300 font-semibold">(long) nums[i] + nums[j] + nums[left] + nums[right]</code> ensures exact 64-bit arithmetic.
+          </div>
+
+          <div class="grid grid-cols-2 gap-3 pt-1">
+            <div class="p-2.5 bg-white/[0.03] rounded-lg border border-white/10">
+              <span class="text-[11px] text-slate-400 uppercase font-semibold">Time Complexity</span>
+              <div class="text-sm font-bold text-emerald-400 font-mono mt-0.5">&Omicron;(N&sup3;)</div>
+              <p class="text-[10px] text-slate-400 mt-0.5">Two nested anchor loops (<code class="font-mono">i, j</code>) wrapping an <code class="font-mono">&Omicron;(N)</code> two-pointer pass.</p>
+            </div>
+            <div class="p-2.5 bg-white/[0.03] rounded-lg border border-white/10">
+              <span class="text-[11px] text-slate-400 uppercase font-semibold">Space Complexity</span>
+              <div class="text-sm font-bold text-cyan-400 font-mono mt-0.5">&Omicron;(1) Aux</div>
+              <p class="text-[10px] text-slate-400 mt-0.5">Constant extra space (or <code class="font-mono">&Omicron;(log N)</code> sort stack) excluding the output list.</p>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+    </footer>
+
+  </div>
+
+  <!-- JAVASCRIPT SIMULATION ENGINE WITH PHYSICAL FLIP LIFT-AND-GLIDE ANIMATIONS -->
+  <script>
+    // 10 COMPREHENSIVE PRESETS
+    const PRESETS = [
+      { name: "1: LeetCode Ex 1 ([1, 0, -1, 0, -2, 2], target = 0)", nums: [1, 0, -1, 0, -2, 2], target: 0 },
+      { name: "2: LeetCode Ex 2 ([2, 2, 2, 2, 2], target = 8)", nums: [2, 2, 2, 2, 2], target: 8 },
+      { name: "3: 32-Bit Overflow Trap ([1000000000, 1000000000, 1000000000, 1000000000], target = -294967296)", nums: [1000000000, 1000000000, 1000000000, 1000000000], target: -294967296 },
+      { name: "4: Exact 4 Elements Match ([4, -3, 2, -1], target = 2)", nums: [4, -3, 2, -1], target: 2 },
+      { name: "5: Negative Target ([-2, -5, 0, -1, -4, -3], target = -10)", nums: [-2, -5, 0, -1, -4, -3], target: -10 },
+      { name: "6: Heavy Duplicates ([-1, 2, 0, -2, 1, -1, 0, 1], target = 0)", nums: [-1, 2, 0, -2, 1, -1, 0, 1], target: 0 },
+      { name: "7: All Zeros ([0, 0, 0, 0, 0], target = 0)", nums: [0, 0, 0, 0, 0], target: 0 },
+      { name: "8: Positive Mix ([6, 1, 5, 2, 4, 3], target = 14)", nums: [6, 1, 5, 2, 4, 3], target: 14 },
+      { name: "9: No Valid Quadruplet ([5, 1, 4, 2, 3], target = 50)", nums: [5, 1, 4, 2, 3], target: 50 },
+      { name: "10: Fewer Than 4 Elements ([3, 1, 2], target = 6)", nums: [3, 1, 2], target: 6 }
+    ];
+
+    // APPLICATION STATE
+    let currentNums = [...PRESETS[0].nums];
+    let currentTarget = PRESETS[0].target;
+    let steps = [];
+    let currentStepIdx = 0;
+    let isPlaying = false;
+    let playInterval = null;
+    let playSpeed = 650;
+    let audioEnabled = true;
+    let viewMode = 'both'; // 'both' | 'bars' | 'boxes'
+
+    // WEB AUDIO SYNTHESIZER
+    let audioCtx = null;
+    function initAudio() {
+      if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      }
+    }
+    function playTone(freq = 440, type = 'sine', duration = 0.08, vol = 0.035) {
+      if (!audioEnabled) return;
+      try {
+        initAudio();
+        if (audioCtx.state === 'suspended') {
+          audioCtx.resume();
+        }
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = type;
+        osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+        gain.gain.setValueAtTime(vol, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + duration);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + duration);
+      } catch (e) {}
+    }
+
+    // DOM REFERENCES
+    const btnPlay = document.getElementById('btnPlay');
+    const playIcon = document.getElementById('playIcon');
+    const playText = document.getElementById('playText');
+    const btnPrev = document.getElementById('btnPrev');
+    const btnNext = document.getElementById('btnNext');
+    const btnReset = document.getElementById('btnReset');
+    const btnAudio = document.getElementById('btnAudio');
+    const audioIcon = document.getElementById('audioIcon');
+    const presetSelect = document.getElementById('presetSelect');
+    const customArrInput = document.getElementById('customArrInput');
+    const customTargetInput = document.getElementById('customTargetInput');
+    const btnApplyCustom = document.getElementById('btnApplyCustom');
+    const stepScrubber = document.getElementById('stepScrubber');
+    const stepCounterBadge = document.getElementById('stepCounterBadge');
+    const phaseBadge = document.getElementById('phaseBadge');
+    const targetHeaderBadge = document.getElementById('targetHeaderBadge');
+    const quadCountBadge = document.getElementById('quadCountBadge');
+
+    const varIVal = document.getElementById('varIVal');
+    const varIIdx = document.getElementById('varIIdx');
+    const varJVal = document.getElementById('varJVal');
+    const varJIdx = document.getElementById('varJIdx');
+    const varLeftVal = document.getElementById('varLeftVal');
+    const varLeftIdx = document.getElementById('varLeftIdx');
+    const varRightVal = document.getElementById('varRightVal');
+    const varRightIdx = document.getElementById('varRightIdx');
+    const varQuadSum = document.getElementById('varQuadSum');
+    const varTargetRel = document.getElementById('varTargetRel');
+
+    const sortStateTag = document.getElementById('sortStateTag');
+    const arenaWrapper = document.getElementById('arenaWrapper');
+    const sortArcSvg = document.getElementById('sortArcSvg');
+    const arrayArena = document.getElementById('arrayArena');
+    const decisionBanner = document.getElementById('decisionBanner');
+    const decisionIcon = document.getElementById('decisionIcon');
+    const decisionText = document.getElementById('decisionText');
+    const equationPill = document.getElementById('equationPill');
+
+    const vaultCountTag = document.getElementById('vaultCountTag');
+    const quadVaultContainer = document.getElementById('quadVaultContainer');
+    const codeContainer = document.getElementById('codeContainer');
+    const stepDescription = document.getElementById('stepDescription');
+
+    // HELPER: Format large numbers concisely for compact badges while keeping exact values in HUD
+    function formatCompactNum(num) {
+      if (Math.abs(num) >= 1000000000) return (num / 1000000000).toFixed(0) + 'B';
+      if (Math.abs(num) >= 1000000) return (num / 1000000).toFixed(0) + 'M';
+      return String(num);
+    }
+
+    // STRICT LINE-BY-LINE EXECUTION TRACE GENERATOR WITH STABLE ITEM IDS
+    function generateSteps(numsArr, target) {
+      const trace = [];
+      // Track each element with a unique stable ID so Arrays.sort(nums) physically lifts & glides elements!
+      const items = numsArr.map((val, idx) => ({ id: idx, val }));
+      const n = items.length;
+      const resultQuads = [];
+
+      const snapshot = () => items.map(it => ({ ...it }));
+      const snapshotQuads = () => resultQuads.map(q => [...q]);
+
+      // Line 4: Method entry
+      trace.push({
+        line: 4,
+        phase: "Start",
+        items: snapshot(),
+        target,
+        isSorted: false,
+        i: -1,
+        j: -1,
+        left: -1,
+        right: -1,
+        sum: null,
+        quads: snapshotQuads(),
+        desc: `Entered <span class="code-font text-cyan-300 font-bold">fourSum</span> with <span class="code-font text-slate-100">[${items.map(it => it.val).join(', ')}]</span> and <span class="code-font text-amber-300 font-bold">target = ${target}</span>.`,
+        soundFreq: 330
+      });
+
+      // Line 6: List<List<Integer>> result = new ArrayList<>();
+      trace.push({
+        line: 6,
+        phase: "Init Result",
+        items: snapshot(),
+        target,
+        isSorted: false,
+        i: -1,
+        j: -1,
+        left: -1,
+        right: -1,
+        sum: null,
+        quads: snapshotQuads(),
+        desc: `Allocated empty list <span class="code-font text-emerald-300 font-bold">result = new ArrayList&lt;&gt;()</span> to collect unique quadruplets.`,
+        soundFreq: 360
+      });
+
+      // Line 8: Arrays.sort(nums); -> Physically lift and move elements into sorted positions!
+      const beforeSortOrder = items.map((it, idx) => ({ id: it.id, fromIdx: idx }));
+      items.sort((a, b) => a.val - b.val);
+      const sortMoves = [];
+      items.forEach((it, toIdx) => {
+        const prev = beforeSortOrder.find(b => b.id === it.id);
+        if (prev && prev.fromIdx !== toIdx) {
+          sortMoves.push({ from: prev.fromIdx, to: toIdx, val: it.val });
+        }
+      });
+
+      trace.push({
+        line: 8,
+        phase: "Arrays.sort(nums)",
+        items: snapshot(),
+        target,
+        isSorted: true,
+        sortMoves,
+        i: -1,
+        j: -1,
+        left: -1,
+        right: -1,
+        sum: null,
+        quads: snapshotQuads(),
+        desc: `Executed <span class="code-font text-cyan-300 font-bold">Arrays.sort(nums)</span> &rarr; <span class="code-font text-slate-100">[${items.map(it => it.val).join(', ')}]</span>. Sorting enables two-pointer convergence and O(1) duplicate skipping.`,
+        soundFreq: 480
+      });
+
+      // Line 10: int n = nums.length;
+      trace.push({
+        line: 10,
+        phase: `n = ${n}`,
+        items: snapshot(),
+        target,
+        isSorted: true,
+        i: -1,
+        j: -1,
+        left: -1,
+        right: -1,
+        sum: null,
+        quads: snapshotQuads(),
+        desc: `Stored array length <span class="code-font text-cyan-300 font-bold">n = ${n}</span>.`,
+        soundFreq: 420
+      });
+
+      // Outer loop: for (int i = 0; i < n - 3; i++)
+      for (let i = 0; i < n - 3; i++) {
+        trace.push({
+          line: 12,
+          phase: `Anchor i = ${i}`,
+          items: snapshot(),
+          target,
+          isSorted: true,
+          i,
+          j: -1,
+          left: -1,
+          right: -1,
+          sum: null,
+          quads: snapshotQuads(),
+          desc: `Outer loop <span class="code-font text-purple-300 font-bold">i = ${i}</span> (<span class="code-font">${i} &lt; ${n - 3}</span>): Fixed 1st element <span class="code-font text-purple-200 font-bold">nums[${i}] = ${items[i].val}</span>.`,
+          soundFreq: 440
+        });
+
+        // Line 15: if (i > 0 && nums[i] == nums[i - 1])
+        const isDupI = i > 0 && items[i].val === items[i - 1].val;
+        trace.push({
+          line: 15,
+          phase: isDupI ? `Dup i = ${i}` : `Check i = ${i}`,
+          items: snapshot(),
+          target,
+          isSorted: true,
+          i,
+          j: -1,
+          left: -1,
+          right: -1,
+          sum: null,
+          skipIdx: isDupI ? i : undefined,
+          quads: snapshotQuads(),
+          desc: i === 0
+            ? `Check <span class="code-font text-purple-300">i &gt; 0 &amp;&amp; nums[i] == nums[i - 1]</span>: <span class="code-font">i = 0</span>, so condition is <b>false</b>.`
+            : isDupI
+              ? `Duplicate check <span class="code-font text-rose-300">nums[${i}] (${items[i].val}) == nums[${i - 1}] (${items[i - 1].val})</span> is <b>true</b>.`
+              : `Duplicate check <span class="code-font text-purple-300">nums[${i}] (${items[i].val}) == nums[${i - 1}] (${items[i - 1].val})</span> is <b>false</b> &rarr; unique first element.`,
+          soundFreq: isDupI ? 350 : 445
+        });
+
+        if (isDupI) {
+          trace.push({
+            line: 16,
+            phase: "Skip Duplicate i",
+            items: snapshot(),
+            target,
+            isSorted: true,
+            i,
+            j: -1,
+            left: -1,
+            right: -1,
+            sum: null,
+            skipIdx: i,
+            quads: snapshotQuads(),
+            desc: `Executed <span class="code-font text-rose-300 font-bold">continue</span> to avoid duplicate quadruplets starting with <span class="code-font">${items[i].val}</span>.`,
+            soundFreq: 330
+          });
+          continue;
+        }
+
+        // Second loop: for (int j = i + 1; j < n - 2; j++)
+        for (let j = i + 1; j < n - 2; j++) {
+          trace.push({
+            line: 19,
+            phase: `Anchor j = ${j}`,
+            items: snapshot(),
+            target,
+            isSorted: true,
+            i,
+            j,
+            left: -1,
+            right: -1,
+            sum: null,
+            quads: snapshotQuads(),
+            desc: `Second loop <span class="code-font text-pink-300 font-bold">j = ${j}</span> (<span class="code-font">${j} &lt; ${n - 2}</span>): Fixed 2nd element <span class="code-font text-pink-200 font-bold">nums[${j}] = ${items[j].val}</span>.`,
+            soundFreq: 470
+          });
+
+          // Line 22: if (j > i + 1 && nums[j] == nums[j - 1])
+          const isDupJ = j > i + 1 && items[j].val === items[j - 1].val;
+          trace.push({
+            line: 22,
+            phase: isDupJ ? `Dup j = ${j}` : `Check j = ${j}`,
+            items: snapshot(),
+            target,
+            isSorted: true,
+            i,
+            j,
+            left: -1,
+            right: -1,
+            sum: null,
+            skipIdx: isDupJ ? j : undefined,
+            quads: snapshotQuads(),
+            desc: j === i + 1
+              ? `Check <span class="code-font text-pink-300">j &gt; i + 1 &amp;&amp; nums[j] == nums[j - 1]</span>: <span class="code-font">j == i + 1 (${j})</span>, so condition is <b>false</b>.`
+              : isDupJ
+                ? `Duplicate check <span class="code-font text-rose-300">nums[${j}] (${items[j].val}) == nums[${j - 1}] (${items[j - 1].val})</span> is <b>true</b>.`
+                : `Duplicate check <span class="code-font text-pink-300">nums[${j}] (${items[j].val}) == nums[${j - 1}] (${items[j - 1].val})</span> is <b>false</b> &rarr; unique second element.`,
+            soundFreq: isDupJ ? 350 : 475
+          });
+
+          if (isDupJ) {
+            trace.push({
+              line: 23,
+              phase: "Skip Duplicate j",
+              items: snapshot(),
+              target,
+              isSorted: true,
+              i,
+              j,
+              left: -1,
+              right: -1,
+              sum: null,
+              skipIdx: j,
+              quads: snapshotQuads(),
+              desc: `Executed <span class="code-font text-rose-300 font-bold">continue</span> to avoid duplicate pair <span class="code-font">(${items[i].val}, ${items[j].val})</span>.`,
+              soundFreq: 330
+            });
+            continue;
+          }
+
+          // Line 26: int left = j + 1;
+          let left = j + 1;
+          trace.push({
+            line: 26,
+            phase: `Init left = ${left}`,
+            items: snapshot(),
+            target,
+            isSorted: true,
+            i,
+            j,
+            left,
+            right: -1,
+            sum: null,
+            quads: snapshotQuads(),
+            desc: `Initialized <span class="code-font text-cyan-300 font-bold">left = j + 1 = ${left}</span> (value <span class="code-font text-cyan-200">${items[left].val}</span>).`,
+            soundFreq: 490
+          });
+
+          // Line 27: int right = n - 1;
+          let right = n - 1;
+          trace.push({
+            line: 27,
+            phase: `Init right = ${right}`,
+            items: snapshot(),
+            target,
+            isSorted: true,
+            i,
+            j,
+            left,
+            right,
+            sum: null,
+            quads: snapshotQuads(),
+            desc: `Initialized <span class="code-font text-amber-300 font-bold">right = n - 1 = ${right}</span> (value <span class="code-font text-amber-200">${items[right].val}</span>).`,
+            soundFreq: 510
+          });
+
+          // Inner two-pointer loop: while (left < right)
+          while (left < right) {
+            trace.push({
+              line: 29,
+              phase: `Scan [${left}, ${right}]`,
+              items: snapshot(),
+              target,
+              isSorted: true,
+              i,
+              j,
+              left,
+              right,
+              sum: null,
+              quads: snapshotQuads(),
+              desc: `Inner loop check <span class="code-font text-cyan-300">left (${left}) &lt; right (${right})</span> is <b>true</b>.`,
+              soundFreq: 520
+            });
+
+            // Lines 31-32: long sum = (long) nums[i] + nums[j] + nums[left] + nums[right];
+            const sum = items[i].val + items[j].val + items[left].val + items[right].val;
+            const eqStr = `(${items[i].val}) + (${items[j].val}) + (${items[left].val}) + (${items[right].val}) = ${sum}`;
+
+            trace.push({
+              line: [31, 32],
+              phase: `Sum = ${formatCompactNum(sum)}`,
+              items: snapshot(),
+              target,
+              isSorted: true,
+              i,
+              j,
+              left,
+              right,
+              sum,
+              equationText: eqStr,
+              quads: snapshotQuads(),
+              desc: `Computed 64-bit <span class="code-font text-sky-300 font-bold">long sum = ${eqStr}</span>.`,
+              soundFreq: 550
+            });
+
+            // Line 34: ALWAYS evaluate if (sum == target) right after computing sum!
+            const isExactMatch = (sum === target);
+            trace.push({
+              line: 34,
+              phase: isExactMatch ? "sum == target (True)" : "sum == target (False)",
+              items: snapshot(),
+              target,
+              isSorted: true,
+              i,
+              j,
+              left,
+              right,
+              sum,
+              isMatch: isExactMatch,
+              equationText: isExactMatch ? `${sum} == ${target} (True)` : `${sum} == ${target} (False)`,
+              quads: snapshotQuads(),
+              desc: isExactMatch
+                ? `<span class="text-emerald-400 font-bold"><i class="fa-solid fa-check mr-1"></i>Condition True!</span> <span class="code-font text-emerald-300 font-bold">sum (${sum}) == target (${target})</span> &rarr; entering <span class="code-font">if</span> block.`
+                : `Evaluating <span class="code-font text-sky-300 font-bold">if (sum == target)</span>: <span class="code-font">${sum} == ${target}</span> is <b>false</b> &rarr; checking <span class="code-font">else if</span>.`,
+              soundFreq: isExactMatch ? 720 : 510
+            });
+
+            if (isExactMatch) {
+              // Lines 36-39: result.add(Arrays.asList(...));
+              resultQuads.push([items[i].val, items[j].val, items[left].val, items[right].val]);
+              trace.push({
+                line: [36, 37, 38, 39],
+                phase: "Add to Result",
+                items: snapshot(),
+                target,
+                isSorted: true,
+                i,
+                j,
+                left,
+                right,
+                sum,
+                isMatch: true,
+                justAddedQuad: true,
+                equationText: `[${items[i].val}, ${items[j].val}, ${items[left].val}, ${items[right].val}]`,
+                quads: snapshotQuads(),
+                desc: `Added <span class="code-font text-emerald-300 font-bold">[${items[i].val}, ${items[j].val}, ${items[left].val}, ${items[right].val}]</span> to <span class="code-font">result</span> (total: ${resultQuads.length}).`,
+                soundFreq: 860
+              });
+
+              // Line 41: left++;
+              const prevL = left;
+              left++;
+              trace.push({
+                line: 41,
+                phase: "left++",
+                items: snapshot(),
+                target,
+                isSorted: true,
+                i,
+                j,
+                left,
+                right,
+                sum: null,
+                quads: snapshotQuads(),
+                desc: `Advanced <span class="code-font text-cyan-300 font-bold">left++</span> (${prevL} &rarr; ${left}).`,
+                soundFreq: 560
+              });
+
+              // Line 42: right--;
+              const prevR = right;
+              right--;
+              trace.push({
+                line: 42,
+                phase: "right--",
+                items: snapshot(),
+                target,
+                isSorted: true,
+                i,
+                j,
+                left,
+                right,
+                sum: null,
+                quads: snapshotQuads(),
+                desc: `Retreated <span class="code-font text-amber-300 font-bold">right--</span> (${prevR} &rarr; ${right}).`,
+                soundFreq: 540
+              });
+
+              // Lines 45-47: Skip duplicate third elements (always evaluate loop condition!)
+              while (true) {
+                const canSkipLeft = left < right && items[left].val === items[left - 1].val;
+                trace.push({
+                  line: [45, 46],
+                  phase: canSkipLeft ? "Dup left (True)" : "Dup left (False)",
+                  items: snapshot(),
+                  target,
+                  isSorted: true,
+                  i,
+                  j,
+                  left,
+                  right,
+                  sum: null,
+                  skipIdx: canSkipLeft ? left : undefined,
+                  quads: snapshotQuads(),
+                  desc: left >= right
+                    ? `Inner <span class="code-font text-cyan-300">while (left &lt; right &amp;&amp; nums[left] == nums[left - 1])</span>: <span class="code-font">left (${left}) &lt; right (${right})</span> is <b>false</b> &rarr; exit loop.`
+                    : canSkipLeft
+                      ? `Duplicate check <span class="code-font text-rose-300">nums[${left}] (${items[left].val}) == nums[${left - 1}] (${items[left - 1].val})</span> is <b>true</b> &rarr; skipping duplicate.`
+                      : `Duplicate check <span class="code-font text-cyan-300">nums[${left}] (${items[left].val}) == nums[${left - 1}] (${items[left - 1].val})</span> is <b>false</b> &rarr; exit loop.`,
+                  soundFreq: canSkipLeft ? 380 : 500
+                });
+
+                if (!canSkipLeft) break;
+
+                const dupL = left;
+                left++;
+                trace.push({
+                  line: 47,
+                  phase: "Skip Dup left++",
+                  items: snapshot(),
+                  target,
+                  isSorted: true,
+                  i,
+                  j,
+                  left,
+                  right,
+                  sum: null,
+                  skipIdx: dupL,
+                  quads: snapshotQuads(),
+                  desc: `Skipped duplicate 3rd element via <span class="code-font text-cyan-300 font-bold">left++</span> (${dupL} &rarr; ${left}).`,
+                  soundFreq: 360
+                });
+              }
+
+              // Lines 51-53: Skip duplicate fourth elements (always evaluate loop condition!)
+              while (true) {
+                const canSkipRight = left < right && items[right].val === items[right + 1].val;
+                trace.push({
+                  line: [51, 52],
+                  phase: canSkipRight ? "Dup right (True)" : "Dup right (False)",
+                  items: snapshot(),
+                  target,
+                  isSorted: true,
+                  i,
+                  j,
+                  left,
+                  right,
+                  sum: null,
+                  skipIdx: canSkipRight ? right : undefined,
+                  quads: snapshotQuads(),
+                  desc: left >= right
+                    ? `Inner <span class="code-font text-amber-300">while (left &lt; right &amp;&amp; nums[right] == nums[right + 1])</span>: <span class="code-font">left (${left}) &lt; right (${right})</span> is <b>false</b> &rarr; exit loop.`
+                    : canSkipRight
+                      ? `Duplicate check <span class="code-font text-rose-300">nums[${right}] (${items[right].val}) == nums[${right + 1}] (${items[right + 1].val})</span> is <b>true</b> &rarr; skipping duplicate.`
+                      : `Duplicate check <span class="code-font text-amber-300">nums[${right}] (${items[right].val}) == nums[${right + 1}] (${items[right + 1].val})</span> is <b>false</b> &rarr; exit loop.`,
+                  soundFreq: canSkipRight ? 380 : 500
+                });
+
+                if (!canSkipRight) break;
+
+                const dupR = right;
+                right--;
+                trace.push({
+                  line: 53,
+                  phase: "Skip Dup right--",
+                  items: snapshot(),
+                  target,
+                  isSorted: true,
+                  i,
+                  j,
+                  left,
+                  right,
+                  sum: null,
+                  skipIdx: dupR,
+                  quads: snapshotQuads(),
+                  desc: `Skipped duplicate 4th element via <span class="code-font text-amber-300 font-bold">right--</span> (${dupR} &rarr; ${right}).`,
+                  soundFreq: 360
+                });
+              }
+
+            } else {
+              // Line 56: ALWAYS evaluate else if (sum < target)
+              const isSmaller = (sum < target);
+              trace.push({
+                line: 56,
+                phase: isSmaller ? "sum < target (True)" : "sum < target (False)",
+                items: snapshot(),
+                target,
+                isSorted: true,
+                i,
+                j,
+                left,
+                right,
+                sum,
+                equationText: isSmaller ? `${sum} < ${target} (True)` : `${sum} < ${target} (False)`,
+                quads: snapshotQuads(),
+                desc: isSmaller
+                  ? `Evaluating <span class="code-font text-sky-300 font-bold">else if (sum &lt; target)</span>: <span class="code-font">${sum} &lt; ${target}</span> is <b>true</b> &rarr; need a larger sum.`
+                  : `Evaluating <span class="code-font text-sky-300 font-bold">else if (sum &lt; target)</span>: <span class="code-font">${sum} &lt; ${target}</span> is <b>false</b> &rarr; entering <span class="code-font">else</span> branch.`,
+                soundFreq: 485
+              });
+
+              if (isSmaller) {
+                const prevL = left;
+                left++;
+                trace.push({
+                  line: 58,
+                  phase: "left++",
+                  items: snapshot(),
+                  target,
+                  isSorted: true,
+                  i,
+                  j,
+                  left,
+                  right,
+                  sum: null,
+                  quads: snapshotQuads(),
+                  desc: `Incremented <span class="code-font text-cyan-300 font-bold">left++</span> (${prevL} &rarr; ${left}) to increase the sum.`,
+                  soundFreq: 520
+                });
+              } else {
+                // Line 60: else (sum > target)
+                trace.push({
+                  line: 60,
+                  phase: "else (sum > target)",
+                  items: snapshot(),
+                  target,
+                  isSorted: true,
+                  i,
+                  j,
+                  left,
+                  right,
+                  sum,
+                  equationText: `${sum} > ${target} (Too Large)`,
+                  quads: snapshotQuads(),
+                  desc: `Entered <span class="code-font text-amber-300 font-bold">else</span> block because <span class="code-font">${sum} &gt; ${target}</span> &rarr; need a smaller sum.`,
+                  soundFreq: 470
+                });
+
+                const prevR = right;
+                right--;
+                trace.push({
+                  line: 62,
+                  phase: "right--",
+                  items: snapshot(),
+                  target,
+                  isSorted: true,
+                  i,
+                  j,
+                  left,
+                  right,
+                  sum: null,
+                  quads: snapshotQuads(),
+                  desc: `Decremented <span class="code-font text-amber-300 font-bold">right--</span> (${prevR} &rarr; ${right}) to decrease the sum.`,
+                  soundFreq: 450
+                });
+              }
+            }
+          }
+
+          // Line 29: while (left < right) evaluates to false -> exit inner two-pointer loop
+          trace.push({
+            line: 29,
+            phase: "Exit Inner Loop",
+            items: snapshot(),
+            target,
+            isSorted: true,
+            i,
+            j,
+            left,
+            right,
+            sum: null,
+            quads: snapshotQuads(),
+            desc: `Inner loop check <span class="code-font text-cyan-300">left (${left}) &lt; right (${right})</span> is <b>false</b> &rarr; exiting inner <span class="code-font">while</span> loop.`,
+            soundFreq: 460
+          });
+        }
+      }
+
+      // Line 68: return result;
+      trace.push({
+        line: 68,
+        phase: "Complete",
+        items: snapshot(),
+        target,
+        isSorted: true,
+        i: -1,
+        j: -1,
+        left: -1,
+        right: -1,
+        sum: null,
+        isComplete: true,
+        quads: snapshotQuads(),
+        desc: `<span class="text-emerald-400 font-bold text-sm"><i class="fa-solid fa-trophy mr-1.5"></i>Complete!</span> Found <span class="code-font text-emerald-300 font-bold text-sm">${resultQuads.length}</span> unique quadruplet${resultQuads.length === 1 ? '' : 's'} summing to <span class="code-font text-amber-300">${target}</span>.`,
+        soundFreq: 960
+      });
+
+      return trace;
+    }
+
+    // LOCALIZED ZERO-JUMP CODE LINE HIGHLIGHTER
+    function highlightCodeLine(lineSpec) {
+      document.querySelectorAll('.code-line').forEach(el => el.classList.remove('active-line'));
+      const lineNums = Array.isArray(lineSpec) ? lineSpec : [lineSpec];
+      let firstActiveEl = null;
+
+      lineNums.forEach(num => {
+        const el = document.getElementById(`line${num}`);
+        if (el) {
+          el.classList.add('active-line');
+          if (!firstActiveEl) firstActiveEl = el;
+        }
+      });
+
+      if (firstActiveEl) {
+        const containerTop = codeContainer.scrollTop;
+        const containerBottom = containerTop + codeContainer.clientHeight;
+        const elTop = firstActiveEl.offsetTop - codeContainer.offsetTop;
+        const elBottom = elTop + firstActiveEl.clientHeight;
+
+        if (elTop < containerTop + 24) {
+          codeContainer.scrollTo({ top: Math.max(0, elTop - 24), behavior: 'smooth' });
+        } else if (elBottom > containerBottom - 24) {
+          codeContainer.scrollTo({ top: elBottom - codeContainer.clientHeight + 24, behavior: 'smooth' });
+        }
+      }
+    }
+
+    // DRAW OVERHEAD CURVED SORT TRAJECTORY ARCS WHEN Arrays.sort(nums) MOVES ELEMENTS
+    function drawSortArcs(moves) {
+      sortArcSvg.innerHTML = '';
+      if (!moves || moves.length === 0) return;
+
+      const wrapperRect = arenaWrapper.getBoundingClientRect();
+      let pathsHtml = '';
+
+      moves.forEach((mv, idx) => {
+        const elFrom = arrayArena.querySelector(`[data-index="${mv.from}"]`);
+        const elTo = arrayArena.querySelector(`[data-index="${mv.to}"]`);
+        if (!elFrom || !elTo) return;
+
+        const rectFrom = elFrom.getBoundingClientRect();
+        const rectTo = elTo.getBoundingClientRect();
+        const x1 = (rectFrom.left - wrapperRect.left) + rectFrom.width / 2;
+        const x2 = (rectTo.left - wrapperRect.left) + rectTo.width / 2;
+        const yBase = 48;
+        const midX = (x1 + x2) / 2;
+        const archY = Math.max(4, 24 - Math.abs(mv.to - mv.from) * 4 - (idx % 2) * 5);
+        const color = mv.to < mv.from ? '#38bdf8' : '#c084fc';
+
+        pathsHtml += `
+          <path d="M ${x1} ${yBase} Q ${midX} ${archY}, ${x2} ${yBase}"
+                fill="none" stroke="${color}" stroke-width="1.8" class="sort-arc-path" opacity="0.85" />
+          <polygon points="${x2},${yBase + 2} ${x2 - 4},${yBase - 6} ${x2 + 4},${yBase - 6}" fill="${color}" />
+        `;
+      });
+
+      sortArcSvg.innerHTML = pathsHtml;
+    }
+
+    // RENDER CURRENT STEP WITH PHYSICAL FLIP LIFT-AND-GLIDE ANIMATIONS
+    function renderStep(idx, animateMovement = true) {
+      if (idx < 0 || idx >= steps.length) return;
+      const step = steps[idx];
+      const items = step.items;
+      const target = step.target;
+      const maxAbs = Math.max(1, ...items.map(it => Math.abs(it.val)));
+
+      // Capture old horizontal screen X positions of existing DOM elements by item.id (FLIP: First)
+      const prevLeftMap = new Map();
+      if (animateMovement) {
+        arrayArena.querySelectorAll('[data-item-id]').forEach(el => {
+          const itemId = parseInt(el.dataset.itemId, 10);
+          prevLeftMap.set(itemId, el.getBoundingClientRect().left);
+        });
+      }
+
+      // Update Header Scrubber & Badges
+      stepCounterBadge.textContent = `Step: ${idx + 1} / ${steps.length}`;
+      phaseBadge.textContent = step.phase;
+      targetHeaderBadge.textContent = `Target: ${target}`;
+      quadCountBadge.textContent = `Quadruplets: ${step.quads.length}`;
+      stepScrubber.max = steps.length - 1;
+      stepScrubber.value = idx;
+
+      // Sort State Badge
+      if (step.isSorted) {
+        sortStateTag.textContent = "Sorted Ascending ✓";
+        sortStateTag.className = "code-font text-[10px] px-2 py-0.5 rounded bg-emerald-500/15 border border-emerald-400/35 text-emerald-300";
+      } else {
+        sortStateTag.textContent = "Unsorted Input";
+        sortStateTag.className = "code-font text-[10px] px-2 py-0.5 rounded bg-amber-500/15 border border-amber-400/35 text-amber-300";
+      }
+
+      // Update Telemetry HUD Cards
+      if (step.i >= 0 && step.i < items.length) {
+        varIVal.textContent = formatCompactNum(items[step.i].val);
+        varIIdx.textContent = `idx:${step.i}`;
+      } else {
+        varIVal.textContent = '-';
+        varIIdx.textContent = 'idx:-';
+      }
+
+      if (step.j >= 0 && step.j < items.length) {
+        varJVal.textContent = formatCompactNum(items[step.j].val);
+        varJIdx.textContent = `idx:${step.j}`;
+      } else {
+        varJVal.textContent = '-';
+        varJIdx.textContent = 'idx:-';
+      }
+
+      if (step.left >= 0 && step.left < items.length) {
+        varLeftVal.textContent = formatCompactNum(items[step.left].val);
+        varLeftIdx.textContent = `idx:${step.left}`;
+      } else {
+        varLeftVal.textContent = '-';
+        varLeftIdx.textContent = 'idx:-';
+      }
+
+      if (step.right >= 0 && step.right < items.length) {
+        varRightVal.textContent = formatCompactNum(items[step.right].val);
+        varRightIdx.textContent = `idx:${step.right}`;
+      } else {
+        varRightVal.textContent = '-';
+        varRightIdx.textContent = 'idx:-';
+      }
+
+      varTargetRel.textContent = `Target = ${formatCompactNum(target)}`;
+      if (step.sum !== null && step.sum !== undefined) {
+        varQuadSum.textContent = formatCompactNum(step.sum);
+        if (step.sum === target) {
+          varQuadSum.className = "code-font text-base sm:text-lg font-black text-emerald-400 truncate";
+        } else if (step.sum < target) {
+          varQuadSum.className = "code-font text-base sm:text-lg font-black text-cyan-300 truncate";
+        } else {
+          varQuadSum.className = "code-font text-base sm:text-lg font-black text-amber-300 truncate";
+        }
+      } else {
+        varQuadSum.textContent = '-';
+        varQuadSum.className = "code-font text-base sm:text-lg font-black text-sky-300 truncate";
+      }
+
+      // Narrative Description
+      stepDescription.innerHTML = step.desc;
+
+      // 1. Render Glassy Boxes & Bi-Directional Magnitude Bars
+      arrayArena.innerHTML = '';
+
+      items.forEach((item, index) => {
+        const val = item.val;
+        const isI = (step.i === index);
+        const isJ = (step.j === index);
+        const isLeft = (step.left === index);
+        const isRight = (step.right === index);
+        const isSkipped = (step.skipIdx === index);
+        const isAnyActive = isI || isJ || isLeft || isRight;
+        const isMatchQuad = step.isMatch && isAnyActive;
+
+        const card = document.createElement('div');
+        card.dataset.itemId = item.id;
+        card.dataset.index = index;
+
+        let classes = 'glass-element-card relative rounded-2xl p-2.5 flex flex-col items-center justify-between select-none shrink-0 ';
+        classes += viewMode === 'bars' ? 'w-14 sm:w-16 min-h-[225px] ' : viewMode === 'boxes' ? 'w-16 sm:w-20 min-h-[126px] ' : 'w-16 sm:w-20 min-h-[245px] ';
+
+        if (isSkipped) {
+          classes += 'skip-dup-card ';
+        } else if (isMatchQuad) {
+          classes += 'match-quad-card ';
+        } else if (isI) {
+          classes += 'ptr-i-card ';
+        } else if (isJ) {
+          classes += 'ptr-j-card ';
+        } else if (isLeft) {
+          classes += 'ptr-left-card ';
+        } else if (isRight) {
+          classes += 'ptr-right-card ';
+        } else if (step.i >= 0 && index < step.i && !step.isComplete) {
+          classes += 'dimmed-card ';
+        }
+
+        card.className = classes;
+
+        // Pointer Badges Row
+        const badges = [];
+        if (isI) badges.push(`<span class="px-1.5 py-0.2 rounded bg-purple-500 text-white font-extrabold text-[9px] code-font shadow">i</span>`);
+        if (isJ) badges.push(`<span class="px-1.5 py-0.2 rounded bg-pink-500 text-white font-extrabold text-[9px] code-font shadow">j</span>`);
+        if (isLeft) badges.push(`<span class="px-1.5 py-0.2 rounded bg-cyan-400 text-slate-950 font-extrabold text-[9px] code-font shadow">L</span>`);
+        if (isRight) badges.push(`<span class="px-1.5 py-0.2 rounded bg-amber-400 text-slate-950 font-extrabold text-[9px] code-font shadow">R</span>`);
+
+        const skipChip = isSkipped
+          ? `<span class="absolute -top-5 left-1/2 -translate-x-1/2 px-1.5 py-0.5 rounded bg-rose-500 text-white code-font text-[8px] font-extrabold shadow whitespace-nowrap">SKIP DUP</span>`
+          : '';
+
+        const topHeader = `
+          <div class="w-full flex items-center justify-between text-[10px] code-font min-h-[18px]">
+            <span class="text-slate-400">[${index}]</span>
+            <div class="flex items-center gap-0.5">${badges.join('')}</div>
+          </div>
+        `;
+
+        // Wide Bi-Directional Magnitude Bar Section (for 'both' and 'bars' modes)
+        let barSection = '';
+        if (viewMode === 'both' || viewMode === 'bars') {
+          const magPct = val === 0 ? 0 : Math.max(14, (Math.abs(val) / maxAbs) * 100);
+          const isPos = val > 0;
+          const isNeg = val < 0;
+
+          let posStyle = 'bg-gradient-to-t from-cyan-600/80 via-cyan-500/80 to-cyan-300 border-t border-cyan-100';
+          let negStyle = 'bg-gradient-to-b from-rose-600/80 via-rose-500/80 to-rose-400 border-b border-rose-200';
+
+          if (isMatchQuad) {
+            posStyle = 'bg-gradient-to-t from-emerald-600 via-emerald-500 to-emerald-300 border-t border-white shadow-[0_0_16px_rgba(16,185,129,0.6)]';
+            negStyle = 'bg-gradient-to-b from-emerald-600 via-emerald-500 to-emerald-300 border-b border-white shadow-[0_0_16px_rgba(16,185,129,0.6)]';
+          } else if (isI) {
+            posStyle = 'bg-gradient-to-t from-purple-600 via-purple-500 to-purple-300 border-t border-white shadow-[0_0_16px_rgba(168,85,247,0.6)]';
+            negStyle = 'bg-gradient-to-b from-purple-600 via-purple-500 to-purple-300 border-b border-white shadow-[0_0_16px_rgba(168,85,247,0.6)]';
+          } else if (isJ) {
+            posStyle = 'bg-gradient-to-t from-pink-600 via-pink-500 to-pink-300 border-t border-white shadow-[0_0_16px_rgba(236,72,153,0.6)]';
+            negStyle = 'bg-gradient-to-b from-pink-600 via-pink-500 to-pink-300 border-b border-white shadow-[0_0_16px_rgba(236,72,153,0.6)]';
+          } else if (isLeft) {
+            posStyle = 'bg-gradient-to-t from-cyan-600 via-cyan-400 to-cyan-200 border-t border-white shadow-[0_0_16px_rgba(34,211,238,0.6)]';
+            negStyle = 'bg-gradient-to-b from-cyan-600 via-cyan-400 to-cyan-200 border-b border-white shadow-[0_0_16px_rgba(34,211,238,0.6)]';
+          } else if (isRight) {
+            posStyle = 'bg-gradient-to-t from-amber-600 via-amber-400 to-amber-200 border-t border-white shadow-[0_0_16px_rgba(251,191,36,0.6)]';
+            negStyle = 'bg-gradient-to-b from-amber-600 via-amber-400 to-amber-200 border-b border-white shadow-[0_0_16px_rgba(251,191,36,0.6)]';
+          }
+
+          barSection = `
+            <div class="w-full flex-1 flex flex-col items-center justify-center my-1.5">
+              <!-- Positive Upper Half -->
+              <div class="w-9 sm:w-11 h-16 flex items-end justify-center">
+                ${isPos ? `<div class="w-full rounded-t-md transition-all duration-300 ${posStyle}" style="height: ${magPct}%;"></div>` : ''}
+              </div>
+              <!-- Zero Center Axis Line -->
+              <div class="w-12 sm:w-14 h-[2px] ${val === 0 ? 'bg-cyan-300 shadow-[0_0_8px_rgba(34,211,238,0.8)]' : 'bg-white/25'} rounded-full"></div>
+              <!-- Negative Lower Half -->
+              <div class="w-9 sm:w-11 h-16 flex items-start justify-center">
+                ${isNeg ? `<div class="w-full rounded-b-md transition-all duration-300 ${negStyle}" style="height: ${magPct}%;"></div>` : ''}
+              </div>
+            </div>
+          `;
+        }
+
+        // Value Footer Display
+        const displayVal = formatCompactNum(val);
+        let valColor = 'text-white';
+        if (isMatchQuad) valColor = 'text-emerald-200';
+        else if (isI) valColor = 'text-purple-200';
+        else if (isJ) valColor = 'text-pink-200';
+        else if (isLeft) valColor = 'text-cyan-200';
+        else if (isRight) valColor = 'text-amber-200';
+
+        const bottomFooter = `
+          <div class="w-full flex flex-col items-center">
+            <span class="code-font ${viewMode === 'boxes' ? 'text-xl sm:text-2xl my-2' : 'text-sm sm:text-base'} font-extrabold ${valColor}" title="${val}">
+              ${displayVal}
+            </span>
+          </div>
+        `;
+
+        card.innerHTML = `${skipChip}${topHeader}${barSection}${bottomFooter}`;
+        arrayArena.appendChild(card);
+      });
+
+      // 2. Execute Physical FLIP Lift-and-Arc Glide Animation When Arrays.sort(nums) Moves Elements!
+      if (animateMovement && prevLeftMap.size > 0) {
+        arrayArena.querySelectorAll('[data-item-id]').forEach(el => {
+          const itemId = parseInt(el.dataset.itemId, 10);
+          const oldLeft = prevLeftMap.get(itemId);
+          if (oldLeft !== undefined) {
+            const newLeft = el.getBoundingClientRect().left;
+            const deltaX = oldLeft - newLeft;
+
+            if (Math.abs(deltaX) > 2) {
+              // Lift high above other bars/boxes (-44px) and glide smoothly over the top into the sorted slot!
+              const animDuration = Math.min(620, Math.max(260, playSpeed * 0.85));
+              el.style.zIndex = '50';
+              const anim = el.animate([
+                { transform: `translate(${deltaX}px, 0px) scale(1)` },
+                { transform: `translate(${deltaX * 0.72}px, -44px) scale(1.07)`, offset: 0.3 },
+                { transform: `translate(${deltaX * 0.28}px, -44px) scale(1.07)`, offset: 0.7 },
+                { transform: `translate(0px, 0px) scale(1)` }
+              ], {
+                duration: animDuration,
+                easing: 'cubic-bezier(0.22, 1, 0.36, 1)'
+              });
+              anim.onfinish = () => {
+                el.style.zIndex = '';
+              };
+            }
+          }
+        });
+      }
+
+      // 3. Draw Overhead Sort Arcs SVG during Arrays.sort(nums)
+      if (step.sortMoves && step.sortMoves.length > 0) {
+        requestAnimationFrame(() => drawSortArcs(step.sortMoves));
+      } else {
+        sortArcSvg.innerHTML = '';
+      }
+
+      // 4. Render Discovered Unique Quadruplets Vault
+      vaultCountTag.textContent = `${step.quads.length} found`;
+      quadVaultContainer.innerHTML = '';
+      if (step.quads.length === 0) {
+        quadVaultContainer.innerHTML = `<span class="text-xs text-slate-500 italic">${step.isComplete ? 'No valid quadruplets exist for this target.' : 'No quadruplets added yet — valid matches [nums[i], nums[j], nums[left], nums[right]] appear here.'}</span>`;
+      } else {
+        step.quads.forEach((quad, qIdx) => {
+          const isNewest = (qIdx === step.quads.length - 1) && step.justAddedQuad;
+          const badge = document.createElement('div');
+          badge.className = `px-3 py-1.5 rounded-xl border code-font text-xs font-bold flex items-center gap-1.5 ${
+            isNewest
+              ? 'quad-card-pop bg-emerald-500/25 border-emerald-400 text-emerald-100 shadow-lg shadow-emerald-500/25'
+              : 'bg-emerald-500/12 border-emerald-400/35 text-emerald-200'
+          }`;
+          badge.innerHTML = `
+            <span class="text-[10px] text-emerald-400/80">#${qIdx + 1}</span>
+            <span>[${quad.join(', ')}]</span>
+          `;
+          quadVaultContainer.appendChild(badge);
+        });
+      }
+
+      // 5. Update Decision Banner & Equation Pill
+      if (step.equationText) {
+        equationPill.classList.remove('hidden');
+        equationPill.textContent = step.equationText;
+      } else {
+        equationPill.classList.add('hidden');
+      }
+
+      if (step.isComplete) {
+        decisionIcon.className = "fa-solid fa-trophy text-emerald-400 text-base";
+        decisionBanner.className = "p-3.5 rounded-xl bg-emerald-500/15 border border-emerald-400/35 text-xs flex flex-col sm:flex-row items-center justify-between gap-3 backdrop-blur-md";
+      } else if (step.isMatch) {
+        decisionIcon.className = "fa-solid fa-circle-check text-emerald-400 text-base";
+        decisionBanner.className = "p-3.5 rounded-xl bg-emerald-500/15 border border-emerald-400/35 text-xs flex flex-col sm:flex-row items-center justify-between gap-3 backdrop-blur-md";
+      } else if (step.skipIdx !== undefined) {
+        decisionIcon.className = "fa-solid fa-forward text-rose-400 text-base";
+        decisionBanner.className = "p-3.5 rounded-xl bg-rose-500/12 border border-rose-400/30 text-xs flex flex-col sm:flex-row items-center justify-between gap-3 backdrop-blur-md";
+      } else {
+        decisionIcon.className = "fa-solid fa-circle-info text-cyan-400 text-base";
+        decisionBanner.className = "p-3.5 rounded-xl bg-white/[0.04] border border-white/10 text-xs flex flex-col sm:flex-row items-center justify-between gap-3 backdrop-blur-md";
+      }
+      decisionText.innerHTML = step.desc;
+
+      // 6. Highlight Active Java Line & Play Audio Tone
+      highlightCodeLine(step.line);
+      if (step.soundFreq) {
+        playTone(step.soundFreq, 'sine', 0.08, 0.035);
+      }
+    }
+
+    // PLAYBACK CONTROLLER
+    function setPlaying(playing) {
+      isPlaying = playing;
+      if (isPlaying) {
+        playIcon.className = "fa-solid fa-pause";
+        playText.textContent = "Stop";
+        btnPlay.classList.add('bg-rose-500/25', 'text-rose-200', 'border-rose-400/50');
+        btnPlay.classList.remove('bg-cyan-500/25', 'text-cyan-200', 'border-cyan-400/50');
+
+        playInterval = setInterval(() => {
+          if (currentStepIdx < steps.length - 1) {
+            currentStepIdx++;
+            renderStep(currentStepIdx, true);
+          } else {
+            setPlaying(false);
+          }
+        }, playSpeed);
+      } else {
+        playIcon.className = "fa-solid fa-play";
+        playText.textContent = "Start";
+        btnPlay.classList.remove('bg-rose-500/25', 'text-rose-200', 'border-rose-400/50');
+        btnPlay.classList.add('bg-cyan-500/25', 'text-cyan-200', 'border-cyan-400/50');
+        if (playInterval) {
+          clearInterval(playInterval);
+          playInterval = null;
+        }
+      }
+    }
+
+    function initSimulation(numsArr, targetVal) {
+      setPlaying(false);
+      currentNums = [...numsArr];
+      currentTarget = targetVal;
+      steps = generateSteps(currentNums, currentTarget);
+      currentStepIdx = 0;
+      stepScrubber.max = steps.length - 1;
+      stepScrubber.value = 0;
+      renderStep(0, false);
+    }
+
+    // EVENT LISTENERS
+    btnPlay.addEventListener('click', () => {
+      if (currentStepIdx >= steps.length - 1) {
+        currentStepIdx = 0;
+        renderStep(0, false);
+      }
+      setPlaying(!isPlaying);
+    });
+
+    btnNext.addEventListener('click', () => {
+      setPlaying(false);
+      if (currentStepIdx < steps.length - 1) {
+        currentStepIdx++;
+        renderStep(currentStepIdx, true);
+      }
+    });
+
+    btnPrev.addEventListener('click', () => {
+      setPlaying(false);
+      if (currentStepIdx > 0) {
+        currentStepIdx--;
+        renderStep(currentStepIdx, true);
+      }
+    });
+
+    btnReset.addEventListener('click', () => {
+      setPlaying(false);
+      currentStepIdx = 0;
+      renderStep(0, false);
+    });
+
+    stepScrubber.addEventListener('input', (e) => {
+      setPlaying(false);
+      currentStepIdx = parseInt(e.target.value, 10);
+      renderStep(currentStepIdx, false);
+    });
+
+    document.querySelectorAll('.speed-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.speed-btn').forEach(b => {
+          b.classList.remove('bg-cyan-500/30', 'text-cyan-200', 'font-semibold');
+        });
+        btn.classList.add('bg-cyan-500/30', 'text-cyan-200', 'font-semibold');
+        playSpeed = parseInt(btn.dataset.speed, 10);
+        if (isPlaying) {
+          setPlaying(false);
+          setPlaying(true);
+        }
+      });
+    });
+
+    document.querySelectorAll('.view-mode-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.view-mode-btn').forEach(b => {
+          b.classList.remove('bg-cyan-500/30', 'text-cyan-200', 'font-semibold');
+          b.classList.add('text-slate-300');
+        });
+        btn.classList.add('bg-cyan-500/30', 'text-cyan-200', 'font-semibold');
+        btn.classList.remove('text-slate-300');
+        viewMode = btn.dataset.mode;
+        renderStep(currentStepIdx, false);
+      });
+    });
+
+    btnAudio.addEventListener('click', () => {
+      audioEnabled = !audioEnabled;
+      if (audioEnabled) {
+        audioIcon.className = "fa-solid fa-volume-high";
+        btnAudio.classList.remove('text-slate-600');
+        btnAudio.classList.add('text-slate-300');
+      } else {
+        audioIcon.className = "fa-solid fa-volume-xmark";
+        btnAudio.classList.add('text-slate-600');
+        btnAudio.classList.remove('text-slate-300');
+      }
+    });
+
+    presetSelect.addEventListener('change', (e) => {
+      const idx = parseInt(e.target.value, 10);
+      customArrInput.value = PRESETS[idx].nums.join(', ');
+      customTargetInput.value = PRESETS[idx].target;
+      initSimulation(PRESETS[idx].nums, PRESETS[idx].target);
+    });
+
+    btnApplyCustom.addEventListener('click', () => {
+      const text = customArrInput.value.trim();
+      const targetVal = parseInt(customTargetInput.value, 10);
+      if (!text || isNaN(targetVal)) return;
+
+      const parsed = text.split(',')
+        .map(s => parseInt(s.trim(), 10))
+        .filter(n => !isNaN(n));
+
+      if (parsed.length >= 1) {
+        customArrInput.value = parsed.join(', ');
+        initSimulation(parsed, targetVal);
+      }
+    });
+
+    window.addEventListener('resize', () => {
+      const step = steps[currentStepIdx];
+      if (step && step.sortMoves && step.sortMoves.length > 0) {
+        drawSortArcs(step.sortMoves);
+      }
+    });
+
+    window.addEventListener('keydown', (e) => {
+      if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT') return;
+      if (e.code === 'Space') {
+        e.preventDefault();
+        btnPlay.click();
+      } else if (e.code === 'ArrowRight') {
+        e.preventDefault();
+        btnNext.click();
+      } else if (e.code === 'ArrowLeft') {
+        e.preventDefault();
+        btnPrev.click();
+      }
+    });
+
+    window.onload = function() {
+      customArrInput.value = PRESETS[0].nums.join(', ');
+      customTargetInput.value = PRESETS[0].target;
+      initSimulation(PRESETS[0].nums, PRESETS[0].target);
+    };
+  </script>
+</body>
+</html>

@@ -100,6 +100,11 @@ export const PROBLEMS: DSAProblem[] = [
         "number": 167,
         "title": "Two Sum II - Input Array Is Sorted",
         "difficulty": "Medium"
+      },
+      {
+        "number": 18,
+        "title": "4Sum",
+        "difficulty": "Medium"
       }
     ],
     "leetcodeUrl": "https://leetcode.com/problems/two-sum/"
@@ -3002,6 +3007,11 @@ export const PROBLEMS: DSAProblem[] = [
         "number": 11,
         "title": "Container With Most Water",
         "difficulty": "Medium"
+      },
+      {
+        "number": 18,
+        "title": "4Sum",
+        "difficulty": "Medium"
       }
     ],
     "leetcodeUrl": "https://leetcode.com/problems/3sum/"
@@ -3426,6 +3436,11 @@ export const PROBLEMS: DSAProblem[] = [
         "number": 88,
         "title": "Merge Sorted Array",
         "difficulty": "Easy"
+      },
+      {
+        "number": 18,
+        "title": "4Sum",
+        "difficulty": "Medium"
       }
     ],
     "leetcodeUrl": "https://leetcode.com/problems/two-sum-ii-input-array-is-sorted/"
@@ -3833,5 +3848,105 @@ export const PROBLEMS: DSAProblem[] = [
       }
     ],
     "leetcodeUrl": "https://leetcode.com/problems/merge-sorted-array/"
+  },
+  {
+    "id": "4sum",
+    "number": 18,
+    "title": "4Sum",
+    "slug": "4sum",
+    "difficulty": "Medium",
+    "categories": [
+      "Arrays",
+      "Two Pointers",
+      "Sorting"
+    ],
+    "description": "Given an array nums of n integers, return an array of all the unique quadruplets [nums[a], nums[b], nums[c], nums[d]] such that:\n- 0 <= a, b, c, d < n\n- a, b, c, and d are distinct.\n- nums[a] + nums[b] + nums[c] + nums[d] == target\n\nYou may return the answer in any order.",
+    "inputFormat": "nums = [int], target = int",
+    "outputFormat": "[[int, int, int, int]] (list of unique quadruplets)",
+    "constraints": [
+      "1 <= nums.length <= 200",
+      "-10^9 <= nums[i] <= 10^9",
+      "-10^9 <= target <= 10^9"
+    ],
+    "examples": [
+      {
+        "exampleNumber": 1,
+        "input": "nums = [1, 0, -1, 0, -2, 2], target = 0",
+        "output": "[[-2, -1, 1, 2], [-2, 0, 0, 2], [-1, 0, 0, 1]]",
+        "explanation": "The distinct quadruplets that sum up to 0 are [-2, -1, 1, 2], [-2, 0, 0, 2], and [-1, 0, 0, 1].",
+        "type": "official"
+      },
+      {
+        "exampleNumber": 2,
+        "input": "nums = [2, 2, 2, 2, 2], target = 8",
+        "output": "[[2, 2, 2, 2]]",
+        "explanation": "There is only one unique combination of 4 elements summing to 8.",
+        "type": "official"
+      }
+    ],
+    "approach": "Sorting + Dual Anchors + Converging Two Pointers: Sort nums in O(n log n). Run two nested loops with anchors i (0 to n - 4) and j (i + 1 to n - 3), pruning duplicate elements whenever nums[i] == nums[i - 1] or nums[j] == nums[j - 1]. In the innermost loop, set left = j + 1 and right = n - 1. Compute 64-bit long sum = (long) nums[i] + nums[j] + nums[left] + nums[right]. If sum == target, record quadruplet, move left++ and right--, and skip identical values. If sum < target, advance left++; if sum > target, retreat right--.",
+    "flowSteps": [
+      {
+        "step": 1,
+        "title": "Sort Array & Fix Dual Anchors",
+        "description": "Sort nums ascending. Iterate anchor i from 0 to n-4 (skip if nums[i] == nums[i-1]). Iterate anchor j from i+1 to n-3 (skip if nums[j] == nums[j-1]).",
+        "stateSnapshot": "Arrays.sort(nums); i in [0..n-4], j in [i+1..n-3]",
+        "highlight": "Anchors"
+      },
+      {
+        "step": 2,
+        "title": "Bilateral Two-Pointer Convergence",
+        "description": "Initialize left = j + 1 and right = n - 1. Compute 64-bit sum = (long) nums[i] + nums[j] + nums[left] + nums[right].",
+        "stateSnapshot": "sum = (long) nums[i] + nums[j] + nums[left] + nums[right]",
+        "highlight": "Evaluate"
+      },
+      {
+        "step": 3,
+        "title": "Match & 4-Level Duplicate Pruning",
+        "description": "If sum == target, append [nums[i], nums[j], nums[left], nums[right]], then advance left, retreat right, and skip adjacent duplicate values.",
+        "stateSnapshot": "result.add(...); while (left < right && nums[left] == nums[left-1]) left++",
+        "highlight": "Prune"
+      }
+    ],
+    "timeComplexity": "O(n^3)",
+    "timeComplexityExplanation": "Sorting takes O(n log n). Dual nested anchor loops yield O(n^2) iterations, each running an O(n) two-pointer scan, giving strictly O(n^3) total time.",
+    "spaceComplexity": "O(1)",
+    "spaceComplexityExplanation": "Operates purely in-place using scalar pointers without hash sets or auxiliary storage.",
+    "visualizerUrl": "/visualizers/four_sum_visualizer.html",
+    "keyObservations": [
+      "Sorting reduces 4Sum from O(n^4) brute force down to O(n^3) by transforming the inner pair into sorted Two Sum.",
+      "Guarantees unique quadruplets without a HashSet by skipping identical consecutive values at i, j, left, and right.",
+      "Since elements can reach 10^9, four integers can sum up to 4 * 10^9, exceeding Java's 32-bit Integer.MAX_VALUE (2.14 * 10^9); 64-bit long casting is mandatory."
+    ],
+    "importantPattern": "Sorting + Dual Anchors + Converging Two Pointers",
+    "commonMistakes": [
+      "32-bit integer overflow when calculating sum without casting to long.",
+      "Missing duplicate skips after a match, generating redundant quadruplets.",
+      "Moving only left or only right upon finding a target match."
+    ],
+    "optimalApproach": "Sorting + Dual Anchors + Two Pointers with 4-Way Duplicate Pruning",
+    "relatedProblems": [
+      {
+        "number": 15,
+        "title": "3Sum",
+        "difficulty": "Medium"
+      },
+      {
+        "number": 1,
+        "title": "Two Sum",
+        "difficulty": "Easy"
+      },
+      {
+        "number": 167,
+        "title": "Two Sum II - Input Array Is Sorted",
+        "difficulty": "Medium"
+      },
+      {
+        "number": 11,
+        "title": "Container With Most Water",
+        "difficulty": "Medium"
+      }
+    ],
+    "leetcodeUrl": "https://leetcode.com/problems/4sum/"
   }
 ];
