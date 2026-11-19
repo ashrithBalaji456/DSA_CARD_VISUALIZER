@@ -1,0 +1,1618 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Longest Repeating Character Replacement (LeetCode 424) - Glassmorphic Visualizer</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: radial-gradient(circle at 14% 16%, #0c192c 0%, #030712 100%);
+      color: #e2e8f0;
+      min-height: 100vh;
+    }
+
+    .code-font {
+      font-family: 'Fira Code', monospace;
+    }
+
+    /* Glassmorphic Surface & Controls */
+    .glass-panel {
+      background: rgba(15, 23, 42, 0.56);
+      backdrop-filter: blur(22px);
+      -webkit-backdrop-filter: blur(22px);
+      border: 1px solid rgba(255, 255, 255, 0.11);
+      box-shadow: 0 20px 45px -15px rgba(0, 0, 0, 0.68), inset 0 1px 0 0 rgba(255, 255, 255, 0.09);
+    }
+
+    .glass-button {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .glass-button:hover:not(:disabled) {
+      background: rgba(255, 255, 255, 0.15);
+      border-color: rgba(255, 255, 255, 0.28);
+      transform: translateY(-1px);
+    }
+    .glass-button:active:not(:disabled) {
+      transform: translateY(1px);
+    }
+    .glass-button:disabled {
+      opacity: 0.35;
+      cursor: not-allowed;
+    }
+
+    /* Code Execution Line Highlight */
+    .code-line {
+      transition: all 0.2s ease;
+      border-left: 3px solid transparent;
+      padding: 2px 10px;
+    }
+    .code-line.active-line {
+      background: rgba(56, 189, 248, 0.18);
+      border-left: 3px solid #38bdf8;
+      color: #ffffff;
+      box-shadow: inset 0 0 16px rgba(56, 189, 248, 0.15);
+    }
+
+    /* Glassy Character Tiles in String Stream */
+    .char-card {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      transition: all 0.28s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    .char-card.evicted-char {
+      opacity: 0.38;
+      background: rgba(15, 23, 42, 0.35);
+      border-color: rgba(255, 255, 255, 0.06);
+    }
+
+    .char-card.majority-char {
+      background: linear-gradient(180deg, rgba(34, 211, 238, 0.20) 0%, rgba(6, 182, 212, 0.08) 100%);
+      border-color: rgba(34, 211, 238, 0.72);
+      box-shadow: 0 8px 20px -6px rgba(34, 211, 238, 0.3);
+    }
+
+    .char-card.replaced-char {
+      background: linear-gradient(180deg, rgba(168, 85, 247, 0.24) 0%, rgba(126, 34, 206, 0.10) 100%);
+      border-color: rgba(192, 132, 252, 0.8);
+      border-style: dashed;
+      box-shadow: 0 8px 20px -6px rgba(168, 85, 247, 0.32);
+    }
+
+    .char-card.ptr-right-char {
+      transform: translateY(-5px) scale(1.05);
+      box-shadow: 0 12px 26px -4px rgba(251, 191, 36, 0.42), inset 0 1px 0 rgba(255, 255, 255, 0.25);
+      z-index: 15;
+    }
+
+    .char-card.window-overflow-char {
+      background: linear-gradient(180deg, rgba(244, 63, 94, 0.28) 0%, rgba(225, 29, 72, 0.12) 100%) !important;
+      border-color: rgba(251, 113, 133, 0.92) !important;
+      box-shadow: 0 10px 24px -4px rgba(244, 63, 94, 0.42) !important;
+    }
+
+    .char-card.best-record-char {
+      background: linear-gradient(180deg, rgba(16, 185, 129, 0.24) 0%, rgba(5, 150, 105, 0.09) 100%);
+      border-color: rgba(52, 211, 153, 0.85);
+      box-shadow: 0 10px 24px -4px rgba(16, 185, 129, 0.35);
+    }
+
+    /* Glassy Frequency Bucket Card */
+    .freq-bucket {
+      background: rgba(255, 255, 255, 0.035);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      transition: all 0.28s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    .freq-bucket.dominant-bucket {
+      background: linear-gradient(180deg, rgba(34, 211, 238, 0.18) 0%, rgba(6, 182, 212, 0.06) 100%);
+      border-color: rgba(34, 211, 238, 0.78);
+      box-shadow: 0 10px 24px -6px rgba(34, 211, 238, 0.32);
+    }
+
+    .freq-bucket.active-inc-bucket {
+      border-color: rgba(52, 211, 153, 0.95) !important;
+      transform: translateY(-4px) scale(1.04);
+      box-shadow: 0 12px 28px -4px rgba(16, 185, 129, 0.48) !important;
+    }
+
+    .freq-bucket.active-dec-bucket {
+      border-color: rgba(251, 113, 133, 0.95) !important;
+      transform: translateY(2px) scale(0.98);
+      box-shadow: 0 10px 24px -4px rgba(244, 63, 94, 0.45) !important;
+    }
+
+    @keyframes arcDash {
+      to {
+        stroke-dashoffset: -24;
+      }
+    }
+    .transfer-arc-path {
+      stroke-dasharray: 6 6;
+      animation: arcDash 0.8s linear infinite;
+    }
+
+    @keyframes recordPulse {
+      0%, 100% { transform: scale(1); filter: drop-shadow(0 0 8px rgba(16, 185, 129, 0.45)); }
+      50% { transform: scale(1.04); filter: drop-shadow(0 0 20px rgba(16, 185, 129, 0.95)); }
+    }
+    .record-badge-anim {
+      animation: recordPulse 0.65s ease-in-out;
+    }
+
+    /* Custom Scrollbars */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: rgba(15, 23, 42, 0.4);
+    }
+    ::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.18);
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(255, 255, 255, 0.3);
+    }
+  </style>
+</head>
+<body class="p-4 sm:p-6 lg:p-8 flex flex-col items-center justify-start min-h-screen">
+
+  <!-- Ambient Glass Glow Orbs -->
+  <div class="fixed top-6 left-1/6 w-96 h-96 bg-cyan-500/14 rounded-full blur-3xl pointer-events-none -z-10"></div>
+  <div class="fixed top-1/3 right-1/6 w-96 h-96 bg-purple-500/14 rounded-full blur-3xl pointer-events-none -z-10"></div>
+  <div class="fixed bottom-12 left-1/2 w-80 h-80 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none -z-10"></div>
+
+  <!-- MAIN WRAPPER -->
+  <div class="w-full max-w-7xl flex flex-col gap-6">
+
+    <!-- TOP FROSTED-GLASS CONTROLS DECK -->
+    <header class="glass-panel rounded-2xl p-4 sm:p-5 flex flex-col gap-4 sticky top-4 z-50">
+      <div class="flex flex-wrap items-center justify-between gap-4">
+
+        <!-- Title & Algorithm Metadata -->
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-cyan-500 via-purple-500 to-emerald-400 flex items-center justify-center shadow-lg shadow-cyan-500/25 text-slate-950 font-bold text-lg">
+            <i class="fa-solid fa-wand-magic-sparkles"></i>
+          </div>
+          <div>
+            <h1 class="text-lg sm:text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white via-cyan-100 to-purple-300">
+              Longest Repeating Character Replacement
+            </h1>
+            <p class="text-xs text-slate-400 flex items-center gap-2">
+              <span class="inline-block w-2 h-2 rounded-full bg-cyan-400 animate-pulse"></span>
+              LeetCode 424 • Sliding Window + Frequency Array int[26] • &Omicron;(n) Time • &Omicron;(1) Space
+            </p>
+          </div>
+        </div>
+
+        <!-- Center Playback Controls: Reset, Previous, Start/Stop, Next -->
+        <div class="flex items-center gap-2 sm:gap-3 bg-white/5 p-1.5 rounded-xl border border-white/10 backdrop-blur-md">
+          <button id="btnReset" class="glass-button text-slate-200 hover:text-white px-3 py-2 rounded-lg text-sm flex items-center gap-1.5" title="Reset to Initial State">
+            <i class="fa-solid fa-rotate-left"></i>
+            <span class="hidden sm:inline">Reset</span>
+          </button>
+          <button id="btnPrev" class="glass-button text-slate-200 hover:text-white px-3 py-2 rounded-lg text-sm flex items-center gap-1.5" title="Previous Step (Left Arrow)">
+            <i class="fa-solid fa-backward-step"></i>
+            <span class="hidden sm:inline">Previous</span>
+          </button>
+          <button id="btnPlay" class="glass-button bg-cyan-500/25 text-cyan-200 hover:bg-cyan-500/35 border-cyan-400/50 px-4 py-2 rounded-lg text-sm font-semibold flex items-center gap-2 shadow-lg shadow-cyan-500/15" title="Start / Stop (Spacebar)">
+            <i class="fa-solid fa-play" id="playIcon"></i>
+            <span id="playText">Start</span>
+          </button>
+          <button id="btnNext" class="glass-button text-slate-200 hover:text-white px-3 py-2 rounded-lg text-sm flex items-center gap-1.5" title="Next Step (Right Arrow)">
+            <span class="hidden sm:inline">Next</span>
+            <i class="fa-solid fa-forward-step"></i>
+          </button>
+        </div>
+
+        <!-- Speed & Audio Controls -->
+        <div class="flex items-center gap-2">
+          <a href="/" class="glass-button px-3 py-2 rounded-xl text-xs font-semibold text-slate-300 hover:text-white flex items-center gap-1.5 border border-white/10 hover:border-indigo-500/40 bg-white/5 shrink-0 transition-all active:scale-95 cursor-pointer" title="Return to DSA Atlas Library">
+            <i class="fa-solid fa-arrow-left text-indigo-400"></i>
+            <span>DSA Atlas</span>
+          </a>
+          <div class="flex items-center bg-white/5 rounded-xl p-1 border border-white/10 text-xs text-slate-300 backdrop-blur-md">
+            <span class="px-2 py-1 text-slate-400"><i class="fa-solid fa-gauge-high mr-1"></i>Speed</span>
+            <button class="speed-btn px-2 py-1 rounded-lg hover:text-white transition" data-speed="1300">0.5x</button>
+            <button class="speed-btn px-2 py-1 rounded-lg bg-cyan-500/30 text-cyan-200 font-semibold transition" data-speed="650">1x</button>
+            <button class="speed-btn px-2 py-1 rounded-lg hover:text-white transition" data-speed="280">2x</button>
+            <button class="speed-btn px-2 py-1 rounded-lg hover:text-white transition" data-speed="110">4x</button>
+          </div>
+          <button id="btnAudio" class="glass-button p-2.5 rounded-xl text-slate-300 hover:text-cyan-300" title="Toggle Sound Effects">
+            <i class="fa-solid fa-volume-high" id="audioIcon"></i>
+          </button>
+        </div>
+
+      </div>
+
+      <!-- Scrubber Slider & Status Badges -->
+      <div class="flex flex-col sm:flex-row items-center gap-3 pt-2 border-t border-white/10">
+        <div class="flex flex-wrap items-center gap-2 text-xs text-slate-300 w-full sm:w-auto shrink-0">
+          <span id="stepCounterBadge" class="code-font px-2.5 py-1 rounded-md bg-white/5 border border-white/10 text-cyan-300">
+            Step: 0 / 0
+          </span>
+          <span id="phaseBadge" class="px-2.5 py-1 rounded-md bg-sky-500/20 border border-sky-400/30 text-sky-200 font-semibold">
+            Ready
+          </span>
+          <span id="kBudgetHeaderBadge" class="px-2.5 py-1 rounded-md bg-purple-500/20 border border-purple-400/30 text-purple-200 font-bold">
+            Budget k = 1
+          </span>
+          <span id="maxLenHeaderBadge" class="px-2.5 py-1 rounded-md bg-emerald-500/20 border border-emerald-400/30 text-emerald-200 font-bold">
+            Max Length: 0
+          </span>
+        </div>
+        <div class="w-full flex items-center gap-3">
+          <input type="range" id="stepScrubber" min="0" max="0" value="0" class="w-full h-1.5 bg-slate-800/80 rounded-lg appearance-none cursor-pointer accent-cyan-400">
+        </div>
+      </div>
+    </header>
+
+    <!-- TEST CASES & CUSTOM (S, K) BAR -->
+    <section class="glass-panel rounded-2xl p-4 flex flex-wrap items-center justify-between gap-4">
+      <div class="flex flex-wrap items-center gap-3">
+        <label for="presetSelect" class="text-xs uppercase font-semibold text-slate-300 tracking-wider flex items-center gap-1.5">
+          <i class="fa-solid fa-flask text-cyan-400"></i> Test Cases:
+        </label>
+        <select id="presetSelect" class="bg-slate-900/75 border border-white/15 text-xs sm:text-sm text-slate-200 rounded-xl px-3 py-2 outline-none focus:border-cyan-400 backdrop-blur-md">
+          <option value="0">1: LeetCode Ex 2 (s = "AABABBA", k = 1 &rarr; 4)</option>
+          <option value="1">2: LeetCode Ex 1 (s = "ABAB", k = 2 &rarr; 4)</option>
+          <option value="2">3: Trailing Majority Shift (s = "ABBB", k = 2 &rarr; 4)</option>
+          <option value="3">4: Zero Replacements Allowed (s = "AAABBCAAA", k = 0 &rarr; 3)</option>
+          <option value="4">5: Bridge Two Clusters (s = "AABBAABB", k = 2 &rarr; 6)</option>
+          <option value="5">6: Three Distinct Letters (s = "ABCDE", k = 2 &rarr; 3)</option>
+          <option value="6">7: Full String Replacement (s = "XYZ", k = 2 &rarr; 3)</option>
+          <option value="7">8: Delayed Peak Surge (s = "BAAAB", k = 2 &rarr; 5)</option>
+          <option value="8">9: All Same Characters (s = "CCCC", k = 1 &rarr; 4)</option>
+          <option value="9">10: Single Character Edge Case (s = "Z", k = 0 &rarr; 1)</option>
+        </select>
+      </div>
+
+      <div class="flex flex-wrap items-center gap-2 flex-grow max-w-lg">
+        <input type="text" id="customStrInput" placeholder="Uppercase A-Z: AABABBA" class="flex-1 min-w-[140px] bg-white/5 border border-white/15 rounded-xl px-3 py-2 text-xs text-slate-200 code-font uppercase outline-none focus:border-cyan-400 backdrop-blur-md">
+        <input type="number" id="customKInput" min="0" max="50" value="1" placeholder="k" class="w-16 bg-white/5 border border-white/15 rounded-xl px-2.5 py-2 text-xs text-slate-200 code-font outline-none focus:border-cyan-400 backdrop-blur-md" title="Max replacements k (>= 0)">
+        <button id="btnApplyCustom" class="glass-button text-xs px-4 py-2 rounded-xl text-cyan-300 font-semibold shrink-0">
+          Load (s, k)
+        </button>
+      </div>
+    </section>
+
+    <!-- MAIN VISUALIZATION & CODE SECTION -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+      <!-- LEFT: SLIDING WINDOW TAPE, REPLACEMENT GAUGE & FREQ[26] HISTOGRAM (7 Cols) -->
+      <section class="lg:col-span-7 flex flex-col gap-6">
+
+        <!-- Live Sliding Window & Replacement Budget Telemetry Cards -->
+        <div class="grid grid-cols-2 sm:grid-cols-5 gap-3">
+
+          <!-- Left & Right Window Bounds -->
+          <div class="glass-panel rounded-xl p-3 flex flex-col justify-between border-cyan-400/35">
+            <span class="text-[11px] text-slate-400 uppercase font-semibold flex items-center justify-between">
+              Window [L..R]
+              <span class="w-2 h-2 rounded-full bg-cyan-400"></span>
+            </span>
+            <div class="flex items-baseline gap-1.5 mt-1.5">
+              <span id="varWinSpan" class="code-font text-lg sm:text-xl font-bold text-cyan-300">-</span>
+            </div>
+            <span id="varWinLenSub" class="text-[10px] text-cyan-200/75 mt-1 code-font">len = 0</span>
+          </div>
+
+          <!-- maxFreq -->
+          <div class="glass-panel rounded-xl p-3 flex flex-col justify-between border-sky-400/35">
+            <span class="text-[11px] text-slate-400 uppercase font-semibold flex items-center justify-between">
+              maxFreq
+              <i class="fa-solid fa-crown text-sky-400 text-[10px]"></i>
+            </span>
+            <div class="flex items-baseline gap-1.5 mt-1.5">
+              <span id="varMaxFreq" class="code-font text-xl font-bold text-sky-300">0</span>
+              <span id="varDomChar" class="text-xs text-sky-200 code-font font-bold"></span>
+            </div>
+            <span class="text-[10px] text-slate-400 mt-1 code-font">Peak char count</span>
+          </div>
+
+          <!-- Replacements Needed: (right - left + 1) - maxFreq -->
+          <div id="replacementsCard" class="glass-panel rounded-xl p-3 flex flex-col justify-between border-purple-400/35">
+            <span class="text-[11px] text-slate-400 uppercase font-semibold flex items-center justify-between">
+              Replacements
+              <i class="fa-solid fa-wand-sparkles text-purple-400 text-[10px]"></i>
+            </span>
+            <div class="flex items-baseline gap-1 mt-1.5">
+              <span id="varReplacements" class="code-font text-lg sm:text-xl font-bold text-purple-300">0 / 1</span>
+            </div>
+            <span class="text-[10px] text-purple-200/75 mt-1 code-font">len - maxFreq &le; k</span>
+          </div>
+
+          <!-- Current Char ch -->
+          <div class="glass-panel rounded-xl p-3 flex flex-col justify-between border-amber-400/35">
+            <span class="text-[11px] text-slate-400 uppercase font-semibold flex items-center justify-between">
+              Active ch
+              <span class="w-2 h-2 rounded-full bg-amber-400"></span>
+            </span>
+            <div class="flex items-baseline gap-1.5 mt-1.5">
+              <span id="varCurCh" class="code-font text-xl font-bold text-amber-300">-</span>
+              <span id="varRightIdx" class="text-[10px] text-slate-400 code-font">R: -</span>
+            </div>
+            <span class="text-[10px] text-amber-200/75 mt-1 code-font">s.charAt(right)</span>
+          </div>
+
+          <!-- maxLength Record -->
+          <div id="maxLenCard" class="glass-panel rounded-xl p-3 flex flex-col justify-between border-emerald-400/35 col-span-2 sm:col-span-1">
+            <span class="text-[11px] text-slate-400 uppercase font-semibold flex items-center justify-between">
+              maxLength
+              <i class="fa-solid fa-trophy text-emerald-400 text-[10px]"></i>
+            </span>
+            <div class="flex items-baseline gap-1.5 mt-1.5">
+              <span id="varMaxLen" class="code-font text-2xl font-black text-emerald-400">0</span>
+            </div>
+            <span id="varBestSubstr" class="text-[10px] text-emerald-300/85 mt-1 code-font truncate">Best: ""</span>
+          </div>
+
+        </div>
+
+        <!-- UNIFIED SLIDING WINDOW & FREQUENCY HISTOGRAM STAGE WITH LIFT-AND-ARC TRANSFERS -->
+        <div id="stageWrapper" class="glass-panel relative rounded-2xl p-5 flex flex-col gap-5">
+          <!-- SVG Trajectory Arc Overlay Connecting Character Stream & freq[26] Buckets -->
+          <svg id="transferArcSvg" class="absolute inset-0 w-full h-full pointer-events-none z-30 overflow-visible"></svg>
+
+          <!-- Floating Lift-and-Place Token Layer -->
+          <div id="flyingCloneLayer" class="absolute inset-0 pointer-events-none z-40"></div>
+
+          <!-- 1. STRING S & ELASTIC SLIDING WINDOW TAPE -->
+          <div class="flex flex-col gap-3">
+            <div class="flex flex-wrap items-center justify-between text-xs pb-2 border-b border-white/10 gap-2">
+              <span class="font-semibold text-slate-200 uppercase tracking-wider flex items-center gap-1.5">
+                <i class="fa-solid fa-tape text-cyan-400"></i>
+                Sliding Window Stream: <span class="code-font text-slate-300">s</span> <span id="strLenBadge" class="code-font text-cyan-300">(len = 0, k = 1)</span>
+              </span>
+
+              <div class="flex flex-wrap items-center gap-3 text-[11px]">
+                <span class="flex items-center gap-1.5">
+                  <span class="w-2.5 h-2.5 rounded-sm bg-cyan-400 inline-block"></span> Majority Char
+                </span>
+                <span class="flex items-center gap-1.5">
+                  <span class="w-2.5 h-2.5 rounded-sm border border-dashed border-purple-400 bg-purple-500/30 inline-block"></span> Replaced (&le; k)
+                </span>
+                <span class="flex items-center gap-1.5">
+                  <span class="w-2.5 h-2.5 rounded-sm bg-rose-500 inline-block"></span> Exceeds k
+                </span>
+                <span class="flex items-center gap-1.5">
+                  <span class="w-2.5 h-2.5 rounded-sm bg-emerald-400 inline-block"></span> Max Substring
+                </span>
+              </div>
+            </div>
+
+            <!-- Scrollable Character Tape + Elastic Sliding Window Halo -->
+            <div id="tapeScrollContainer" class="relative w-full pt-9 pb-8 px-4 rounded-xl bg-white/[0.02] border border-white/10 overflow-x-auto">
+              <!-- Elastic Active Window Frame [left .. right] -->
+              <div id="activeWindowFrame" class="hidden absolute rounded-2xl border-2 border-cyan-400/75 bg-cyan-400/[0.06] pointer-events-none transition-all duration-300 z-10">
+                <span id="activeWindowTag" class="absolute -top-3 left-1/2 -translate-x-1/2 px-2 py-0.5 rounded-full bg-slate-950 border border-cyan-400/70 text-cyan-200 code-font text-[9px] font-bold shadow whitespace-nowrap">
+                  window [0..0] • repl=0/1
+                </span>
+              </div>
+
+              <!-- Best Record Substring Dashed Frame -->
+              <div id="bestWindowFrame" class="hidden absolute h-3.5 border-b-2 border-x-2 border-dashed border-emerald-400/75 rounded-b-lg pointer-events-none transition-all duration-300 z-10">
+                <span id="bestWindowTag" class="absolute -bottom-4 left-1/2 -translate-x-1/2 text-[9px] code-font text-emerald-300 font-bold whitespace-nowrap">
+                  Best: ""
+                </span>
+              </div>
+
+              <!-- Character Tiles Row -->
+              <div id="charStreamArena" class="relative z-20 flex items-center justify-center gap-2 sm:gap-2.5 min-h-[82px]">
+                <!-- Populated dynamically -->
+              </div>
+            </div>
+          </div>
+
+          <!-- 2. FREQUENCY COUNTER ARRAY: int[] freq = new int[26] -->
+          <div class="flex flex-col gap-3 pt-1">
+            <div class="flex flex-wrap items-center justify-between text-xs pb-2 border-b border-white/10 gap-2">
+              <span class="font-semibold text-slate-200 uppercase tracking-wider flex items-center gap-1.5">
+                <i class="fa-solid fa-chart-column text-purple-400"></i>
+                Window Frequency Table: <span class="code-font text-purple-300">int[] freq = new int[26]</span>
+              </span>
+              <span id="freqSummaryBadge" class="code-font text-[11px] text-cyan-200 bg-cyan-500/15 px-2.5 py-0.5 rounded border border-cyan-400/30">
+                maxFreq = 0
+              </span>
+            </div>
+
+            <div id="freqBucketsArena" class="min-h-[124px] p-3.5 rounded-xl bg-white/[0.02] border border-white/10 flex flex-wrap items-end justify-center gap-3 sm:gap-4">
+              <!-- Populated dynamically with glassy boxes & vertical frequency bars -->
+            </div>
+          </div>
+
+          <!-- Live Replacement Budget Formula & Decision Banner -->
+          <div id="decisionBanner" class="p-3.5 rounded-xl bg-white/[0.04] border border-white/10 text-xs flex flex-col sm:flex-row items-center justify-between gap-3 backdrop-blur-md">
+            <div class="flex items-center gap-2.5">
+              <i id="decisionIcon" class="fa-solid fa-circle-info text-cyan-400 text-base"></i>
+              <span id="decisionText" class="text-slate-200">Ready to expand the sliding window across s and track character frequencies in freq[26].</span>
+            </div>
+            <div id="formulaPill" class="hidden text-xs code-font px-3 py-1.5 rounded-lg bg-slate-950/70 border border-white/15 text-sky-200 font-semibold shrink-0">
+              <!-- e.g. (3 - 0 + 1) - 3 = 1 <= 1 -->
+            </div>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- RIGHT: SYNCHRONIZED JAVA CODE CONTAINER (5 Cols) -->
+      <section class="lg:col-span-5 flex flex-col gap-4">
+
+        <div class="glass-panel rounded-2xl p-4 flex flex-col h-full">
+          <div class="flex items-center justify-between pb-3 border-b border-white/10 text-xs">
+            <div class="flex items-center gap-2">
+              <div class="flex gap-1.5">
+                <span class="w-3 h-3 rounded-full bg-rose-500/80 inline-block"></span>
+                <span class="w-3 h-3 rounded-full bg-amber-500/80 inline-block"></span>
+                <span class="w-3 h-3 rounded-full bg-emerald-500/80 inline-block"></span>
+              </div>
+              <span class="code-font text-slate-200 font-semibold ml-2">Solution.java</span>
+            </div>
+            <span class="text-[11px] text-cyan-300 bg-cyan-500/15 px-2.5 py-0.5 rounded border border-cyan-400/25 code-font">
+              Sliding Window + freq[26]
+            </span>
+          </div>
+
+          <!-- Code Lines with Zero-Jump Localized Scroll -->
+          <div id="codeContainer" class="code-font text-xs sm:text-[13px] leading-relaxed text-slate-300 py-3 overflow-y-auto max-h-[560px] flex-grow select-none">
+            <div class="code-line" id="line1"><span class="text-slate-500 mr-2"> 1</span><span class="text-indigo-400 font-semibold">class</span> <span class="text-amber-300">Solution</span> {</div>
+            <div class="code-line" id="line2"><span class="text-slate-500 mr-2"> 2</span>    <span class="text-indigo-400 font-semibold">public int</span> <span class="text-cyan-300">characterReplacement</span>(String s, <span class="text-indigo-400">int</span> k) {</div>
+            <div class="code-line" id="line3"><span class="text-slate-500 mr-2"> 3</span></div>
+            <div class="code-line" id="line4"><span class="text-slate-500 mr-2"> 4</span>        <span class="text-indigo-400 font-semibold">int</span>[] freq = <span class="text-indigo-400 font-semibold">new int</span>[<span class="text-rose-400">26</span>];</div>
+            <div class="code-line" id="line5"><span class="text-slate-500 mr-2"> 5</span></div>
+            <div class="code-line" id="line6"><span class="text-slate-500 mr-2"> 6</span>        <span class="text-indigo-400 font-semibold">int</span> left = <span class="text-rose-400">0</span>;</div>
+            <div class="code-line" id="line7"><span class="text-slate-500 mr-2"> 7</span>        <span class="text-indigo-400 font-semibold">int</span> maxFreq = <span class="text-rose-400">0</span>;</div>
+            <div class="code-line" id="line8"><span class="text-slate-500 mr-2"> 8</span>        <span class="text-indigo-400 font-semibold">int</span> maxLength = <span class="text-rose-400">0</span>;</div>
+            <div class="code-line" id="line9"><span class="text-slate-500 mr-2"> 9</span></div>
+            <div class="code-line" id="line10"><span class="text-slate-500 mr-2">10</span>        <span class="text-indigo-400 font-semibold">for</span> (<span class="text-indigo-400">int</span> right = <span class="text-rose-400">0</span>; right &lt; s.length(); right++) {</div>
+            <div class="code-line" id="line11"><span class="text-slate-500 mr-2">11</span></div>
+            <div class="code-line" id="line12"><span class="text-slate-500 mr-2">12</span>            <span class="text-indigo-400 font-semibold">char</span> ch = s.charAt(right);</div>
+            <div class="code-line" id="line13"><span class="text-slate-500 mr-2">13</span></div>
+            <div class="code-line" id="line14"><span class="text-slate-500 mr-2">14</span>            <span class="text-slate-500 italic">// Update frequency of current character</span></div>
+            <div class="code-line" id="line15"><span class="text-slate-500 mr-2">15</span>            freq[ch - <span class="text-emerald-300">'A'</span>]++;</div>
+            <div class="code-line" id="line16"><span class="text-slate-500 mr-2">16</span></div>
+            <div class="code-line" id="line17"><span class="text-slate-500 mr-2">17</span>            <span class="text-slate-500 italic">// Maximum frequency in the current window</span></div>
+            <div class="code-line" id="line18"><span class="text-slate-500 mr-2">18</span>            maxFreq = Math.max(maxFreq, freq[ch - <span class="text-emerald-300">'A'</span>]);</div>
+            <div class="code-line" id="line19"><span class="text-slate-500 mr-2">19</span></div>
+            <div class="code-line" id="line20"><span class="text-slate-500 mr-2">20</span>            <span class="text-slate-500 italic">// Shrink window if replacements exceed k</span></div>
+            <div class="code-line" id="line21"><span class="text-slate-500 mr-2">21</span>            <span class="text-indigo-400 font-semibold">while</span> ((right - left + <span class="text-rose-400">1</span>) - maxFreq &gt; k) {</div>
+            <div class="code-line" id="line22"><span class="text-slate-500 mr-2">22</span></div>
+            <div class="code-line" id="line23"><span class="text-slate-500 mr-2">23</span>                freq[s.charAt(left) - <span class="text-emerald-300">'A'</span>]--;</div>
+            <div class="code-line" id="line24"><span class="text-slate-500 mr-2">24</span>                left++;</div>
+            <div class="code-line" id="line25"><span class="text-slate-500 mr-2">25</span>            }</div>
+            <div class="code-line" id="line26"><span class="text-slate-500 mr-2">26</span></div>
+            <div class="code-line" id="line27"><span class="text-slate-500 mr-2">27</span>            <span class="text-slate-500 italic">// Update maximum valid window length</span></div>
+            <div class="code-line" id="line28"><span class="text-slate-500 mr-2">28</span>            maxLength = Math.max(maxLength, right - left + <span class="text-rose-400">1</span>);</div>
+            <div class="code-line" id="line29"><span class="text-slate-500 mr-2">29</span>        }</div>
+            <div class="code-line" id="line30"><span class="text-slate-500 mr-2">30</span></div>
+            <div class="code-line" id="line31"><span class="text-slate-500 mr-2">31</span>        <span class="text-indigo-400 font-semibold">return</span> maxLength;</div>
+            <div class="code-line" id="line32"><span class="text-slate-500 mr-2">32</span>    }</div>
+            <div class="code-line" id="line33"><span class="text-slate-500 mr-2">33</span>}</div>
+          </div>
+
+          <!-- Live Step Narrative Box -->
+          <div class="mt-3 p-3 bg-white/[0.04] border border-white/10 rounded-xl flex items-start gap-2.5 backdrop-blur-md">
+            <i class="fa-solid fa-circle-info text-cyan-400 mt-0.5 text-xs"></i>
+            <div class="text-xs text-slate-200 leading-relaxed" id="stepDescription">
+              Ready to run Longest Repeating Character Replacement. Click <b>Start</b> or <b>Next</b> to step through.
+            </div>
+          </div>
+
+        </div>
+
+      </section>
+
+    </div>
+
+    <!-- BOTTOM SECTION: PROBLEM STATEMENT & ARCHITECTURAL SUMMARY -->
+    <footer class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-2">
+
+      <!-- Problem Statement Card -->
+      <div class="glass-panel rounded-2xl p-5 flex flex-col gap-3">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <span class="text-amber-400 font-bold"><i class="fa-solid fa-file-lines mr-1.5"></i>Problem Statement</span>
+            <span class="px-2 py-0.5 rounded text-[11px] font-semibold bg-amber-500/20 text-amber-300 border border-amber-400/30">Medium</span>
+          </div>
+          <span class="text-xs text-slate-400 font-mono">LeetCode 424</span>
+        </div>
+
+        <p class="text-xs text-slate-300 leading-relaxed">
+          You are given a string <code class="font-mono text-cyan-300">s</code> and an integer <code class="font-mono text-purple-300">k</code>. You can choose any character of the string and change it to any other uppercase English character. You can perform this operation <b>at most <code class="font-mono">k</code> times</b>.
+          <br><br>
+          Return the length of the <b>longest substring</b> containing the same letter you can get after performing the above operations.
+        </p>
+
+        <div class="space-y-2 pt-2 border-t border-white/10 text-xs text-slate-300">
+          <div class="bg-white/[0.03] p-2.5 rounded-lg border border-white/10 font-mono">
+            <span class="text-slate-400">Example 1:</span><br>
+            <b>Input:</b> s = "ABAB", k = 2 &rarr; <b>Output:</b> <span class="text-emerald-400 font-bold">4</span><br>
+            <span class="text-[11px] text-slate-400 font-sans">Replace the two 'A's with two 'B's (or vice versa) to get "BBBB" of length 4.</span>
+          </div>
+          <div class="bg-white/[0.03] p-2.5 rounded-lg border border-white/10 font-mono">
+            <span class="text-slate-400">Example 2:</span><br>
+            <b>Input:</b> s = "AABABBA", k = 1 &rarr; <b>Output:</b> <span class="text-emerald-400 font-bold">4</span><br>
+            <span class="text-[11px] text-slate-400 font-sans">Replace the middle 'A' with 'B' to form "AABBBBA", yielding "BBBB" of length 4.</span>
+          </div>
+        </div>
+
+        <div class="text-[11px] text-slate-400">
+          <b>Constraints:</b> <code class="font-mono text-slate-300">1 &le; s.length &le; 10<sup>5</sup></code>, <code class="font-mono text-slate-300">s</code> consists of only uppercase English letters, <code class="font-mono text-slate-300">0 &le; k &le; s.length</code>.
+        </div>
+      </div>
+
+      <!-- Algorithm Summary & Monotonic Sliding Window Proof Card -->
+      <div class="glass-panel rounded-2xl p-5 flex flex-col gap-3">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <span class="text-cyan-400 font-bold"><i class="fa-solid fa-brain mr-1.5"></i>Algorithm Summary &amp; Sliding Window Invariant</span>
+          </div>
+          <span class="px-2 py-0.5 rounded text-[11px] font-semibold bg-cyan-500/20 text-cyan-200 border border-cyan-400/30">O(1) Aux Space</span>
+        </div>
+
+        <div class="space-y-3 text-xs text-slate-300 leading-relaxed">
+          <div class="p-3 bg-cyan-950/30 border border-cyan-400/25 rounded-xl">
+            <b class="text-cyan-300 flex items-center gap-1.5 mb-1">
+              <i class="fa-solid fa-calculator"></i> Window Validity Formula:
+            </b>
+            To make every character inside <code class="font-mono">s[left .. right]</code> match the most frequent character in that window, we keep all <code class="font-mono text-cyan-300">maxFreq</code> occurrences of that dominant letter and replace the remaining characters:<br>
+            <code class="font-mono text-emerald-300 font-semibold">replacementsNeeded = (right - left + 1) - maxFreq &le; k</code>
+          </div>
+
+          <div class="p-3 bg-purple-950/25 border border-purple-400/20 rounded-xl">
+            <b class="text-purple-300 flex items-center gap-1.5 mb-1">
+              <i class="fa-solid fa-bolt"></i> Why We Never Decrement <code class="font-mono">maxFreq</code> When Shrinking:
+            </b>
+            Notice <code class="font-mono">maxFreq</code> is never recomputed downward when <code class="font-mono">left++</code> runs. Since <code class="font-mono">maxLength</code> can only beat its previous best when <code class="font-mono">(right - left + 1)</code> grows larger, a new record requires a <b>strictly higher</b> <code class="font-mono">maxFreq</code> anyway — keeping the algorithm strictly <code class="font-mono">&Omicron;(N)</code> instead of <code class="font-mono">&Omicron;(26 &times; N)</code>.
+          </div>
+
+          <div class="grid grid-cols-2 gap-3 pt-1">
+            <div class="p-2.5 bg-white/[0.03] rounded-lg border border-white/10">
+              <span class="text-[11px] text-slate-400 uppercase font-semibold">Time Complexity</span>
+              <div class="text-sm font-bold text-emerald-400 font-mono mt-0.5">&Omicron;(N)</div>
+              <p class="text-[10px] text-slate-400 mt-0.5">Single pass; <code class="font-mono">right</code> and <code class="font-mono">left</code> each advance at most <code class="font-mono">N</code> times.</p>
+            </div>
+            <div class="p-2.5 bg-white/[0.03] rounded-lg border border-white/10">
+              <span class="text-[11px] text-slate-400 uppercase font-semibold">Space Complexity</span>
+              <div class="text-sm font-bold text-cyan-400 font-mono mt-0.5">&Omicron;(1)</div>
+              <p class="text-[10px] text-slate-400 mt-0.5">Fixed 26-slot integer array <code class="font-mono">int[26]</code> for uppercase English letters.</p>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+    </footer>
+
+  </div>
+
+  <!-- JAVASCRIPT SIMULATION ENGINE WITH SLIDING WINDOW & LIFT-AND-ARC FREQ TRANSFERS -->
+  <script>
+    // 10 COMPREHENSIVE PRESETS
+    const PRESETS = [
+      { name: "1: LeetCode Ex 2 (s = 'AABABBA', k = 1)", s: "AABABBA", k: 1 },
+      { name: "2: LeetCode Ex 1 (s = 'ABAB', k = 2)", s: "ABAB", k: 2 },
+      { name: "3: Trailing Majority Shift (s = 'ABBB', k = 2)", s: "ABBB", k: 2 },
+      { name: "4: Zero Replacements Allowed (s = 'AAABBCAAA', k = 0)", s: "AAABBCAAA", k: 0 },
+      { name: "5: Bridge Two Clusters (s = 'AABBAABB', k = 2)", s: "AABBAABB", k: 2 },
+      { name: "6: Three Distinct Letters (s = 'ABCDE', k = 2)", s: "ABCDE", k: 2 },
+      { name: "7: Full String Replacement (s = 'XYZ', k = 2)", s: "XYZ", k: 2 },
+      { name: "8: Delayed Peak Surge (s = 'BAAAB', k = 2)", s: "BAAAB", k: 2 },
+      { name: "9: All Same Characters (s = 'CCCC', k = 1)", s: "CCCC", k: 1 },
+      { name: "10: Single Character Edge Case (s = 'Z', k = 0)", s: "Z", k: 0 }
+    ];
+
+    // APPLICATION STATE
+    let currentS = PRESETS[0].s;
+    let currentK = PRESETS[0].k;
+    let steps = [];
+    let currentStepIdx = 0;
+    let isPlaying = false;
+    let playInterval = null;
+    let playSpeed = 650;
+    let audioEnabled = true;
+
+    // WEB AUDIO SYNTHESIZER
+    let audioCtx = null;
+    function initAudio() {
+      if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      }
+    }
+    function playTone(freq = 440, type = 'sine', duration = 0.08, vol = 0.035) {
+      if (!audioEnabled) return;
+      try {
+        initAudio();
+        if (audioCtx.state === 'suspended') {
+          audioCtx.resume();
+        }
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = type;
+        osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+        gain.gain.setValueAtTime(vol, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + duration);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + duration);
+      } catch (e) {}
+    }
+
+    // DOM REFERENCES
+    const btnPlay = document.getElementById('btnPlay');
+    const playIcon = document.getElementById('playIcon');
+    const playText = document.getElementById('playText');
+    const btnPrev = document.getElementById('btnPrev');
+    const btnNext = document.getElementById('btnNext');
+    const btnReset = document.getElementById('btnReset');
+    const btnAudio = document.getElementById('btnAudio');
+    const audioIcon = document.getElementById('audioIcon');
+    const presetSelect = document.getElementById('presetSelect');
+    const customStrInput = document.getElementById('customStrInput');
+    const customKInput = document.getElementById('customKInput');
+    const btnApplyCustom = document.getElementById('btnApplyCustom');
+    const stepScrubber = document.getElementById('stepScrubber');
+    const stepCounterBadge = document.getElementById('stepCounterBadge');
+    const phaseBadge = document.getElementById('phaseBadge');
+    const kBudgetHeaderBadge = document.getElementById('kBudgetHeaderBadge');
+    const maxLenHeaderBadge = document.getElementById('maxLenHeaderBadge');
+
+    const varWinSpan = document.getElementById('varWinSpan');
+    const varWinLenSub = document.getElementById('varWinLenSub');
+    const varMaxFreq = document.getElementById('varMaxFreq');
+    const varDomChar = document.getElementById('varDomChar');
+    const replacementsCard = document.getElementById('replacementsCard');
+    const varReplacements = document.getElementById('varReplacements');
+    const varCurCh = document.getElementById('varCurCh');
+    const varRightIdx = document.getElementById('varRightIdx');
+    const maxLenCard = document.getElementById('maxLenCard');
+    const varMaxLen = document.getElementById('varMaxLen');
+    const varBestSubstr = document.getElementById('varBestSubstr');
+
+    const stageWrapper = document.getElementById('stageWrapper');
+    const transferArcSvg = document.getElementById('transferArcSvg');
+    const flyingCloneLayer = document.getElementById('flyingCloneLayer');
+    const strLenBadge = document.getElementById('strLenBadge');
+    const activeWindowFrame = document.getElementById('activeWindowFrame');
+    const activeWindowTag = document.getElementById('activeWindowTag');
+    const bestWindowFrame = document.getElementById('bestWindowFrame');
+    const bestWindowTag = document.getElementById('bestWindowTag');
+    const charStreamArena = document.getElementById('charStreamArena');
+
+    const freqSummaryBadge = document.getElementById('freqSummaryBadge');
+    const freqBucketsArena = document.getElementById('freqBucketsArena');
+    const decisionBanner = document.getElementById('decisionBanner');
+    const decisionIcon = document.getElementById('decisionIcon');
+    const decisionText = document.getElementById('decisionText');
+    const formulaPill = document.getElementById('formulaPill');
+    const codeContainer = document.getElementById('codeContainer');
+    const stepDescription = document.getElementById('stepDescription');
+
+    // HELPER: Determine dominant character in current window for visual replacement cues
+    function getDominantChar(freqArr, distinctChars) {
+      let bestCh = null;
+      let bestCount = 0;
+      for (const ch of distinctChars) {
+        const c = freqArr[ch.charCodeAt(0) - 65];
+        if (c > bestCount) {
+          bestCount = c;
+          bestCh = ch;
+        }
+      }
+      return bestCh;
+    }
+
+    // STRICT LINE-BY-LINE EXECUTION TRACE GENERATOR
+    function generateSteps(s, k) {
+      const trace = [];
+      const n = s.length;
+      const freq = new Array(26).fill(0);
+      const distinctChars = Array.from(new Set(s.split(''))).sort();
+
+      let left = 0;
+      let maxFreq = 0;
+      let maxLength = 0;
+      let bestLeft = -1;
+      let bestRight = -1;
+
+      // Line 2: Method entry
+      trace.push({
+        line: 2,
+        phase: "Start",
+        s,
+        k,
+        distinctChars,
+        freq: [...freq],
+        left: -1,
+        right: -1,
+        curCh: null,
+        maxFreq: 0,
+        maxLength: 0,
+        bestLeft: -1,
+        bestRight: -1,
+        desc: `Entered <span class="code-font text-cyan-300 font-bold">characterReplacement</span> with <span class="code-font text-slate-100">"${s}"</span> (length ${n}) and replacement budget <span class="code-font text-purple-300 font-bold">k = ${k}</span>.`,
+        soundFreq: 330
+      });
+
+      // Line 4: int[] freq = new int[26];
+      trace.push({
+        line: 4,
+        phase: "Init freq[26]",
+        s,
+        k,
+        distinctChars,
+        freq: [...freq],
+        left: -1,
+        right: -1,
+        curCh: null,
+        maxFreq: 0,
+        maxLength: 0,
+        bestLeft: -1,
+        bestRight: -1,
+        desc: `Allocated 26-slot frequency counter <span class="code-font text-purple-300 font-bold">int[] freq = new int[26]</span> (initialized to 0).`,
+        soundFreq: 360
+      });
+
+      // Line 6: int left = 0;
+      trace.push({
+        line: 6,
+        phase: "Init left = 0",
+        s,
+        k,
+        distinctChars,
+        freq: [...freq],
+        left: 0,
+        right: -1,
+        curCh: null,
+        maxFreq: 0,
+        maxLength: 0,
+        bestLeft: -1,
+        bestRight: -1,
+        desc: `Initialized left window boundary <span class="code-font text-cyan-300 font-bold">left = 0</span>.`,
+        soundFreq: 385
+      });
+
+      // Line 7: int maxFreq = 0;
+      trace.push({
+        line: 7,
+        phase: "Init maxFreq = 0",
+        s,
+        k,
+        distinctChars,
+        freq: [...freq],
+        left: 0,
+        right: -1,
+        curCh: null,
+        maxFreq: 0,
+        maxLength: 0,
+        bestLeft: -1,
+        bestRight: -1,
+        desc: `Initialized <span class="code-font text-sky-300 font-bold">maxFreq = 0</span> to track the highest single-letter frequency seen in any window.`,
+        soundFreq: 410
+      });
+
+      // Line 8: int maxLength = 0;
+      trace.push({
+        line: 8,
+        phase: "Init maxLength = 0",
+        s,
+        k,
+        distinctChars,
+        freq: [...freq],
+        left: 0,
+        right: -1,
+        curCh: null,
+        maxFreq: 0,
+        maxLength: 0,
+        bestLeft: -1,
+        bestRight: -1,
+        desc: `Initialized <span class="code-font text-emerald-300 font-bold">maxLength = 0</span> to record the longest valid repeating substring.`,
+        soundFreq: 435
+      });
+
+      for (let right = 0; right < n; right++) {
+        // Line 10: for (int right = 0; right < s.length(); right++)
+        trace.push({
+          line: 10,
+          phase: `Expand right = ${right}`,
+          s,
+          k,
+          distinctChars,
+          freq: [...freq],
+          left,
+          right,
+          curCh: null,
+          maxFreq,
+          maxLength,
+          bestLeft,
+          bestRight,
+          desc: `Outer loop <span class="code-font text-amber-300 font-bold">right = ${right}</span> (<span class="code-font">${right} &lt; ${n}</span>): Expanding window right edge.`,
+          soundFreq: 460
+        });
+
+        // Line 12: char ch = s.charAt(right);
+        const ch = s[right];
+        const codeIdx = ch.charCodeAt(0) - 65;
+        trace.push({
+          line: 12,
+          phase: `ch = '${ch}'`,
+          s,
+          k,
+          distinctChars,
+          freq: [...freq],
+          left,
+          right,
+          curCh: ch,
+          maxFreq,
+          maxLength,
+          bestLeft,
+          bestRight,
+          desc: `Read character <span class="code-font text-amber-300 font-bold">ch = s.charAt(${right}) = '${ch}'</span> (ASCII index <span class="code-font">'${ch}' - 'A' = ${codeIdx}</span>).`,
+          soundFreq: 490
+        });
+
+        // Line 15: freq[ch - 'A']++;
+        freq[codeIdx]++;
+        trace.push({
+          line: 15,
+          phase: `freq['${ch}']++ (${freq[codeIdx]})`,
+          s,
+          k,
+          distinctChars,
+          freq: [...freq],
+          left,
+          right,
+          curCh: ch,
+          activeFreqChar: ch,
+          activeFreqOp: 'inc',
+          transfer: { type: 'inc', ch, idx: right },
+          maxFreq,
+          maxLength,
+          bestLeft,
+          bestRight,
+          desc: `Incremented <span class="code-font text-emerald-300 font-bold">freq['${ch}' - 'A']++</span> &rarr; count of <span class="code-font text-emerald-200">'${ch}'</span> in window is now <span class="code-font font-bold">${freq[codeIdx]}</span>.`,
+          soundFreq: 560
+        });
+
+        // Line 18: maxFreq = Math.max(maxFreq, freq[ch - 'A']);
+        const prevMaxFreq = maxFreq;
+        const raisedMaxFreq = freq[codeIdx] > maxFreq;
+        maxFreq = Math.max(maxFreq, freq[codeIdx]);
+        trace.push({
+          line: 18,
+          phase: raisedMaxFreq ? `New maxFreq = ${maxFreq}` : `maxFreq = ${maxFreq}`,
+          s,
+          k,
+          distinctChars,
+          freq: [...freq],
+          left,
+          right,
+          curCh: ch,
+          maxFreq,
+          maxLength,
+          bestLeft,
+          bestRight,
+          desc: raisedMaxFreq
+            ? `Updated <span class="code-font text-sky-300 font-bold">maxFreq = Math.max(${prevMaxFreq}, ${freq[codeIdx]}) = ${maxFreq}</span> (<span class="code-font text-cyan-300">'${ch}'</span> sets new peak frequency).`
+            : `<span class="code-font text-sky-300">maxFreq = Math.max(${prevMaxFreq}, ${freq[codeIdx]}) = ${maxFreq}</span> (unchanged).`,
+          soundFreq: raisedMaxFreq ? 640 : 520
+        });
+
+        // Inner Loop: while ((right - left + 1) - maxFreq > k)
+        while (true) {
+          const winLen = right - left + 1;
+          const replacements = winLen - maxFreq;
+          const exceedsK = replacements > k;
+
+          // Line 21: Always evaluate while condition!
+          trace.push({
+            line: 21,
+            phase: exceedsK ? `Exceeds k (${replacements} > ${k})` : `Valid (${replacements} ≤ ${k})`,
+            s,
+            k,
+            distinctChars,
+            freq: [...freq],
+            left,
+            right,
+            curCh: ch,
+            windowInvalid: exceedsK,
+            formulaText: `(${right} - ${left} + 1) - ${maxFreq} = ${replacements} ${exceedsK ? '>' : '≤'} ${k}`,
+            maxFreq,
+            maxLength,
+            bestLeft,
+            bestRight,
+            desc: exceedsK
+              ? `<span class="text-rose-400 font-bold"><i class="fa-solid fa-triangle-exclamation mr-1"></i>Replacements Exceed k!</span> Window length <span class="code-font">${winLen} - maxFreq (${maxFreq}) = ${replacements} &gt; k (${k})</span>. Must shrink from left.`
+              : `Budget check <span class="code-font text-emerald-300">(${winLen}) - ${maxFreq} = ${replacements} &le; k (${k})</span> is valid (<b>false</b> for shrink loop).`,
+            soundFreq: exceedsK ? 340 : 550
+          });
+
+          if (!exceedsK) break;
+
+          // Line 23: freq[s.charAt(left) - 'A']--;
+          const leftCh = s[left];
+          const leftCodeIdx = leftCh.charCodeAt(0) - 65;
+          freq[leftCodeIdx]--;
+          trace.push({
+            line: 23,
+            phase: `freq['${leftCh}']-- (${freq[leftCodeIdx]})`,
+            s,
+            k,
+            distinctChars,
+            freq: [...freq],
+            left,
+            right,
+            curCh: ch,
+            windowInvalid: true,
+            activeFreqChar: leftCh,
+            activeFreqOp: 'dec',
+            transfer: { type: 'dec', ch: leftCh, idx: left },
+            maxFreq,
+            maxLength,
+            bestLeft,
+            bestRight,
+            desc: `Decremented leaving character <span class="code-font text-rose-300 font-bold">freq['${leftCh}' - 'A']--</span> &rarr; count is now <span class="code-font">${freq[leftCodeIdx]}</span>.`,
+            soundFreq: 390
+          });
+
+          // Line 24: left++;
+          const prevLeft = left;
+          left++;
+          trace.push({
+            line: 24,
+            phase: `left++ (${prevLeft} → ${left})`,
+            s,
+            k,
+            distinctChars,
+            freq: [...freq],
+            left,
+            right,
+            curCh: ch,
+            maxFreq,
+            maxLength,
+            bestLeft,
+            bestRight,
+            desc: `Shrank left window boundary: <span class="code-font text-cyan-300 font-bold">left++</span> (${prevLeft} &rarr; ${left}).`,
+            soundFreq: 430
+          });
+        }
+
+        // Line 28: maxLength = Math.max(maxLength, right - left + 1);
+        const validWinLen = right - left + 1;
+        const isNewRecord = validWinLen > maxLength;
+        if (isNewRecord) {
+          maxLength = validWinLen;
+          bestLeft = left;
+          bestRight = right;
+        }
+        const bestSub = bestLeft >= 0 ? s.slice(bestLeft, bestRight + 1) : '';
+
+        trace.push({
+          line: 28,
+          phase: isNewRecord ? `New Max = ${maxLength}!` : `Valid Len = ${validWinLen}`,
+          s,
+          k,
+          distinctChars,
+          freq: [...freq],
+          left,
+          right,
+          curCh: ch,
+          isNewRecord,
+          formulaText: `maxLength = Math.max(${isNewRecord ? maxLength - (validWinLen - (maxLength - (validWinLen - maxLength))) : maxLength}, ${validWinLen}) = ${maxLength}`,
+          maxFreq,
+          maxLength,
+          bestLeft,
+          bestRight,
+          desc: isNewRecord
+            ? `<span class="text-emerald-400 font-bold"><i class="fa-solid fa-trophy mr-1"></i>New Record!</span> Valid window <span class="code-font text-emerald-300 font-bold">"${bestSub}"</span> achieves <span class="code-font text-emerald-200 font-bold">maxLength = ${maxLength}</span>.`
+            : `Valid window <span class="code-font text-sky-300">"${s.slice(left, right + 1)}"</span> has length <span class="code-font">${validWinLen}</span> &le; <span class="code-font text-emerald-300">${maxLength}</span>.`,
+          soundFreq: isNewRecord ? 840 : 580
+        });
+      }
+
+      // Line 10: Outer loop exit when right == s.length()
+      trace.push({
+        line: 10,
+        phase: "Loop Complete",
+        s,
+        k,
+        distinctChars,
+        freq: [...freq],
+        left,
+        right: n,
+        curCh: null,
+        maxFreq,
+        maxLength,
+        bestLeft,
+        bestRight,
+        desc: `Loop condition <span class="code-font text-amber-300">right (${n}) &lt; s.length() (${n})</span> is <b>false</b>. Finished scanning all characters.`,
+        soundFreq: 680
+      });
+
+      // Line 31: return maxLength;
+      const finalBestSub = bestLeft >= 0 ? s.slice(bestLeft, bestRight + 1) : '';
+      trace.push({
+        line: 31,
+        phase: "Complete",
+        s,
+        k,
+        distinctChars,
+        freq: [...freq],
+        left: bestLeft,
+        right: bestRight,
+        curCh: null,
+        isComplete: true,
+        maxFreq,
+        maxLength,
+        bestLeft,
+        bestRight,
+        desc: `<span class="text-emerald-400 font-bold text-sm"><i class="fa-solid fa-trophy mr-1.5"></i>Complete!</span> Longest repeating substring after &le; ${k} replacement${k === 1 ? '' : 's'} is <span class="code-font text-emerald-300 font-bold text-sm">${maxLength}</span> (from window <span class="code-font text-emerald-200">"${finalBestSub}"</span>).`,
+        soundFreq: 960
+      });
+
+      return trace;
+    }
+
+    // LOCALIZED ZERO-JUMP CODE LINE HIGHLIGHTER
+    function highlightCodeLine(lineNum) {
+      document.querySelectorAll('.code-line').forEach(el => el.classList.remove('active-line'));
+      const activeEl = document.getElementById(`line${lineNum}`);
+      if (activeEl) {
+        activeEl.classList.add('active-line');
+
+        const containerTop = codeContainer.scrollTop;
+        const containerBottom = containerTop + codeContainer.clientHeight;
+        const elTop = activeEl.offsetTop - codeContainer.offsetTop;
+        const elBottom = elTop + activeEl.clientHeight;
+
+        if (elTop < containerTop + 24) {
+          codeContainer.scrollTo({ top: Math.max(0, elTop - 24), behavior: 'smooth' });
+        } else if (elBottom > containerBottom - 24) {
+          codeContainer.scrollTo({ top: elBottom - codeContainer.clientHeight + 24, behavior: 'smooth' });
+        }
+      }
+    }
+
+    // POSITION ELASTIC SLIDING WINDOW HALO & BEST RECORD BRACKET
+    function updateWindowFrames(step) {
+      const n = step.s.length;
+      const arenaOffsetX = charStreamArena.offsetLeft;
+      const arenaOffsetY = charStreamArena.offsetTop;
+
+      // 1. Active Window Frame [left .. right]
+      if (!step.isComplete && n > 0 && step.left >= 0 && step.right >= step.left && step.right < n) {
+        const leftCard = charStreamArena.querySelector(`[data-char-idx="${step.left}"]`);
+        const rightCard = charStreamArena.querySelector(`[data-char-idx="${step.right}"]`);
+        if (leftCard && rightCard) {
+          const padX = 6;
+          const padY = 7;
+          const xStart = arenaOffsetX + leftCard.offsetLeft - padX;
+          const width = (rightCard.offsetLeft + rightCard.offsetWidth) - leftCard.offsetLeft + padX * 2;
+          const yTop = arenaOffsetY + leftCard.offsetTop - padY;
+          const height = leftCard.offsetHeight + padY * 2;
+          const winLen = step.right - step.left + 1;
+          const replUsed = Math.max(0, winLen - step.maxFreq);
+
+          activeWindowFrame.classList.remove('hidden');
+          activeWindowFrame.style.left = `${xStart}px`;
+          activeWindowFrame.style.width = `${width}px`;
+          activeWindowFrame.style.top = `${yTop}px`;
+          activeWindowFrame.style.height = `${height}px`;
+          activeWindowTag.textContent = `window [${step.left}..${step.right}] • repl=${replUsed}/${step.k}`;
+
+          if (step.windowInvalid) {
+            activeWindowFrame.className = "absolute rounded-2xl border-2 border-rose-400/85 bg-rose-500/[0.08] pointer-events-none transition-all duration-300 z-10";
+            activeWindowTag.className = "absolute -top-3 left-1/2 -translate-x-1/2 px-2 py-0.5 rounded-full bg-rose-950 border border-rose-400/80 text-rose-200 code-font text-[9px] font-bold shadow whitespace-nowrap";
+          } else {
+            activeWindowFrame.className = "absolute rounded-2xl border-2 border-cyan-400/75 bg-cyan-400/[0.06] pointer-events-none transition-all duration-300 z-10";
+            activeWindowTag.className = "absolute -top-3 left-1/2 -translate-x-1/2 px-2 py-0.5 rounded-full bg-slate-950 border border-cyan-400/70 text-cyan-200 code-font text-[9px] font-bold shadow whitespace-nowrap";
+          }
+        }
+      } else {
+        activeWindowFrame.classList.add('hidden');
+      }
+
+      // 2. Best Record Dashed Frame [bestLeft .. bestRight]
+      if (n > 0 && step.bestLeft >= 0 && step.bestRight >= step.bestLeft && step.bestRight < n) {
+        const bLeftCard = charStreamArena.querySelector(`[data-char-idx="${step.bestLeft}"]`);
+        const bRightCard = charStreamArena.querySelector(`[data-char-idx="${step.bestRight}"]`);
+        if (bLeftCard && bRightCard) {
+          const padX = 4;
+          const xStart = arenaOffsetX + bLeftCard.offsetLeft - padX;
+          const width = (bRightCard.offsetLeft + bRightCard.offsetWidth) - bLeftCard.offsetLeft + padX * 2;
+          const yTop = arenaOffsetY + bLeftCard.offsetTop + bLeftCard.offsetHeight + 4;
+          const bestSub = step.s.slice(step.bestLeft, step.bestRight + 1);
+
+          bestWindowFrame.classList.remove('hidden');
+          bestWindowFrame.style.left = `${xStart}px`;
+          bestWindowFrame.style.width = `${width}px`;
+          bestWindowFrame.style.top = `${yTop}px`;
+          bestWindowTag.textContent = `Best: "${bestSub}" (len=${step.maxLength})`;
+        }
+      } else {
+        bestWindowFrame.classList.add('hidden');
+      }
+    }
+
+    // PHYSICAL LIFT-AND-ARC ANIMATION BETWEEN CHARACTER STREAM AND FREQ[26] BUCKET
+    function animateFreqTransfer(transfer, animateFlight) {
+      transferArcSvg.innerHTML = '';
+      flyingCloneLayer.innerHTML = '';
+      if (!transfer) return;
+
+      const stageRect = stageWrapper.getBoundingClientRect();
+      const charEl = charStreamArena.querySelector(`[data-char-idx="${transfer.idx}"]`);
+      const bucketEl = freqBucketsArena.querySelector(`[data-freq-char="${transfer.ch}"]`);
+      if (!charEl || !bucketEl) return;
+
+      const charRect = charEl.getBoundingClientRect();
+      const bucketRect = bucketEl.getBoundingClientRect();
+
+      if (transfer.type === 'inc') {
+        const startX = (charRect.left - stageRect.left) + charRect.width / 2;
+        const startY = (charRect.bottom - stageRect.top) + 4;
+        const endX = (bucketRect.left - stageRect.left) + bucketRect.width / 2;
+        const endY = (bucketRect.top - stageRect.top) - 6;
+
+        const midX = (startX + endX) / 2 + 20;
+        const midY = (startY + endY) / 2;
+
+        transferArcSvg.innerHTML = `
+          <path d="M ${startX} ${startY} Q ${midX} ${midY}, ${endX} ${endY}"
+                fill="none" stroke="#34d399" stroke-width="2.2" class="transfer-arc-path" />
+          <circle cx="${startX}" cy="${startY}" r="4" fill="#fbbf24" />
+          <polygon points="${endX},${endY + 3} ${endX - 5},${endY - 6} ${endX + 5},${endY - 6}" fill="#34d399" />
+        `;
+
+        if (!animateFlight) return;
+
+        const clone = document.createElement('div');
+        clone.className = 'absolute px-2 py-1 rounded-lg bg-emerald-400 text-slate-950 code-font text-xs font-extrabold shadow-lg shadow-emerald-400/50 pointer-events-none';
+        clone.textContent = `+1 '${transfer.ch}'`;
+        clone.style.left = `${(charRect.left - stageRect.left) + charRect.width / 2 - 22}px`;
+        clone.style.top = `${(charRect.top - stageRect.top) + charRect.height / 2}px`;
+        flyingCloneLayer.appendChild(clone);
+
+        const dx = endX - startX;
+        const dy = endY - startY;
+        const duration = Math.min(520, Math.max(230, playSpeed * 0.76));
+
+        const anim = clone.animate([
+          { transform: 'translate(0px, 0px) scale(1)', opacity: 1 },
+          { transform: `translate(${dx * 0.45 + 18}px, ${dy * 0.45 - 16}px) scale(1.12)`, opacity: 1, offset: 0.45 },
+          { transform: `translate(${dx}px, ${dy}px) scale(0.95)`, opacity: 0.1 }
+        ], {
+          duration,
+          easing: 'cubic-bezier(0.22, 1, 0.36, 1)'
+        });
+        anim.onfinish = () => clone.remove();
+
+      } else if (transfer.type === 'dec') {
+        const startX = (bucketRect.left - stageRect.left) + bucketRect.width / 2;
+        const startY = (bucketRect.top - stageRect.top) - 4;
+        const endX = (charRect.left - stageRect.left) + charRect.width / 2;
+        const endY = (charRect.bottom - stageRect.top) + 6;
+
+        const midX = (startX + endX) / 2 - 20;
+        const midY = (startY + endY) / 2;
+
+        transferArcSvg.innerHTML = `
+          <path d="M ${startX} ${startY} Q ${midX} ${midY}, ${endX} ${endY}"
+                fill="none" stroke="#fb7185" stroke-width="2.2" class="transfer-arc-path" />
+          <circle cx="${startX}" cy="${startY}" r="4" fill="#fb7185" />
+          <polygon points="${endX},${endY - 3} ${endX - 5},${endY + 6} ${endX + 5},${endY + 6}" fill="#fb7185" />
+        `;
+
+        if (!animateFlight) return;
+
+        const clone = document.createElement('div');
+        clone.className = 'absolute px-2 py-1 rounded-lg bg-rose-500 text-white code-font text-xs font-extrabold shadow-lg shadow-rose-500/50 pointer-events-none';
+        clone.textContent = `-1 '${transfer.ch}'`;
+        clone.style.left = `${(bucketRect.left - stageRect.left) + bucketRect.width / 2 - 22}px`;
+        clone.style.top = `${(bucketRect.top - stageRect.top) - 8}px`;
+        flyingCloneLayer.appendChild(clone);
+
+        const dx = endX - startX;
+        const dy = endY - startY;
+        const duration = Math.min(520, Math.max(230, playSpeed * 0.76));
+
+        const anim = clone.animate([
+          { transform: 'translate(0px, 0px) scale(1)', opacity: 1 },
+          { transform: `translate(${dx * 0.45 - 18}px, ${dy * 0.45}px) scale(1.1)`, opacity: 1, offset: 0.45 },
+          { transform: `translate(${dx}px, ${dy}px) scale(0.95)`, opacity: 0.1 }
+        ], {
+          duration,
+          easing: 'cubic-bezier(0.22, 1, 0.36, 1)'
+        });
+        anim.onfinish = () => clone.remove();
+      }
+    }
+
+    // RENDER CURRENT STEP
+    function renderStep(idx, animateMovement = true) {
+      if (idx < 0 || idx >= steps.length) return;
+      const step = steps[idx];
+      const s = step.s;
+      const n = s.length;
+      const domChar = getDominantChar(step.freq, step.distinctChars);
+
+      // Update Header Scrubber & Badges
+      stepCounterBadge.textContent = `Step: ${idx + 1} / ${steps.length}`;
+      phaseBadge.textContent = step.phase;
+      kBudgetHeaderBadge.textContent = `Budget k = ${step.k}`;
+      maxLenHeaderBadge.textContent = `Max Length: ${step.maxLength}`;
+      stepScrubber.max = steps.length - 1;
+      stepScrubber.value = idx;
+      strLenBadge.textContent = `(len = ${n}, k = ${step.k})`;
+
+      // Update Telemetry HUD Cards
+      const hasActiveWin = !step.isComplete && step.left >= 0 && step.right >= step.left && step.right < n;
+      const winLen = hasActiveWin ? (step.right - step.left + 1) : (step.isComplete ? step.maxLength : 0);
+      const replUsed = hasActiveWin ? Math.max(0, winLen - step.maxFreq) : 0;
+
+      if (hasActiveWin) {
+        varWinSpan.textContent = `[${step.left}..${step.right}]`;
+        varWinLenSub.textContent = `len = ${winLen}`;
+      } else if (step.isComplete && step.bestLeft >= 0) {
+        varWinSpan.textContent = `[${step.bestLeft}..${step.bestRight}]`;
+        varWinLenSub.textContent = `best len = ${step.maxLength}`;
+      } else {
+        varWinSpan.textContent = step.left >= 0 ? `[${step.left}..-]` : '-';
+        varWinLenSub.textContent = 'len = 0';
+      }
+
+      varMaxFreq.textContent = step.maxFreq;
+      varDomChar.textContent = domChar && step.maxFreq > 0 ? `('${domChar}')` : '';
+
+      varReplacements.textContent = `${replUsed} / ${step.k}`;
+      if (step.windowInvalid) {
+        varReplacements.className = "code-font text-lg sm:text-xl font-black text-rose-400";
+        replacementsCard.classList.add('border-rose-400', 'bg-rose-500/10');
+      } else {
+        varReplacements.className = "code-font text-lg sm:text-xl font-bold text-purple-300";
+        replacementsCard.classList.remove('border-rose-400', 'bg-rose-500/10');
+      }
+
+      if (step.right >= 0 && step.right < n) {
+        varCurCh.textContent = `'${s[step.right]}'`;
+        varRightIdx.textContent = `R: ${step.right}`;
+      } else {
+        varCurCh.textContent = '-';
+        varRightIdx.textContent = 'R: -';
+      }
+
+      varMaxLen.textContent = step.maxLength;
+      if (step.isNewRecord) {
+        maxLenCard.classList.add('record-badge-anim');
+        setTimeout(() => maxLenCard.classList.remove('record-badge-anim'), 650);
+      }
+      const bestSub = (step.bestLeft >= 0 && step.bestRight >= step.bestLeft)
+        ? s.slice(step.bestLeft, step.bestRight + 1)
+        : '';
+      varBestSubstr.textContent = `Best: "${bestSub}"`;
+
+      // Narrative Description
+      stepDescription.innerHTML = step.desc;
+
+      // 1. Render String Character Stream Tape
+      charStreamArena.innerHTML = '';
+      for (let idxChar = 0; idxChar < n; idxChar++) {
+        const ch = s[idxChar];
+        const isLeft = (step.left === idxChar && !step.isComplete);
+        const isRight = (step.right === idxChar && !step.isComplete);
+        const isInWindow = (!step.isComplete && step.left >= 0 && step.right >= 0 && idxChar >= step.left && idxChar <= step.right);
+        const isBestFinal = (step.isComplete && step.bestLeft >= 0 && idxChar >= step.bestLeft && idxChar <= step.bestRight);
+        const isEvicted = (!step.isComplete && step.left > 0 && idxChar < step.left);
+
+        // Inside active window, is this char matching the dominant letter or being replaced?
+        const isMajorityInWin = isInWindow && domChar && ch === domChar;
+        const isReplacedInWin = isInWindow && domChar && ch !== domChar && step.maxFreq > 0;
+
+        const card = document.createElement('div');
+        card.dataset.charIdx = idxChar;
+
+        let classes = 'char-card relative w-12 sm:w-13 h-17 rounded-xl py-1.5 px-1 flex flex-col items-center justify-between select-none shrink-0 ';
+        if (step.windowInvalid && isInWindow) {
+          classes += 'window-overflow-char ';
+        } else if (isBestFinal) {
+          classes += 'best-record-char ';
+        } else if (isMajorityInWin) {
+          classes += 'majority-char ';
+        } else if (isReplacedInWin) {
+          classes += 'replaced-char ';
+        } else if (isEvicted) {
+          classes += 'evicted-char ';
+        }
+
+        if (isRight) {
+          classes += 'ptr-right-char ';
+        }
+        card.className = classes;
+
+        // Top Pointer Badges (L, R)
+        let ptrBadge = `<span class="text-[9px] code-font text-slate-400">[${idxChar}]</span>`;
+        if (isLeft && isRight) {
+          ptrBadge = `<span class="px-1.5 py-0.2 rounded bg-emerald-400 text-slate-950 font-extrabold text-[9px] code-font shadow">L=R</span>`;
+        } else if (isLeft) {
+          ptrBadge = `<span class="px-1.5 py-0.2 rounded bg-cyan-400 text-slate-950 font-extrabold text-[9px] code-font shadow">L</span>`;
+        } else if (isRight) {
+          ptrBadge = `<span class="px-1.5 py-0.2 rounded bg-amber-400 text-slate-950 font-extrabold text-[9px] code-font shadow">R</span>`;
+        }
+
+        let glyphColor = 'text-white';
+        if (step.windowInvalid && isInWindow) glyphColor = 'text-rose-200';
+        else if (isBestFinal) glyphColor = 'text-emerald-200';
+        else if (isMajorityInWin) glyphColor = 'text-cyan-100';
+        else if (isReplacedInWin) glyphColor = 'text-purple-200';
+
+        // Bottom Replacement / Role Tag
+        let footHtml = `<span class="text-[8px] code-font text-slate-500">${idxChar}</span>`;
+        if (isBestFinal && domChar && ch !== domChar) {
+          footHtml = `<span class="text-[8px] code-font px-1 rounded bg-purple-500/30 text-purple-200 font-bold">&rarr;'${domChar}'</span>`;
+        } else if (isBestFinal) {
+          footHtml = `<span class="text-[8px] code-font text-emerald-300 font-bold">✓</span>`;
+        } else if (isReplacedInWin) {
+          footHtml = `<span class="text-[8px] code-font px-1 rounded bg-purple-500/30 text-purple-200 font-bold">&rarr;'${domChar}'</span>`;
+        } else if (isMajorityInWin) {
+          footHtml = `<span class="text-[8px] code-font text-cyan-300 font-bold">keep</span>`;
+        }
+
+        card.innerHTML = `
+          <div class="w-full flex items-center justify-center">${ptrBadge}</div>
+          <span class="code-font text-base sm:text-lg font-extrabold ${glyphColor}">'${ch}'</span>
+          ${footHtml}
+        `;
+        charStreamArena.appendChild(card);
+      }
+
+      // 2. Render Frequency Histogram Buckets (int[] freq = new int[26])
+      freqBucketsArena.innerHTML = '';
+      freqSummaryBadge.textContent = `maxFreq = ${step.maxFreq}${domChar && step.maxFreq > 0 ? ` ('${domChar}')` : ''}`;
+      const maxBarScale = Math.max(2, ...step.freq, step.maxFreq);
+
+      step.distinctChars.forEach((ch) => {
+        const idx26 = ch.charCodeAt(0) - 65;
+        const count = step.freq[idx26];
+        const barPct = count === 0 ? 4 : Math.max(16, (count / maxBarScale) * 100);
+        const isDom = (domChar === ch && count > 0);
+        const isInc = (step.activeFreqChar === ch && step.activeFreqOp === 'inc');
+        const isDec = (step.activeFreqChar === ch && step.activeFreqOp === 'dec');
+
+        const bucket = document.createElement('div');
+        bucket.dataset.freqChar = ch;
+
+        let bClasses = 'freq-bucket relative w-16 sm:w-20 rounded-xl p-2 flex flex-col items-center justify-between gap-1.5 select-none ';
+        if (isInc) bClasses += 'active-inc-bucket ';
+        else if (isDec) bClasses += 'active-dec-bucket ';
+        else if (isDom) bClasses += 'dominant-bucket ';
+        bucket.className = bClasses;
+
+        let barFill = 'bg-slate-600/70 border-t border-slate-400/50';
+        if (isInc) barFill = 'bg-gradient-to-t from-emerald-600 to-emerald-400 border-t border-white shadow-[0_0_14px_rgba(16,185,129,0.6)]';
+        else if (isDec) barFill = 'bg-gradient-to-t from-rose-600 to-rose-400 border-t border-white shadow-[0_0_14px_rgba(244,63,94,0.6)]';
+        else if (isDom) barFill = 'bg-gradient-to-t from-cyan-600 to-cyan-400 border-t border-cyan-100 shadow-[0_0_14px_rgba(34,211,238,0.5)]';
+        else if (count > 0) barFill = 'bg-gradient-to-t from-purple-600/80 to-purple-400/90 border-t border-purple-200/70';
+
+        const crownTag = isDom
+          ? `<span class="absolute -top-2.5 right-1.5 px-1.5 py-0.2 rounded bg-cyan-400 text-slate-950 text-[8px] font-extrabold code-font shadow">MAX</span>`
+          : '';
+
+        bucket.innerHTML = `
+          ${crownTag}
+          <div class="w-full flex items-center justify-between text-[10px] code-font">
+            <span class="font-bold ${isDom ? 'text-cyan-200' : 'text-slate-200'}">'${ch}'</span>
+            <span class="text-slate-400">[${idx26}]</span>
+          </div>
+          <div class="w-full h-14 flex items-end justify-center bg-black/25 rounded-lg p-1 border border-white/[0.06]">
+            <div class="w-8 sm:w-10 rounded-t-sm transition-all duration-300 flex items-center justify-center ${barFill}" style="height: ${barPct}%;">
+              <span class="code-font text-xs font-black text-white drop-shadow">${count}</span>
+            </div>
+          </div>
+          <span class="text-[9px] code-font ${isInc ? 'text-emerald-300 font-bold' : isDec ? 'text-rose-300 font-bold' : 'text-slate-400'}">
+            freq[${idx26}] = ${count}
+          </span>
+        `;
+        freqBucketsArena.appendChild(bucket);
+      });
+
+      // 3. Position Elastic Sliding Window Halo & Best Record Frame + Trigger Lift-and-Arc Transfer
+      requestAnimationFrame(() => {
+        updateWindowFrames(step);
+        animateFreqTransfer(step.transfer, animateMovement);
+      });
+
+      // 4. Update Formula Pill & Decision Banner
+      if (step.formulaText) {
+        formulaPill.classList.remove('hidden');
+        formulaPill.textContent = step.formulaText;
+      } else {
+        formulaPill.classList.add('hidden');
+      }
+
+      if (step.isComplete || step.isNewRecord) {
+        decisionIcon.className = "fa-solid fa-trophy text-emerald-400 text-base";
+        decisionBanner.className = "p-3.5 rounded-xl bg-emerald-500/15 border border-emerald-400/35 text-xs flex flex-col sm:flex-row items-center justify-between gap-3 backdrop-blur-md";
+      } else if (step.windowInvalid || step.activeFreqOp === 'dec') {
+        decisionIcon.className = "fa-solid fa-triangle-exclamation text-rose-400 text-base";
+        decisionBanner.className = "p-3.5 rounded-xl bg-rose-500/12 border border-rose-400/30 text-xs flex flex-col sm:flex-row items-center justify-between gap-3 backdrop-blur-md";
+      } else {
+        decisionIcon.className = "fa-solid fa-circle-info text-cyan-400 text-base";
+        decisionBanner.className = "p-3.5 rounded-xl bg-white/[0.04] border border-white/10 text-xs flex flex-col sm:flex-row items-center justify-between gap-3 backdrop-blur-md";
+      }
+      decisionText.innerHTML = step.desc;
+
+      // 5. Highlight Active Java Line & Play Audio Tone
+      highlightCodeLine(step.line);
+      if (step.soundFreq) {
+        playTone(step.soundFreq, 'sine', 0.08, 0.035);
+      }
+    }
+
+    // PLAYBACK CONTROLLER
+    function setPlaying(playing) {
+      isPlaying = playing;
+      if (isPlaying) {
+        playIcon.className = "fa-solid fa-pause";
+        playText.textContent = "Stop";
+        btnPlay.classList.add('bg-rose-500/25', 'text-rose-200', 'border-rose-400/50');
+        btnPlay.classList.remove('bg-cyan-500/25', 'text-cyan-200', 'border-cyan-400/50');
+
+        playInterval = setInterval(() => {
+          if (currentStepIdx < steps.length - 1) {
+            currentStepIdx++;
+            renderStep(currentStepIdx, true);
+          } else {
+            setPlaying(false);
+          }
+        }, playSpeed);
+      } else {
+        playIcon.className = "fa-solid fa-play";
+        playText.textContent = "Start";
+        btnPlay.classList.remove('bg-rose-500/25', 'text-rose-200', 'border-rose-400/50');
+        btnPlay.classList.add('bg-cyan-500/25', 'text-cyan-200', 'border-cyan-400/50');
+        if (playInterval) {
+          clearInterval(playInterval);
+          playInterval = null;
+        }
+      }
+    }
+
+    function initSimulation(sVal, kVal) {
+      setPlaying(false);
+      currentS = sVal;
+      currentK = kVal;
+      steps = generateSteps(currentS, currentK);
+      currentStepIdx = 0;
+      stepScrubber.max = steps.length - 1;
+      stepScrubber.value = 0;
+      renderStep(0, false);
+    }
+
+    // EVENT LISTENERS
+    btnPlay.addEventListener('click', () => {
+      if (currentStepIdx >= steps.length - 1) {
+        currentStepIdx = 0;
+        renderStep(0, false);
+      }
+      setPlaying(!isPlaying);
+    });
+
+    btnNext.addEventListener('click', () => {
+      setPlaying(false);
+      if (currentStepIdx < steps.length - 1) {
+        currentStepIdx++;
+        renderStep(currentStepIdx, true);
+      }
+    });
+
+    btnPrev.addEventListener('click', () => {
+      setPlaying(false);
+      if (currentStepIdx > 0) {
+        currentStepIdx--;
+        renderStep(currentStepIdx, true);
+      }
+    });
+
+    btnReset.addEventListener('click', () => {
+      setPlaying(false);
+      currentStepIdx = 0;
+      renderStep(0, false);
+    });
+
+    stepScrubber.addEventListener('input', (e) => {
+      setPlaying(false);
+      currentStepIdx = parseInt(e.target.value, 10);
+      renderStep(currentStepIdx, false);
+    });
+
+    document.querySelectorAll('.speed-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.speed-btn').forEach(b => {
+          b.classList.remove('bg-cyan-500/30', 'text-cyan-200', 'font-semibold');
+        });
+        btn.classList.add('bg-cyan-500/30', 'text-cyan-200', 'font-semibold');
+        playSpeed = parseInt(btn.dataset.speed, 10);
+        if (isPlaying) {
+          setPlaying(false);
+          setPlaying(true);
+        }
+      });
+    });
+
+    btnAudio.addEventListener('click', () => {
+      audioEnabled = !audioEnabled;
+      if (audioEnabled) {
+        audioIcon.className = "fa-solid fa-volume-high";
+        btnAudio.classList.remove('text-slate-600');
+        btnAudio.classList.add('text-slate-300');
+      } else {
+        audioIcon.className = "fa-solid fa-volume-xmark";
+        btnAudio.classList.add('text-slate-600');
+        btnAudio.classList.remove('text-slate-300');
+      }
+    });
+
+    presetSelect.addEventListener('change', (e) => {
+      const idx = parseInt(e.target.value, 10);
+      customStrInput.value = PRESETS[idx].s;
+      customKInput.value = PRESETS[idx].k;
+      initSimulation(PRESETS[idx].s, PRESETS[idx].k);
+    });
+
+    btnApplyCustom.addEventListener('click', () => {
+      const cleanedS = customStrInput.value.toUpperCase().replace(/[^A-Z]/g, '');
+      const parsedK = parseInt(customKInput.value, 10);
+      if (cleanedS.length >= 1 && !isNaN(parsedK) && parsedK >= 0) {
+        const clampedK = Math.min(cleanedS.length, parsedK);
+        customStrInput.value = cleanedS;
+        customKInput.value = clampedK;
+        initSimulation(cleanedS, clampedK);
+      }
+    });
+
+    window.addEventListener('resize', () => {
+      const step = steps[currentStepIdx];
+      if (step) {
+        updateWindowFrames(step);
+        animateFreqTransfer(step.transfer, false);
+      }
+    });
+
+    window.addEventListener('keydown', (e) => {
+      if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT') return;
+      if (e.code === 'Space') {
+        e.preventDefault();
+        btnPlay.click();
+      } else if (e.code === 'ArrowRight') {
+        e.preventDefault();
+        btnNext.click();
+      } else if (e.code === 'ArrowLeft') {
+        e.preventDefault();
+        btnPrev.click();
+      }
+    });
+
+    window.onload = function() {
+      customStrInput.value = PRESETS[0].s;
+      customKInput.value = PRESETS[0].k;
+      initSimulation(PRESETS[0].s, PRESETS[0].k);
+    };
+  </script>
+</body>
+</html>

@@ -1488,6 +1488,11 @@ const problems = [
         "number": 11,
         "title": "Container With Most Water",
         "difficulty": "Medium"
+      },
+      {
+        "number": 424,
+        "title": "Longest Repeating Character Replacement",
+        "difficulty": "Medium"
       }
     ],
     "leetcodeUrl": "https://leetcode.com/problems/longest-substring-without-repeating-characters/"
@@ -2229,6 +2234,11 @@ const problems = [
       {
         "number": 3,
         "title": "Longest Substring Without Repeating Characters",
+        "difficulty": "Medium"
+      },
+      {
+        "number": 424,
+        "title": "Longest Repeating Character Replacement",
         "difficulty": "Medium"
       }
     ],
@@ -4097,6 +4107,112 @@ const problems = [
       }
     ],
     "leetcodeUrl": "https://leetcode.com/problems/best-time-to-buy-and-sell-stock/"
+  },
+  {
+    "id": "longest-repeating-character-replacement",
+    "number": 424,
+    "title": "Longest Repeating Character Replacement",
+    "slug": "longest-repeating-character-replacement",
+    "difficulty": "Medium",
+    "categories": [
+      "Sliding Window",
+      "Two Pointers",
+      "Strings"
+    ],
+    "description": "You are given a string s and an integer k. You can choose any character of the string and change it to any other uppercase English character. You can perform this operation at most k times.\n\nReturn the length of the longest substring containing the same letter you can get after performing the above operations.",
+    "inputFormat": "s = string, k = int",
+    "outputFormat": "int (maximum length)",
+    "constraints": [
+      "1 <= s.length <= 10^5",
+      "s consists of only uppercase English letters",
+      "0 <= k <= s.length"
+    ],
+    "examples": [
+      {
+        "exampleNumber": 1,
+        "input": "s = \"ABAB\", k = 2",
+        "output": "4",
+        "explanation": "Replace the two 'A's with two 'B's or vice versa to get \"BBBB\".",
+        "type": "official"
+      },
+      {
+        "exampleNumber": 2,
+        "input": "s = \"AABABBA\", k = 1",
+        "output": "4",
+        "explanation": "Replace the one 'A' in the middle with 'B' and form \"AABBBBA\". The substring \"BBBB\" has the longest repeating letters, which is 4.",
+        "type": "official"
+      }
+    ],
+    "approach": "Sliding Window with Frequency Array: Maintain a window s[left..right] and an int[26] array counting character frequencies inside the window. Track maxFreq, the maximum frequency of any single character seen in the current window. The number of replacements needed to make all characters in the window identical is (windowLength - maxFreq) = ((right - left + 1) - maxFreq). If replacements > k, the window is invalid; decrement freq[s.charAt(left) - 'A'] and advance left++. Update maxLength = Math.max(maxLength, right - left + 1). Crucially, maxFreq does not need to decrease when the window shrinks, because a smaller maxFreq cannot produce a window larger than our current best maxLength.",
+    "flowSteps": [
+      {
+        "step": 1,
+        "title": "Initialize Frequency Counter & Pointers",
+        "description": "Create int[26] freq, set left = 0, maxFreq = 0, and maxLength = 0.",
+        "stateSnapshot": "freq = new int[26], left = 0, maxFreq = 0, maxLen = 0",
+        "highlight": "Init"
+      },
+      {
+        "step": 2,
+        "title": "Expand Window & Update Max Frequency",
+        "description": "At each right: increment freq[s.charAt(right) - 'A']++ and update maxFreq = Math.max(maxFreq, freq[s.charAt(right) - 'A']).",
+        "stateSnapshot": "freq[ch - 'A']++; maxFreq = max(maxFreq, freq[ch - 'A'])",
+        "highlight": "Expand"
+      },
+      {
+        "step": 3,
+        "title": "Contract Window When Replacements Exceed k",
+        "description": "While (right - left + 1) - maxFreq > k: decrement freq[s.charAt(left) - 'A']-- and advance left++.",
+        "stateSnapshot": "while (len - maxFreq > k) { freq[s[left++] - 'A']--; }",
+        "highlight": "Contract"
+      },
+      {
+        "step": 4,
+        "title": "Record Maximum Window Length",
+        "description": "Record maxLength = Math.max(maxLength, right - left + 1).",
+        "stateSnapshot": "maxLength = max(maxLength, right - left + 1)",
+        "highlight": "Record"
+      }
+    ],
+    "timeComplexity": "O(n)",
+    "timeComplexityExplanation": "Both right and left pointers traverse the string at most once, and each character is processed in O(1) time.",
+    "spaceComplexity": "O(1)",
+    "spaceComplexityExplanation": "Fixed 26-slot integer frequency array for uppercase English letters.",
+    "visualizerUrl": "/visualizers/longest_repeating_character_replacement_visualizer.html",
+    "keyObservations": [
+      "To maximize the window while keeping at most k replacements, keep the most frequent letter intact and replace all other (windowLength - maxFreq) letters.",
+      "The condition (right - left + 1) - maxFreq <= k defines a valid window.",
+      "maxFreq does not need to be decremented when shrinking the window because a new optimal window length can only be achieved when maxFreq strictly increases."
+    ],
+    "importantPattern": "Sliding Window with Dynamic Majority Element Tracking",
+    "commonMistakes": [
+      "Recalculating the max frequency across all 26 letters inside the while loop, needlessly increasing runtime to O(26n).",
+      "Shrinking the window until the entire string is valid from scratch rather than advancing left by one."
+    ],
+    "optimalApproach": "Sliding Window with Non-Decreasing Max Frequency",
+    "relatedProblems": [
+      {
+        "number": 3,
+        "title": "Longest Substring Without Repeating Characters",
+        "difficulty": "Medium"
+      },
+      {
+        "number": 1446,
+        "title": "Consecutive Characters (Longest Equal Run)",
+        "difficulty": "Easy"
+      },
+      {
+        "number": 11,
+        "title": "Container With Most Water",
+        "difficulty": "Medium"
+      },
+      {
+        "number": 125,
+        "title": "Valid Palindrome",
+        "difficulty": "Easy"
+      }
+    ],
+    "leetcodeUrl": "https://leetcode.com/problems/longest-repeating-character-replacement/"
   }
 ];
 
