@@ -1,0 +1,1629 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Merge Two Sorted Arrays Without Extra Space - Glassmorphic Visualizer</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: radial-gradient(circle at 14% 16%, #0c192c 0%, #030712 100%);
+      color: #e2e8f0;
+      min-height: 100vh;
+    }
+
+    .code-font {
+      font-family: 'Fira Code', monospace;
+    }
+
+    /* Glassmorphic Surface & Controls */
+    .glass-panel {
+      background: rgba(15, 23, 42, 0.56);
+      backdrop-filter: blur(22px);
+      -webkit-backdrop-filter: blur(22px);
+      border: 1px solid rgba(255, 255, 255, 0.11);
+      box-shadow: 0 20px 45px -15px rgba(0, 0, 0, 0.68), inset 0 1px 0 0 rgba(255, 255, 255, 0.09);
+    }
+
+    .glass-button {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .glass-button:hover:not(:disabled) {
+      background: rgba(255, 255, 255, 0.15);
+      border-color: rgba(255, 255, 255, 0.28);
+      transform: translateY(-1px);
+    }
+    .glass-button:active:not(:disabled) {
+      transform: translateY(1px);
+    }
+    .glass-button:disabled {
+      opacity: 0.35;
+      cursor: not-allowed;
+    }
+
+    /* Code Execution Line Highlight */
+    .code-line {
+      transition: all 0.2s ease;
+      border-left: 3px solid transparent;
+      padding: 2px 10px;
+    }
+    .code-line.active-line {
+      background: rgba(56, 189, 248, 0.18);
+      border-left: 3px solid #38bdf8;
+      color: #ffffff;
+      box-shadow: inset 0 0 16px rgba(56, 189, 248, 0.15);
+    }
+
+    /* Glassy Element Cards & Bars */
+    .glass-element-card {
+      background: rgba(255, 255, 255, 0.045);
+      border: 1px solid rgba(255, 255, 255, 0.13);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      transition: border-color 0.25s ease, background 0.25s ease, box-shadow 0.25s ease, opacity 0.25s ease;
+      will-change: transform;
+    }
+
+    .glass-element-card.buffer-slot {
+      background: rgba(15, 23, 42, 0.32);
+      border: 1px dashed rgba(148, 163, 184, 0.32);
+    }
+
+    .glass-element-card.consumed-slot {
+      opacity: 0.42;
+    }
+
+    .glass-element-card.ptr-i-card {
+      background: linear-gradient(180deg, rgba(34, 211, 238, 0.24) 0%, rgba(6, 182, 212, 0.09) 100%);
+      border-color: rgba(34, 211, 238, 0.92);
+      box-shadow: 0 10px 26px -6px rgba(34, 211, 238, 0.38), inset 0 1px 0 rgba(255, 255, 255, 0.25);
+    }
+
+    .glass-element-card.ptr-j-card {
+      background: linear-gradient(180deg, rgba(251, 191, 36, 0.24) 0%, rgba(245, 158, 11, 0.09) 100%);
+      border-color: rgba(251, 191, 36, 0.92);
+      box-shadow: 0 10px 26px -6px rgba(251, 191, 36, 0.38), inset 0 1px 0 rgba(255, 255, 255, 0.25);
+    }
+
+    .glass-element-card.ptr-k-card {
+      background: linear-gradient(180deg, rgba(168, 85, 247, 0.24) 0%, rgba(126, 34, 206, 0.09) 100%);
+      border-color: rgba(192, 132, 252, 0.92);
+      box-shadow: 0 10px 26px -6px rgba(168, 85, 247, 0.38), inset 0 1px 0 rgba(255, 255, 255, 0.25);
+    }
+
+    .glass-element-card.just-placed-card {
+      background: linear-gradient(180deg, rgba(16, 185, 129, 0.30) 0%, rgba(5, 150, 105, 0.12) 100%);
+      border-color: rgba(52, 211, 153, 0.95);
+      box-shadow: 0 14px 32px -4px rgba(16, 185, 129, 0.48), inset 0 1px 0 rgba(255, 255, 255, 0.35);
+      z-index: 25;
+    }
+
+    .glass-element-card.finalized-card {
+      border-color: rgba(52, 211, 153, 0.45);
+      background: linear-gradient(180deg, rgba(16, 185, 129, 0.11) 0%, rgba(5, 150, 105, 0.04) 100%);
+    }
+
+    /* Lifted Source Highlight During Transfer */
+    .glass-element-card.lifted-source {
+      transform: translateY(-14px) scale(1.04);
+      box-shadow: 0 18px 34px -4px rgba(56, 189, 248, 0.45);
+      z-index: 30;
+    }
+
+    @keyframes arcDash {
+      to {
+        stroke-dashoffset: -24;
+      }
+    }
+    .transfer-arc-path {
+      stroke-dasharray: 6 6;
+      animation: arcDash 0.8s linear infinite;
+    }
+
+    @keyframes completePulse {
+      0%, 100% { transform: scale(1); filter: drop-shadow(0 0 8px rgba(16, 185, 129, 0.45)); }
+      50% { transform: scale(1.04); filter: drop-shadow(0 0 20px rgba(16, 185, 129, 0.95)); }
+    }
+    .complete-badge-anim {
+      animation: completePulse 0.65s ease-in-out;
+    }
+
+    /* Custom Scrollbars */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: rgba(15, 23, 42, 0.4);
+    }
+    ::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.18);
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(255, 255, 255, 0.3);
+    }
+  </style>
+</head>
+<body class="p-4 sm:p-6 lg:p-8 flex flex-col items-center justify-start min-h-screen">
+
+  <!-- Ambient Glass Glow Orbs -->
+  <div class="fixed top-6 left-1/6 w-96 h-96 bg-cyan-500/14 rounded-full blur-3xl pointer-events-none -z-10"></div>
+  <div class="fixed top-1/3 right-1/6 w-96 h-96 bg-purple-500/14 rounded-full blur-3xl pointer-events-none -z-10"></div>
+  <div class="fixed bottom-12 left-1/2 w-80 h-80 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none -z-10"></div>
+
+  <!-- MAIN WRAPPER -->
+  <div class="w-full max-w-7xl flex flex-col gap-6">
+
+    <!-- TOP FROSTED-GLASS CONTROLS DECK -->
+    <header class="glass-panel rounded-2xl p-4 sm:p-5 flex flex-col gap-4 sticky top-4 z-50">
+      <div class="flex flex-wrap items-center justify-between gap-4">
+
+        <!-- Title & Algorithm Metadata -->
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-cyan-500 via-purple-500 to-emerald-400 flex items-center justify-center shadow-lg shadow-cyan-500/25 text-slate-950 font-bold text-lg">
+            <i class="fa-solid fa-code-merge"></i>
+          </div>
+          <div>
+            <h1 class="text-lg sm:text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white via-cyan-100 to-purple-300">
+              Merge Two Sorted Arrays Without Extra Space
+            </h1>
+            <p class="text-xs text-slate-400 flex items-center gap-2">
+              <span class="inline-block w-2 h-2 rounded-full bg-cyan-400 animate-pulse"></span>
+              Problem 146 (LeetCode 88) • Reverse Three-Pointer In-Place Merge • &Omicron;(m + n) Time • &Omicron;(1) Space
+            </p>
+          </div>
+        </div>
+
+        <!-- Center Playback Controls: Reset, Previous, Start/Stop, Next -->
+        <div class="flex items-center gap-2 sm:gap-3 bg-white/5 p-1.5 rounded-xl border border-white/10 backdrop-blur-md">
+          <button id="btnReset" class="glass-button text-slate-200 hover:text-white px-3 py-2 rounded-lg text-sm flex items-center gap-1.5" title="Reset to Initial State">
+            <i class="fa-solid fa-rotate-left"></i>
+            <span class="hidden sm:inline">Reset</span>
+          </button>
+          <button id="btnPrev" class="glass-button text-slate-200 hover:text-white px-3 py-2 rounded-lg text-sm flex items-center gap-1.5" title="Previous Step (Left Arrow)">
+            <i class="fa-solid fa-backward-step"></i>
+            <span class="hidden sm:inline">Previous</span>
+          </button>
+          <button id="btnPlay" class="glass-button bg-cyan-500/25 text-cyan-200 hover:bg-cyan-500/35 border-cyan-400/50 px-4 py-2 rounded-lg text-sm font-semibold flex items-center gap-2 shadow-lg shadow-cyan-500/15" title="Start / Stop (Spacebar)">
+            <i class="fa-solid fa-play" id="playIcon"></i>
+            <span id="playText">Start</span>
+          </button>
+          <button id="btnNext" class="glass-button text-slate-200 hover:text-white px-3 py-2 rounded-lg text-sm flex items-center gap-1.5" title="Next Step (Right Arrow)">
+            <span class="hidden sm:inline">Next</span>
+            <i class="fa-solid fa-forward-step"></i>
+          </button>
+        </div>
+
+        <!-- Speed & Audio Controls -->
+        <div class="flex items-center gap-2">
+          <a href="/" class="glass-button px-3 py-2 rounded-xl text-xs font-semibold text-slate-300 hover:text-white flex items-center gap-1.5 border border-white/10 hover:border-indigo-500/40 bg-white/5 shrink-0 transition-all active:scale-95 cursor-pointer" title="Return to DSA Atlas Library">
+            <i class="fa-solid fa-arrow-left text-indigo-400"></i>
+            <span>DSA Atlas</span>
+          </a>
+          <div class="flex items-center bg-white/5 rounded-xl p-1 border border-white/10 text-xs text-slate-300 backdrop-blur-md">
+            <span class="px-2 py-1 text-slate-400"><i class="fa-solid fa-gauge-high mr-1"></i>Speed</span>
+            <button class="speed-btn px-2 py-1 rounded-lg hover:text-white transition" data-speed="1350">0.5x</button>
+            <button class="speed-btn px-2 py-1 rounded-lg bg-cyan-500/30 text-cyan-200 font-semibold transition" data-speed="700">1x</button>
+            <button class="speed-btn px-2 py-1 rounded-lg hover:text-white transition" data-speed="340">2x</button>
+            <button class="speed-btn px-2 py-1 rounded-lg hover:text-white transition" data-speed="140">4x</button>
+          </div>
+          <button id="btnAudio" class="glass-button p-2.5 rounded-xl text-slate-300 hover:text-cyan-300" title="Toggle Sound Effects">
+            <i class="fa-solid fa-volume-high" id="audioIcon"></i>
+          </button>
+        </div>
+
+      </div>
+
+      <!-- Scrubber Slider & Status Badges -->
+      <div class="flex flex-col sm:flex-row items-center gap-3 pt-2 border-t border-white/10">
+        <div class="flex flex-wrap items-center gap-2 text-xs text-slate-300 w-full sm:w-auto shrink-0">
+          <span id="stepCounterBadge" class="code-font px-2.5 py-1 rounded-md bg-white/5 border border-white/10 text-cyan-300">
+            Step: 0 / 0
+          </span>
+          <span id="phaseBadge" class="px-2.5 py-1 rounded-md bg-purple-500/20 border border-purple-400/30 text-purple-200 font-semibold">
+            Ready
+          </span>
+          <span id="dimHeaderBadge" class="px-2.5 py-1 rounded-md bg-cyan-500/20 border border-cyan-400/30 text-cyan-200 font-bold">
+            m = 4, n = 3
+          </span>
+          <span id="placedCountBadge" class="px-2.5 py-1 rounded-md bg-emerald-500/20 border border-emerald-400/30 text-emerald-200 font-bold">
+            Placed: 0 / 7
+          </span>
+        </div>
+        <div class="w-full flex items-center gap-3">
+          <input type="range" id="stepScrubber" min="0" max="0" value="0" class="w-full h-1.5 bg-slate-800/80 rounded-lg appearance-none cursor-pointer accent-cyan-400">
+        </div>
+      </div>
+    </header>
+
+    <!-- TEST CASES & CUSTOM ARRAYS BAR -->
+    <section class="glass-panel rounded-2xl p-4 flex flex-wrap items-center justify-between gap-4">
+      <div class="flex flex-wrap items-center gap-3">
+        <label for="presetSelect" class="text-xs uppercase font-semibold text-slate-300 tracking-wider flex items-center gap-1.5">
+          <i class="fa-solid fa-flask text-cyan-400"></i> Test Cases:
+        </label>
+        <select id="presetSelect" class="bg-slate-900/75 border border-white/15 text-xs sm:text-sm text-slate-200 rounded-xl px-3 py-2 outline-none focus:border-cyan-400 backdrop-blur-md">
+          <option value="0">1: Example 1 (nums1=[-5,-2,4,5,0,0,0], nums2=[-3,1,8])</option>
+          <option value="1">2: Example 2 (nums1=[0,2,7,8,0,0,0], nums2=[-7,-3,-1])</option>
+          <option value="2">3: Prompt Quiz (nums1=[1,3,5,0,0,0,0], nums2=[2,4,6,7])</option>
+          <option value="3">4: Classic Interleaved (nums1=[1,2,3,0,0,0], nums2=[2,5,6])</option>
+          <option value="4">5: Remaining nums2 Copy (nums1=[4,5,6,0,0,0], nums2=[1,2,3])</option>
+          <option value="5">6: All nums2 Greater (nums1=[1,2,3,0,0,0], nums2=[7,8,9])</option>
+          <option value="6">7: Empty nums1 m=0 (nums1=[0,0,0], nums2=[2,5,9])</option>
+          <option value="7">8: Empty nums2 n=0 (nums1=[1,4,7], nums2=[])</option>
+          <option value="8">9: Duplicate Values (nums1=[2,2,4,0,0,0], nums2=[2,4,4])</option>
+          <option value="9">10: Negatives &amp; Zeros (nums1=[-4,0,3,0,0], nums2=[-2,0])</option>
+        </select>
+      </div>
+
+      <div class="flex flex-wrap items-center gap-2 flex-grow max-w-xl">
+        <input type="text" id="customNums1Input" placeholder="nums1 active (m): -5, -2, 4, 5" class="flex-1 min-w-[130px] bg-white/5 border border-white/15 rounded-xl px-3 py-2 text-xs text-slate-200 code-font outline-none focus:border-cyan-400 backdrop-blur-md" title="Sorted active elements of nums1">
+        <input type="text" id="customNums2Input" placeholder="nums2 (n): -3, 1, 8" class="flex-1 min-w-[115px] bg-white/5 border border-white/15 rounded-xl px-3 py-2 text-xs text-slate-200 code-font outline-none focus:border-cyan-400 backdrop-blur-md" title="Sorted elements of nums2">
+        <button id="btnApplyCustom" class="glass-button text-xs px-4 py-2 rounded-xl text-cyan-300 font-semibold shrink-0">
+          Load Arrays
+        </button>
+      </div>
+    </section>
+
+    <!-- MAIN VISUALIZATION & CODE SECTION -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+      <!-- LEFT: DUAL-ARRAY ARENA WITH LIFT-AND-ARC ELEMENT TRANSFER (7 Cols) -->
+      <section class="lg:col-span-7 flex flex-col gap-6">
+
+        <!-- Live Three-Pointer & Comparison Telemetry Cards -->
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+
+          <!-- Pointer i (nums1 active) -->
+          <div class="glass-panel rounded-xl p-3.5 flex flex-col justify-between border-cyan-400/35">
+            <span class="text-[11px] text-slate-400 uppercase font-semibold flex items-center justify-between">
+              Ptr i (nums1)
+              <span class="w-2 h-2 rounded-full bg-cyan-400"></span>
+            </span>
+            <div class="flex items-baseline gap-1.5 mt-1.5">
+              <span id="varIVal" class="code-font text-xl font-bold text-cyan-300">-</span>
+              <span id="varIIdx" class="text-[11px] text-slate-400 code-font">i: -</span>
+            </div>
+            <span class="text-[10px] text-cyan-200/75 mt-1 code-font">nums1[i] reader</span>
+          </div>
+
+          <!-- Pointer j (nums2 active) -->
+          <div class="glass-panel rounded-xl p-3.5 flex flex-col justify-between border-amber-400/35">
+            <span class="text-[11px] text-slate-400 uppercase font-semibold flex items-center justify-between">
+              Ptr j (nums2)
+              <span class="w-2 h-2 rounded-full bg-amber-400"></span>
+            </span>
+            <div class="flex items-baseline gap-1.5 mt-1.5">
+              <span id="varJVal" class="code-font text-xl font-bold text-amber-300">-</span>
+              <span id="varJIdx" class="text-[11px] text-slate-400 code-font">j: -</span>
+            </div>
+            <span class="text-[10px] text-amber-200/75 mt-1 code-font">nums2[j] reader</span>
+          </div>
+
+          <!-- Pointer k (nums1 write slot) -->
+          <div class="glass-panel rounded-xl p-3.5 flex flex-col justify-between border-purple-400/35">
+            <span class="text-[11px] text-slate-400 uppercase font-semibold flex items-center justify-between">
+              Ptr k (Write)
+              <span class="w-2 h-2 rounded-full bg-purple-400"></span>
+            </span>
+            <div class="flex items-baseline gap-1.5 mt-1.5">
+              <span id="varKIdx" class="code-font text-xl font-bold text-purple-300">-</span>
+              <span id="varKCurVal" class="text-[11px] text-slate-400 code-font"></span>
+            </div>
+            <span class="text-[10px] text-purple-200/75 mt-1 code-font">nums1[k] target</span>
+          </div>
+
+          <!-- Active Comparison -->
+          <div class="glass-panel rounded-xl p-3.5 flex flex-col justify-between border-emerald-400/35">
+            <span class="text-[11px] text-slate-400 uppercase font-semibold flex items-center justify-between">
+              Comparison
+              <i class="fa-solid fa-scale-balanced text-emerald-400 text-[10px]"></i>
+            </span>
+            <div class="flex items-baseline gap-1.5 mt-1.5">
+              <span id="varCompareExpr" class="code-font text-base sm:text-lg font-bold text-sky-300">- vs -</span>
+            </div>
+            <span id="varCompareHint" class="text-[10px] text-slate-400 mt-1 code-font">nums1[i] &gt; nums2[j]</span>
+          </div>
+
+        </div>
+
+        <!-- DUAL-ARRAY MERGE ARENA: GLASSY BOXES & BI-DIRECTIONAL MAGNITUDE BARS -->
+        <div class="glass-panel rounded-2xl p-5 flex flex-col gap-4">
+          <div class="flex flex-wrap items-center justify-between text-xs pb-2 border-b border-white/10 gap-2">
+            <span class="font-semibold text-slate-200 uppercase tracking-wider flex items-center gap-1.5">
+              <i class="fa-solid fa-layer-group text-cyan-400"></i>
+              In-Place Reverse Merge Stage
+            </span>
+
+            <!-- Switchable View Mode: Bars + Boxes | Bars Only | Boxes Only -->
+            <div class="flex items-center bg-white/5 rounded-xl p-1 border border-white/10 text-[11px] backdrop-blur-md">
+              <button class="view-mode-btn px-2.5 py-1 rounded-lg bg-cyan-500/30 text-cyan-200 font-semibold transition" data-mode="both">
+                Bars + Boxes
+              </button>
+              <button class="view-mode-btn px-2.5 py-1 rounded-lg text-slate-300 hover:text-white transition" data-mode="bars">
+                Bars Only
+              </button>
+              <button class="view-mode-btn px-2.5 py-1 rounded-lg text-slate-300 hover:text-white transition" data-mode="boxes">
+                Boxes Only
+              </button>
+            </div>
+          </div>
+
+          <!-- Legend Row -->
+          <div class="flex flex-wrap items-center justify-between text-[11px] text-slate-300 px-1 gap-2">
+            <div class="flex flex-wrap items-center gap-3">
+              <span class="flex items-center gap-1.5">
+                <span class="w-2.5 h-2.5 rounded-sm bg-cyan-400 inline-block"></span> i (nums1)
+              </span>
+              <span class="flex items-center gap-1.5">
+                <span class="w-2.5 h-2.5 rounded-sm bg-amber-400 inline-block"></span> j (nums2)
+              </span>
+              <span class="flex items-center gap-1.5">
+                <span class="w-2.5 h-2.5 rounded-sm bg-purple-400 inline-block"></span> k (Write Slot)
+              </span>
+              <span class="flex items-center gap-1.5">
+                <span class="w-2.5 h-2.5 rounded-sm bg-emerald-400 inline-block"></span> Placed / Sorted
+              </span>
+            </div>
+            <span class="code-font text-[10px] text-slate-400">Right &rarr; Left Fill</span>
+          </div>
+
+          <!-- Unified Dual-Array Stage with SVG Trajectory Overlay & Flying Lift Clone Layer -->
+          <div id="stageWrapper" class="relative w-full p-4 rounded-xl bg-white/[0.02] border border-white/10 flex flex-col gap-6 overflow-x-auto">
+            <!-- SVG Trajectory Arc Overlay Connecting Source (nums1[i] or nums2[j]) to Destination (nums1[k]) -->
+            <svg id="transferArcSvg" class="absolute inset-0 w-full h-full pointer-events-none z-30 overflow-visible"></svg>
+
+            <!-- Floating Lift-and-Place Clone Layer -->
+            <div id="flyingCloneLayer" class="absolute inset-0 pointer-events-none z-40"></div>
+
+            <!-- 1. DESTINATION & PRIMARY ARRAY: nums1[0 .. m + n - 1] -->
+            <div class="flex flex-col gap-2">
+              <div class="flex items-center justify-between text-[11px] px-1">
+                <span class="code-font font-bold text-cyan-300 flex items-center gap-1.5">
+                  <i class="fa-solid fa-database text-cyan-400"></i>
+                  nums1[] <span class="text-slate-400 font-normal">(length = m + n = <span id="nums1LenTag">7</span>)</span>
+                </span>
+                <span class="code-font text-[10px] text-slate-400">
+                  [0..m-1]: Initial &bull; [m..m+n-1]: Buffer (0s)
+                </span>
+              </div>
+              <div id="nums1Arena" class="relative flex items-center justify-center gap-2.5 sm:gap-3 pt-4 pb-1">
+                <!-- Populated dynamically -->
+              </div>
+            </div>
+
+            <!-- 2. SOURCE ARRAY: nums2[0 .. n - 1] -->
+            <div class="flex flex-col gap-2 pt-3 border-t border-white/10">
+              <div class="flex items-center justify-between text-[11px] px-1">
+                <span class="code-font font-bold text-amber-300 flex items-center gap-1.5">
+                  <i class="fa-solid fa-layer-group text-amber-400"></i>
+                  nums2[] <span class="text-slate-400 font-normal">(length = n = <span id="nums2LenTag">3</span>)</span>
+                </span>
+                <span class="code-font text-[10px] text-slate-400">
+                  Merged into nums1[k] from back to front
+                </span>
+              </div>
+              <div id="nums2Arena" class="relative flex items-center justify-center gap-2.5 sm:gap-3 pt-4 pb-1 min-h-[90px]">
+                <!-- Populated dynamically -->
+              </div>
+            </div>
+          </div>
+
+          <!-- Live Decision & Element Transfer Banner -->
+          <div id="decisionBanner" class="p-3.5 rounded-xl bg-white/[0.04] border border-white/10 text-xs flex flex-col sm:flex-row items-center justify-between gap-3 backdrop-blur-md">
+            <div class="flex items-center gap-2.5">
+              <i id="decisionIcon" class="fa-solid fa-circle-info text-cyan-400 text-base"></i>
+              <span id="decisionText" class="text-slate-200">Ready to merge nums1 and nums2 in-place from right to left.</span>
+            </div>
+            <div id="actionPill" class="hidden text-xs code-font px-3 py-1.5 rounded-lg bg-emerald-500/20 border border-emerald-400/40 text-emerald-200 font-semibold shrink-0">
+              <!-- e.g. nums1[6] = nums2[2] (8) -->
+            </div>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- RIGHT: SYNCHRONIZED JAVA CODE CONTAINER (5 Cols) -->
+      <section class="lg:col-span-5 flex flex-col gap-4">
+
+        <div class="glass-panel rounded-2xl p-4 flex flex-col h-full">
+          <div class="flex items-center justify-between pb-3 border-b border-white/10 text-xs">
+            <div class="flex items-center gap-2">
+              <div class="flex gap-1.5">
+                <span class="w-3 h-3 rounded-full bg-rose-500/80 inline-block"></span>
+                <span class="w-3 h-3 rounded-full bg-amber-500/80 inline-block"></span>
+                <span class="w-3 h-3 rounded-full bg-emerald-500/80 inline-block"></span>
+              </div>
+              <span class="code-font text-slate-200 font-semibold ml-2">Solution.java</span>
+            </div>
+            <span class="text-[11px] text-cyan-300 bg-cyan-500/15 px-2.5 py-0.5 rounded border border-cyan-400/25 code-font">
+              In-Place O(1) Space
+            </span>
+          </div>
+
+          <!-- Code Lines with Zero-Jump Localized Scroll -->
+          <div id="codeContainer" class="code-font text-xs sm:text-[13px] leading-relaxed text-slate-300 py-3 overflow-y-auto max-h-[560px] flex-grow select-none">
+            <div class="code-line" id="line1"><span class="text-slate-500 mr-2"> 1</span><span class="text-indigo-400 font-semibold">class</span> <span class="text-amber-300">Solution</span> {</div>
+            <div class="code-line" id="line2"><span class="text-slate-500 mr-2"> 2</span>    <span class="text-indigo-400 font-semibold">public void</span> <span class="text-cyan-300">merge</span>(<span class="text-indigo-400">int</span>[] nums1, <span class="text-indigo-400">int</span> m, <span class="text-indigo-400">int</span>[] nums2, <span class="text-indigo-400">int</span> n) {</div>
+            <div class="code-line" id="line3"><span class="text-slate-500 mr-2"> 3</span></div>
+            <div class="code-line" id="line4"><span class="text-slate-500 mr-2"> 4</span>        <span class="text-indigo-400 font-semibold">int</span> i = m - <span class="text-rose-400">1</span>;</div>
+            <div class="code-line" id="line5"><span class="text-slate-500 mr-2"> 5</span>        <span class="text-indigo-400 font-semibold">int</span> j = n - <span class="text-rose-400">1</span>;</div>
+            <div class="code-line" id="line6"><span class="text-slate-500 mr-2"> 6</span>        <span class="text-indigo-400 font-semibold">int</span> k = m + n - <span class="text-rose-400">1</span>;</div>
+            <div class="code-line" id="line7"><span class="text-slate-500 mr-2"> 7</span></div>
+            <div class="code-line" id="line8"><span class="text-slate-500 mr-2"> 8</span>        <span class="text-indigo-400 font-semibold">while</span> (i &gt;= <span class="text-rose-400">0</span> &amp;&amp; j &gt;= <span class="text-rose-400">0</span>) {</div>
+            <div class="code-line" id="line9"><span class="text-slate-500 mr-2"> 9</span></div>
+            <div class="code-line" id="line10"><span class="text-slate-500 mr-2">10</span>            <span class="text-indigo-400 font-semibold">if</span> (nums1[i] &gt; nums2[j]) {</div>
+            <div class="code-line" id="line11"><span class="text-slate-500 mr-2">11</span>                nums1[k] = nums1[i];</div>
+            <div class="code-line" id="line12"><span class="text-slate-500 mr-2">12</span>                i--;</div>
+            <div class="code-line" id="line13"><span class="text-slate-500 mr-2">13</span>            } <span class="text-indigo-400 font-semibold">else</span> {</div>
+            <div class="code-line" id="line14"><span class="text-slate-500 mr-2">14</span>                nums1[k] = nums2[j];</div>
+            <div class="code-line" id="line15"><span class="text-slate-500 mr-2">15</span>                j--;</div>
+            <div class="code-line" id="line16"><span class="text-slate-500 mr-2">16</span>            }</div>
+            <div class="code-line" id="line17"><span class="text-slate-500 mr-2">17</span></div>
+            <div class="code-line" id="line18"><span class="text-slate-500 mr-2">18</span>            k--;</div>
+            <div class="code-line" id="line19"><span class="text-slate-500 mr-2">19</span>        }</div>
+            <div class="code-line" id="line20"><span class="text-slate-500 mr-2">20</span></div>
+            <div class="code-line" id="line21"><span class="text-slate-500 mr-2">21</span>        <span class="text-slate-500 italic">// Copy remaining elements of nums2</span></div>
+            <div class="code-line" id="line22"><span class="text-slate-500 mr-2">22</span>        <span class="text-indigo-400 font-semibold">while</span> (j &gt;= <span class="text-rose-400">0</span>) {</div>
+            <div class="code-line" id="line23"><span class="text-slate-500 mr-2">23</span>            nums1[k] = nums2[j];</div>
+            <div class="code-line" id="line24"><span class="text-slate-500 mr-2">24</span>            j--;</div>
+            <div class="code-line" id="line25"><span class="text-slate-500 mr-2">25</span>            k--;</div>
+            <div class="code-line" id="line26"><span class="text-slate-500 mr-2">26</span>        }</div>
+            <div class="code-line" id="line27"><span class="text-slate-500 mr-2">27</span>    }</div>
+            <div class="code-line" id="line28"><span class="text-slate-500 mr-2">28</span>}</div>
+          </div>
+
+          <!-- Live Step Narrative Box -->
+          <div class="mt-3 p-3 bg-white/[0.04] border border-white/10 rounded-xl flex items-start gap-2.5 backdrop-blur-md">
+            <i class="fa-solid fa-circle-info text-cyan-400 mt-0.5 text-xs"></i>
+            <div class="text-xs text-slate-200 leading-relaxed" id="stepDescription">
+              Ready to run Merge Two Sorted Arrays. Click <b>Start</b> or <b>Next</b> to step through.
+            </div>
+          </div>
+
+        </div>
+
+      </section>
+
+    </div>
+
+    <!-- BOTTOM SECTION: PROBLEM STATEMENT & ARCHITECTURAL SUMMARY -->
+    <footer class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-2">
+
+      <!-- Problem Statement Card -->
+      <div class="glass-panel rounded-2xl p-5 flex flex-col gap-3">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <span class="text-emerald-400 font-bold"><i class="fa-solid fa-file-lines mr-1.5"></i>Problem Statement</span>
+            <span class="px-2 py-0.5 rounded text-[11px] font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-400/30">Easy / Medium</span>
+          </div>
+          <span class="text-xs text-slate-400 font-mono">146 • LeetCode 88</span>
+        </div>
+
+        <p class="text-xs text-slate-300 leading-relaxed">
+          Given two integer arrays <code class="font-mono text-cyan-300">nums1</code> and <code class="font-mono text-amber-300">nums2</code>, both sorted in <b>non-decreasing order</b>, merge both arrays into a single array sorted in non-decreasing order:
+          <br>&bull; The final sorted array must be stored inside <code class="font-mono text-cyan-300">nums1</code> <b>in-place</b>.
+          <br>&bull; <code class="font-mono">nums1</code> has length <code class="font-mono">m + n</code>, where the first <code class="font-mono">m</code> elements denote the elements of <code class="font-mono">nums1</code> and the rest are <code class="font-mono">0</code>s.
+          <br>&bull; <code class="font-mono">nums2</code> has length <code class="font-mono">n</code>.
+        </p>
+
+        <div class="space-y-2 pt-2 border-t border-white/10 text-xs text-slate-300">
+          <div class="bg-white/[0.03] p-2.5 rounded-lg border border-white/10 font-mono">
+            <span class="text-slate-400">Example 1:</span><br>
+            <b>Input:</b> nums1 = [-5, -2, 4, 5, 0, 0, 0], nums2 = [-3, 1, 8]<br>
+            <b>Output:</b> <span class="text-emerald-400 font-bold">[-5, -3, -2, 1, 4, 5, 8]</span>
+          </div>
+          <div class="bg-white/[0.03] p-2.5 rounded-lg border border-white/10 font-mono">
+            <span class="text-slate-400">Example 2:</span><br>
+            <b>Input:</b> nums1 = [0, 2, 7, 8, 0, 0, 0], nums2 = [-7, -3, -1]<br>
+            <b>Output:</b> <span class="text-emerald-400 font-bold">[-7, -3, -1, 0, 2, 7, 8]</span>
+          </div>
+          <div class="bg-white/[0.03] p-2.5 rounded-lg border border-white/10 font-mono">
+            <span class="text-slate-400">Practice Check:</span><br>
+            <b>Input:</b> nums1 = [1, 3, 5, 0, 0, 0, 0], nums2 = [2, 4, 6, 7] &rarr; <b>Output:</b> <span class="text-emerald-400 font-bold">[1, 2, 3, 4, 5, 6, 7]</span>
+          </div>
+        </div>
+
+        <div class="text-[11px] text-slate-400">
+          <b>Constraints:</b> <code class="font-mono text-slate-300">n == nums2.length</code>, <code class="font-mono text-slate-300">m + n == nums1.length</code>, <code class="font-mono text-slate-300">0 &le; n, m &le; 1000</code>, <code class="font-mono text-slate-300">-10<sup>4</sup> &le; nums1[i], nums2[i] &le; 10<sup>4</sup></code>.
+        </div>
+      </div>
+
+      <!-- Algorithm Summary & Reverse-Fill Invariant Card -->
+      <div class="glass-panel rounded-2xl p-5 flex flex-col gap-3">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <span class="text-cyan-400 font-bold"><i class="fa-solid fa-brain mr-1.5"></i>Algorithm Summary &amp; Reverse-Fill Proof</span>
+          </div>
+          <span class="px-2 py-0.5 rounded text-[11px] font-semibold bg-cyan-500/20 text-cyan-200 border border-cyan-400/30">O(1) Aux Space</span>
+        </div>
+
+        <div class="space-y-3 text-xs text-slate-300 leading-relaxed">
+          <div class="p-3 bg-cyan-950/30 border border-cyan-400/25 rounded-xl">
+            <b class="text-cyan-300 flex items-center gap-1.5 mb-1">
+              <i class="fa-solid fa-backward"></i> Why Merge From Back to Front (<code class="font-mono">k = m + n - 1</code>)?
+            </b>
+            Merging left-to-right inside <code class="font-mono">nums1</code> would overwrite unread elements of <code class="font-mono">nums1</code> unless we allocate an <code class="font-mono">&Omicron;(m)</code> temporary array. Because the trailing <code class="font-mono">n</code> slots of <code class="font-mono">nums1</code> are empty buffer zeros, filling largest-to-smallest from <code class="font-mono">k = m + n - 1</code> guarantees <code class="font-mono text-emerald-300 font-semibold">k &gt; i</code> always holds — so no unread element in <code class="font-mono">nums1</code> is ever overwritten!
+          </div>
+
+          <div class="p-3 bg-amber-950/25 border border-amber-400/20 rounded-xl">
+            <b class="text-amber-300 flex items-center gap-1.5 mb-1">
+              <i class="fa-solid fa-copy"></i> Why Only <code class="font-mono">while (j &gt;= 0)</code> Cleanup Is Needed:
+            </b>
+            If <code class="font-mono">nums2</code> finishes first (<code class="font-mono">j &lt; 0</code>), any remaining elements <code class="font-mono">nums1[0..i]</code> are already in their exact final sorted positions inside <code class="font-mono">nums1</code>. Only leftover elements in <code class="font-mono">nums2</code> (<code class="font-mono">j &ge; 0</code>) need to be copied into <code class="font-mono">nums1[0..k]</code>.
+          </div>
+
+          <div class="grid grid-cols-2 gap-3 pt-1">
+            <div class="p-2.5 bg-white/[0.03] rounded-lg border border-white/10">
+              <span class="text-[11px] text-slate-400 uppercase font-semibold">Time Complexity</span>
+              <div class="text-sm font-bold text-emerald-400 font-mono mt-0.5">&Omicron;(M + N)</div>
+              <p class="text-[10px] text-slate-400 mt-0.5">Each of the <code class="font-mono">m + n</code> elements is placed exactly once.</p>
+            </div>
+            <div class="p-2.5 bg-white/[0.03] rounded-lg border border-white/10">
+              <span class="text-[11px] text-slate-400 uppercase font-semibold">Space Complexity</span>
+              <div class="text-sm font-bold text-cyan-400 font-mono mt-0.5">&Omicron;(1)</div>
+              <p class="text-[10px] text-slate-400 mt-0.5">Purely in-place using only three integer pointers (<code class="font-mono">i, j, k</code>).</p>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+    </footer>
+
+  </div>
+
+  <!-- JAVASCRIPT SIMULATION ENGINE WITH LIFT-AND-ARC TRANSFER ANIMATIONS -->
+  <script>
+    // 10 COMPREHENSIVE PRESETS (Including all user examples + edge cases)
+    const PRESETS = [
+      {
+        name: "1: Example 1 (nums1=[-5,-2,4,5,0,0,0], nums2=[-3,1,8])",
+        nums1Active: [-5, -2, 4, 5],
+        nums2: [-3, 1, 8]
+      },
+      {
+        name: "2: Example 2 (nums1=[0,2,7,8,0,0,0], nums2=[-7,-3,-1])",
+        nums1Active: [0, 2, 7, 8],
+        nums2: [-7, -3, -1]
+      },
+      {
+        name: "3: Prompt Quiz (nums1=[1,3,5,0,0,0,0], nums2=[2,4,6,7])",
+        nums1Active: [1, 3, 5],
+        nums2: [2, 4, 6, 7]
+      },
+      {
+        name: "4: Classic Interleaved (nums1=[1,2,3,0,0,0], nums2=[2,5,6])",
+        nums1Active: [1, 2, 3],
+        nums2: [2, 5, 6]
+      },
+      {
+        name: "5: Remaining nums2 Copy (nums1=[4,5,6,0,0,0], nums2=[1,2,3])",
+        nums1Active: [4, 5, 6],
+        nums2: [1, 2, 3]
+      },
+      {
+        name: "6: All nums2 Greater (nums1=[1,2,3,0,0,0], nums2=[7,8,9])",
+        nums1Active: [1, 2, 3],
+        nums2: [7, 8, 9]
+      },
+      {
+        name: "7: Empty nums1 m=0 (nums1=[0,0,0], nums2=[2,5,9])",
+        nums1Active: [],
+        nums2: [2, 5, 9]
+      },
+      {
+        name: "8: Empty nums2 n=0 (nums1=[1,4,7], nums2=[])",
+        nums1Active: [1, 4, 7],
+        nums2: []
+      },
+      {
+        name: "9: Duplicate Values (nums1=[2,2,4,0,0,0], nums2=[2,4,4])",
+        nums1Active: [2, 2, 4],
+        nums2: [2, 4, 4]
+      },
+      {
+        name: "10: Negatives & Zeros (nums1=[-4,0,3,0,0], nums2=[-2,0])",
+        nums1Active: [-4, 0, 3],
+        nums2: [-2, 0]
+      }
+    ];
+
+    // APPLICATION STATE
+    let currentNums1Active = [...PRESETS[0].nums1Active];
+    let currentNums2 = [...PRESETS[0].nums2];
+    let steps = [];
+    let currentStepIdx = 0;
+    let isPlaying = false;
+    let playInterval = null;
+    let playSpeed = 700;
+    let audioEnabled = true;
+    let viewMode = 'both'; // 'both' | 'bars' | 'boxes'
+
+    // WEB AUDIO SYNTHESIZER
+    let audioCtx = null;
+    function initAudio() {
+      if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      }
+    }
+    function playTone(freq = 440, type = 'sine', duration = 0.08, vol = 0.035) {
+      if (!audioEnabled) return;
+      try {
+        initAudio();
+        if (audioCtx.state === 'suspended') {
+          audioCtx.resume();
+        }
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = type;
+        osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+        gain.gain.setValueAtTime(vol, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + duration);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + duration);
+      } catch (e) {}
+    }
+
+    // DOM REFERENCES
+    const btnPlay = document.getElementById('btnPlay');
+    const playIcon = document.getElementById('playIcon');
+    const playText = document.getElementById('playText');
+    const btnPrev = document.getElementById('btnPrev');
+    const btnNext = document.getElementById('btnNext');
+    const btnReset = document.getElementById('btnReset');
+    const btnAudio = document.getElementById('btnAudio');
+    const audioIcon = document.getElementById('audioIcon');
+    const presetSelect = document.getElementById('presetSelect');
+    const customNums1Input = document.getElementById('customNums1Input');
+    const customNums2Input = document.getElementById('customNums2Input');
+    const btnApplyCustom = document.getElementById('btnApplyCustom');
+    const stepScrubber = document.getElementById('stepScrubber');
+    const stepCounterBadge = document.getElementById('stepCounterBadge');
+    const phaseBadge = document.getElementById('phaseBadge');
+    const dimHeaderBadge = document.getElementById('dimHeaderBadge');
+    const placedCountBadge = document.getElementById('placedCountBadge');
+
+    const varIVal = document.getElementById('varIVal');
+    const varIIdx = document.getElementById('varIIdx');
+    const varJVal = document.getElementById('varJVal');
+    const varJIdx = document.getElementById('varJIdx');
+    const varKIdx = document.getElementById('varKIdx');
+    const varKCurVal = document.getElementById('varKCurVal');
+    const varCompareExpr = document.getElementById('varCompareExpr');
+    const varCompareHint = document.getElementById('varCompareHint');
+
+    const stageWrapper = document.getElementById('stageWrapper');
+    const transferArcSvg = document.getElementById('transferArcSvg');
+    const flyingCloneLayer = document.getElementById('flyingCloneLayer');
+    const nums1LenTag = document.getElementById('nums1LenTag');
+    const nums2LenTag = document.getElementById('nums2LenTag');
+    const nums1Arena = document.getElementById('nums1Arena');
+    const nums2Arena = document.getElementById('nums2Arena');
+
+    const decisionBanner = document.getElementById('decisionBanner');
+    const decisionIcon = document.getElementById('decisionIcon');
+    const decisionText = document.getElementById('decisionText');
+    const actionPill = document.getElementById('actionPill');
+    const codeContainer = document.getElementById('codeContainer');
+    const stepDescription = document.getElementById('stepDescription');
+
+    // STRICT LINE-BY-LINE EXECUTION TRACE GENERATOR
+    function generateSteps(nums1InitActive, nums2Init) {
+      const trace = [];
+      const m = nums1InitActive.length;
+      const n = nums2Init.length;
+      const totalLen = m + n;
+
+      // Build nums1 cells with provenance ('init1' | 'buffer' | 'placed1' | 'placed2')
+      const arr1 = [];
+      for (let idx = 0; idx < m; idx++) {
+        arr1.push({ val: nums1InitActive[idx], state: 'init1' });
+      }
+      for (let idx = 0; idx < n; idx++) {
+        arr1.push({ val: 0, state: 'buffer' });
+      }
+
+      const arr2 = nums2Init.map(v => ({ val: v }));
+
+      const snap1 = () => arr1.map(c => ({ ...c }));
+      const snap2 = () => arr2.map(c => ({ ...c }));
+      const countPlaced = () => arr1.filter(c => c.state === 'placed1' || c.state === 'placed2').length;
+
+      // Line 2: Method entry
+      trace.push({
+        line: 2,
+        phase: "Start",
+        arr1: snap1(),
+        arr2: snap2(),
+        m,
+        n,
+        i: null,
+        j: null,
+        k: null,
+        placedCount: 0,
+        desc: `Entered <span class="code-font text-cyan-300 font-bold">merge</span> with <span class="code-font">m = ${m}</span>, <span class="code-font">n = ${n}</span>, <span class="code-font text-cyan-200">nums1 = [${arr1.map(c => c.val).join(', ')}]</span>, <span class="code-font text-amber-200">nums2 = [${arr2.map(c => c.val).join(', ')}]</span>.`,
+        soundFreq: 330
+      });
+
+      // Line 4: int i = m - 1;
+      let i = m - 1;
+      trace.push({
+        line: 4,
+        phase: `Init i = ${i}`,
+        arr1: snap1(),
+        arr2: snap2(),
+        m,
+        n,
+        i,
+        j: null,
+        k: null,
+        placedCount: 0,
+        desc: `Initialized <span class="code-font text-cyan-300 font-bold">i = m - 1 = ${i}</span> (last active element of <span class="code-font">nums1</span>${i >= 0 ? `: <span class="code-font text-cyan-200 font-bold">${arr1[i].val}</span>` : ' — empty'}).`,
+        soundFreq: 370
+      });
+
+      // Line 5: int j = n - 1;
+      let j = n - 1;
+      trace.push({
+        line: 5,
+        phase: `Init j = ${j}`,
+        arr1: snap1(),
+        arr2: snap2(),
+        m,
+        n,
+        i,
+        j,
+        k: null,
+        placedCount: 0,
+        desc: `Initialized <span class="code-font text-amber-300 font-bold">j = n - 1 = ${j}</span> (last element of <span class="code-font">nums2</span>${j >= 0 ? `: <span class="code-font text-amber-200 font-bold">${arr2[j].val}</span>` : ' — empty'}).`,
+        soundFreq: 400
+      });
+
+      // Line 6: int k = m + n - 1;
+      let k = m + n - 1;
+      trace.push({
+        line: 6,
+        phase: `Init k = ${k}`,
+        arr1: snap1(),
+        arr2: snap2(),
+        m,
+        n,
+        i,
+        j,
+        k,
+        placedCount: 0,
+        desc: `Initialized write pointer <span class="code-font text-purple-300 font-bold">k = m + n - 1 = ${k}</span> at the back of <span class="code-font">nums1</span>.`,
+        soundFreq: 430
+      });
+
+      // Main Loop: while (i >= 0 && j >= 0)
+      while (i >= 0 && j >= 0) {
+        trace.push({
+          line: 8,
+          phase: `Check (i=${i}, j=${j})`,
+          arr1: snap1(),
+          arr2: snap2(),
+          m,
+          n,
+          i,
+          j,
+          k,
+          placedCount: countPlaced(),
+          desc: `Condition <span class="code-font text-cyan-300">i (${i}) &ge; 0 &amp;&amp; j (${j}) &ge; 0</span> is <b>true</b>.`,
+          soundFreq: 460
+        });
+
+        const v1 = arr1[i].val;
+        const v2 = arr2[j].val;
+        const takeFromNums1 = v1 > v2;
+
+        // Line 10: if (nums1[i] > nums2[j])
+        trace.push({
+          line: 10,
+          phase: takeFromNums1 ? `${v1} > ${v2} (True)` : `${v1} > ${v2} (False)`,
+          arr1: snap1(),
+          arr2: snap2(),
+          m,
+          n,
+          i,
+          j,
+          k,
+          compareText: `${v1} ${takeFromNums1 ? '>' : '≤'} ${v2}`,
+          placedCount: countPlaced(),
+          desc: takeFromNums1
+            ? `Evaluating <span class="code-font text-cyan-300 font-bold">if (nums1[${i}] (${v1}) &gt; nums2[${j}] (${v2}))</span>: <b>true</b> &rarr; place <span class="code-font text-cyan-200 font-bold">${v1}</span> at <span class="code-font">nums1[${k}]</span>.`
+            : `Evaluating <span class="code-font text-amber-300 font-bold">if (nums1[${i}] (${v1}) &gt; nums2[${j}] (${v2}))</span>: <b>false</b> (<span class="code-font">${v1} &le; ${v2}</span>) &rarr; entering <span class="code-font">else</span> branch.`,
+          soundFreq: 500
+        });
+
+        if (takeFromNums1) {
+          // Line 11: nums1[k] = nums1[i];
+          arr1[k] = { val: v1, state: 'placed1' };
+          trace.push({
+            line: 11,
+            phase: `Place ${v1} at [${k}]`,
+            arr1: snap1(),
+            arr2: snap2(),
+            m,
+            n,
+            i,
+            j,
+            k,
+            placedIdx: k,
+            transfer: { fromArr: 'nums1', fromIdx: i, toIdx: k, val: v1 },
+            actionText: `nums1[${k}] = nums1[${i}] (${v1})`,
+            placedCount: countPlaced(),
+            desc: `Lifted <span class="code-font text-cyan-300 font-bold">nums1[${i}] (${v1})</span> and placed it into <span class="code-font text-emerald-300 font-bold">nums1[${k}]</span>.`,
+            soundFreq: 740
+          });
+
+          // Line 12: i--;
+          const prevI = i;
+          i--;
+          trace.push({
+            line: 12,
+            phase: `i-- (${prevI} → ${i})`,
+            arr1: snap1(),
+            arr2: snap2(),
+            m,
+            n,
+            i,
+            j,
+            k,
+            placedCount: countPlaced(),
+            desc: `Decremented <span class="code-font text-cyan-300 font-bold">i--</span> (${prevI} &rarr; ${i}).`,
+            soundFreq: 540
+          });
+        } else {
+          // Line 13: else
+          trace.push({
+            line: 13,
+            phase: "else Branch",
+            arr1: snap1(),
+            arr2: snap2(),
+            m,
+            n,
+            i,
+            j,
+            k,
+            placedCount: countPlaced(),
+            desc: `Entered <span class="code-font text-amber-300 font-bold">else</span> block because <span class="code-font">nums2[${j}] (${v2}) &ge; nums1[${i}] (${v1})</span>.`,
+            soundFreq: 490
+          });
+
+          // Line 14: nums1[k] = nums2[j];
+          arr1[k] = { val: v2, state: 'placed2' };
+          trace.push({
+            line: 14,
+            phase: `Place ${v2} at [${k}]`,
+            arr1: snap1(),
+            arr2: snap2(),
+            m,
+            n,
+            i,
+            j,
+            k,
+            placedIdx: k,
+            transfer: { fromArr: 'nums2', fromIdx: j, toIdx: k, val: v2 },
+            actionText: `nums1[${k}] = nums2[${j}] (${v2})`,
+            placedCount: countPlaced(),
+            desc: `Lifted <span class="code-font text-amber-300 font-bold">nums2[${j}] (${v2})</span> and placed it into <span class="code-font text-emerald-300 font-bold">nums1[${k}]</span>.`,
+            soundFreq: 740
+          });
+
+          // Line 15: j--;
+          const prevJ = j;
+          j--;
+          trace.push({
+            line: 15,
+            phase: `j-- (${prevJ} → ${j})`,
+            arr1: snap1(),
+            arr2: snap2(),
+            m,
+            n,
+            i,
+            j,
+            k,
+            placedCount: countPlaced(),
+            desc: `Decremented <span class="code-font text-amber-300 font-bold">j--</span> (${prevJ} &rarr; ${j}).`,
+            soundFreq: 540
+          });
+        }
+
+        // Line 18: k--;
+        const prevK = k;
+        k--;
+        trace.push({
+          line: 18,
+          phase: `k-- (${prevK} → ${k})`,
+          arr1: snap1(),
+          arr2: snap2(),
+          m,
+          n,
+          i,
+          j,
+          k,
+          placedCount: countPlaced(),
+          desc: `Decremented write pointer <span class="code-font text-purple-300 font-bold">k--</span> (${prevK} &rarr; ${k}).`,
+          soundFreq: 520
+        });
+      }
+
+      // Line 8: while (i >= 0 && j >= 0) evaluates to false
+      trace.push({
+        line: 8,
+        phase: "Main Loop Exit",
+        arr1: snap1(),
+        arr2: snap2(),
+        m,
+        n,
+        i,
+        j,
+        k,
+        placedCount: countPlaced(),
+        desc: `Condition <span class="code-font text-cyan-300">i (${i}) &ge; 0 &amp;&amp; j (${j}) &ge; 0</span> is <b>false</b>. Checking if any elements remain in <span class="code-font text-amber-300">nums2</span>.`,
+        soundFreq: 480
+      });
+
+      // Cleanup Loop: while (j >= 0)
+      while (j >= 0) {
+        trace.push({
+          line: 22,
+          phase: `Remaining j = ${j}`,
+          arr1: snap1(),
+          arr2: snap2(),
+          m,
+          n,
+          i,
+          j,
+          k,
+          placedCount: countPlaced(),
+          desc: `Cleanup loop check <span class="code-font text-amber-300 font-bold">j (${j}) &ge; 0</span> is <b>true</b>. Copying remaining <span class="code-font">nums2[${j}] = ${arr2[j].val}</span>.`,
+          soundFreq: 510
+        });
+
+        const v2 = arr2[j].val;
+        arr1[k] = { val: v2, state: 'placed2' };
+
+        // Line 23: nums1[k] = nums2[j];
+        trace.push({
+          line: 23,
+          phase: `Copy ${v2} to [${k}]`,
+          arr1: snap1(),
+          arr2: snap2(),
+          m,
+          n,
+          i,
+          j,
+          k,
+          placedIdx: k,
+          transfer: { fromArr: 'nums2', fromIdx: j, toIdx: k, val: v2 },
+          actionText: `nums1[${k}] = nums2[${j}] (${v2})`,
+          placedCount: countPlaced(),
+          desc: `Lifted remaining <span class="code-font text-amber-300 font-bold">nums2[${j}] (${v2})</span> and placed it into <span class="code-font text-emerald-300 font-bold">nums1[${k}]</span>.`,
+          soundFreq: 760
+        });
+
+        // Line 24: j--;
+        const prevJ = j;
+        j--;
+        trace.push({
+          line: 24,
+          phase: `j-- (${prevJ} → ${j})`,
+          arr1: snap1(),
+          arr2: snap2(),
+          m,
+          n,
+          i,
+          j,
+          k,
+          placedCount: countPlaced(),
+          desc: `Decremented <span class="code-font text-amber-300 font-bold">j--</span> (${prevJ} &rarr; ${j}).`,
+          soundFreq: 550
+        });
+
+        // Line 25: k--;
+        const prevK = k;
+        k--;
+        trace.push({
+          line: 25,
+          phase: `k-- (${prevK} → ${k})`,
+          arr1: snap1(),
+          arr2: snap2(),
+          m,
+          n,
+          i,
+          j,
+          k,
+          placedCount: countPlaced(),
+          desc: `Decremented <span class="code-font text-purple-300 font-bold">k--</span> (${prevK} &rarr; ${k}).`,
+          soundFreq: 530
+        });
+      }
+
+      // Line 22: while (j >= 0) evaluates to false
+      trace.push({
+        line: 22,
+        phase: "Cleanup Complete",
+        arr1: snap1(),
+        arr2: snap2(),
+        m,
+        n,
+        i,
+        j,
+        k,
+        placedCount: totalLen,
+        desc: `Condition <span class="code-font text-amber-300">j (${j}) &ge; 0</span> is <b>false</b>. All <span class="code-font">nums2</span> elements have been merged in-place.`,
+        soundFreq: 680
+      });
+
+      // Mark any untouched prefix elements in nums1[0..i] as finalized!
+      for (let idx = 0; idx < totalLen; idx++) {
+        if (arr1[idx].state === 'init1') {
+          arr1[idx].state = 'placed1';
+        }
+      }
+
+      // Line 27: Complete
+      trace.push({
+        line: 27,
+        phase: "Complete",
+        arr1: snap1(),
+        arr2: snap2(),
+        m,
+        n,
+        i: -1,
+        j: -1,
+        k: -1,
+        placedCount: totalLen,
+        isComplete: true,
+        desc: `<span class="text-emerald-400 font-bold text-sm"><i class="fa-solid fa-trophy mr-1.5"></i>Merged In-Place!</span> Final sorted <span class="code-font text-emerald-300 font-bold text-sm">nums1 = [${arr1.map(c => c.val).join(', ')}]</span>.`,
+        soundFreq: 960
+      });
+
+      return trace;
+    }
+
+    // LOCALIZED ZERO-JUMP CODE LINE HIGHLIGHTER
+    function highlightCodeLine(lineNum) {
+      document.querySelectorAll('.code-line').forEach(el => el.classList.remove('active-line'));
+      const activeEl = document.getElementById(`line${lineNum}`);
+      if (activeEl) {
+        activeEl.classList.add('active-line');
+
+        const containerTop = codeContainer.scrollTop;
+        const containerBottom = containerTop + codeContainer.clientHeight;
+        const elTop = activeEl.offsetTop - codeContainer.offsetTop;
+        const elBottom = elTop + activeEl.clientHeight;
+
+        if (elTop < containerTop + 24) {
+          codeContainer.scrollTo({ top: Math.max(0, elTop - 24), behavior: 'smooth' });
+        } else if (elBottom > containerBottom - 24) {
+          codeContainer.scrollTo({ top: elBottom - codeContainer.clientHeight + 24, behavior: 'smooth' });
+        }
+      }
+    }
+
+    // BUILD ELEMENT CARD HTML (Used for both Stage Elements & Flying Lift Clone)
+    function buildElementCardContent(val, index, maxAbs, badgesHtml, footerTagHtml, accentType) {
+      let topRow = `
+        <div class="w-full flex items-center justify-between text-[10px] code-font min-h-[18px]">
+          <span class="text-slate-400">[${index}]</span>
+          <div class="flex items-center gap-0.5">${badgesHtml}</div>
+        </div>
+      `;
+
+      let barSection = '';
+      if (viewMode === 'both' || viewMode === 'bars') {
+        const magPct = val === 0 ? 0 : Math.max(15, (Math.abs(val) / maxAbs) * 100);
+        const isPos = val > 0;
+        const isNeg = val < 0;
+
+        let posStyle = 'bg-gradient-to-t from-cyan-600/80 via-cyan-500/80 to-cyan-300 border-t border-cyan-100';
+        let negStyle = 'bg-gradient-to-b from-rose-600/80 via-rose-500/80 to-rose-400 border-b border-rose-200';
+
+        if (accentType === 'placed' || accentType === 'finalized') {
+          posStyle = 'bg-gradient-to-t from-emerald-600 via-emerald-500 to-emerald-300 border-t border-white shadow-[0_0_16px_rgba(16,185,129,0.55)]';
+          negStyle = 'bg-gradient-to-b from-emerald-600 via-emerald-500 to-emerald-300 border-b border-white shadow-[0_0_16px_rgba(16,185,129,0.55)]';
+        } else if (accentType === 'ptrI') {
+          posStyle = 'bg-gradient-to-t from-cyan-600 via-cyan-400 to-cyan-200 border-t border-white shadow-[0_0_16px_rgba(34,211,238,0.6)]';
+          negStyle = 'bg-gradient-to-b from-cyan-600 via-cyan-400 to-cyan-200 border-b border-white shadow-[0_0_16px_rgba(34,211,238,0.6)]';
+        } else if (accentType === 'ptrJ') {
+          posStyle = 'bg-gradient-to-t from-amber-600 via-amber-400 to-amber-200 border-t border-white shadow-[0_0_16px_rgba(251,191,36,0.6)]';
+          negStyle = 'bg-gradient-to-b from-amber-600 via-amber-400 to-amber-200 border-b border-white shadow-[0_0_16px_rgba(251,191,36,0.6)]';
+        } else if (accentType === 'ptrK') {
+          posStyle = 'bg-gradient-to-t from-purple-600 via-purple-400 to-purple-200 border-t border-white shadow-[0_0_16px_rgba(168,85,247,0.6)]';
+          negStyle = 'bg-gradient-to-b from-purple-600 via-purple-400 to-purple-200 border-b border-white shadow-[0_0_16px_rgba(168,85,247,0.6)]';
+        }
+
+        barSection = `
+          <div class="w-full flex-1 flex flex-col items-center justify-center my-1">
+            <!-- Positive Upper Half -->
+            <div class="w-9 sm:w-11 h-14 flex items-end justify-center">
+              ${isPos ? `<div class="w-full rounded-t-md transition-all duration-300 ${posStyle}" style="height: ${magPct}%;"></div>` : ''}
+            </div>
+            <!-- Zero Center Axis Line -->
+            <div class="w-12 sm:w-14 h-[2px] ${val === 0 ? 'bg-slate-400' : 'bg-white/25'} rounded-full"></div>
+            <!-- Negative Lower Half -->
+            <div class="w-9 sm:w-11 h-14 flex items-start justify-center">
+              ${isNeg ? `<div class="w-full rounded-b-md transition-all duration-300 ${negStyle}" style="height: ${magPct}%;"></div>` : ''}
+            </div>
+          </div>
+        `;
+      }
+
+      let valColor = 'text-white';
+      if (accentType === 'buffer') valColor = 'text-slate-500';
+      else if (accentType === 'placed' || accentType === 'finalized') valColor = 'text-emerald-200';
+      else if (accentType === 'ptrI') valColor = 'text-cyan-200';
+      else if (accentType === 'ptrJ') valColor = 'text-amber-200';
+      else if (accentType === 'ptrK') valColor = 'text-purple-200';
+
+      const bottomRow = `
+        <div class="w-full flex flex-col items-center gap-0.5">
+          <span class="code-font ${viewMode === 'boxes' ? 'text-xl sm:text-2xl my-1.5' : 'text-sm sm:text-base'} font-extrabold ${valColor}">
+            ${val}
+          </span>
+          ${footerTagHtml}
+        </div>
+      `;
+
+      return `${topRow}${barSection}${bottomRow}`;
+    }
+
+    // PHYSICAL LIFT-AND-ARC CLONE & SVG TRAJECTORY ANIMATION
+    function animateElementTransfer(transfer, maxAbs, animateFlight) {
+      transferArcSvg.innerHTML = '';
+      flyingCloneLayer.innerHTML = '';
+      if (!transfer) return;
+
+      const srcEl = transfer.fromArr === 'nums1'
+        ? nums1Arena.querySelector(`[data-index="${transfer.fromIdx}"]`)
+        : nums2Arena.querySelector(`[data-index="${transfer.fromIdx}"]`);
+      const dstEl = nums1Arena.querySelector(`[data-index="${transfer.toIdx}"]`);
+
+      if (!srcEl || !dstEl) return;
+
+      const stageRect = stageWrapper.getBoundingClientRect();
+      const srcRect = srcEl.getBoundingClientRect();
+      const dstRect = dstEl.getBoundingClientRect();
+
+      const x1 = (srcRect.left - stageRect.left) + srcRect.width / 2;
+      const y1 = (srcRect.top - stageRect.top) + srcRect.height / 2;
+      const x2 = (dstRect.left - stageRect.left) + dstRect.width / 2;
+      const y2 = (dstRect.top - stageRect.top) + dstRect.height / 2;
+
+      const midX = (x1 + x2) / 2;
+      const controlY = Math.min(y1, y2) - 48;
+      const arcColor = transfer.fromArr === 'nums1' ? '#22d3ee' : '#fbbf24';
+
+      // Draw SVG Curved Trajectory Arc
+      transferArcSvg.innerHTML = `
+        <path d="M ${x1} ${y1} Q ${midX} ${controlY}, ${x2} ${y2}"
+              fill="none" stroke="${arcColor}" stroke-width="2.4" class="transfer-arc-path" opacity="0.9" />
+        <circle cx="${x1}" cy="${y1}" r="4.5" fill="${arcColor}" />
+        <polygon points="${x2},${y2} ${x2 - 6},${y2 - 8} ${x2 + 6},${y2 - 8}" fill="#34d399" />
+      `;
+
+      if (!animateFlight) return;
+
+      // Spawn a physical glassy flying clone that lifts from srcEl, glides over the top of other boxes/bars, and lands in dstEl!
+      const clone = document.createElement('div');
+      const cardHeightClass = viewMode === 'bars' ? 'w-14 sm:w-16 min-h-[205px]' : viewMode === 'boxes' ? 'w-16 sm:w-20 min-h-[118px]' : 'w-16 sm:w-20 min-h-[225px]';
+      clone.className = `glass-element-card just-placed-card absolute rounded-2xl p-2.5 flex flex-col items-center justify-between select-none ${cardHeightClass}`;
+      clone.style.left = `${srcRect.left - stageRect.left}px`;
+      clone.style.top = `${srcRect.top - stageRect.top}px`;
+
+      const srcBadge = transfer.fromArr === 'nums1'
+        ? `<span class="px-1.5 py-0.2 rounded bg-cyan-400 text-slate-950 font-extrabold text-[9px] code-font">nums1[${transfer.fromIdx}]</span>`
+        : `<span class="px-1.5 py-0.2 rounded bg-amber-400 text-slate-950 font-extrabold text-[9px] code-font">nums2[${transfer.fromIdx}]</span>`;
+      const dstBadge = `<span class="text-[8px] code-font px-1.5 py-0.2 rounded bg-emerald-500/30 text-emerald-100 font-bold">&rarr; [${transfer.toIdx}]</span>`;
+
+      clone.innerHTML = buildElementCardContent(transfer.val, transfer.toIdx, maxAbs, srcBadge, dstBadge, 'placed');
+      flyingCloneLayer.appendChild(clone);
+
+      const dx = dstRect.left - srcRect.left;
+      const dy = dstRect.top - srcRect.top;
+      const liftY = Math.min(0, dy) - 48; // Always lift well above other bars/boxes!
+      const duration = Math.min(560, Math.max(250, playSpeed * 0.8));
+
+      const anim = clone.animate([
+        { transform: 'translate(0px, 0px) scale(1)', opacity: 0.95 },
+        { transform: `translate(${dx * 0.3}px, ${liftY}px) scale(1.08)`, opacity: 1, offset: 0.35 },
+        { transform: `translate(${dx * 0.72}px, ${liftY}px) scale(1.08)`, opacity: 1, offset: 0.72 },
+        { transform: `translate(${dx}px, ${dy}px) scale(1)`, opacity: 0.15 }
+      ], {
+        duration,
+        easing: 'cubic-bezier(0.22, 1, 0.36, 1)'
+      });
+
+      anim.onfinish = () => {
+        clone.remove();
+      };
+    }
+
+    // RENDER CURRENT STEP
+    function renderStep(idx, animateMovement = true) {
+      if (idx < 0 || idx >= steps.length) return;
+      const step = steps[idx];
+      const arr1 = step.arr1;
+      const arr2 = step.arr2;
+      const allVals = [...arr1.map(c => Math.abs(c.val)), ...arr2.map(c => Math.abs(c.val))];
+      const maxAbs = Math.max(1, ...allVals);
+
+      // Update Header Scrubber & Badges
+      stepCounterBadge.textContent = `Step: ${idx + 1} / ${steps.length}`;
+      phaseBadge.textContent = step.phase;
+      dimHeaderBadge.textContent = `m = ${step.m}, n = ${step.n}`;
+      placedCountBadge.textContent = `Placed: ${step.placedCount} / ${step.m + step.n}`;
+      stepScrubber.max = steps.length - 1;
+      stepScrubber.value = idx;
+
+      nums1LenTag.textContent = arr1.length;
+      nums2LenTag.textContent = arr2.length;
+
+      // Update Telemetry HUD Cards
+      if (step.i !== null && step.i !== undefined) {
+        varIIdx.textContent = `i: ${step.i}`;
+        varIVal.textContent = step.i >= 0 && step.i < arr1.length ? arr1[step.i].val : 'done';
+      } else {
+        varIIdx.textContent = 'i: -';
+        varIVal.textContent = '-';
+      }
+
+      if (step.j !== null && step.j !== undefined) {
+        varJIdx.textContent = `j: ${step.j}`;
+        varJVal.textContent = step.j >= 0 && step.j < arr2.length ? arr2[step.j].val : 'done';
+      } else {
+        varJIdx.textContent = 'j: -';
+        varJVal.textContent = '-';
+      }
+
+      if (step.k !== null && step.k !== undefined) {
+        varKIdx.textContent = step.k >= 0 ? `[${step.k}]` : 'done';
+        varKCurVal.textContent = step.k >= 0 && step.k < arr1.length ? `(val: ${arr1[step.k].val})` : '';
+      } else {
+        varKIdx.textContent = '-';
+        varKCurVal.textContent = '';
+      }
+
+      if (step.compareText) {
+        varCompareExpr.textContent = step.compareText;
+        varCompareExpr.className = "code-font text-base sm:text-lg font-bold text-emerald-300";
+      } else if (step.i >= 0 && step.j >= 0 && step.i !== null && step.j !== null) {
+        varCompareExpr.textContent = `${arr1[step.i].val} vs ${arr2[step.j].val}`;
+        varCompareExpr.className = "code-font text-base sm:text-lg font-bold text-sky-300";
+      } else {
+        varCompareExpr.textContent = '- vs -';
+        varCompareExpr.className = "code-font text-base sm:text-lg font-bold text-slate-400";
+      }
+
+      // Narrative Description
+      stepDescription.innerHTML = step.desc;
+
+      // 1. Render nums1[] Cards & Bi-Directional Magnitude Bars
+      nums1Arena.innerHTML = '';
+      const cardSizeClass = viewMode === 'bars' ? 'w-14 sm:w-16 min-h-[205px]' : viewMode === 'boxes' ? 'w-16 sm:w-20 min-h-[118px]' : 'w-16 sm:w-20 min-h-[225px]';
+
+      arr1.forEach((cell, index) => {
+        const isI = (step.i === index && step.i >= 0);
+        const isK = (step.k === index && step.k >= 0);
+        const isJustPlaced = (step.placedIdx === index);
+        const isLiftedSrc = step.transfer && step.transfer.fromArr === 'nums1' && step.transfer.fromIdx === index;
+        const isPlacedState = cell.state === 'placed1' || cell.state === 'placed2';
+        const isBufferSlot = cell.state === 'buffer';
+
+        const card = document.createElement('div');
+        card.dataset.index = index;
+
+        let classes = `glass-element-card relative rounded-2xl p-2.5 flex flex-col items-center justify-between select-none shrink-0 ${cardSizeClass} `;
+        let accentType = 'default';
+
+        if (isJustPlaced) {
+          classes += 'just-placed-card ';
+          accentType = 'placed';
+        } else if (isLiftedSrc) {
+          classes += 'ptr-i-card lifted-source ';
+          accentType = 'ptrI';
+        } else if (isI && isK) {
+          classes += 'ptr-i-card ';
+          accentType = 'ptrI';
+        } else if (isI) {
+          classes += 'ptr-i-card ';
+          accentType = 'ptrI';
+        } else if (isK) {
+          classes += 'ptr-k-card ';
+          accentType = 'ptrK';
+        } else if (isPlacedState) {
+          classes += 'finalized-card ';
+          accentType = 'finalized';
+        } else if (isBufferSlot) {
+          classes += 'buffer-slot ';
+          accentType = 'buffer';
+        }
+
+        card.className = classes;
+
+        // Pointer Badges (i, k)
+        const badges = [];
+        if (isI) badges.push(`<span class="px-1.5 py-0.2 rounded bg-cyan-400 text-slate-950 font-extrabold text-[9px] code-font shadow">i</span>`);
+        if (isK) badges.push(`<span class="px-1.5 py-0.2 rounded bg-purple-400 text-slate-950 font-extrabold text-[9px] code-font shadow">k</span>`);
+
+        // Provenance Footer Pill
+        let footerTag = '';
+        if (cell.state === 'placed1') {
+          footerTag = `<span class="text-[8px] code-font px-1.5 py-0.2 rounded bg-cyan-500/20 text-cyan-200 border border-cyan-400/35">from n1</span>`;
+        } else if (cell.state === 'placed2') {
+          footerTag = `<span class="text-[8px] code-font px-1.5 py-0.2 rounded bg-amber-500/20 text-amber-200 border border-amber-400/35">from n2</span>`;
+        } else if (isBufferSlot) {
+          footerTag = `<span class="text-[8px] code-font px-1.5 py-0.2 rounded bg-white/[0.04] text-slate-500">buffer</span>`;
+        } else {
+          footerTag = `<span class="text-[8px] code-font px-1.5 py-0.2 rounded bg-white/[0.05] text-slate-400">init n1</span>`;
+        }
+
+        card.innerHTML = buildElementCardContent(cell.val, index, maxAbs, badges.join(''), footerTag, accentType);
+        nums1Arena.appendChild(card);
+      });
+
+      // 2. Render nums2[] Cards & Bi-Directional Magnitude Bars
+      nums2Arena.innerHTML = '';
+      if (arr2.length === 0) {
+        nums2Arena.innerHTML = `<span class="text-xs text-slate-500 italic">nums2 is empty (n = 0) — nothing to merge.</span>`;
+      } else {
+        arr2.forEach((cell, index) => {
+          const isJ = (step.j === index && step.j >= 0);
+          const isLiftedSrc = step.transfer && step.transfer.fromArr === 'nums2' && step.transfer.fromIdx === index;
+          const isConsumed = (step.j !== null && step.j !== undefined && index > step.j && !isLiftedSrc) || step.isComplete;
+
+          const card = document.createElement('div');
+          card.dataset.index = index;
+
+          let classes = `glass-element-card relative rounded-2xl p-2.5 flex flex-col items-center justify-between select-none shrink-0 ${cardSizeClass} `;
+          let accentType = 'default';
+
+          if (isLiftedSrc) {
+            classes += 'ptr-j-card lifted-source ';
+            accentType = 'ptrJ';
+          } else if (isJ) {
+            classes += 'ptr-j-card ';
+            accentType = 'ptrJ';
+          } else if (isConsumed) {
+            classes += 'consumed-slot ';
+          }
+
+          card.className = classes;
+
+          const badges = isJ
+            ? `<span class="px-1.5 py-0.2 rounded bg-amber-400 text-slate-950 font-extrabold text-[9px] code-font shadow">j</span>`
+            : '';
+
+          const footerTag = isConsumed
+            ? `<span class="text-[8px] code-font px-1.5 py-0.2 rounded bg-emerald-500/15 text-emerald-300">copied ✓</span>`
+            : `<span class="text-[8px] code-font px-1.5 py-0.2 rounded bg-amber-500/15 text-amber-200">nums2</span>`;
+
+          card.innerHTML = buildElementCardContent(cell.val, index, maxAbs, badges, footerTag, accentType);
+          nums2Arena.appendChild(card);
+        });
+      }
+
+      // 3. Trigger Lift-and-Arc Transfer Animation When nums1[k] = ... Executes!
+      if (step.transfer) {
+        requestAnimationFrame(() => animateElementTransfer(step.transfer, maxAbs, animateMovement));
+      } else {
+        transferArcSvg.innerHTML = '';
+        flyingCloneLayer.innerHTML = '';
+      }
+
+      // 4. Update Decision Banner & Action Pill
+      if (step.actionText) {
+        actionPill.classList.remove('hidden');
+        actionPill.textContent = step.actionText;
+      } else {
+        actionPill.classList.add('hidden');
+      }
+
+      if (step.isComplete) {
+        decisionIcon.className = "fa-solid fa-trophy text-emerald-400 text-base";
+        decisionBanner.className = "p-3.5 rounded-xl bg-emerald-500/15 border border-emerald-400/35 text-xs flex flex-col sm:flex-row items-center justify-between gap-3 backdrop-blur-md";
+        placedCountBadge.classList.add('complete-badge-anim');
+        setTimeout(() => placedCountBadge.classList.remove('complete-badge-anim'), 650);
+      } else if (step.transfer) {
+        decisionIcon.className = "fa-solid fa-arrow-up-right-from-square text-emerald-400 text-base";
+        decisionBanner.className = "p-3.5 rounded-xl bg-emerald-500/12 border border-emerald-400/30 text-xs flex flex-col sm:flex-row items-center justify-between gap-3 backdrop-blur-md";
+      } else {
+        decisionIcon.className = "fa-solid fa-circle-info text-cyan-400 text-base";
+        decisionBanner.className = "p-3.5 rounded-xl bg-white/[0.04] border border-white/10 text-xs flex flex-col sm:flex-row items-center justify-between gap-3 backdrop-blur-md";
+      }
+      decisionText.innerHTML = step.desc;
+
+      // 5. Highlight Active Java Line & Play Audio Tone
+      highlightCodeLine(step.line);
+      if (step.soundFreq) {
+        playTone(step.soundFreq, 'sine', 0.08, 0.035);
+      }
+    }
+
+    // PLAYBACK CONTROLLER
+    function setPlaying(playing) {
+      isPlaying = playing;
+      if (isPlaying) {
+        playIcon.className = "fa-solid fa-pause";
+        playText.textContent = "Stop";
+        btnPlay.classList.add('bg-rose-500/25', 'text-rose-200', 'border-rose-400/50');
+        btnPlay.classList.remove('bg-cyan-500/25', 'text-cyan-200', 'border-cyan-400/50');
+
+        playInterval = setInterval(() => {
+          if (currentStepIdx < steps.length - 1) {
+            currentStepIdx++;
+            renderStep(currentStepIdx, true);
+          } else {
+            setPlaying(false);
+          }
+        }, playSpeed);
+      } else {
+        playIcon.className = "fa-solid fa-play";
+        playText.textContent = "Start";
+        btnPlay.classList.remove('bg-rose-500/25', 'text-rose-200', 'border-rose-400/50');
+        btnPlay.classList.add('bg-cyan-500/25', 'text-cyan-200', 'border-cyan-400/50');
+        if (playInterval) {
+          clearInterval(playInterval);
+          playInterval = null;
+        }
+      }
+    }
+
+    function initSimulation(nums1ActiveArr, nums2Arr) {
+      setPlaying(false);
+      currentNums1Active = [...nums1ActiveArr];
+      currentNums2 = [...nums2Arr];
+      steps = generateSteps(currentNums1Active, currentNums2);
+      currentStepIdx = 0;
+      stepScrubber.max = steps.length - 1;
+      stepScrubber.value = 0;
+      renderStep(0, false);
+    }
+
+    // EVENT LISTENERS
+    btnPlay.addEventListener('click', () => {
+      if (currentStepIdx >= steps.length - 1) {
+        currentStepIdx = 0;
+        renderStep(0, false);
+      }
+      setPlaying(!isPlaying);
+    });
+
+    btnNext.addEventListener('click', () => {
+      setPlaying(false);
+      if (currentStepIdx < steps.length - 1) {
+        currentStepIdx++;
+        renderStep(currentStepIdx, true);
+      }
+    });
+
+    btnPrev.addEventListener('click', () => {
+      setPlaying(false);
+      if (currentStepIdx > 0) {
+        currentStepIdx--;
+        renderStep(currentStepIdx, true);
+      }
+    });
+
+    btnReset.addEventListener('click', () => {
+      setPlaying(false);
+      currentStepIdx = 0;
+      renderStep(0, false);
+    });
+
+    stepScrubber.addEventListener('input', (e) => {
+      setPlaying(false);
+      currentStepIdx = parseInt(e.target.value, 10);
+      renderStep(currentStepIdx, false);
+    });
+
+    document.querySelectorAll('.speed-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.speed-btn').forEach(b => {
+          b.classList.remove('bg-cyan-500/30', 'text-cyan-200', 'font-semibold');
+        });
+        btn.classList.add('bg-cyan-500/30', 'text-cyan-200', 'font-semibold');
+        playSpeed = parseInt(btn.dataset.speed, 10);
+        if (isPlaying) {
+          setPlaying(false);
+          setPlaying(true);
+        }
+      });
+    });
+
+    document.querySelectorAll('.view-mode-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.view-mode-btn').forEach(b => {
+          b.classList.remove('bg-cyan-500/30', 'text-cyan-200', 'font-semibold');
+          b.classList.add('text-slate-300');
+        });
+        btn.classList.add('bg-cyan-500/30', 'text-cyan-200', 'font-semibold');
+        btn.classList.remove('text-slate-300');
+        viewMode = btn.dataset.mode;
+        renderStep(currentStepIdx, false);
+      });
+    });
+
+    btnAudio.addEventListener('click', () => {
+      audioEnabled = !audioEnabled;
+      if (audioEnabled) {
+        audioIcon.className = "fa-solid fa-volume-high";
+        btnAudio.classList.remove('text-slate-600');
+        btnAudio.classList.add('text-slate-300');
+      } else {
+        audioIcon.className = "fa-solid fa-volume-xmark";
+        btnAudio.classList.add('text-slate-600');
+        btnAudio.classList.remove('text-slate-300');
+      }
+    });
+
+    presetSelect.addEventListener('change', (e) => {
+      const idx = parseInt(e.target.value, 10);
+      customNums1Input.value = PRESETS[idx].nums1Active.join(', ');
+      customNums2Input.value = PRESETS[idx].nums2.join(', ');
+      initSimulation(PRESETS[idx].nums1Active, PRESETS[idx].nums2);
+    });
+
+    btnApplyCustom.addEventListener('click', () => {
+      const raw1 = customNums1Input.value.trim();
+      const raw2 = customNums2Input.value.trim();
+
+      const parsed1 = raw1 === ''
+        ? []
+        : raw1.split(',').map(s => parseInt(s.trim(), 10)).filter(n => !isNaN(n)).sort((a, b) => a - b);
+      const parsed2 = raw2 === ''
+        ? []
+        : raw2.split(',').map(s => parseInt(s.trim(), 10)).filter(n => !isNaN(n)).sort((a, b) => a - b);
+
+      if (parsed1.length + parsed2.length >= 1) {
+        customNums1Input.value = parsed1.join(', ');
+        customNums2Input.value = parsed2.join(', ');
+        initSimulation(parsed1, parsed2);
+      }
+    });
+
+    window.addEventListener('resize', () => {
+      const step = steps[currentStepIdx];
+      if (step && step.transfer) {
+        const allVals = [...step.arr1.map(c => Math.abs(c.val)), ...step.arr2.map(c => Math.abs(c.val))];
+        animateElementTransfer(step.transfer, Math.max(1, ...allVals), false);
+      }
+    });
+
+    window.addEventListener('keydown', (e) => {
+      if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT') return;
+      if (e.code === 'Space') {
+        e.preventDefault();
+        btnPlay.click();
+      } else if (e.code === 'ArrowRight') {
+        e.preventDefault();
+        btnNext.click();
+      } else if (e.code === 'ArrowLeft') {
+        e.preventDefault();
+        btnPrev.click();
+      }
+    });
+
+    window.onload = function() {
+      customNums1Input.value = PRESETS[0].nums1Active.join(', ');
+      customNums2Input.value = PRESETS[0].nums2.join(', ');
+      initSimulation(PRESETS[0].nums1Active, PRESETS[0].nums2);
+    };
+  </script>
+</body>
+</html>

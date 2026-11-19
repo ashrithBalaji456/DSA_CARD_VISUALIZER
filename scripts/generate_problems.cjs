@@ -3206,6 +3206,11 @@ const problems = [
         "number": 167,
         "title": "Two Sum II - Input Array Is Sorted",
         "difficulty": "Medium"
+      },
+      {
+        "number": 88,
+        "title": "Merge Sorted Array",
+        "difficulty": "Easy"
       }
     ],
     "leetcodeUrl": "https://leetcode.com/problems/sort-colors/"
@@ -3416,6 +3421,11 @@ const problems = [
       {
         "number": 125,
         "title": "Valid Palindrome",
+        "difficulty": "Easy"
+      },
+      {
+        "number": 88,
+        "title": "Merge Sorted Array",
         "difficulty": "Easy"
       }
     ],
@@ -3715,6 +3725,115 @@ const problems = [
       }
     ],
     "leetcodeUrl": "https://leetcode.com/problems/container-with-most-water/"
+  },
+  {
+    "id": "merge-sorted-array",
+    "number": 88,
+    "title": "Merge Sorted Array",
+    "slug": "merge-sorted-array",
+    "difficulty": "Easy",
+    "categories": [
+      "Arrays",
+      "Two Pointers",
+      "Sorting"
+    ],
+    "description": "You are given two integer arrays nums1 and nums2, sorted in non-decreasing order, and two integers m and n, representing the number of elements in nums1 and nums2 respectively.\n\nMerge nums1 and nums2 into a single array sorted in non-decreasing order.\n\nThe final sorted array should not be returned by the function, but instead be stored inside the array nums1. To accommodate this, nums1 has a length of m + n, where the first m elements denote the elements that should be merged, and the last n elements are set to 0 and should be ignored. nums2 has a length of n.",
+    "inputFormat": "nums1 = [int], m = int, nums2 = [int], n = int",
+    "outputFormat": "void (rearrange nums1 in place)",
+    "constraints": [
+      "nums1.length == m + n",
+      "nums2.length == n",
+      "0 <= m, n <= 200",
+      "1 <= m + n <= 200",
+      "-10^9 <= nums1[i], nums2[j] <= 10^9"
+    ],
+    "examples": [
+      {
+        "exampleNumber": 1,
+        "input": "nums1 = [1, 2, 3, 0, 0, 0], m = 3, nums2 = [2, 5, 6], n = 3",
+        "output": "[1, 2, 2, 3, 5, 6]",
+        "explanation": "The arrays we are merging are [1, 2, 3] and [2, 5, 6]. The result of the merge is [1, 2, 2, 3, 5, 6].",
+        "type": "official"
+      },
+      {
+        "exampleNumber": 2,
+        "input": "nums1 = [1], m = 1, nums2 = [], n = 0",
+        "output": "[1]",
+        "explanation": "The arrays we are merging are [1] and []. The result of the merge is [1].",
+        "type": "official"
+      },
+      {
+        "exampleNumber": 3,
+        "input": "nums1 = [0], m = 0, nums2 = [1], n = 1",
+        "output": "[1]",
+        "explanation": "The arrays we are merging are [] and [1]. The result of the merge is [1]. Note that because m = 0, there are no active elements in nums1.",
+        "type": "official"
+      }
+    ],
+    "approach": "Reverse Three-Pointer In-Place Merge: Initialize i = m - 1 (reading active elements of nums1), j = n - 1 (reading nums2), and write pointer k = m + n - 1 (back of nums1). Compare nums1[i] and nums2[j] and write the larger element into nums1[k], decrementing k and whichever pointer was chosen. Continue until one array is exhausted. If nums2 still has leftover elements (j >= 0), copy them into nums1[0..k]. Any remaining elements of nums1 are already in their correct sorted positions.",
+    "flowSteps": [
+      {
+        "step": 1,
+        "title": "Initialize Dual Readers & Tail Writer",
+        "description": "Set i = m - 1 (end of active nums1), j = n - 1 (end of nums2), and k = m + n - 1 (write boundary).",
+        "stateSnapshot": "i = m - 1, j = n - 1, k = m + n - 1",
+        "highlight": "Init"
+      },
+      {
+        "step": 2,
+        "title": "Reverse Convergence Comparison",
+        "description": "While i >= 0 && j >= 0: if nums1[i] > nums2[j], nums1[k--] = nums1[i--]; else nums1[k--] = nums2[j--].",
+        "stateSnapshot": "nums1[k] = max(nums1[i], nums2[j])",
+        "highlight": "Compare"
+      },
+      {
+        "step": 3,
+        "title": "Copy Remaining nums2 Elements",
+        "description": "While j >= 0: nums1[k--] = nums2[j--]. Leftover nums1 elements are already in their sorted final positions.",
+        "stateSnapshot": "while (j >= 0) nums1[k--] = nums2[j--]",
+        "highlight": "Cleanup"
+      }
+    ],
+    "timeComplexity": "O(m + n)",
+    "timeComplexityExplanation": "Each element from both arrays is inspected and placed into nums1 exactly once.",
+    "spaceComplexity": "O(1)",
+    "spaceComplexityExplanation": "Operates strictly in-place inside the trailing buffer zeros of nums1 using three pointer variables.",
+    "visualizerUrl": "/visualizers/merge_two_sorted_arrays_without_extra_space_visualizer.html",
+    "keyObservations": [
+      "Merging forwards from index 0 would overwrite unread nums1 elements, requiring an O(m) auxiliary array.",
+      "Merging backwards from index m + n - 1 guarantees k >= i at all times, making overwriting unread elements physically impossible.",
+      "When j < 0, nums1[0..i] is already sorted and correctly placed, so no additional copy loop is needed for nums1."
+    ],
+    "importantPattern": "Reverse Three-Pointer In-Place Traversal",
+    "commonMistakes": [
+      "Merging from the front and clobbering unread values of nums1.",
+      "Adding an unnecessary cleanup loop for nums1 when j < 0.",
+      "Forgetting to handle m = 0 or n = 0 edge cases."
+    ],
+    "optimalApproach": "Reverse Three-Pointer In-Place Merge",
+    "relatedProblems": [
+      {
+        "number": 167,
+        "title": "Two Sum II - Input Array Is Sorted",
+        "difficulty": "Medium"
+      },
+      {
+        "number": 75,
+        "title": "Sort Colors",
+        "difficulty": "Medium"
+      },
+      {
+        "number": 15,
+        "title": "3Sum",
+        "difficulty": "Medium"
+      },
+      {
+        "number": 31,
+        "title": "Next Permutation",
+        "difficulty": "Medium"
+      }
+    ],
+    "leetcodeUrl": "https://leetcode.com/problems/merge-sorted-array/"
   }
 ];
 
