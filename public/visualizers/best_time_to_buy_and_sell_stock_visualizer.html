@@ -1,0 +1,1302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Best Time to Buy and Sell Stock (LeetCode 121) - Glassmorphic Visualizer</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: radial-gradient(circle at 14% 16%, #0c192c 0%, #030712 100%);
+      color: #e2e8f0;
+      min-height: 100vh;
+    }
+
+    .code-font {
+      font-family: 'Fira Code', monospace;
+    }
+
+    /* Glassmorphic Surface & Controls */
+    .glass-panel {
+      background: rgba(15, 23, 42, 0.56);
+      backdrop-filter: blur(22px);
+      -webkit-backdrop-filter: blur(22px);
+      border: 1px solid rgba(255, 255, 255, 0.11);
+      box-shadow: 0 20px 45px -15px rgba(0, 0, 0, 0.68), inset 0 1px 0 0 rgba(255, 255, 255, 0.09);
+    }
+
+    .glass-button {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .glass-button:hover:not(:disabled) {
+      background: rgba(255, 255, 255, 0.15);
+      border-color: rgba(255, 255, 255, 0.28);
+      transform: translateY(-1px);
+    }
+    .glass-button:active:not(:disabled) {
+      transform: translateY(1px);
+    }
+    .glass-button:disabled {
+      opacity: 0.35;
+      cursor: not-allowed;
+    }
+
+    /* Code Execution Line Highlight */
+    .code-line {
+      transition: all 0.2s ease;
+      border-left: 3px solid transparent;
+      padding: 2px 10px;
+    }
+    .code-line.active-line {
+      background: rgba(56, 189, 248, 0.18);
+      border-left: 3px solid #38bdf8;
+      color: #ffffff;
+      box-shadow: inset 0 0 16px rgba(56, 189, 248, 0.15);
+    }
+
+    /* Profit Spread Margin Bar (from minPrice floor up to prices[i]) */
+    .profit-spread-bar {
+      background: linear-gradient(
+        180deg,
+        rgba(52, 211, 153, 0.65) 0%,
+        rgba(16, 185, 129, 0.38) 60%,
+        rgba(5, 150, 105, 0.22) 100%
+      );
+      backdrop-filter: blur(3px);
+      -webkit-backdrop-filter: blur(3px);
+      border-top: 2px solid #6ee7b7;
+      border-bottom: 2px dashed #38bdf8;
+      border-left: 1px solid rgba(110, 231, 183, 0.45);
+      border-right: 1px solid rgba(110, 231, 183, 0.45);
+      box-shadow: 0 0 22px rgba(16, 185, 129, 0.35), inset 0 6px 14px rgba(167, 243, 208, 0.25);
+      transition: all 0.32s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    @keyframes arcDash {
+      to {
+        stroke-dashoffset: -24;
+      }
+    }
+    .trade-arc-path {
+      stroke-dasharray: 6 6;
+      animation: arcDash 0.85s linear infinite;
+    }
+
+    @keyframes recordPulse {
+      0%, 100% { transform: scale(1); filter: drop-shadow(0 0 8px rgba(16, 185, 129, 0.45)); }
+      50% { transform: scale(1.05); filter: drop-shadow(0 0 20px rgba(16, 185, 129, 0.95)); }
+    }
+    .record-badge-anim {
+      animation: recordPulse 0.6s ease-in-out;
+    }
+
+    /* Custom Scrollbars */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: rgba(15, 23, 42, 0.4);
+    }
+    ::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.18);
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(255, 255, 255, 0.3);
+    }
+  </style>
+</head>
+<body class="p-4 sm:p-6 lg:p-8 flex flex-col items-center justify-start min-h-screen">
+
+  <!-- Ambient Glass Glow Orbs -->
+  <div class="fixed top-6 left-1/6 w-96 h-96 bg-emerald-500/14 rounded-full blur-3xl pointer-events-none -z-10"></div>
+  <div class="fixed top-1/3 right-1/6 w-96 h-96 bg-cyan-500/14 rounded-full blur-3xl pointer-events-none -z-10"></div>
+  <div class="fixed bottom-12 left-1/2 w-80 h-80 bg-amber-500/10 rounded-full blur-3xl pointer-events-none -z-10"></div>
+
+  <!-- MAIN WRAPPER -->
+  <div class="w-full max-w-7xl flex flex-col gap-6">
+
+    <!-- TOP FROSTED-GLASS CONTROLS DECK -->
+    <header class="glass-panel rounded-2xl p-4 sm:p-5 flex flex-col gap-4 sticky top-4 z-50">
+      <div class="flex flex-wrap items-center justify-between gap-4">
+
+        <!-- Title & Algorithm Metadata -->
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-emerald-500 via-cyan-400 to-sky-400 flex items-center justify-center shadow-lg shadow-emerald-500/25 text-slate-950 font-bold text-lg">
+            <i class="fa-solid fa-chart-line"></i>
+          </div>
+          <div>
+            <h1 class="text-lg sm:text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white via-emerald-100 to-cyan-300">
+              Best Time to Buy and Sell Stock
+            </h1>
+            <p class="text-xs text-slate-400 flex items-center gap-2">
+              <span class="inline-block w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+              LeetCode 121 • One-Pass Valley Buy &amp; Peak Sell • &Omicron;(n) Time • &Omicron;(1) Space
+            </p>
+          </div>
+        </div>
+
+        <!-- Center Playback Controls: Reset, Previous, Start/Stop, Next -->
+        <div class="flex items-center gap-2 sm:gap-3 bg-white/5 p-1.5 rounded-xl border border-white/10 backdrop-blur-md">
+          <button id="btnReset" class="glass-button text-slate-200 hover:text-white px-3 py-2 rounded-lg text-sm flex items-center gap-1.5" title="Reset to Initial State">
+            <i class="fa-solid fa-rotate-left"></i>
+            <span class="hidden sm:inline">Reset</span>
+          </button>
+          <button id="btnPrev" class="glass-button text-slate-200 hover:text-white px-3 py-2 rounded-lg text-sm flex items-center gap-1.5" title="Previous Step (Left Arrow)">
+            <i class="fa-solid fa-backward-step"></i>
+            <span class="hidden sm:inline">Previous</span>
+          </button>
+          <button id="btnPlay" class="glass-button bg-cyan-500/25 text-cyan-200 hover:bg-cyan-500/35 border-cyan-400/50 px-4 py-2 rounded-lg text-sm font-semibold flex items-center gap-2 shadow-lg shadow-cyan-500/15" title="Start / Stop (Spacebar)">
+            <i class="fa-solid fa-play" id="playIcon"></i>
+            <span id="playText">Start</span>
+          </button>
+          <button id="btnNext" class="glass-button text-slate-200 hover:text-white px-3 py-2 rounded-lg text-sm flex items-center gap-1.5" title="Next Step (Right Arrow)">
+            <span class="hidden sm:inline">Next</span>
+            <i class="fa-solid fa-forward-step"></i>
+          </button>
+        </div>
+
+        <!-- Speed & Audio Controls -->
+        <div class="flex items-center gap-2">
+          <a href="/" class="glass-button px-3 py-2 rounded-xl text-xs font-semibold text-slate-300 hover:text-white flex items-center gap-1.5 border border-white/10 hover:border-indigo-500/40 bg-white/5 shrink-0 transition-all active:scale-95 cursor-pointer" title="Return to DSA Atlas Library">
+            <i class="fa-solid fa-arrow-left text-indigo-400"></i>
+            <span>DSA Atlas</span>
+          </a>
+          <div class="flex items-center bg-white/5 rounded-xl p-1 border border-white/10 text-xs text-slate-300 backdrop-blur-md">
+            <span class="px-2 py-1 text-slate-400"><i class="fa-solid fa-gauge-high mr-1"></i>Speed</span>
+            <button class="speed-btn px-2 py-1 rounded-lg hover:text-white transition" data-speed="1300">0.5x</button>
+            <button class="speed-btn px-2 py-1 rounded-lg bg-cyan-500/30 text-cyan-200 font-semibold transition" data-speed="650">1x</button>
+            <button class="speed-btn px-2 py-1 rounded-lg hover:text-white transition" data-speed="300">2x</button>
+            <button class="speed-btn px-2 py-1 rounded-lg hover:text-white transition" data-speed="120">4x</button>
+          </div>
+          <button id="btnAudio" class="glass-button p-2.5 rounded-xl text-slate-300 hover:text-cyan-300" title="Toggle Sound Effects">
+            <i class="fa-solid fa-volume-high" id="audioIcon"></i>
+          </button>
+        </div>
+
+      </div>
+
+      <!-- Scrubber Slider & Status Badges -->
+      <div class="flex flex-col sm:flex-row items-center gap-3 pt-2 border-t border-white/10">
+        <div class="flex flex-wrap items-center gap-2 text-xs text-slate-300 w-full sm:w-auto shrink-0">
+          <span id="stepCounterBadge" class="code-font px-2.5 py-1 rounded-md bg-white/5 border border-white/10 text-cyan-300">
+            Step: 0 / 0
+          </span>
+          <span id="phaseBadge" class="px-2.5 py-1 rounded-md bg-sky-500/20 border border-sky-400/30 text-sky-200 font-semibold">
+            Ready
+          </span>
+          <span id="maxProfitBadge" class="px-2.5 py-1 rounded-md bg-emerald-500/20 border border-emerald-400/30 text-emerald-200 font-bold">
+            Max Profit: 0
+          </span>
+        </div>
+        <div class="w-full flex items-center gap-3">
+          <input type="range" id="stepScrubber" min="0" max="0" value="0" class="w-full h-1.5 bg-slate-800/80 rounded-lg appearance-none cursor-pointer accent-cyan-400">
+        </div>
+      </div>
+    </header>
+
+    <!-- TEST CASES & CUSTOM PRICES BAR -->
+    <section class="glass-panel rounded-2xl p-4 flex flex-wrap items-center justify-between gap-4">
+      <div class="flex flex-wrap items-center gap-3">
+        <label for="presetSelect" class="text-xs uppercase font-semibold text-slate-300 tracking-wider flex items-center gap-1.5">
+          <i class="fa-solid fa-flask text-cyan-400"></i> Market Scenarios:
+        </label>
+        <select id="presetSelect" class="bg-slate-900/75 border border-white/15 text-xs sm:text-sm text-slate-200 rounded-xl px-3 py-2 outline-none focus:border-cyan-400 backdrop-blur-md">
+          <option value="0">1: LeetCode Ex 1 ([7, 1, 5, 3, 6, 4] &rarr; Profit: 5)</option>
+          <option value="1">2: LeetCode Ex 2 Bear Market ([7, 6, 4, 3, 1] &rarr; Profit: 0)</option>
+          <option value="2">3: Late Dip, Higher Rally ([3, 8, 2, 1, 9, 4] &rarr; Profit: 8)</option>
+          <option value="3">4: New Low Without Better Peak ([4, 11, 2, 7, 1, 5] &rarr; Profit: 7)</option>
+          <option value="4">5: Steady Bull Run ([1, 2, 4, 7, 10, 14] &rarr; Profit: 13)</option>
+          <option value="5">6: Double Bottom Recovery ([6, 2, 5, 2, 8, 3] &rarr; Profit: 6)</option>
+          <option value="6">7: Flat Sideways Market ([5, 5, 5, 5, 5] &rarr; Profit: 0)</option>
+          <option value="7">8: Zero-Dollar Dip ([4, 0, 6, 2, 9] &rarr; Profit: 9)</option>
+          <option value="8">9: Single Trading Day ([8] &rarr; Profit: 0)</option>
+          <option value="9">10: Peak First, Valley Last ([10, 8, 6, 4, 2] &rarr; Profit: 0)</option>
+        </select>
+      </div>
+
+      <div class="flex items-center gap-2 flex-grow max-w-md">
+        <input type="text" id="customPricesInput" placeholder="Custom prices: 7, 1, 5, 3, 6, 4" class="w-full bg-white/5 border border-white/15 rounded-xl px-3 py-2 text-xs text-slate-200 code-font outline-none focus:border-cyan-400 backdrop-blur-md">
+        <button id="btnApplyCustom" class="glass-button text-xs px-4 py-2 rounded-xl text-cyan-300 font-semibold shrink-0">
+          Load Prices
+        </button>
+      </div>
+    </section>
+
+    <!-- MAIN VISUALIZATION & CODE SECTION -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+      <!-- LEFT: STOCK MARKET CHART, BUY FLOOR & PROFIT MARGIN ARENA (7 Cols) -->
+      <section class="lg:col-span-7 flex flex-col gap-6">
+
+        <!-- Live Trading Telemetry Cards -->
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+
+          <!-- minPrice (Lowest Buy Floor) -->
+          <div id="minPriceCard" class="glass-panel rounded-xl p-3.5 flex flex-col justify-between border-cyan-400/35">
+            <span class="text-[11px] text-slate-400 uppercase font-semibold flex items-center justify-between">
+              minPrice (Buy)
+              <span class="w-2 h-2 rounded-full bg-cyan-400"></span>
+            </span>
+            <div class="flex items-baseline gap-1.5 mt-1.5">
+              <span id="varMinPrice" class="code-font text-xl font-bold text-cyan-300">&infin;</span>
+              <span id="varMinBuyDay" class="text-[10px] text-slate-400 code-font"></span>
+            </div>
+            <span class="text-[10px] text-cyan-200/75 mt-1 code-font">Lowest buy floor</span>
+          </div>
+
+          <!-- Current Day i Price -->
+          <div class="glass-panel rounded-xl p-3.5 flex flex-col justify-between border-amber-400/35">
+            <span class="text-[11px] text-slate-400 uppercase font-semibold flex items-center justify-between">
+              prices[i] (Today)
+              <span class="w-2 h-2 rounded-full bg-amber-400"></span>
+            </span>
+            <div class="flex items-baseline gap-1.5 mt-1.5">
+              <span id="varCurPrice" class="code-font text-xl font-bold text-amber-300">-</span>
+              <span id="varCurDayIdx" class="text-[10px] text-slate-400 code-font">i: -</span>
+            </div>
+            <span class="text-[10px] text-amber-200/75 mt-1 code-font">Current quote</span>
+          </div>
+
+          <!-- Today's Potential Profit -->
+          <div class="glass-panel rounded-xl p-3.5 flex flex-col justify-between border-sky-400/35">
+            <span class="text-[11px] text-slate-400 uppercase font-semibold flex items-center justify-between">
+              Today's Profit
+              <i class="fa-solid fa-coins text-sky-400 text-[10px]"></i>
+            </span>
+            <div class="flex items-baseline gap-1.5 mt-1.5">
+              <span id="varTodayProfit" class="code-font text-xl font-bold text-sky-300">-</span>
+            </div>
+            <span class="text-[10px] text-slate-400 mt-1 code-font">prices[i] - minPrice</span>
+          </div>
+
+          <!-- maxProfit Record -->
+          <div id="maxProfitCard" class="glass-panel rounded-xl p-3.5 flex flex-col justify-between border-emerald-400/35">
+            <span class="text-[11px] text-slate-400 uppercase font-semibold flex items-center justify-between">
+              maxProfit
+              <i class="fa-solid fa-trophy text-emerald-400 text-[10px]"></i>
+            </span>
+            <div class="flex items-baseline gap-1.5 mt-1.5">
+              <span id="varMaxProfit" class="code-font text-2xl font-black text-emerald-400">0</span>
+            </div>
+            <span id="varBestTradeSpan" class="text-[10px] text-emerald-300/80 mt-1 code-font">Best: none</span>
+          </div>
+
+        </div>
+
+        <!-- STOCK PRICE CHART, BUY FLOOR & PROFIT MARGIN SIMULATION -->
+        <div class="glass-panel rounded-2xl p-5 flex flex-col gap-4">
+          <div class="flex flex-wrap items-center justify-between text-xs pb-2 border-b border-white/10 gap-2">
+            <span class="font-semibold text-slate-200 uppercase tracking-wider flex items-center gap-1.5">
+              <i class="fa-solid fa-chart-area text-emerald-400"></i>
+              Stock Price Timeline &amp; Profit Margin: <span class="code-font text-slate-300">prices[]</span>
+            </span>
+
+            <div class="flex flex-wrap items-center gap-3 text-[11px]">
+              <span class="flex items-center gap-1.5">
+                <span class="w-2.5 h-2.5 rounded-sm bg-cyan-400 inline-block"></span> minPrice (Buy)
+              </span>
+              <span class="flex items-center gap-1.5">
+                <span class="w-2.5 h-2.5 rounded-sm bg-amber-400 inline-block"></span> Today (i)
+              </span>
+              <span class="flex items-center gap-1.5">
+                <span class="w-2.5 h-2.5 rounded-sm bg-emerald-400/70 border border-emerald-200 inline-block"></span> Profit Spread
+              </span>
+            </div>
+          </div>
+
+          <!-- 2D Stock Market Coordinate Chart + Trend Line + Buy Floor + Vertical Profit Spread -->
+          <div id="chartWrapper" class="relative w-full pt-12 pb-8 px-2 bg-slate-950/60 rounded-xl border border-white/15 select-none overflow-x-auto">
+            <div class="min-w-[460px] flex items-stretch h-[290px]">
+
+              <!-- Y-Axis Price Scale ($0 .. maxPrice) -->
+              <div id="yAxisContainer" class="w-10 shrink-0 relative border-r-2 border-b-2 border-r-slate-400/50 border-b-transparent text-[11px] code-font text-slate-300 pr-2 text-right">
+                <!-- Populated dynamically -->
+              </div>
+
+              <!-- Chart Plotting Area -->
+              <div id="chartPlotArea" class="relative flex-1 h-full border-b-2 border-slate-400/50">
+                <!-- Horizontal Gridlines Layer -->
+                <div id="gridLinesLayer" class="absolute inset-0 pointer-events-none z-10"></div>
+
+                <!-- SVG Stock Price Trend Line & Best Trade Arc Layer -->
+                <svg id="trendSvgLayer" class="absolute inset-0 w-full h-full pointer-events-none z-25 overflow-visible"></svg>
+
+                <!-- Floating Lift-to-Buy-Floor Clone Layer -->
+                <div id="flyingCloneLayer" class="absolute inset-0 pointer-events-none z-40"></div>
+
+                <!-- Horizontal minPrice Buy Floor Threshold Line -->
+                <div id="minPriceFloorLine" class="hidden absolute left-0 right-0 border-t-2 border-dashed border-cyan-400/90 pointer-events-none z-30 transition-all duration-300">
+                  <span id="minPriceFloorTag" class="absolute left-1.5 -top-5 text-[10px] code-font font-bold text-cyan-200 bg-slate-950/95 px-2 py-0.5 rounded border border-cyan-400/60 shadow whitespace-nowrap">
+                    minPrice = $0
+                  </span>
+                </div>
+
+                <!-- Daily Price Columns, Profit Spread Overlay & Day Badges -->
+                <div id="daysColumnsLayer" class="absolute inset-0 z-20">
+                  <!-- Populated dynamically -->
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+          <!-- Live Profit Formula & Decision Banner -->
+          <div id="decisionBanner" class="p-3.5 rounded-xl bg-white/[0.04] border border-white/10 text-xs flex flex-col sm:flex-row items-center justify-between gap-3 backdrop-blur-md">
+            <div class="flex items-center gap-2.5">
+              <i id="decisionIcon" class="fa-solid fa-circle-info text-cyan-400 text-base"></i>
+              <span id="decisionText" class="text-slate-200">Ready to scan stock prices day-by-day to find the lowest buy valley and highest sell profit.</span>
+            </div>
+            <div id="formulaPill" class="hidden text-xs code-font px-3 py-1.5 rounded-lg bg-slate-950/70 border border-emerald-400/35 text-emerald-200 font-semibold shrink-0">
+              <!-- e.g. profit = 6 - 1 = 5 -->
+            </div>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- RIGHT: SYNCHRONIZED JAVA CODE CONTAINER (5 Cols) -->
+      <section class="lg:col-span-5 flex flex-col gap-4">
+
+        <div class="glass-panel rounded-2xl p-4 flex flex-col h-full">
+          <div class="flex items-center justify-between pb-3 border-b border-white/10 text-xs">
+            <div class="flex items-center gap-2">
+              <div class="flex gap-1.5">
+                <span class="w-3 h-3 rounded-full bg-rose-500/80 inline-block"></span>
+                <span class="w-3 h-3 rounded-full bg-amber-500/80 inline-block"></span>
+                <span class="w-3 h-3 rounded-full bg-emerald-500/80 inline-block"></span>
+              </div>
+              <span class="code-font text-slate-200 font-semibold ml-2">Solution.java</span>
+            </div>
+            <span class="text-[11px] text-emerald-300 bg-emerald-500/15 px-2.5 py-0.5 rounded border border-emerald-400/25 code-font">
+              One-Pass Greedy
+            </span>
+          </div>
+
+          <!-- Code Lines with Zero-Jump Localized Scroll -->
+          <div id="codeContainer" class="code-font text-xs sm:text-[13px] leading-relaxed text-slate-300 py-3 overflow-y-auto max-h-[520px] flex-grow select-none">
+            <div class="code-line" id="line1"><span class="text-slate-500 mr-2"> 1</span><span class="text-indigo-400 font-semibold">class</span> <span class="text-amber-300">Solution</span> {</div>
+            <div class="code-line" id="line2"><span class="text-slate-500 mr-2"> 2</span>    <span class="text-indigo-400 font-semibold">public int</span> <span class="text-cyan-300">maxProfit</span>(<span class="text-indigo-400">int</span>[] prices) {</div>
+            <div class="code-line" id="line3"><span class="text-slate-500 mr-2"> 3</span></div>
+            <div class="code-line" id="line4"><span class="text-slate-500 mr-2"> 4</span>        <span class="text-indigo-400 font-semibold">int</span> minPrice = Integer.MAX_VALUE;</div>
+            <div class="code-line" id="line5"><span class="text-slate-500 mr-2"> 5</span>        <span class="text-indigo-400 font-semibold">int</span> maxProfit = <span class="text-rose-400">0</span>;</div>
+            <div class="code-line" id="line6"><span class="text-slate-500 mr-2"> 6</span></div>
+            <div class="code-line" id="line7"><span class="text-slate-500 mr-2"> 7</span>        <span class="text-indigo-400 font-semibold">for</span> (<span class="text-indigo-400">int</span> i = <span class="text-rose-400">0</span>; i &lt; prices.length; i++) {</div>
+            <div class="code-line" id="line8"><span class="text-slate-500 mr-2"> 8</span></div>
+            <div class="code-line" id="line9"><span class="text-slate-500 mr-2"> 9</span>            <span class="text-slate-500 italic">// Find the minimum buying price</span></div>
+            <div class="code-line" id="line10"><span class="text-slate-500 mr-2">10</span>            <span class="text-indigo-400 font-semibold">if</span> (prices[i] &lt; minPrice) {</div>
+            <div class="code-line" id="line11"><span class="text-slate-500 mr-2">11</span>                minPrice = prices[i];</div>
+            <div class="code-line" id="line12"><span class="text-slate-500 mr-2">12</span>            }</div>
+            <div class="code-line" id="line13"><span class="text-slate-500 mr-2">13</span></div>
+            <div class="code-line" id="line14"><span class="text-slate-500 mr-2">14</span>            <span class="text-slate-500 italic">// Calculate profit if we sell today</span></div>
+            <div class="code-line" id="line15"><span class="text-slate-500 mr-2">15</span>            <span class="text-indigo-400 font-semibold">else</span> {</div>
+            <div class="code-line" id="line16"><span class="text-slate-500 mr-2">16</span>                <span class="text-indigo-400 font-semibold">int</span> profit = prices[i] - minPrice;</div>
+            <div class="code-line" id="line17"><span class="text-slate-500 mr-2">17</span></div>
+            <div class="code-line" id="line18"><span class="text-slate-500 mr-2">18</span>                maxProfit = Math.max(maxProfit, profit);</div>
+            <div class="code-line" id="line19"><span class="text-slate-500 mr-2">19</span>            }</div>
+            <div class="code-line" id="line20"><span class="text-slate-500 mr-2">20</span>        }</div>
+            <div class="code-line" id="line21"><span class="text-slate-500 mr-2">21</span></div>
+            <div class="code-line" id="line22"><span class="text-slate-500 mr-2">22</span>        <span class="text-indigo-400 font-semibold">return</span> maxProfit;</div>
+            <div class="code-line" id="line23"><span class="text-slate-500 mr-2">23</span>    }</div>
+            <div class="code-line" id="line24"><span class="text-slate-500 mr-2">24</span>}</div>
+          </div>
+
+          <!-- Live Step Narrative Box -->
+          <div class="mt-3 p-3 bg-white/[0.04] border border-white/10 rounded-xl flex items-start gap-2.5 backdrop-blur-md">
+            <i class="fa-solid fa-circle-info text-cyan-400 mt-0.5 text-xs"></i>
+            <div class="text-xs text-slate-200 leading-relaxed" id="stepDescription">
+              Ready to run Best Time to Buy and Sell Stock. Click <b>Start</b> or <b>Next</b> to step through.
+            </div>
+          </div>
+
+        </div>
+
+      </section>
+
+    </div>
+
+    <!-- BOTTOM SECTION: PROBLEM STATEMENT & ARCHITECTURAL SUMMARY -->
+    <footer class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-2">
+
+      <!-- Problem Statement Card -->
+      <div class="glass-panel rounded-2xl p-5 flex flex-col gap-3">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <span class="text-emerald-400 font-bold"><i class="fa-solid fa-file-lines mr-1.5"></i>Problem Statement</span>
+            <span class="px-2 py-0.5 rounded text-[11px] font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-400/30">Easy</span>
+          </div>
+          <span class="text-xs text-slate-400 font-mono">LeetCode 121</span>
+        </div>
+
+        <p class="text-xs text-slate-300 leading-relaxed">
+          You are given an array <code class="font-mono text-cyan-300">prices</code> where <code class="font-mono">prices[i]</code> is the price of a given stock on the <code class="font-mono">i<sup>th</sup></code> day.
+          <br><br>
+          You want to maximize your profit by choosing a <b>single day</b> to buy one stock and choosing a <b>different day in the future</b> to sell that stock. Return the maximum profit you can achieve from this transaction. If you cannot achieve any profit, return <code class="font-mono text-amber-300">0</code>.
+        </p>
+
+        <div class="space-y-2 pt-2 border-t border-white/10 text-xs text-slate-300">
+          <div class="bg-white/[0.03] p-2.5 rounded-lg border border-white/10 font-mono">
+            <span class="text-slate-400">Example 1:</span><br>
+            <b>Input:</b> prices = [7,1,5,3,6,4] &rarr; <b>Output:</b> <span class="text-emerald-400 font-bold">5</span><br>
+            <span class="text-[11px] text-slate-400 font-sans">Buy on day 2 (price = 1) and sell on day 5 (price = 6), profit = 6 - 1 = 5.</span>
+          </div>
+          <div class="bg-white/[0.03] p-2.5 rounded-lg border border-white/10 font-mono">
+            <span class="text-slate-400">Example 2:</span><br>
+            <b>Input:</b> prices = [7,6,4,3,1] &rarr; <b>Output:</b> <span class="text-rose-400 font-bold">0</span> (Prices only decline; no profitable trade exists)
+          </div>
+        </div>
+
+        <div class="text-[11px] text-slate-400">
+          <b>Constraints:</b> <code class="font-mono text-slate-300">1 &le; prices.length &le; 10<sup>5</sup></code>, <code class="font-mono text-slate-300">0 &le; prices[i] &le; 10<sup>4</sup></code>.
+        </div>
+      </div>
+
+      <!-- Algorithm Summary & Greedy Valley-Peak Proof Card -->
+      <div class="glass-panel rounded-2xl p-5 flex flex-col gap-3">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <span class="text-cyan-400 font-bold"><i class="fa-solid fa-brain mr-1.5"></i>Algorithm Summary &amp; Single-Pass Proof</span>
+          </div>
+          <span class="px-2 py-0.5 rounded text-[11px] font-semibold bg-emerald-500/20 text-emerald-200 border border-emerald-400/30">O(1) Aux Space</span>
+        </div>
+
+        <div class="space-y-3 text-xs text-slate-300 leading-relaxed">
+          <div class="p-3 bg-cyan-950/30 border border-cyan-400/25 rounded-xl">
+            <b class="text-cyan-300 flex items-center gap-1.5 mb-1">
+              <i class="fa-solid fa-arrow-trend-up"></i> Enforcing "Buy Before You Sell" Naturally:
+            </b>
+            As we scan chronologically from <code class="font-mono">i = 0</code> to <code class="font-mono">n - 1</code>, <code class="font-mono text-cyan-300 font-semibold">minPrice</code> always represents the lowest price seen on days <code class="font-mono">0 .. i - 1</code>. Therefore, evaluating <code class="font-mono text-emerald-300 font-semibold">prices[i] - minPrice</code> on day <code class="font-mono">i</code> automatically guarantees the buy day strictly precedes the sell day!
+          </div>
+
+          <div class="p-3 bg-emerald-950/25 border border-emerald-400/20 rounded-xl">
+            <b class="text-emerald-300 flex items-center gap-1.5 mb-1">
+              <i class="fa-solid fa-shield-halved"></i> Why Updating <code class="font-mono">minPrice</code> Never Loses Past Profits:
+            </b>
+            When a lower buying price is discovered (<code class="font-mono">prices[i] &lt; minPrice</code>), updating <code class="font-mono">minPrice</code> only improves future potential profits, while any higher profit already achieved from an earlier buy-sell pair remains safely preserved inside <code class="font-mono text-emerald-300 font-bold">maxProfit</code>.
+          </div>
+
+          <div class="grid grid-cols-2 gap-3 pt-1">
+            <div class="p-2.5 bg-white/[0.03] rounded-lg border border-white/10">
+              <span class="text-[11px] text-slate-400 uppercase font-semibold">Time Complexity</span>
+              <div class="text-sm font-bold text-emerald-400 font-mono mt-0.5">&Omicron;(N)</div>
+              <p class="text-[10px] text-slate-400 mt-0.5">Single linear pass over the <code class="font-mono">prices</code> array.</p>
+            </div>
+            <div class="p-2.5 bg-white/[0.03] rounded-lg border border-white/10">
+              <span class="text-[11px] text-slate-400 uppercase font-semibold">Space Complexity</span>
+              <div class="text-sm font-bold text-cyan-400 font-mono mt-0.5">&Omicron;(1)</div>
+              <p class="text-[10px] text-slate-400 mt-0.5">Constant memory using only <code class="font-mono">minPrice</code>, <code class="font-mono">maxProfit</code>, and <code class="font-mono">profit</code>.</p>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+    </footer>
+
+  </div>
+
+  <!-- JAVASCRIPT SIMULATION ENGINE -->
+  <script>
+    // 10 COMPREHENSIVE STOCK MARKET PRESETS
+    const PRESETS = [
+      { name: "1: LeetCode Ex 1 ([7, 1, 5, 3, 6, 4])", prices: [7, 1, 5, 3, 6, 4] },
+      { name: "2: LeetCode Ex 2 Bear Market ([7, 6, 4, 3, 1])", prices: [7, 6, 4, 3, 1] },
+      { name: "3: Late Dip, Higher Rally ([3, 8, 2, 1, 9, 4])", prices: [3, 8, 2, 1, 9, 4] },
+      { name: "4: New Low Without Better Peak ([4, 11, 2, 7, 1, 5])", prices: [4, 11, 2, 7, 1, 5] },
+      { name: "5: Steady Bull Run ([1, 2, 4, 7, 10, 14])", prices: [1, 2, 4, 7, 10, 14] },
+      { name: "6: Double Bottom Recovery ([6, 2, 5, 2, 8, 3])", prices: [6, 2, 5, 2, 8, 3] },
+      { name: "7: Flat Sideways Market ([5, 5, 5, 5, 5])", prices: [5, 5, 5, 5, 5] },
+      { name: "8: Zero-Dollar Dip ([4, 0, 6, 2, 9])", prices: [4, 0, 6, 2, 9] },
+      { name: "9: Single Trading Day ([8])", prices: [8] },
+      { name: "10: Peak First, Valley Last ([10, 8, 6, 4, 2])", prices: [10, 8, 6, 4, 2] }
+    ];
+
+    // APPLICATION STATE
+    let currentPrices = [...PRESETS[0].prices];
+    let steps = [];
+    let currentStepIdx = 0;
+    let isPlaying = false;
+    let playInterval = null;
+    let playSpeed = 650;
+    let audioEnabled = true;
+
+    // WEB AUDIO SYNTHESIZER
+    let audioCtx = null;
+    function initAudio() {
+      if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      }
+    }
+    function playTone(freq = 440, type = 'sine', duration = 0.08, vol = 0.035) {
+      if (!audioEnabled) return;
+      try {
+        initAudio();
+        if (audioCtx.state === 'suspended') {
+          audioCtx.resume();
+        }
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = type;
+        osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+        gain.gain.setValueAtTime(vol, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + duration);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + duration);
+      } catch (e) {}
+    }
+
+    // DOM REFERENCES
+    const btnPlay = document.getElementById('btnPlay');
+    const playIcon = document.getElementById('playIcon');
+    const playText = document.getElementById('playText');
+    const btnPrev = document.getElementById('btnPrev');
+    const btnNext = document.getElementById('btnNext');
+    const btnReset = document.getElementById('btnReset');
+    const btnAudio = document.getElementById('btnAudio');
+    const audioIcon = document.getElementById('audioIcon');
+    const presetSelect = document.getElementById('presetSelect');
+    const customPricesInput = document.getElementById('customPricesInput');
+    const btnApplyCustom = document.getElementById('btnApplyCustom');
+    const stepScrubber = document.getElementById('stepScrubber');
+    const stepCounterBadge = document.getElementById('stepCounterBadge');
+    const phaseBadge = document.getElementById('phaseBadge');
+    const maxProfitBadge = document.getElementById('maxProfitBadge');
+
+    const minPriceCard = document.getElementById('minPriceCard');
+    const varMinPrice = document.getElementById('varMinPrice');
+    const varMinBuyDay = document.getElementById('varMinBuyDay');
+    const varCurPrice = document.getElementById('varCurPrice');
+    const varCurDayIdx = document.getElementById('varCurDayIdx');
+    const varTodayProfit = document.getElementById('varTodayProfit');
+    const maxProfitCard = document.getElementById('maxProfitCard');
+    const varMaxProfit = document.getElementById('varMaxProfit');
+    const varBestTradeSpan = document.getElementById('varBestTradeSpan');
+
+    const chartWrapper = document.getElementById('chartWrapper');
+    const yAxisContainer = document.getElementById('yAxisContainer');
+    const chartPlotArea = document.getElementById('chartPlotArea');
+    const gridLinesLayer = document.getElementById('gridLinesLayer');
+    const trendSvgLayer = document.getElementById('trendSvgLayer');
+    const flyingCloneLayer = document.getElementById('flyingCloneLayer');
+    const minPriceFloorLine = document.getElementById('minPriceFloorLine');
+    const minPriceFloorTag = document.getElementById('minPriceFloorTag');
+    const daysColumnsLayer = document.getElementById('daysColumnsLayer');
+
+    const decisionBanner = document.getElementById('decisionBanner');
+    const decisionIcon = document.getElementById('decisionIcon');
+    const decisionText = document.getElementById('decisionText');
+    const formulaPill = document.getElementById('formulaPill');
+    const codeContainer = document.getElementById('codeContainer');
+    const stepDescription = document.getElementById('stepDescription');
+
+    // STRICT LINE-BY-LINE EXECUTION TRACE GENERATOR
+    function generateSteps(pricesArr) {
+      const trace = [];
+      const prices = [...pricesArr];
+      const n = prices.length;
+
+      let minPrice = Infinity;
+      let minBuyIdx = -1;
+      let maxProfit = 0;
+      let bestBuyIdx = -1;
+      let bestSellIdx = -1;
+
+      // Line 2: Method entry
+      trace.push({
+        line: 2,
+        phase: "Start",
+        prices,
+        i: -1,
+        minPrice: Infinity,
+        minBuyIdx: -1,
+        todayProfit: null,
+        maxProfit: 0,
+        bestBuyIdx: -1,
+        bestSellIdx: -1,
+        desc: `Entered <span class="code-font text-cyan-300 font-bold">maxProfit</span> with <span class="code-font text-slate-100">${n}</span> daily stock prices <span class="code-font text-emerald-300">[${prices.join(', ')}]</span>.`,
+        soundFreq: 330
+      });
+
+      // Line 4: int minPrice = Integer.MAX_VALUE;
+      trace.push({
+        line: 4,
+        phase: "Init minPrice",
+        prices,
+        i: -1,
+        minPrice: Infinity,
+        minBuyIdx: -1,
+        todayProfit: null,
+        maxProfit: 0,
+        bestBuyIdx: -1,
+        bestSellIdx: -1,
+        desc: `Initialized <span class="code-font text-cyan-300 font-bold">minPrice = Integer.MAX_VALUE (&infin;)</span> so the very first day's price becomes our initial buy candidate.`,
+        soundFreq: 370
+      });
+
+      // Line 5: int maxProfit = 0;
+      trace.push({
+        line: 5,
+        phase: "Init maxProfit",
+        prices,
+        i: -1,
+        minPrice: Infinity,
+        minBuyIdx: -1,
+        todayProfit: null,
+        maxProfit: 0,
+        bestBuyIdx: -1,
+        bestSellIdx: -1,
+        desc: `Initialized <span class="code-font text-emerald-300 font-bold">maxProfit = 0</span> (if prices only decline, we make no transaction and return 0).`,
+        soundFreq: 400
+      });
+
+      for (let i = 0; i < n; i++) {
+        // Line 7: for (int i = 0; i < prices.length; i++)
+        trace.push({
+          line: 7,
+          phase: `Day ${i + 1} (i = ${i})`,
+          prices,
+          i,
+          minPrice,
+          minBuyIdx,
+          todayProfit: null,
+          maxProfit,
+          bestBuyIdx,
+          bestSellIdx,
+          desc: `Day <span class="code-font text-amber-300 font-bold">${i + 1}</span> (<span class="code-font">i = ${i}</span>): Current stock price is <span class="code-font text-amber-200 font-bold">$${prices[i]}</span>.`,
+          soundFreq: 430
+        });
+
+        const isNewLow = prices[i] < minPrice;
+        const minDisp = minPrice === Infinity ? '∞' : `$${minPrice}`;
+
+        // Line 10: if (prices[i] < minPrice)
+        trace.push({
+          line: 10,
+          phase: isNewLow ? "New Low (True)" : "Check Low (False)",
+          prices,
+          i,
+          minPrice,
+          minBuyIdx,
+          todayProfit: null,
+          maxProfit,
+          bestBuyIdx,
+          bestSellIdx,
+          desc: isNewLow
+            ? `Check <span class="code-font text-cyan-300 font-bold">prices[${i}] ($${prices[i]}) &lt; minPrice (${minDisp})</span> is <b>true</b> &rarr; found a cheaper day to buy!`
+            : `Check <span class="code-font text-slate-300">prices[${i}] ($${prices[i]}) &lt; minPrice (${minDisp})</span> is <b>false</b> &rarr; entering <span class="code-font">else</span> branch to compute potential sell profit.`,
+          soundFreq: 470
+        });
+
+        if (isNewLow) {
+          // Line 11: minPrice = prices[i];
+          minPrice = prices[i];
+          minBuyIdx = i;
+          trace.push({
+            line: 11,
+            phase: `Buy Floor = $${minPrice}`,
+            prices,
+            i,
+            minPrice,
+            minBuyIdx,
+            justUpdatedMin: true,
+            todayProfit: null,
+            maxProfit,
+            bestBuyIdx,
+            bestSellIdx,
+            formulaText: `minPrice = $${minPrice} (Day ${i + 1})`,
+            desc: `Updated <span class="code-font text-cyan-300 font-bold">minPrice = $${minPrice}</span> (anchored at Day <span class="code-font">${i + 1}</span>, index <span class="code-font">[${i}]</span>).`,
+            soundFreq: 600
+          });
+        } else {
+          // Line 15: else
+          trace.push({
+            line: 15,
+            phase: "Sell Evaluation",
+            prices,
+            i,
+            minPrice,
+            minBuyIdx,
+            todayProfit: null,
+            maxProfit,
+            bestBuyIdx,
+            bestSellIdx,
+            desc: `Entered <span class="code-font text-emerald-300 font-bold">else</span> block: evaluating profit if we bought on Day <span class="code-font">${minBuyIdx + 1} ($${minPrice})</span> and sell today on Day <span class="code-font">${i + 1} ($${prices[i]})</span>.`,
+            soundFreq: 490
+          });
+
+          // Line 16: int profit = prices[i] - minPrice;
+          const profit = prices[i] - minPrice;
+          trace.push({
+            line: 16,
+            phase: `Profit = +$${profit}`,
+            prices,
+            i,
+            minPrice,
+            minBuyIdx,
+            todayProfit: profit,
+            showSpreadAt: i,
+            maxProfit,
+            bestBuyIdx,
+            bestSellIdx,
+            formulaText: `profit = $${prices[i]} - $${minPrice} = $${profit}`,
+            desc: `Calculated <span class="code-font text-sky-300 font-bold">profit = prices[${i}] ($${prices[i]}) - minPrice ($${minPrice}) = $${profit}</span>.`,
+            soundFreq: 560 + profit * 18
+          });
+
+          // Line 18: maxProfit = Math.max(maxProfit, profit);
+          const isNewRecord = profit > maxProfit;
+          if (isNewRecord) {
+            maxProfit = profit;
+            bestBuyIdx = minBuyIdx;
+            bestSellIdx = i;
+          }
+
+          trace.push({
+            line: 18,
+            phase: isNewRecord ? "New Max Profit!" : "Compare Max",
+            prices,
+            i,
+            minPrice,
+            minBuyIdx,
+            todayProfit: profit,
+            showSpreadAt: i,
+            maxProfit,
+            bestBuyIdx,
+            bestSellIdx,
+            isNewRecord,
+            formulaText: isNewRecord
+              ? `maxProfit = $${maxProfit} (Buy D${bestBuyIdx + 1} → Sell D${bestSellIdx + 1})`
+              : `max($${maxProfit}, $${profit}) = $${maxProfit}`,
+            desc: isNewRecord
+              ? `<span class="text-emerald-400 font-bold"><i class="fa-solid fa-trophy mr-1"></i>New Max Profit!</span> <span class="code-font text-emerald-300 font-bold">maxProfit = $${maxProfit}</span> (Buy Day ${bestBuyIdx + 1} at <span class="code-font">$${prices[bestBuyIdx]}</span> &rarr; Sell Day ${bestSellIdx + 1} at <span class="code-font">$${prices[bestSellIdx]}</span>).`
+              : `Profit <span class="code-font">$${profit}</span> &le; current <span class="code-font text-emerald-300">$${maxProfit}</span>. Best profit remains unchanged.`,
+            soundFreq: isNewRecord ? 840 : 520
+          });
+        }
+      }
+
+      // Line 22: return maxProfit;
+      trace.push({
+        line: 22,
+        phase: "Complete",
+        prices,
+        i: -1,
+        minPrice,
+        minBuyIdx,
+        todayProfit: null,
+        maxProfit,
+        bestBuyIdx,
+        bestSellIdx,
+        isComplete: true,
+        desc: maxProfit > 0
+          ? `<span class="text-emerald-400 font-bold text-sm"><i class="fa-solid fa-trophy mr-1.5"></i>Complete!</span> Maximum profit = <span class="code-font text-emerald-300 font-bold text-sm">$${maxProfit}</span> (Buy Day <span class="code-font">${bestBuyIdx + 1}</span> at <span class="code-font">$${prices[bestBuyIdx]}</span> &rarr; Sell Day <span class="code-font">${bestSellIdx + 1}</span> at <span class="code-font">$${prices[bestSellIdx]}</span>).`
+          : `<span class="text-amber-400 font-bold text-sm"><i class="fa-solid fa-shield mr-1.5"></i>Complete!</span> No profitable trade possible in a declining market. Returned <span class="code-font text-amber-300 font-bold text-sm">0</span>.`,
+        soundFreq: 960
+      });
+
+      return trace;
+    }
+
+    // LOCALIZED ZERO-JUMP CODE LINE HIGHLIGHTER
+    function highlightCodeLine(lineNum) {
+      document.querySelectorAll('.code-line').forEach(el => el.classList.remove('active-line'));
+      const activeEl = document.getElementById(`line${lineNum}`);
+      if (activeEl) {
+        activeEl.classList.add('active-line');
+
+        const containerTop = codeContainer.scrollTop;
+        const containerBottom = containerTop + codeContainer.clientHeight;
+        const elTop = activeEl.offsetTop - codeContainer.offsetTop;
+        const elBottom = elTop + activeEl.clientHeight;
+
+        if (elTop < containerTop + 24) {
+          codeContainer.scrollTo({ top: Math.max(0, elTop - 24), behavior: 'smooth' });
+        } else if (elBottom > containerBottom - 24) {
+          codeContainer.scrollTo({ top: elBottom - codeContainer.clientHeight + 24, behavior: 'smooth' });
+        }
+      }
+    }
+
+    // PHYSICAL LIFT-AND-GLIDE CLONE FROM DAY BAR TO minPrice CARD
+    function animateLiftToMinPrice(dayIdx, priceVal) {
+      flyingCloneLayer.innerHTML = '';
+      const barNode = daysColumnsLayer.querySelector(`[data-day-idx="${dayIdx}"]`);
+      if (!barNode) return;
+
+      const wrapperRect = chartWrapper.getBoundingClientRect();
+      const barRect = barNode.getBoundingClientRect();
+      const targetRect = minPriceCard.getBoundingClientRect();
+
+      const clone = document.createElement('div');
+      clone.className = 'absolute px-2.5 py-1 rounded-lg bg-cyan-400 text-slate-950 code-font text-xs font-extrabold shadow-lg shadow-cyan-400/50 pointer-events-none';
+      clone.textContent = `BUY $${priceVal}`;
+      clone.style.left = `${(barRect.left - wrapperRect.left) + barRect.width / 2 - 30}px`;
+      clone.style.top = `${barRect.top - wrapperRect.top - 12}px`;
+      flyingCloneLayer.appendChild(clone);
+
+      const dx = (targetRect.left - barRect.left);
+      const dy = (targetRect.top - barRect.top) - 24;
+      const duration = Math.min(550, Math.max(240, playSpeed * 0.78));
+
+      const anim = clone.animate([
+        { transform: 'translate(0px, 0px) scale(1)', opacity: 1 },
+        { transform: `translate(${dx * 0.35}px, -42px) scale(1.12)`, opacity: 1, offset: 0.35 },
+        { transform: `translate(${dx}px, ${dy}px) scale(0.9)`, opacity: 0.1 }
+      ], {
+        duration,
+        easing: 'cubic-bezier(0.22, 1, 0.36, 1)'
+      });
+
+      anim.onfinish = () => clone.remove();
+    }
+
+    // DRAW SVG STOCK TREND LINE & BEST TRADE BUY->SELL ARC
+    function drawTrendAndTradeSvg(step, maxVal) {
+      trendSvgLayer.innerHTML = '';
+      const prices = step.prices;
+      const n = prices.length;
+      if (n === 0) return;
+
+      const plotRect = chartPlotArea.getBoundingClientRect();
+      const w = plotRect.width;
+      const h = plotRect.height;
+      if (w === 0 || h === 0) return;
+
+      trendSvgLayer.setAttribute('viewBox', `0 0 ${w} ${h}`);
+
+      const points = prices.map((val, idx) => {
+        const cx = ((idx + 0.5) / n) * w;
+        const cy = h - (val / maxVal) * h;
+        return { x: cx, y: cy, val, idx };
+      });
+
+      let svgHtml = '';
+
+      // 1. Connect consecutive daily quotes with color-coded stock trend segments
+      for (let k = 0; k < points.length - 1; k++) {
+        const p1 = points[k];
+        const p2 = points[k + 1];
+        const isUp = p2.val >= p1.val;
+        const segColor = isUp ? 'rgba(52, 211, 153, 0.55)' : 'rgba(251, 113, 133, 0.5)';
+        svgHtml += `
+          <line x1="${p1.x}" y1="${p1.y}" x2="${p2.x}" y2="${p2.y}"
+                stroke="${segColor}" stroke-width="2.2" stroke-linecap="round" />
+        `;
+      }
+
+      // 2. Draw Curved Best Trade Arc connecting bestBuyIdx -> bestSellIdx
+      if (step.bestBuyIdx >= 0 && step.bestSellIdx > step.bestBuyIdx && step.maxProfit > 0) {
+        const bPt = points[step.bestBuyIdx];
+        const sPt = points[step.bestSellIdx];
+        const midX = (bPt.x + sPt.x) / 2;
+        const archY = Math.max(8, Math.min(bPt.y, sPt.y) - 36);
+
+        svgHtml += `
+          <path d="M ${bPt.x} ${bPt.y} Q ${midX} ${archY}, ${sPt.x} ${sPt.y}"
+                fill="none" stroke="#34d399" stroke-width="2.5" class="trade-arc-path" />
+          <circle cx="${bPt.x}" cy="${bPt.y}" r="5" fill="#22d3ee" stroke="#0f172a" stroke-width="1.5" />
+          <circle cx="${sPt.x}" cy="${sPt.y}" r="5.5" fill="#34d399" stroke="#0f172a" stroke-width="1.5" />
+        `;
+      }
+
+      // 3. Draw subtle quote vertex dots
+      points.forEach((pt) => {
+        const isCur = step.i === pt.idx;
+        const isBuy = step.minBuyIdx === pt.idx;
+        const dotColor = isCur ? '#fbbf24' : isBuy ? '#22d3ee' : '#94a3b8';
+        const r = isCur || isBuy ? 4.5 : 3;
+        svgHtml += `<circle cx="${pt.x}" cy="${pt.y}" r="${r}" fill="${dotColor}" stroke="#020617" stroke-width="1.2" />`;
+      });
+
+      trendSvgLayer.innerHTML = svgHtml;
+    }
+
+    // RENDER CURRENT STEP
+    function renderStep(idx, animateMovement = true) {
+      if (idx < 0 || idx >= steps.length) return;
+      const step = steps[idx];
+      const prices = step.prices;
+      const n = prices.length;
+      const maxVal = Math.max(1, ...prices);
+
+      // Update Header Scrubber & Badges
+      stepCounterBadge.textContent = `Step: ${idx + 1} / ${steps.length}`;
+      phaseBadge.textContent = step.phase;
+      maxProfitBadge.textContent = `Max Profit: $${step.maxProfit}`;
+      stepScrubber.max = steps.length - 1;
+      stepScrubber.value = idx;
+
+      // Update Telemetry HUD Cards
+      if (step.minPrice === Infinity) {
+        varMinPrice.textContent = '∞';
+        varMinBuyDay.textContent = '(MAX_VALUE)';
+      } else {
+        varMinPrice.textContent = `$${step.minPrice}`;
+        varMinBuyDay.textContent = step.minBuyIdx >= 0 ? `Day ${step.minBuyIdx + 1}` : '';
+      }
+
+      if (step.i >= 0 && step.i < n) {
+        varCurPrice.textContent = `$${prices[step.i]}`;
+        varCurDayIdx.textContent = `i: ${step.i} (D${step.i + 1})`;
+      } else {
+        varCurPrice.textContent = '-';
+        varCurDayIdx.textContent = 'i: -';
+      }
+
+      if (step.todayProfit !== null && step.todayProfit !== undefined) {
+        varTodayProfit.textContent = `+$${step.todayProfit}`;
+        varTodayProfit.className = step.todayProfit > 0
+          ? "code-font text-xl font-bold text-emerald-300"
+          : "code-font text-xl font-bold text-slate-300";
+      } else {
+        varTodayProfit.textContent = '-';
+        varTodayProfit.className = "code-font text-xl font-bold text-sky-300";
+      }
+
+      varMaxProfit.textContent = `$${step.maxProfit}`;
+      if (step.isNewRecord) {
+        maxProfitCard.classList.add('record-badge-anim');
+        setTimeout(() => maxProfitCard.classList.remove('record-badge-anim'), 650);
+      }
+      varBestTradeSpan.textContent = step.bestBuyIdx >= 0 && step.maxProfit > 0
+        ? `D${step.bestBuyIdx + 1}($${prices[step.bestBuyIdx]}) → D${step.bestSellIdx + 1}($${prices[step.bestSellIdx]})`
+        : 'Best: none';
+
+      // Narrative Description
+      stepDescription.innerHTML = step.desc;
+
+      // 1. Render Y-Axis Scale & Horizontal Gridlines
+      yAxisContainer.innerHTML = '';
+      gridLinesLayer.innerHTML = '';
+      const tickStep = maxVal <= 12 ? 1 : Math.ceil(maxVal / 7);
+
+      for (let val = maxVal; val >= 0; val -= tickStep) {
+        const pctFromBottom = (val / maxVal) * 100;
+        const tickLabel = document.createElement('div');
+        tickLabel.className = 'absolute right-0 translate-y-1/2 flex items-center gap-1';
+        tickLabel.style.bottom = `${pctFromBottom}%`;
+        tickLabel.innerHTML = `<span>$${val}</span><span class="w-1.5 h-[1.5px] bg-slate-400/70 inline-block"></span>`;
+        yAxisContainer.appendChild(tickLabel);
+
+        if (val > 0) {
+          const gridLine = document.createElement('div');
+          gridLine.className = 'absolute left-0 right-0 border-t border-white/[0.06]';
+          gridLine.style.bottom = `${pctFromBottom}%`;
+          gridLinesLayer.appendChild(gridLine);
+        }
+      }
+      if (maxVal % tickStep !== 0) {
+        const zeroLabel = document.createElement('div');
+        zeroLabel.className = 'absolute right-0 translate-y-1/2 flex items-center gap-1';
+        zeroLabel.style.bottom = `0%`;
+        zeroLabel.innerHTML = `<span>$0</span><span class="w-1.5 h-[1.5px] bg-slate-400/70 inline-block"></span>`;
+        yAxisContainer.appendChild(zeroLabel);
+      }
+
+      // 2. Render Daily Stock Price Bars & Vertical Profit Margin Overlays
+      daysColumnsLayer.innerHTML = '';
+      const barWidthPx = Math.max(18, Math.min(34, Math.floor(380 / n)));
+
+      prices.forEach((val, index) => {
+        const centerPct = ((index + 0.5) / n) * 100;
+        const heightPct = (val / maxVal) * 100;
+        const barHeightCss = val === 0 ? '3px' : `${heightPct}%`;
+
+        const isCurrentDay = (step.i === index);
+        const isCurrentBuy = (step.minBuyIdx === index && step.minPrice !== Infinity);
+        const isBestBuy = (step.isComplete && step.bestBuyIdx === index && step.maxProfit > 0);
+        const isBestSell = (step.isComplete && step.bestSellIdx === index && step.maxProfit > 0);
+        const isPastDay = (step.i >= 0 && index < step.i && !isCurrentBuy && !step.isComplete);
+
+        const colWrapper = document.createElement('div');
+        colWrapper.className = 'absolute bottom-0 top-0 -translate-x-1/2 pointer-events-none transition-all duration-300';
+        colWrapper.style.left = `${centerPct}%`;
+
+        let barStyle = 'bg-slate-700/70 border-slate-500/50';
+        if (isBestBuy) {
+          barStyle = 'bg-gradient-to-t from-cyan-600 to-cyan-400 border-cyan-200 shadow-[0_0_22px_rgba(34,211,238,0.75)]';
+        } else if (isBestSell) {
+          barStyle = 'bg-gradient-to-t from-emerald-600 to-emerald-400 border-emerald-200 shadow-[0_0_22px_rgba(16,185,129,0.75)]';
+        } else if (isCurrentDay && isCurrentBuy) {
+          barStyle = 'bg-gradient-to-t from-cyan-600 to-cyan-400 border-cyan-200 shadow-[0_0_22px_rgba(34,211,238,0.75)]';
+        } else if (isCurrentDay) {
+          barStyle = 'bg-gradient-to-t from-amber-600 to-amber-400 border-amber-200 shadow-[0_0_22px_rgba(251,191,36,0.7)]';
+        } else if (isCurrentBuy) {
+          barStyle = 'bg-gradient-to-t from-cyan-700/90 to-cyan-500/90 border-cyan-300/80 shadow-[0_0_16px_rgba(34,211,238,0.45)]';
+        } else if (isPastDay) {
+          barStyle = 'bg-slate-800/50 border-slate-600/35 opacity-60';
+        }
+
+        // Top Pointer / Role Badge
+        let topBadgeHtml = '';
+        if (isBestBuy) {
+          topBadgeHtml = `<span class="px-1.5 py-0.5 rounded bg-cyan-400 text-slate-950 font-extrabold text-[10px] code-font shadow whitespace-nowrap">BUY $${val}</span>`;
+        } else if (isBestSell) {
+          topBadgeHtml = `<span class="px-1.5 py-0.5 rounded bg-emerald-400 text-slate-950 font-extrabold text-[10px] code-font shadow whitespace-nowrap">SELL $${val}</span>`;
+        } else if (isCurrentDay && isCurrentBuy) {
+          topBadgeHtml = `<span class="px-1.5 py-0.5 rounded bg-cyan-400 text-slate-950 font-extrabold text-[10px] code-font shadow whitespace-nowrap">i • BUY $${val}</span>`;
+        } else if (isCurrentDay) {
+          topBadgeHtml = `<span class="px-1.5 py-0.5 rounded bg-amber-400 text-slate-950 font-extrabold text-[10px] code-font shadow whitespace-nowrap">i = $${val}</span>`;
+        } else if (isCurrentBuy) {
+          topBadgeHtml = `<span class="px-1.5 py-0.5 rounded bg-cyan-500/30 border border-cyan-400/60 text-cyan-200 font-bold text-[10px] code-font whitespace-nowrap">BUY $${val}</span>`;
+        } else {
+          topBadgeHtml = `<span class="text-[10px] code-font text-slate-400 whitespace-nowrap">$${val}</span>`;
+        }
+
+        // Vertical Profit Margin Overlay (from minPrice floor up to prices[i]) when evaluating profit!
+        let profitSpreadHtml = '';
+        const showSpreadHere = (step.showSpreadAt === index) || (isBestSell && step.isComplete);
+        if (showSpreadHere && step.minPrice !== Infinity) {
+          const buyVal = isBestSell && step.isComplete ? prices[step.bestBuyIdx] : step.minPrice;
+          const profitAmt = val - buyVal;
+          if (profitAmt > 0) {
+            const bottomPct = (buyVal / maxVal) * 100;
+            const spreadHeightPct = (profitAmt / maxVal) * 100;
+            profitSpreadHtml = `
+              <div class="profit-spread-bar absolute left-1/2 -translate-x-1/2 rounded-sm flex items-center justify-center z-30"
+                   style="width: ${barWidthPx + 10}px; bottom: ${bottomPct}%; height: ${spreadHeightPct}%;">
+                <span class="px-1.5 py-0.2 rounded bg-slate-950/85 text-emerald-300 code-font text-[10px] font-extrabold border border-emerald-400/50 shadow whitespace-nowrap">
+                  +$${profitAmt}
+                </span>
+              </div>
+            `;
+          }
+        }
+
+        colWrapper.innerHTML = `
+          <!-- Daily Price Bar -->
+          <div data-day-idx="${index}"
+               class="absolute bottom-0 left-1/2 -translate-x-1/2 rounded-t-md border-t border-x transition-all duration-300 ${barStyle}"
+               style="width: ${barWidthPx}px; height: ${barHeightCss};">
+          </div>
+
+          <!-- Vertical Profit Gain Spread Overlay -->
+          ${profitSpreadHtml}
+
+          <!-- Top Quote / Pointer Badge -->
+          <div class="absolute left-1/2 -translate-x-1/2 -translate-y-full pb-1.5 transition-all duration-300 flex items-center justify-center z-30"
+               style="bottom: ${barHeightCss};">
+            ${topBadgeHtml}
+          </div>
+
+          <!-- X-Axis Day & Index Label -->
+          <span class="absolute -bottom-6 left-1/2 -translate-x-1/2 text-[10px] code-font ${isCurrentDay ? 'text-amber-300 font-bold' : isCurrentBuy ? 'text-cyan-300 font-bold' : 'text-slate-400'} whitespace-nowrap">
+            D${index + 1}
+          </span>
+        `;
+        daysColumnsLayer.appendChild(colWrapper);
+      });
+
+      // 3. Render Horizontal minPrice Buy Floor Threshold Line
+      if (step.minPrice !== Infinity) {
+        const floorPct = (step.minPrice / maxVal) * 100;
+        minPriceFloorLine.classList.remove('hidden');
+        minPriceFloorLine.style.bottom = `${floorPct}%`;
+        minPriceFloorTag.textContent = `minPrice = $${step.minPrice} (Day ${step.minBuyIdx + 1})`;
+      } else {
+        minPriceFloorLine.classList.add('hidden');
+      }
+
+      // 4. Trigger Physical Lift-to-Buy-Floor Animation when minPrice updates!
+      if (animateMovement && step.justUpdatedMin && step.i >= 0) {
+        requestAnimationFrame(() => animateLiftToMinPrice(step.i, prices[step.i]));
+      } else {
+        flyingCloneLayer.innerHTML = '';
+      }
+
+      // 5. Render Stock Trend Line & Best Trade Arc SVG
+      requestAnimationFrame(() => drawTrendAndTradeSvg(step, maxVal));
+
+      // 6. Update Formula Pill & Decision Banner
+      if (step.formulaText) {
+        formulaPill.classList.remove('hidden');
+        formulaPill.textContent = step.formulaText;
+      } else {
+        formulaPill.classList.add('hidden');
+      }
+
+      if (step.isComplete) {
+        decisionIcon.className = "fa-solid fa-trophy text-emerald-400 text-base";
+        decisionBanner.className = "p-3.5 rounded-xl bg-emerald-500/15 border border-emerald-400/35 text-xs flex flex-col sm:flex-row items-center justify-between gap-3 backdrop-blur-md";
+        maxProfitBadge.classList.add('record-badge-anim');
+        setTimeout(() => maxProfitBadge.classList.remove('record-badge-anim'), 650);
+      } else if (step.isNewRecord) {
+        decisionIcon.className = "fa-solid fa-star text-emerald-400 text-base";
+        decisionBanner.className = "p-3.5 rounded-xl bg-emerald-500/15 border border-emerald-400/35 text-xs flex flex-col sm:flex-row items-center justify-between gap-3 backdrop-blur-md";
+      } else if (step.justUpdatedMin) {
+        decisionIcon.className = "fa-solid fa-arrow-trend-down text-cyan-400 text-base";
+        decisionBanner.className = "p-3.5 rounded-xl bg-cyan-500/12 border border-cyan-400/30 text-xs flex flex-col sm:flex-row items-center justify-between gap-3 backdrop-blur-md";
+      } else {
+        decisionIcon.className = "fa-solid fa-circle-info text-cyan-400 text-base";
+        decisionBanner.className = "p-3.5 rounded-xl bg-white/[0.04] border border-white/10 text-xs flex flex-col sm:flex-row items-center justify-between gap-3 backdrop-blur-md";
+      }
+      decisionText.innerHTML = step.desc;
+
+      // 7. Highlight Active Java Line & Play Audio Tone
+      highlightCodeLine(step.line);
+      if (step.soundFreq) {
+        playTone(step.soundFreq, 'sine', 0.08, 0.035);
+      }
+    }
+
+    // PLAYBACK CONTROLLER
+    function setPlaying(playing) {
+      isPlaying = playing;
+      if (isPlaying) {
+        playIcon.className = "fa-solid fa-pause";
+        playText.textContent = "Stop";
+        btnPlay.classList.add('bg-rose-500/25', 'text-rose-200', 'border-rose-400/50');
+        btnPlay.classList.remove('bg-cyan-500/25', 'text-cyan-200', 'border-cyan-400/50');
+
+        playInterval = setInterval(() => {
+          if (currentStepIdx < steps.length - 1) {
+            currentStepIdx++;
+            renderStep(currentStepIdx, true);
+          } else {
+            setPlaying(false);
+          }
+        }, playSpeed);
+      } else {
+        playIcon.className = "fa-solid fa-play";
+        playText.textContent = "Start";
+        btnPlay.classList.remove('bg-rose-500/25', 'text-rose-200', 'border-rose-400/50');
+        btnPlay.classList.add('bg-cyan-500/25', 'text-cyan-200', 'border-cyan-400/50');
+        if (playInterval) {
+          clearInterval(playInterval);
+          playInterval = null;
+        }
+      }
+    }
+
+    function initSimulation(pricesArr) {
+      setPlaying(false);
+      currentPrices = [...pricesArr];
+      steps = generateSteps(currentPrices);
+      currentStepIdx = 0;
+      stepScrubber.max = steps.length - 1;
+      stepScrubber.value = 0;
+      renderStep(0, false);
+    }
+
+    // EVENT LISTENERS
+    btnPlay.addEventListener('click', () => {
+      if (currentStepIdx >= steps.length - 1) {
+        currentStepIdx = 0;
+        renderStep(0, false);
+      }
+      setPlaying(!isPlaying);
+    });
+
+    btnNext.addEventListener('click', () => {
+      setPlaying(false);
+      if (currentStepIdx < steps.length - 1) {
+        currentStepIdx++;
+        renderStep(currentStepIdx, true);
+      }
+    });
+
+    btnPrev.addEventListener('click', () => {
+      setPlaying(false);
+      if (currentStepIdx > 0) {
+        currentStepIdx--;
+        renderStep(currentStepIdx, true);
+      }
+    });
+
+    btnReset.addEventListener('click', () => {
+      setPlaying(false);
+      currentStepIdx = 0;
+      renderStep(0, false);
+    });
+
+    stepScrubber.addEventListener('input', (e) => {
+      setPlaying(false);
+      currentStepIdx = parseInt(e.target.value, 10);
+      renderStep(currentStepIdx, false);
+    });
+
+    document.querySelectorAll('.speed-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.speed-btn').forEach(b => {
+          b.classList.remove('bg-cyan-500/30', 'text-cyan-200', 'font-semibold');
+        });
+        btn.classList.add('bg-cyan-500/30', 'text-cyan-200', 'font-semibold');
+        playSpeed = parseInt(btn.dataset.speed, 10);
+        if (isPlaying) {
+          setPlaying(false);
+          setPlaying(true);
+        }
+      });
+    });
+
+    btnAudio.addEventListener('click', () => {
+      audioEnabled = !audioEnabled;
+      if (audioEnabled) {
+        audioIcon.className = "fa-solid fa-volume-high";
+        btnAudio.classList.remove('text-slate-600');
+        btnAudio.classList.add('text-slate-300');
+      } else {
+        audioIcon.className = "fa-solid fa-volume-xmark";
+        btnAudio.classList.add('text-slate-600');
+        btnAudio.classList.remove('text-slate-300');
+      }
+    });
+
+    presetSelect.addEventListener('change', (e) => {
+      const idx = parseInt(e.target.value, 10);
+      customPricesInput.value = PRESETS[idx].prices.join(', ');
+      initSimulation(PRESETS[idx].prices);
+    });
+
+    btnApplyCustom.addEventListener('click', () => {
+      const text = customPricesInput.value.trim();
+      if (!text) return;
+      const parsed = text.split(',')
+        .map(s => parseInt(s.trim(), 10))
+        .filter(n => !isNaN(n) && n >= 0);
+
+      if (parsed.length >= 1) {
+        customPricesInput.value = parsed.join(', ');
+        initSimulation(parsed);
+      }
+    });
+
+    window.addEventListener('resize', () => {
+      const step = steps[currentStepIdx];
+      if (step) {
+        drawTrendAndTradeSvg(step, Math.max(1, ...step.prices));
+      }
+    });
+
+    window.addEventListener('keydown', (e) => {
+      if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT') return;
+      if (e.code === 'Space') {
+        e.preventDefault();
+        btnPlay.click();
+      } else if (e.code === 'ArrowRight') {
+        e.preventDefault();
+        btnNext.click();
+      } else if (e.code === 'ArrowLeft') {
+        e.preventDefault();
+        btnPrev.click();
+      }
+    });
+
+    window.onload = function() {
+      customPricesInput.value = PRESETS[0].prices.join(', ');
+      initSimulation(PRESETS[0].prices);
+    };
+  </script>
+</body>
+</html>

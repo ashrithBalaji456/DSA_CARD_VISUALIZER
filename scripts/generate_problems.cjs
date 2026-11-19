@@ -1377,6 +1377,11 @@ const problems = [
         "number": 1480,
         "title": "Running Sum of 1d Array (Prefix Sum)",
         "difficulty": "Easy"
+      },
+      {
+        "number": 121,
+        "title": "Best Time to Buy and Sell Stock",
+        "difficulty": "Easy"
       }
     ],
     "leetcodeUrl": "https://leetcode.com/problems/maximum-subarray/"
@@ -3737,6 +3742,11 @@ const problems = [
         "number": 125,
         "title": "Valid Palindrome",
         "difficulty": "Easy"
+      },
+      {
+        "number": 121,
+        "title": "Best Time to Buy and Sell Stock",
+        "difficulty": "Easy"
       }
     ],
     "leetcodeUrl": "https://leetcode.com/problems/container-with-most-water/"
@@ -3949,6 +3959,103 @@ const problems = [
       }
     ],
     "leetcodeUrl": "https://leetcode.com/problems/4sum/"
+  },
+  {
+    "id": "best-time-to-buy-and-sell-stock",
+    "number": 121,
+    "title": "Best Time to Buy and Sell Stock",
+    "slug": "best-time-to-buy-and-sell-stock",
+    "difficulty": "Easy",
+    "categories": [
+      "Arrays",
+      "Dynamic Programming"
+    ],
+    "description": "You are given an array prices where prices[i] is the price of a given stock on the ith day.\n\nYou want to maximize your profit by choosing a single day to buy one stock and choosing a different day in the future to sell that stock.\n\nReturn the maximum profit you can achieve from this transaction. If you cannot achieve any profit, return 0.",
+    "inputFormat": "prices = [int]",
+    "outputFormat": "int (maximum profit)",
+    "constraints": [
+      "1 <= prices.length <= 10^5",
+      "0 <= prices[i] <= 10^4"
+    ],
+    "examples": [
+      {
+        "exampleNumber": 1,
+        "input": "prices = [7, 1, 5, 3, 6, 4]",
+        "output": "5",
+        "explanation": "Buy on day 2 (price = 1) and sell on day 5 (price = 6), profit = 6 - 1 = 5. Note that buying on day 2 and selling on day 1 is not allowed because you must buy before you sell.",
+        "type": "official"
+      },
+      {
+        "exampleNumber": 2,
+        "input": "prices = [7, 6, 4, 3, 1]",
+        "output": "0",
+        "explanation": "In this case, no transactions are done and the max profit = 0.",
+        "type": "official"
+      }
+    ],
+    "approach": "One-Pass Valley-Peak Greedy Scan: Track minPrice (initialized to Integer.MAX_VALUE) and maxProfit (initialized to 0). Traverse through prices chronologically: if prices[i] < minPrice, update minPrice = prices[i] as our new lowest buy candidate; else compute today's profit = prices[i] - minPrice and update maxProfit = Math.max(maxProfit, profit). Scanning left-to-right inherently enforces the constraint that the buy day must strictly precede the sell day.",
+    "flowSteps": [
+      {
+        "step": 1,
+        "title": "Initialize Buy Floor & Max Profit",
+        "description": "Set minPrice = Integer.MAX_VALUE (lowest buy candidate) and maxProfit = 0.",
+        "stateSnapshot": "minPrice = ∞, maxProfit = 0",
+        "highlight": "Init"
+      },
+      {
+        "step": 2,
+        "title": "Track Lowest Buy Price",
+        "description": "For each day i, if prices[i] < minPrice, update minPrice = prices[i] to anchor a cheaper buying floor for future days.",
+        "stateSnapshot": "if (prices[i] < minPrice) minPrice = prices[i]",
+        "highlight": "Valley"
+      },
+      {
+        "step": 3,
+        "title": "Evaluate Sell Profit",
+        "description": "Else, compute profit = prices[i] - minPrice, and record maxProfit = Math.max(maxProfit, profit).",
+        "stateSnapshot": "profit = prices[i] - minPrice; maxProfit = max(maxProfit, profit)",
+        "highlight": "Profit"
+      }
+    ],
+    "timeComplexity": "O(n)",
+    "timeComplexityExplanation": "Single linear pass over the prices array with constant-time scalar comparisons.",
+    "spaceComplexity": "O(1)",
+    "spaceComplexityExplanation": "Requires only two integer variables (minPrice and maxProfit).",
+    "visualizerUrl": "/visualizers/best_time_to_buy_and_sell_stock_visualizer.html",
+    "keyObservations": [
+      "To maximize profit = prices[sell] - prices[buy] where buy < sell, we greedily buy at the lowest historical price before the current day.",
+      "Updating minPrice when a new low is seen never invalidates past profits, as earlier profits are already safely stored in maxProfit.",
+      "If stock prices are strictly decreasing, no profitable trade is made and maxProfit remains 0."
+    ],
+    "importantPattern": "Greedy One-Pass Valley-Peak Tracking (Kadane's Variant)",
+    "commonMistakes": [
+      "Using an O(n^2) nested loop checking all pairs, leading to Time Limit Exceeded (TLE) on 10^5 elements.",
+      "Sorting the array, which destroys the chronological buy-before-sell invariant."
+    ],
+    "optimalApproach": "Single-Pass Greedy Running Minimum",
+    "relatedProblems": [
+      {
+        "number": 53,
+        "title": "Maximum Subarray (Max Inventory Increase)",
+        "difficulty": "Medium"
+      },
+      {
+        "number": 11,
+        "title": "Container With Most Water",
+        "difficulty": "Medium"
+      },
+      {
+        "number": 42,
+        "title": "Trapping Rain Water",
+        "difficulty": "Hard"
+      },
+      {
+        "number": 1480,
+        "title": "Running Sum of 1d Array (Prefix Sum)",
+        "difficulty": "Easy"
+      }
+    ],
+    "leetcodeUrl": "https://leetcode.com/problems/best-time-to-buy-and-sell-stock/"
   }
 ];
 
