@@ -725,7 +725,7 @@ const problems = [
       },
       {
         "number": 3,
-        "title": "Longest Distinct Subarray (Sliding Window)",
+        "title": "Longest Substring Without Repeating Characters",
         "difficulty": "Medium"
       }
     ],
@@ -1387,65 +1387,106 @@ const problems = [
     "leetcodeUrl": "https://leetcode.com/problems/maximum-subarray/"
   },
   {
-    "id": "longest-distinct-subarray",
+    "id": "longest-substring-without-repeating-characters",
     "number": 3,
-    "title": "Longest Distinct Subarray (Sliding Window)",
+    "title": "Longest Substring Without Repeating Characters",
     "slug": "longest-substring-without-repeating-characters",
     "difficulty": "Medium",
     "categories": [
       "Sliding Window",
       "Hashing",
-      "Arrays"
+      "Strings"
     ],
-    "description": "Given an array or string, find the length of the longest contiguous subarray or substring without repeating elements.",
-    "inputFormat": "nums = [int] or s = string",
-    "outputFormat": "int",
+    "description": "Given a string s, find the length of the longest substring without duplicate characters.\n\nA substring is a contiguous non-empty sequence of characters within a string.",
+    "inputFormat": "s = string",
+    "outputFormat": "int (maximum length)",
     "constraints": [
-      "0 <= length <= 5 * 10^4"
+      "0 <= s.length <= 5 * 10^4",
+      "s consists of English letters, digits, symbols and spaces"
     ],
     "examples": [
       {
         "exampleNumber": 1,
         "input": "s = \"abcabcbb\"",
         "output": "3",
-        "explanation": "Longest distinct substring is \"abc\".",
+        "explanation": "The answer is \"abc\", with the length of 3.",
+        "type": "official"
+      },
+      {
+        "exampleNumber": 2,
+        "input": "s = \"bbbbb\"",
+        "output": "1",
+        "explanation": "The answer is \"b\", with the length of 1.",
+        "type": "official"
+      },
+      {
+        "exampleNumber": 3,
+        "input": "s = \"pwwkew\"",
+        "output": "3",
+        "explanation": "The answer is \"wke\", with the length of 3. Notice that the answer must be a substring, \"pwke\" is a subsequence and not a substring.",
         "type": "official"
       }
     ],
-    "approach": "Sliding Window with lastSeen index map. When duplicate is found, shift left boundary to lastSeen[char] + 1.",
+    "approach": "Sliding Window with HashSet: Maintain a dynamic window s[left..right] and a HashSet<Character> storing all characters currently in the window. As right advances from 0 to s.length() - 1, read ch = s.charAt(right). While set.contains(ch), remove s.charAt(left) from the set and increment left++ until the duplicate is evicted. Then add ch to the set and update maxLength = Math.max(maxLength, right - left + 1). Because both left and right only move forward, this runs in amortized O(n) time.",
     "flowSteps": [
       {
         "step": 1,
-        "title": "Expand Window",
-        "description": "Advance right pointer and check last seen index.",
-        "stateSnapshot": "right = 0, char = s[right]",
-        "highlight": "Expand"
+        "title": "Initialize Window & Set",
+        "description": "Set left = 0, maxLength = 0, and allocate an empty HashSet<Character> to track window characters.",
+        "stateSnapshot": "left = 0, maxLength = 0, set = {}",
+        "highlight": "Init"
       },
       {
         "step": 2,
-        "title": "Jump Left Pointer",
-        "description": "left = Math.max(left, lastSeen[char] + 1).",
-        "stateSnapshot": "shift window start",
-        "highlight": "Jump"
+        "title": "Shrink Window on Duplicate Conflict",
+        "description": "While set.contains(s.charAt(right)): remove s.charAt(left) from set and advance left++ until the conflict is resolved.",
+        "stateSnapshot": "while (set.contains(ch)) { set.remove(s[left++]); }",
+        "highlight": "Evict"
+      },
+      {
+        "step": 3,
+        "title": "Expand Window & Update Max",
+        "description": "Add s.charAt(right) to set, and update maxLength = Math.max(maxLength, right - left + 1).",
+        "stateSnapshot": "set.add(ch); maxLength = max(maxLength, right - left + 1)",
+        "highlight": "Expand"
       }
     ],
     "timeComplexity": "O(n)",
-    "timeComplexityExplanation": "Each character processed once.",
-    "spaceComplexity": "O(min(m, n))",
-    "spaceComplexityExplanation": "Map stores unique items.",
-    "visualizerUrl": "/visualizers/longest_distinct_subarray_visualizer.html",
+    "timeComplexityExplanation": "Each character is visited by right once and left at most once, and added/removed from the HashSet at most once.",
+    "spaceComplexity": "O(min(n, |Σ|))",
+    "spaceComplexityExplanation": "The HashSet stores at most min(n, |Σ|) distinct characters where Σ is the character alphabet.",
+    "visualizerUrl": "/visualizers/longest_substring_without_repeating_characters_visualizer.html",
     "keyObservations": [
-      "Sliding window boundary jumps directly to duplicate position + 1."
+      "Contiguous substring constraint makes this ideal for a two-pointer sliding window where right expands and left contracts.",
+      "Using a HashSet guarantees O(1) membership checks to immediately catch duplicate characters.",
+      "Although there is a nested while loop, each character enters and exits the set at most once, maintaining linear O(n) runtime."
     ],
-    "importantPattern": "Fast-Forward Sliding Window",
+    "importantPattern": "Elastic Sliding Window with Dynamic Set Contraction",
     "commonMistakes": [
-      "Allowing left pointer to move backward."
+      "Confusing substrings (must be contiguous) with subsequences.",
+      "Forgetting to handle spaces, digits, and special characters.",
+      "Failing to advance the left pointer when removing duplicates from the HashSet."
     ],
-    "optimalApproach": "Sliding Window with Last-Seen Index Map",
+    "optimalApproach": "Sliding Window with HashSet Eviction",
     "relatedProblems": [
       {
         "number": 128,
         "title": "Longest Consecutive Sequence",
+        "difficulty": "Medium"
+      },
+      {
+        "number": 1446,
+        "title": "Consecutive Characters (Longest Equal Run)",
+        "difficulty": "Easy"
+      },
+      {
+        "number": 125,
+        "title": "Valid Palindrome",
+        "difficulty": "Easy"
+      },
+      {
+        "number": 11,
+        "title": "Container With Most Water",
         "difficulty": "Medium"
       }
     ],
@@ -2187,7 +2228,7 @@ const problems = [
     "relatedProblems": [
       {
         "number": 3,
-        "title": "Longest Distinct Subarray (Sliding Window)",
+        "title": "Longest Substring Without Repeating Characters",
         "difficulty": "Medium"
       }
     ],
