@@ -1508,6 +1508,16 @@ const problems = [
         "number": 567,
         "title": "Permutation in String",
         "difficulty": "Medium"
+      },
+      {
+        "number": 76,
+        "title": "Minimum Window Substring",
+        "difficulty": "Hard"
+      },
+      {
+        "number": 239,
+        "title": "Sliding Window Maximum",
+        "difficulty": "Hard"
       }
     ],
     "leetcodeUrl": "https://leetcode.com/problems/longest-substring-without-repeating-characters/"
@@ -1925,6 +1935,11 @@ const problems = [
         "number": 20,
         "title": "Valid Parentheses (Balanced Stack)",
         "difficulty": "Easy"
+      },
+      {
+        "number": 239,
+        "title": "Sliding Window Maximum",
+        "difficulty": "Hard"
       }
     ],
     "leetcodeUrl": "https://leetcode.com/problems/next-greater-element-i/"
@@ -4230,6 +4245,16 @@ const problems = [
         "number": 567,
         "title": "Permutation in String",
         "difficulty": "Medium"
+      },
+      {
+        "number": 76,
+        "title": "Minimum Window Substring",
+        "difficulty": "Hard"
+      },
+      {
+        "number": 239,
+        "title": "Sliding Window Maximum",
+        "difficulty": "Hard"
       }
     ],
     "leetcodeUrl": "https://leetcode.com/problems/longest-repeating-character-replacement/"
@@ -4344,9 +4369,248 @@ const problems = [
         "number": 424,
         "title": "Longest Repeating Character Replacement",
         "difficulty": "Medium"
+      },
+      {
+        "number": 76,
+        "title": "Minimum Window Substring",
+        "difficulty": "Hard"
+      },
+      {
+        "number": 239,
+        "title": "Sliding Window Maximum",
+        "difficulty": "Hard"
       }
     ],
     "leetcodeUrl": "https://leetcode.com/problems/permutation-in-string/"
+  },
+  {
+    "id": "sliding-window-maximum",
+    "number": 239,
+    "title": "Sliding Window Maximum",
+    "slug": "sliding-window-maximum",
+    "difficulty": "Hard",
+    "categories": [
+      "Sliding Window",
+      "Monotonic Deque",
+      "Queue",
+      "Arrays"
+    ],
+    "description": "You are given an array of integers nums, there is a sliding window of size k which is moving from the very left of the array to the very right. You can only see the k numbers in the window. Each time the sliding window moves right by one position.\n\nReturn the max sliding window.",
+    "inputFormat": "nums = int[], k = int",
+    "outputFormat": "int[] (maximums in each sliding window)",
+    "constraints": [
+      "1 <= nums.length <= 10^5",
+      "-10^4 <= nums[i] <= 10^4",
+      "1 <= k <= nums.length"
+    ],
+    "examples": [
+      {
+        "exampleNumber": 1,
+        "input": "nums = [1,3,-1,-3,5,3,6,7], k = 3",
+        "output": "[3,3,5,5,6,7]",
+        "explanation": "Window [1, 3, -1] -> 3; [3, -1, -3] -> 3; [-1, -3, 5] -> 5; [-3, 5, 3] -> 5; [5, 3, 6] -> 6; [3, 6, 7] -> 7.",
+        "type": "official"
+      },
+      {
+        "exampleNumber": 2,
+        "input": "nums = [1], k = 1",
+        "output": "[1]",
+        "explanation": "Single element array with window size 1 yields [1].",
+        "type": "official"
+      }
+    ],
+    "approach": "Monotonic Decreasing Deque: Maintain a double-ended queue (Deque<Integer>) storing indices of candidate maximum elements in strictly decreasing order of their values. For each index i from 0 to n - 1: (1) Expire out-of-bounds indices from the front: while (!deque.isEmpty() && deque.peekFirst() <= i - k) deque.pollFirst(). (2) Maintain monotonic property at the back: while (!deque.isEmpty() && nums[deque.peekLast()] <= nums[i]) deque.pollLast(), since earlier smaller or equal elements can never be the maximum of any window containing i. (3) Offer index i at the back: deque.offerLast(i). (4) Once the first window is formed (i >= k - 1), record the maximum at the front: result[index++] = nums[deque.peekFirst()]. This achieves amortized O(n) time and O(k) auxiliary space.",
+    "flowSteps": [
+      {
+        "step": 1,
+        "title": "Expire Out-of-Bounds Indices",
+        "description": "Remove indices from the front of the deque that fall outside [i - k + 1 .. i].",
+        "stateSnapshot": "while (!deque.isEmpty() && deque.peekFirst() <= i - k) deque.pollFirst();",
+        "highlight": "Expire"
+      },
+      {
+        "step": 2,
+        "title": "Prune Dominated Smaller Elements",
+        "description": "Pop elements from the back of the deque that are <= nums[i], preserving decreasing monotonicity.",
+        "stateSnapshot": "while (!deque.isEmpty() && nums[deque.peekLast()] <= nums[i]) deque.pollLast();",
+        "highlight": "Prune"
+      },
+      {
+        "step": 3,
+        "title": "Offer Current Index at Back",
+        "description": "Append current index i at the back of the deque.",
+        "stateSnapshot": "deque.offerLast(i);",
+        "highlight": "Push"
+      },
+      {
+        "step": 4,
+        "title": "Emit Window Maximum",
+        "description": "If i >= k - 1, the front index deque.peekFirst() holds the window maximum; record it into result[index++].",
+        "stateSnapshot": "if (i >= k - 1) result[index++] = nums[deque.peekFirst()];",
+        "highlight": "Emit"
+      }
+    ],
+    "timeComplexity": "O(n)",
+    "timeComplexityExplanation": "Each index is pushed into the deque exactly once and popped at most once across the entire iteration, giving amortized O(1) work per element and O(n) total.",
+    "spaceComplexity": "O(k)",
+    "spaceComplexityExplanation": "The deque holds at most k indices representing candidate maximums within any single sliding window.",
+    "visualizerUrl": "/visualizers/sliding_window_maximum_visualizer.html",
+    "keyObservations": [
+      "An element nums[j] where j < i and nums[j] <= nums[i] is permanently obsolete because nums[i] is greater or equal and will outlive nums[j] in future windows.",
+      "Storing indices rather than values in the deque allows instant O(1) verification of whether the maximum element has slid out of bounds.",
+      "The front of the deque deque.peekFirst() always holds the index of the maximum element for the current window in O(1) time."
+    ],
+    "importantPattern": "Monotonic Decreasing Deque with Boundary Expiration",
+    "commonMistakes": [
+      "Storing values instead of indices in the deque, making it impossible to check if the maximum element is still inside the current window.",
+      "Using a Max-Heap / PriorityQueue which results in O(n log k) runtime and requires lazy deletion.",
+      "Failing to prune equal elements (<= vs <), potentially violating strict capacity bounds."
+    ],
+    "optimalApproach": "Monotonic Decreasing Deque storing indices (ArrayDeque)",
+    "relatedProblems": [
+      {
+        "number": 76,
+        "title": "Minimum Window Substring",
+        "difficulty": "Hard"
+      },
+      {
+        "number": 3,
+        "title": "Longest Substring Without Repeating Characters",
+        "difficulty": "Medium"
+      },
+      {
+        "number": 424,
+        "title": "Longest Repeating Character Replacement",
+        "difficulty": "Medium"
+      },
+      {
+        "number": 496,
+        "title": "Next Greater Element I",
+        "difficulty": "Easy"
+      }
+    ],
+    "leetcodeUrl": "https://leetcode.com/problems/sliding-window-maximum/"
+  },
+  {
+    "id": "minimum-window-substring",
+    "number": 76,
+    "title": "Minimum Window Substring",
+    "slug": "minimum-window-substring",
+    "difficulty": "Hard",
+    "categories": [
+      "Sliding Window",
+      "Hash Table",
+      "Strings",
+      "Two Pointers"
+    ],
+    "description": "Given two strings s and t of lengths m and n respectively, return the minimum window substring of s such that every character in t (including duplicates) is included in the window. If there is no such substring, return the empty string \"\".\n\nThe testcases will be generated such that the answer is unique.",
+    "inputFormat": "s = string, t = string",
+    "outputFormat": "string (minimum window substring or \"\")",
+    "constraints": [
+      "1 <= s.length, t.length <= 10^5",
+      "s and t consist of uppercase and lowercase English letters"
+    ],
+    "examples": [
+      {
+        "exampleNumber": 1,
+        "input": "s = \"ADOBECODEBANC\", t = \"ABC\"",
+        "output": "\"BANC\"",
+        "explanation": "The minimum window substring \"BANC\" includes 'A', 'B', and 'C' from string t.",
+        "type": "official"
+      },
+      {
+        "exampleNumber": 2,
+        "input": "s = \"a\", t = \"a\"",
+        "output": "\"a\"",
+        "explanation": "Entire string s is the minimum window.",
+        "type": "official"
+      },
+      {
+        "exampleNumber": 3,
+        "input": "s = \"a\", t = \"aa\"",
+        "output": "\"\"",
+        "explanation": "Both 'a's from t must be included in the window, but s only has one 'a'.",
+        "type": "official"
+      }
+    ],
+    "approach": "Dynamic Expand & Shrink Sliding Window with Frequency Ledger: Precompute required character counts from t into an ASCII frequency array need[128]. Maintain two pointers left = 0, right = 0, and a counter formed = 0 tracking how many required character occurrences are satisfied. As right expands from 0 to s.length() - 1: decrement need[s.charAt(right)]--; if need[s.charAt(right)] >= 0, it fulfilled a requirement from t, so increment formed++. When formed == t.length() (valid window), attempt to shrink from the left: update minLength and startIndex if right - left + 1 < minLength. Then release s.charAt(left) by incrementing need[s.charAt(left)]++; if need[s.charAt(left)] > 0, a mandatory character was lost, so decrement formed--. Advance left++. Return s.substring(startIndex, startIndex + minLength) or empty string if no window was found.",
+    "flowSteps": [
+      {
+        "step": 1,
+        "title": "Record Target Demand",
+        "description": "Count character frequencies in t using an int[128] array; set required = t.length().",
+        "stateSnapshot": "for (char ch : t.toCharArray()) need[ch]++; required = t.length();",
+        "highlight": "Init Demand"
+      },
+      {
+        "step": 2,
+        "title": "Expand Window to Right",
+        "description": "Advance right, decrement need[s[right]]--, and if need[s[right]] >= 0 increment formed++.",
+        "stateSnapshot": "need[s[right]]--; if (need[s[right]] >= 0) formed++;",
+        "highlight": "Expand"
+      },
+      {
+        "step": 3,
+        "title": "Update Best Window Record",
+        "description": "While formed == required: if current windowLength < minLength, update minLength and startIndex.",
+        "stateSnapshot": "if (right - left + 1 < minLength) { minLength = right - left + 1; startIndex = left; }",
+        "highlight": "Record Min"
+      },
+      {
+        "step": 4,
+        "title": "Shrink Window from Left",
+        "description": "Release s[left] via need[s[left]]++; if need[s[left]] > 0 decrement formed--; advance left++.",
+        "stateSnapshot": "need[s[left]]++; if (need[s[left]] > 0) formed--; left++;",
+        "highlight": "Shrink"
+      },
+      {
+        "step": 5,
+        "title": "Extract Optimal Substring",
+        "description": "Return s.substring(startIndex, startIndex + minLength) or \"\" if no valid window occurred.",
+        "stateSnapshot": "return minLength == MAX ? \"\" : s.substring(startIndex, startIndex + minLength);",
+        "highlight": "Done"
+      }
+    ],
+    "timeComplexity": "O(m + n)",
+    "timeComplexityExplanation": "O(n) to count characters in t, plus O(2m) = O(m) as both right and left pointers traverse s at most once.",
+    "spaceComplexity": "O(1)",
+    "spaceComplexityExplanation": "Fixed 128-element integer array for ASCII characters.",
+    "visualizerUrl": "/visualizers/minimum_window_substring_visualizer.html",
+    "keyObservations": [
+      "Positive values in need[c] represent deficit (characters still missing); negative values represent surplus (extra copies buffered inside the window).",
+      "formed only increments when need[ch] >= 0 upon decrement, ensuring duplicate target characters are correctly required.",
+      "Shrinking greedily from the left only stops when formed < required (i.e. need[leftChar] becomes > 0), ensuring the minimum valid window starting at each right boundary is discovered."
+    ],
+    "importantPattern": "Dynamic Expand-and-Shrink Sliding Window with Demand/Surplus Sign Invariant",
+    "commonMistakes": [
+      "Using full map equality comparisons on each character rather than formed counter, resulting in O(|Σ| * m) overhead.",
+      "Handling case sensitivity incorrectly (e.g. using int[26] instead of int[128], which truncates or collides lowercase and uppercase letters).",
+      "Failing to handle duplicate characters in t properly."
+    ],
+    "optimalApproach": "Dynamic Expand & Shrink Sliding Window with int[128] ASCII Demand Array",
+    "relatedProblems": [
+      {
+        "number": 239,
+        "title": "Sliding Window Maximum",
+        "difficulty": "Hard"
+      },
+      {
+        "number": 3,
+        "title": "Longest Substring Without Repeating Characters",
+        "difficulty": "Medium"
+      },
+      {
+        "number": 424,
+        "title": "Longest Repeating Character Replacement",
+        "difficulty": "Medium"
+      },
+      {
+        "number": 567,
+        "title": "Permutation in String",
+        "difficulty": "Medium"
+      }
+    ],
+    "leetcodeUrl": "https://leetcode.com/problems/minimum-window-substring/"
   }
 ];
 

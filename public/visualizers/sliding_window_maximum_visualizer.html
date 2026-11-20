@@ -1,0 +1,1666 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sliding Window Maximum (LeetCode 239) - Glassmorphic Visualizer</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: radial-gradient(circle at 14% 16%, #0c192c 0%, #030712 100%);
+      color: #e2e8f0;
+      min-height: 100vh;
+    }
+
+    .code-font {
+      font-family: 'Fira Code', monospace;
+    }
+
+    /* Glassmorphic Surface & Controls */
+    .glass-panel {
+      background: rgba(15, 23, 42, 0.56);
+      backdrop-filter: blur(22px);
+      -webkit-backdrop-filter: blur(22px);
+      border: 1px solid rgba(255, 255, 255, 0.11);
+      box-shadow: 0 20px 45px -15px rgba(0, 0, 0, 0.68), inset 0 1px 0 0 rgba(255, 255, 255, 0.09);
+    }
+
+    .glass-button {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .glass-button:hover:not(:disabled) {
+      background: rgba(255, 255, 255, 0.15);
+      border-color: rgba(255, 255, 255, 0.28);
+      transform: translateY(-1px);
+    }
+    .glass-button:active:not(:disabled) {
+      transform: translateY(1px);
+    }
+    .glass-button:disabled {
+      opacity: 0.35;
+      cursor: not-allowed;
+    }
+
+    /* Code Execution Line Highlight with Exact Preserved Indentation */
+    .code-line {
+      white-space: pre;
+      transition: all 0.2s ease;
+      border-left: 3px solid transparent;
+      padding: 2px 10px;
+    }
+    .code-line.active-line {
+      background: rgba(56, 189, 248, 0.18);
+      border-left: 3px solid #38bdf8;
+      color: #ffffff;
+      box-shadow: inset 0 0 16px rgba(56, 189, 248, 0.15);
+    }
+
+    /* Glassy Element Cards & Bi-Directional Magnitude Bars */
+    .glass-element-card {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      transition: all 0.28s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    .glass-element-card.expired-card {
+      opacity: 0.38;
+      background: rgba(15, 23, 42, 0.35);
+      border-color: rgba(255, 255, 255, 0.06);
+    }
+
+    .glass-element-card.in-window-card {
+      background: linear-gradient(180deg, rgba(56, 189, 248, 0.15) 0%, rgba(14, 165, 233, 0.05) 100%);
+      border-color: rgba(56, 189, 248, 0.5);
+      box-shadow: 0 8px 20px -6px rgba(56, 189, 248, 0.24);
+    }
+
+    .glass-element-card.scanner-i-card {
+      background: linear-gradient(180deg, rgba(251, 191, 36, 0.24) 0%, rgba(245, 158, 11, 0.09) 100%);
+      border-color: rgba(251, 191, 36, 0.92);
+      transform: translateY(-5px) scale(1.04);
+      box-shadow: 0 12px 26px -4px rgba(251, 191, 36, 0.38), inset 0 1px 0 rgba(255, 255, 255, 0.25);
+      z-index: 15;
+    }
+
+    .glass-element-card.window-max-card {
+      background: linear-gradient(180deg, rgba(16, 185, 129, 0.26) 0%, rgba(5, 150, 105, 0.10) 100%) !important;
+      border-color: rgba(52, 211, 153, 0.95) !important;
+      box-shadow: 0 12px 28px -4px rgba(16, 185, 129, 0.42), inset 0 1px 0 rgba(255, 255, 255, 0.3) !important;
+      z-index: 18;
+    }
+
+    /* Monotonic Deque Node Token */
+    .deque-node {
+      background: linear-gradient(180deg, rgba(168, 85, 247, 0.20) 0%, rgba(126, 34, 206, 0.08) 100%);
+      border: 1px solid rgba(192, 132, 252, 0.55);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      transition: all 0.28s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    .deque-node.deque-front-max {
+      background: linear-gradient(180deg, rgba(16, 185, 129, 0.26) 0%, rgba(5, 150, 105, 0.11) 100%);
+      border-color: rgba(52, 211, 153, 0.92);
+      box-shadow: 0 10px 24px -4px rgba(16, 185, 129, 0.4);
+    }
+
+    .deque-node.deque-check-alert {
+      background: linear-gradient(180deg, rgba(244, 63, 94, 0.30) 0%, rgba(225, 29, 72, 0.14) 100%);
+      border-color: rgba(251, 113, 133, 0.95);
+      transform: translateY(-4px) scale(1.05);
+      box-shadow: 0 10px 24px -4px rgba(244, 63, 94, 0.5);
+    }
+
+    .deque-node.deque-new-offer {
+      background: linear-gradient(180deg, rgba(251, 191, 36, 0.28) 0%, rgba(245, 158, 11, 0.12) 100%);
+      border-color: rgba(251, 191, 36, 0.95);
+      box-shadow: 0 10px 24px -4px rgba(251, 191, 36, 0.45);
+    }
+
+    /* Result Output Slot Card */
+    .result-slot {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px dashed rgba(148, 163, 184, 0.32);
+      backdrop-filter: blur(10px);
+      transition: all 0.28s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    .result-slot.filled-slot {
+      background: linear-gradient(180deg, rgba(16, 185, 129, 0.16) 0%, rgba(5, 150, 105, 0.06) 100%);
+      border: 1px solid rgba(52, 211, 153, 0.55);
+    }
+
+    .result-slot.just-filled-slot {
+      background: linear-gradient(180deg, rgba(16, 185, 129, 0.32) 0%, rgba(5, 150, 105, 0.14) 100%);
+      border: 1.5px solid rgba(52, 211, 153, 0.95);
+      transform: translateY(-4px) scale(1.05);
+      box-shadow: 0 12px 26px -4px rgba(16, 185, 129, 0.48);
+    }
+
+    @keyframes arcDash {
+      to {
+        stroke-dashoffset: -24;
+      }
+    }
+    .transfer-arc-path {
+      stroke-dasharray: 6 6;
+      animation: arcDash 0.8s linear infinite;
+    }
+
+    @keyframes completePulse {
+      0%, 100% { transform: scale(1); filter: drop-shadow(0 0 8px rgba(16, 185, 129, 0.45)); }
+      50% { transform: scale(1.04); filter: drop-shadow(0 0 20px rgba(16, 185, 129, 0.95)); }
+    }
+    .complete-badge-anim {
+      animation: completePulse 0.65s ease-in-out;
+    }
+
+    /* Custom Scrollbars */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: rgba(15, 23, 42, 0.4);
+    }
+    ::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.18);
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(255, 255, 255, 0.3);
+    }
+  </style>
+</head>
+<body class="p-2.5 sm:p-4 lg:px-5 lg:py-4 flex flex-col items-center justify-start min-h-screen">
+
+  <!-- Ambient Glass Glow Orbs -->
+  <div class="fixed top-6 left-1/6 w-96 h-96 bg-cyan-500/14 rounded-full blur-3xl pointer-events-none -z-10"></div>
+  <div class="fixed top-1/3 right-1/6 w-96 h-96 bg-purple-500/14 rounded-full blur-3xl pointer-events-none -z-10"></div>
+  <div class="fixed bottom-12 left-1/2 w-80 h-80 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none -z-10"></div>
+
+  <!-- MAIN WRAPPER -->
+  <div class="w-full max-w-[1560px] flex flex-col gap-5">
+
+    <!-- TOP FROSTED-GLASS CONTROLS DECK -->
+    <header class="glass-panel rounded-2xl p-4 sm:p-5 flex flex-col gap-4 sticky top-3 z-50">
+      <div class="flex flex-wrap items-center justify-between gap-4">
+
+        <!-- Title & Algorithm Metadata -->
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-cyan-500 via-purple-500 to-emerald-400 flex items-center justify-center shadow-lg shadow-cyan-500/25 text-slate-950 font-bold text-lg">
+            <i class="fa-solid fa-window-maximize"></i>
+          </div>
+          <div>
+            <h1 class="text-lg sm:text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white via-cyan-100 to-emerald-300">
+              Sliding Window Maximum
+            </h1>
+            <p class="text-xs text-slate-400 flex items-center gap-2">
+              <span class="inline-block w-2 h-2 rounded-full bg-cyan-400 animate-pulse"></span>
+              LeetCode 239 • Monotonic Decreasing Deque&lt;Integer&gt; • &Omicron;(n) Time • &Omicron;(k) Space
+            </p>
+          </div>
+        </div>
+
+        <!-- Center Playback Controls: Reset, Previous, Start/Stop, Next -->
+        <div class="flex items-center gap-2 sm:gap-3 bg-white/5 p-1.5 rounded-xl border border-white/10 backdrop-blur-md">
+          <button id="btnReset" class="glass-button text-slate-200 hover:text-white px-3 py-2 rounded-lg text-sm flex items-center gap-1.5" title="Reset to Initial State">
+            <i class="fa-solid fa-rotate-left"></i>
+            <span class="hidden sm:inline">Reset</span>
+          </button>
+          <button id="btnPrev" class="glass-button text-slate-200 hover:text-white px-3 py-2 rounded-lg text-sm flex items-center gap-1.5" title="Previous Step (Left Arrow)">
+            <i class="fa-solid fa-backward-step"></i>
+            <span class="hidden sm:inline">Previous</span>
+          </button>
+          <button id="btnPlay" class="glass-button bg-cyan-500/25 text-cyan-200 hover:bg-cyan-500/35 border-cyan-400/50 px-4 py-2 rounded-lg text-sm font-semibold flex items-center gap-2 shadow-lg shadow-cyan-500/15" title="Start / Stop (Spacebar)">
+            <i class="fa-solid fa-play" id="playIcon"></i>
+            <span id="playText">Start</span>
+          </button>
+          <button id="btnNext" class="glass-button text-slate-200 hover:text-white px-3 py-2 rounded-lg text-sm flex items-center gap-1.5" title="Next Step (Right Arrow)">
+            <span class="hidden sm:inline">Next</span>
+            <i class="fa-solid fa-forward-step"></i>
+          </button>
+        </div>
+
+        <!-- Speed & Audio Controls -->
+        <div class="flex items-center gap-2">
+          <a href="/" class="glass-button px-3 py-2 rounded-xl text-xs font-semibold text-slate-300 hover:text-white flex items-center gap-1.5 border border-white/10 hover:border-indigo-500/40 bg-white/5 shrink-0 transition-all active:scale-95 cursor-pointer" title="Return to DSA Atlas Library">
+            <i class="fa-solid fa-arrow-left text-indigo-400"></i>
+            <span>DSA Atlas</span>
+          </a>
+          <div class="flex items-center bg-white/5 rounded-xl p-1 border border-white/10 text-xs text-slate-300 backdrop-blur-md">
+            <span class="px-2 py-1 text-slate-400"><i class="fa-solid fa-gauge-high mr-1"></i>Speed</span>
+            <button class="speed-btn px-2 py-1 rounded-lg hover:text-white transition" data-speed="1300">0.5x</button>
+            <button class="speed-btn px-2 py-1 rounded-lg bg-cyan-500/30 text-cyan-200 font-semibold transition" data-speed="650">1x</button>
+            <button class="speed-btn px-2 py-1 rounded-lg hover:text-white transition" data-speed="280">2x</button>
+            <button class="speed-btn px-2 py-1 rounded-lg hover:text-white transition" data-speed="110">4x</button>
+          </div>
+          <button id="btnAudio" class="glass-button p-2.5 rounded-xl text-slate-300 hover:text-cyan-300" title="Toggle Sound Effects">
+            <i class="fa-solid fa-volume-high" id="audioIcon"></i>
+          </button>
+        </div>
+
+      </div>
+
+      <!-- Scrubber Slider & Status Badges -->
+      <div class="flex flex-col sm:flex-row items-center gap-3 pt-2 border-t border-white/10">
+        <div class="flex flex-wrap items-center gap-2 text-xs text-slate-300 w-full sm:w-auto shrink-0">
+          <span id="stepCounterBadge" class="code-font px-2.5 py-1 rounded-md bg-white/5 border border-white/10 text-cyan-300">
+            Step: 0 / 0
+          </span>
+          <span id="phaseBadge" class="px-2.5 py-1 rounded-md bg-sky-500/20 border border-sky-400/30 text-sky-200 font-semibold">
+            Ready
+          </span>
+          <span id="kHeaderBadge" class="px-2.5 py-1 rounded-md bg-purple-500/20 border border-purple-400/30 text-purple-200 font-bold">
+            Window k = 3
+          </span>
+          <span id="resultHeaderBadge" class="px-2.5 py-1 rounded-md bg-emerald-500/20 border border-emerald-400/30 text-emerald-200 font-bold">
+            Result: [?, ?, ?, ?, ?, ?]
+          </span>
+        </div>
+        <div class="w-full flex items-center gap-3">
+          <input type="range" id="stepScrubber" min="0" max="0" value="0" class="w-full h-1.5 bg-slate-800/80 rounded-lg appearance-none cursor-pointer accent-cyan-400">
+        </div>
+      </div>
+    </header>
+
+    <!-- TEST CASES & CUSTOM (NUMS, K) BAR -->
+    <section class="glass-panel rounded-2xl p-4 flex flex-wrap items-center justify-between gap-4">
+      <div class="flex flex-wrap items-center gap-3">
+        <label for="presetSelect" class="text-xs uppercase font-semibold text-slate-300 tracking-wider flex items-center gap-1.5">
+          <i class="fa-solid fa-flask text-cyan-400"></i> Test Cases:
+        </label>
+        <select id="presetSelect" class="bg-slate-900/75 border border-white/15 text-xs sm:text-sm text-slate-200 rounded-xl px-3 py-2 outline-none focus:border-cyan-400 backdrop-blur-md">
+          <option value="0">1: LeetCode Ex 1 ([1, 3, -1, -3, 5, 3, 6, 7], k = 3 &rarr; [3, 3, 5, 5, 6, 7])</option>
+          <option value="1">2: LeetCode Ex 2 ([1], k = 1 &rarr; [1])</option>
+          <option value="2">3: Strictly Decreasing ([9, 7, 5, 3, 1], k = 3 &rarr; [9, 7, 5])</option>
+          <option value="3">4: Strictly Increasing ([1, 3, 5, 7, 9], k = 3 &rarr; [5, 7, 9])</option>
+          <option value="4">5: Equal Adjacent Peaks ([4, 4, 2, 4, 1], k = 2 &rarr; [4, 4, 4, 4])</option>
+          <option value="5">6: All Negative Values ([-7, -2, -5, -1, -4], k = 3 &rarr; [-2, -1, -1])</option>
+          <option value="6">7: Full Array Window k = n ([2, 8, 4, 6], k = 4 &rarr; [8])</option>
+          <option value="7">8: Unit Window k = 1 ([5, -2, 9, 0], k = 1 &rarr; [5, -2, 9, 0])</option>
+          <option value="8">9: Sawtooth Waves ([3, 1, 4, 1, 5, 9, 2, 6], k = 3 &rarr; [4, 4, 5, 9, 9, 9])</option>
+          <option value="9">10: Sudden Late Surge ([2, 1, 0, -1, 10], k = 3 &rarr; [2, 1, 10])</option>
+        </select>
+      </div>
+
+      <div class="flex flex-wrap items-center gap-2 flex-grow max-w-lg">
+        <input type="text" id="customArrInput" placeholder="Array: 1, 3, -1, -3, 5, 3, 6, 7" class="flex-1 min-w-[150px] bg-white/5 border border-white/15 rounded-xl px-3 py-2 text-xs text-slate-200 code-font outline-none focus:border-cyan-400 backdrop-blur-md" title="Comma-separated integers">
+        <input type="number" id="customKInput" min="1" max="30" value="3" placeholder="k" class="w-16 bg-white/5 border border-white/15 rounded-xl px-2.5 py-2 text-xs text-slate-200 code-font outline-none focus:border-purple-400 backdrop-blur-md" title="Window size k (1 <= k <= nums.length)">
+        <button id="btnApplyCustom" class="glass-button text-xs px-4 py-2 rounded-xl text-cyan-300 font-semibold shrink-0">
+          Load (nums, k)
+        </button>
+      </div>
+    </section>
+
+    <!-- MAIN VISUALIZATION & CODE SECTION -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-5">
+
+      <!-- LEFT: SLIDING WINDOW ARENA, MONOTONIC DEQUE & RESULT ARRAY -->
+      <section class="lg:col-span-7 xl:col-span-8 flex flex-col gap-5">
+
+        <!-- Live Telemetry Cards -->
+        <div class="grid grid-cols-2 sm:grid-cols-5 gap-3">
+
+          <!-- Scanner i & Value -->
+          <div class="glass-panel rounded-xl p-3 flex flex-col justify-between border-amber-400/35">
+            <span class="text-[11px] text-slate-400 uppercase font-semibold flex items-center justify-between">
+              Scanner (i)
+              <span class="w-2 h-2 rounded-full bg-amber-400"></span>
+            </span>
+            <div class="flex items-baseline gap-1.5 mt-1.5">
+              <span id="varPtrI" class="code-font text-xl font-bold text-amber-300">-</span>
+              <span id="varCurVal" class="text-xs text-amber-200 code-font"></span>
+            </div>
+            <span class="text-[10px] text-amber-200/75 mt-1 code-font">nums[i]</span>
+          </div>
+
+          <!-- Active Window Bounds [i - k + 1 .. i] -->
+          <div class="glass-panel rounded-xl p-3 flex flex-col justify-between border-cyan-400/35">
+            <span class="text-[11px] text-slate-400 uppercase font-semibold flex items-center justify-between">
+              Window Span
+              <i class="fa-solid fa-arrows-left-right text-cyan-400 text-[10px]"></i>
+            </span>
+            <div class="flex items-baseline gap-1.5 mt-1.5">
+              <span id="varWinSpan" class="code-font text-base sm:text-lg font-bold text-cyan-300">-</span>
+            </div>
+            <span id="varExpireCutoff" class="text-[10px] text-cyan-200/75 mt-1 code-font">expire &le; i - k</span>
+          </div>
+
+          <!-- Deque Front (Current Max) -->
+          <div class="glass-panel rounded-xl p-3 flex flex-col justify-between border-emerald-400/35">
+            <span class="text-[11px] text-slate-400 uppercase font-semibold flex items-center justify-between">
+              Deque Front
+              <i class="fa-solid fa-crown text-emerald-400 text-[10px]"></i>
+            </span>
+            <div class="flex items-baseline gap-1.5 mt-1.5">
+              <span id="varDequeFront" class="code-font text-base sm:text-lg font-bold text-emerald-300">-</span>
+            </div>
+            <span class="text-[10px] text-emerald-200/75 mt-1 code-font">peekFirst() max</span>
+          </div>
+
+          <!-- Deque Back -->
+          <div class="glass-panel rounded-xl p-3 flex flex-col justify-between border-purple-400/35">
+            <span class="text-[11px] text-slate-400 uppercase font-semibold flex items-center justify-between">
+              Deque Back
+              <i class="fa-solid fa-layer-group text-purple-400 text-[10px]"></i>
+            </span>
+            <div class="flex items-baseline gap-1.5 mt-1.5">
+              <span id="varDequeBack" class="code-font text-base sm:text-lg font-bold text-purple-300">-</span>
+            </div>
+            <span id="varDequeSize" class="text-[10px] text-purple-200/75 mt-1 code-font">size: 0</span>
+          </div>
+
+          <!-- Write Pointer index -->
+          <div id="resultTelemetryCard" class="glass-panel rounded-xl p-3 flex flex-col justify-between border-sky-400/35 col-span-2 sm:col-span-1">
+            <span class="text-[11px] text-slate-400 uppercase font-semibold flex items-center justify-between">
+              Write index
+              <i class="fa-solid fa-pen-to-square text-sky-400 text-[10px]"></i>
+            </span>
+            <div class="flex items-baseline gap-1.5 mt-1.5">
+              <span id="varResIndex" class="code-font text-xl font-black text-sky-300">0</span>
+            </div>
+            <span id="varResTotal" class="text-[10px] text-slate-400 mt-1 code-font">of 6 windows</span>
+          </div>
+
+        </div>
+
+        <!-- UNIFIED STAGE: NUMS[] SLIDING WINDOW, MONOTONIC DEQUE & RESULT[] -->
+        <div id="stageWrapper" class="glass-panel relative rounded-2xl p-4 sm:p-5 flex flex-col gap-5">
+          <!-- SVG Trajectory Arc Overlay for Deque Offer/Poll & Result Writes -->
+          <svg id="transferArcSvg" class="absolute inset-0 w-full h-full pointer-events-none z-30 overflow-visible"></svg>
+
+          <!-- Floating Lift-and-Place Clone Layer -->
+          <div id="flyingCloneLayer" class="absolute inset-0 pointer-events-none z-40"></div>
+
+          <!-- 1. INPUT ARRAY nums[] WITH SLIDING WINDOW HALO & MAGNITUDE BARS -->
+          <div class="flex flex-col gap-2.5">
+            <div class="flex flex-wrap items-center justify-between text-xs pb-2 border-b border-white/10 gap-2">
+              <span class="font-semibold text-slate-200 uppercase tracking-wider flex items-center gap-1.5">
+                <i class="fa-solid fa-chart-simple text-cyan-400"></i>
+                Input Array: <span class="code-font text-white">nums[]</span>
+                <span id="numsMetaTag" class="code-font text-cyan-300">(n = 8, k = 3)</span>
+              </span>
+
+              <div class="flex flex-wrap items-center gap-3 text-[11px]">
+                <span class="flex items-center gap-1.5">
+                  <span class="w-2.5 h-2.5 rounded-sm bg-amber-400 inline-block"></span> Current i
+                </span>
+                <span class="flex items-center gap-1.5">
+                  <span class="w-2.5 h-2.5 rounded-sm bg-emerald-400 inline-block"></span> Window Max (Front)
+                </span>
+                <span class="flex items-center gap-1.5">
+                  <span class="w-2.5 h-2.5 rounded-sm bg-purple-400 inline-block"></span> In Deque
+                </span>
+              </div>
+            </div>
+
+            <!-- Scrollable Input Array Tape + Sliding Window Frame -->
+            <div id="numsScrollContainer" class="relative w-full pt-8 pb-3 px-2.5 sm:px-3 rounded-xl bg-white/[0.02] border border-white/10 overflow-x-auto">
+              <!-- Elastic Fixed-Size Sliding Window Frame -->
+              <div id="activeWindowFrame" class="hidden absolute rounded-2xl border-2 border-cyan-400/80 bg-cyan-400/[0.06] pointer-events-none transition-all duration-300 z-10">
+                <span id="activeWindowTag" class="absolute -top-3 left-1/2 -translate-x-1/2 px-2 py-0.5 rounded-full bg-slate-950 border border-cyan-400/75 text-cyan-200 code-font text-[9px] font-bold shadow whitespace-nowrap">
+                  window [0..2]
+                </span>
+              </div>
+
+              <!-- Glassy Boxes + Bi-Directional Magnitude Bars -->
+              <div id="numsStreamArena" class="relative z-20 w-full flex items-center justify-between gap-1.5 sm:gap-2 min-h-[168px]">
+                <!-- Populated dynamically -->
+              </div>
+            </div>
+          </div>
+
+          <!-- 2. MONOTONIC DECREASING DEQUE<INTEGER> & RESULT[] OUTPUT ARRAY -->
+          <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 pt-1">
+
+            <!-- Monotonic Decreasing Deque<Integer> Chamber (7 Cols) -->
+            <div class="lg:col-span-7 flex flex-col gap-2.5">
+              <div class="flex flex-wrap items-center justify-between text-xs pb-1.5 border-b border-white/10 gap-1">
+                <span class="font-semibold text-purple-300 uppercase tracking-wider flex items-center gap-1.5">
+                  <i class="fa-solid fa-arrows-left-right-to-line text-purple-400"></i>
+                  Monotonic <span class="code-font text-white">Deque&lt;Integer&gt;</span>
+                </span>
+                <span class="code-font text-[10px] text-slate-400">
+                  Decreasing: <span class="text-emerald-300">Front (Max)</span> &gt; ... &gt; <span class="text-purple-300">Back</span>
+                </span>
+              </div>
+
+              <div class="relative min-h-[122px] p-2.5 rounded-xl bg-white/[0.015] border border-white/10 flex items-center justify-center gap-2 overflow-x-auto">
+                <!-- External Left Ejection Dock (Outside FRONT gate on pollFirst) -->
+                <div id="evictedFrontDock" class="hidden shrink-0 px-2 py-1.5 rounded-xl border border-dashed border-rose-400/80 bg-rose-500/15 flex flex-col items-center justify-center select-none">
+                  <span class="text-[8px] code-font text-rose-400 font-bold uppercase">Thrown Out</span>
+                  <span id="evictedFrontIdx" class="code-font text-xs font-extrabold text-rose-200 line-through">[0]</span>
+                  <span id="evictedFrontVal" class="code-font text-[9px] text-rose-300">expired</span>
+                </div>
+
+                <!-- Bordered Deque Channel (Strictly holds active deque elements between FRONT & BACK) -->
+                <div id="dequeTube" class="flex-1 min-w-[215px] p-2 rounded-xl bg-slate-950/65 border border-purple-400/30 flex items-center justify-between gap-2 shadow-inner">
+                  <!-- Left Gate: FRONT (peekFirst / pollFirst) -->
+                  <div id="dequeFrontGate" class="shrink-0 flex flex-col items-center justify-center px-2 py-2 rounded-lg bg-emerald-500/10 border border-emerald-400/30 text-[9px] code-font text-emerald-300 font-bold">
+                    <span>FRONT</span>
+                    <span class="text-[8px] text-emerald-400/75 font-normal">peekFirst</span>
+                  </div>
+
+                  <!-- Active Deque Elements (Right-aligned against BACK gate so offerLast always enters at the back) -->
+                  <div id="dequeArena" class="flex-1 flex items-center justify-end gap-1.5 min-h-[76px] px-1">
+                    <span class="w-full text-center text-xs text-slate-500 italic">empty</span>
+                  </div>
+
+                  <!-- Right Gate: BACK (peekLast / pollLast / offerLast) -->
+                  <div id="dequeBackGate" class="shrink-0 flex flex-col items-center justify-center px-2 py-2 rounded-lg bg-purple-500/10 border border-purple-400/30 text-[9px] code-font text-purple-300 font-bold">
+                    <span>BACK</span>
+                    <span class="text-[8px] text-purple-400/75 font-normal">offerLast</span>
+                  </div>
+                </div>
+
+                <!-- External Right Ejection Dock (Outside BACK gate on pollLast) -->
+                <div id="evictedBackDock" class="hidden shrink-0 px-2 py-1.5 rounded-xl border border-dashed border-rose-400/80 bg-rose-500/15 flex flex-col items-center justify-center select-none">
+                  <span class="text-[8px] code-font text-rose-400 font-bold uppercase">Thrown Out</span>
+                  <span id="evictedBackIdx" class="code-font text-xs font-extrabold text-rose-200 line-through">[0]</span>
+                  <span id="evictedBackVal" class="code-font text-[9px] text-rose-300">&le; 3</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Output Array int[] result (5 Cols) -->
+            <div class="lg:col-span-5 flex flex-col gap-2.5">
+              <div class="flex items-center justify-between text-xs pb-1.5 border-b border-white/10">
+                <span class="font-semibold text-emerald-300 uppercase tracking-wider flex items-center gap-1.5">
+                  <i class="fa-solid fa-square-check text-emerald-400"></i>
+                  Output <span class="code-font text-white">result[]</span>
+                </span>
+                <span id="resultLenTag" class="code-font text-[10px] text-emerald-300">len = 6</span>
+              </div>
+
+              <div id="resultArena" class="min-h-[118px] p-3 rounded-xl bg-white/[0.02] border border-white/10 flex flex-wrap items-center justify-center gap-2">
+                <!-- Populated dynamically -->
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Live Decision Banner -->
+          <div id="decisionBanner" class="p-3.5 rounded-xl bg-white/[0.04] border border-white/10 text-xs flex flex-col sm:flex-row items-center justify-between gap-3 backdrop-blur-md">
+            <div class="flex items-center gap-2.5">
+              <i id="decisionIcon" class="fa-solid fa-circle-info text-cyan-400 text-base"></i>
+              <span id="decisionText" class="text-slate-200">Ready to slide the window across nums[] and maintain candidate maxima in decreasing order inside Deque.</span>
+            </div>
+            <div id="actionPill" class="hidden text-xs code-font px-3 py-1.5 rounded-lg bg-slate-950/70 border border-white/15 text-emerald-200 font-semibold shrink-0">
+              <!-- e.g. result[0] = nums[1] (3) -->
+            </div>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- RIGHT: SYNCHRONIZED & PROPERLY INDENTED JAVA CODE CONTAINER -->
+      <section class="lg:col-span-5 xl:col-span-4 flex flex-col gap-4">
+
+        <div class="glass-panel rounded-2xl p-4 flex flex-col h-full">
+          <div class="flex items-center justify-between pb-3 border-b border-white/10 text-xs">
+            <div class="flex items-center gap-2">
+              <div class="flex gap-1.5">
+                <span class="w-3 h-3 rounded-full bg-rose-500/80 inline-block"></span>
+                <span class="w-3 h-3 rounded-full bg-amber-500/80 inline-block"></span>
+                <span class="w-3 h-3 rounded-full bg-emerald-500/80 inline-block"></span>
+              </div>
+              <span class="code-font text-slate-200 font-semibold ml-2">Solution.java</span>
+            </div>
+            <span class="text-[11px] text-cyan-300 bg-cyan-500/15 px-2.5 py-0.5 rounded border border-cyan-400/25 code-font">
+              Monotonic Deque
+            </span>
+          </div>
+
+          <!-- Properly Indented Java Code Lines with Zero-Jump Localized Scroll -->
+          <div id="codeContainer" class="code-font text-xs sm:text-[13px] leading-relaxed text-slate-300 py-3 overflow-x-auto overflow-y-auto max-h-[600px] flex-grow select-none">
+            <div class="code-line" id="line1"><span class="text-slate-500 mr-2"> 1</span><span class="text-indigo-400 font-semibold">import</span> java.util.*;</div>
+            <div class="code-line" id="line2"><span class="text-slate-500 mr-2"> 2</span></div>
+            <div class="code-line" id="line3"><span class="text-slate-500 mr-2"> 3</span><span class="text-indigo-400 font-semibold">class</span> <span class="text-amber-300">Solution</span> {</div>
+            <div class="code-line" id="line4"><span class="text-slate-500 mr-2"> 4</span>    <span class="text-indigo-400 font-semibold">public int</span>[] <span class="text-cyan-300">maxSlidingWindow</span>(<span class="text-indigo-400">int</span>[] nums, <span class="text-indigo-400">int</span> k) {</div>
+            <div class="code-line" id="line5"><span class="text-slate-500 mr-2"> 5</span></div>
+            <div class="code-line" id="line6"><span class="text-slate-500 mr-2"> 6</span>        <span class="text-indigo-400 font-semibold">int</span> n = nums.length;</div>
+            <div class="code-line" id="line7"><span class="text-slate-500 mr-2"> 7</span>        <span class="text-indigo-400 font-semibold">int</span>[] result = <span class="text-indigo-400 font-semibold">new int</span>[n - k + <span class="text-rose-400">1</span>];</div>
+            <div class="code-line" id="line8"><span class="text-slate-500 mr-2"> 8</span></div>
+            <div class="code-line" id="line9"><span class="text-slate-500 mr-2"> 9</span>        <span class="text-slate-500 italic">// Stores indices in decreasing order of their values</span></div>
+            <div class="code-line" id="line10"><span class="text-slate-500 mr-2">10</span>        Deque&lt;Integer&gt; deque = <span class="text-indigo-400 font-semibold">new</span> ArrayDeque&lt;&gt;();</div>
+            <div class="code-line" id="line11"><span class="text-slate-500 mr-2">11</span>        <span class="text-indigo-400 font-semibold">int</span> index = <span class="text-rose-400">0</span>;</div>
+            <div class="code-line" id="line12"><span class="text-slate-500 mr-2">12</span></div>
+            <div class="code-line" id="line13"><span class="text-slate-500 mr-2">13</span>        <span class="text-indigo-400 font-semibold">for</span> (<span class="text-indigo-400">int</span> i = <span class="text-rose-400">0</span>; i &lt; n; i++) {</div>
+            <div class="code-line" id="line14"><span class="text-slate-500 mr-2">14</span></div>
+            <div class="code-line" id="line15"><span class="text-slate-500 mr-2">15</span>            <span class="text-slate-500 italic">// 1. Remove indices outside the current window</span></div>
+            <div class="code-line" id="line16"><span class="text-slate-500 mr-2">16</span>            <span class="text-indigo-400 font-semibold">while</span> (!deque.isEmpty() &amp;&amp;</div>
+            <div class="code-line" id="line17"><span class="text-slate-500 mr-2">17</span>                   deque.peekFirst() &lt;= i - k) {</div>
+            <div class="code-line" id="line18"><span class="text-slate-500 mr-2">18</span>                deque.pollFirst();</div>
+            <div class="code-line" id="line19"><span class="text-slate-500 mr-2">19</span>            }</div>
+            <div class="code-line" id="line20"><span class="text-slate-500 mr-2">20</span></div>
+            <div class="code-line" id="line21"><span class="text-slate-500 mr-2">21</span>            <span class="text-slate-500 italic">// 2. Remove smaller or equal elements from the back</span></div>
+            <div class="code-line" id="line22"><span class="text-slate-500 mr-2">22</span>            <span class="text-indigo-400 font-semibold">while</span> (!deque.isEmpty() &amp;&amp;</div>
+            <div class="code-line" id="line23"><span class="text-slate-500 mr-2">23</span>                   nums[deque.peekLast()] &lt;= nums[i]) {</div>
+            <div class="code-line" id="line24"><span class="text-slate-500 mr-2">24</span>                deque.pollLast();</div>
+            <div class="code-line" id="line25"><span class="text-slate-500 mr-2">25</span>            }</div>
+            <div class="code-line" id="line26"><span class="text-slate-500 mr-2">26</span></div>
+            <div class="code-line" id="line27"><span class="text-slate-500 mr-2">27</span>            <span class="text-slate-500 italic">// 3. Add the current index</span></div>
+            <div class="code-line" id="line28"><span class="text-slate-500 mr-2">28</span>            deque.offerLast(i);</div>
+            <div class="code-line" id="line29"><span class="text-slate-500 mr-2">29</span></div>
+            <div class="code-line" id="line30"><span class="text-slate-500 mr-2">30</span>            <span class="text-slate-500 italic">// 4. Record maximum after the first window is formed</span></div>
+            <div class="code-line" id="line31"><span class="text-slate-500 mr-2">31</span>            <span class="text-indigo-400 font-semibold">if</span> (i &gt;= k - <span class="text-rose-400">1</span>) {</div>
+            <div class="code-line" id="line32"><span class="text-slate-500 mr-2">32</span>                result[index++] = nums[deque.peekFirst()];</div>
+            <div class="code-line" id="line33"><span class="text-slate-500 mr-2">33</span>            }</div>
+            <div class="code-line" id="line34"><span class="text-slate-500 mr-2">34</span>        }</div>
+            <div class="code-line" id="line35"><span class="text-slate-500 mr-2">35</span></div>
+            <div class="code-line" id="line36"><span class="text-slate-500 mr-2">36</span>        <span class="text-indigo-400 font-semibold">return</span> result;</div>
+            <div class="code-line" id="line37"><span class="text-slate-500 mr-2">37</span>    }</div>
+            <div class="code-line" id="line38"><span class="text-slate-500 mr-2">38</span>}</div>
+          </div>
+
+          <!-- Live Step Narrative Box -->
+          <div class="mt-3 p-3 bg-white/[0.04] border border-white/10 rounded-xl flex items-start gap-2.5 backdrop-blur-md">
+            <i class="fa-solid fa-circle-info text-cyan-400 mt-0.5 text-xs"></i>
+            <div class="text-xs text-slate-200 leading-relaxed" id="stepDescription">
+              Ready to run Sliding Window Maximum. Click <b>Start</b> or <b>Next</b> to step through.
+            </div>
+          </div>
+
+        </div>
+
+      </section>
+
+    </div>
+
+    <!-- BOTTOM SECTION: PROBLEM STATEMENT & ARCHITECTURAL SUMMARY -->
+    <footer class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-2">
+
+      <!-- Problem Statement Card -->
+      <div class="glass-panel rounded-2xl p-5 flex flex-col gap-3">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <span class="text-rose-400 font-bold"><i class="fa-solid fa-file-lines mr-1.5"></i>Problem Statement</span>
+            <span class="px-2 py-0.5 rounded text-[11px] font-semibold bg-rose-500/20 text-rose-300 border border-rose-400/30">Hard</span>
+          </div>
+          <span class="text-xs text-slate-400 font-mono">LeetCode 239</span>
+        </div>
+
+        <p class="text-xs text-slate-300 leading-relaxed">
+          You are given an array of integers <code class="font-mono text-cyan-300">nums</code>, there is a sliding window of size <code class="font-mono text-purple-300">k</code> which is moving from the very left of the array to the very right. You can only see the <code class="font-mono">k</code> numbers in the window. Each time the sliding window moves right by one position. Return the <b>max sliding window</b>.
+        </p>
+
+        <div class="space-y-2 pt-2 border-t border-white/10 text-xs text-slate-300">
+          <div class="bg-white/[0.03] p-2.5 rounded-lg border border-white/10 font-mono">
+            <span class="text-slate-400">Example 1:</span>
+            <b>Input:</b> nums = [1,3,-1,-3,5,3,6,7], k = 3 &rarr; <b>Output:</b> <span class="text-emerald-400 font-bold">[3,3,5,5,6,7]</span>
+            <pre class="text-[10px] text-slate-400 mt-1.5 leading-snug overflow-x-auto">Window position                Max
+---------------               -----
+[1  3  -1] -3  5  3  6  7       3
+ 1 [3  -1  -3] 5  3  6  7       3
+ 1  3 [-1  -3  5] 3  6  7       5
+ 1  3  -1 [-3  5  3] 6  7       5
+ 1  3  -1  -3 [5  3  6] 7       6
+ 1  3  -1  -3  5 [3  6  7]      7</pre>
+          </div>
+          <div class="bg-white/[0.03] p-2.5 rounded-lg border border-white/10 font-mono">
+            <span class="text-slate-400">Example 2:</span>
+            <b>Input:</b> nums = [1], k = 1 &rarr; <b>Output:</b> <span class="text-emerald-400 font-bold">[1]</span>
+          </div>
+        </div>
+
+        <div class="text-[11px] text-slate-400">
+          <b>Constraints:</b> <code class="font-mono text-slate-300">1 &le; nums.length &le; 10<sup>5</sup></code>, <code class="font-mono text-slate-300">-10<sup>4</sup> &le; nums[i] &le; 10<sup>4</sup></code>, <code class="font-mono text-slate-300">1 &le; k &le; nums.length</code>.
+        </div>
+      </div>
+
+      <!-- Algorithm Summary & Monotonic Deque Proof Card -->
+      <div class="glass-panel rounded-2xl p-5 flex flex-col gap-3">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <span class="text-cyan-400 font-bold"><i class="fa-solid fa-brain mr-1.5"></i>Algorithm Summary &amp; Monotonic Deque Invariant</span>
+          </div>
+          <span class="px-2 py-0.5 rounded text-[11px] font-semibold bg-cyan-500/20 text-cyan-200 border border-cyan-400/30">Amortized O(N)</span>
+        </div>
+
+        <div class="space-y-3 text-xs text-slate-300 leading-relaxed">
+          <div class="p-3 bg-purple-950/30 border border-purple-400/25 rounded-xl">
+            <b class="text-purple-300 flex items-center gap-1.5 mb-1">
+              <i class="fa-solid fa-layer-group"></i> Four-Step Monotonic Decreasing Deque Rules:
+            </b>
+            <ol class="list-decimal list-inside space-y-0.5 text-slate-300">
+              <li><b>Expire Out-of-Bounds Front (<code class="font-mono text-rose-300">pollFirst</code>):</b> If <code class="font-mono">deque.peekFirst() &le; i - k</code>, that index has fallen behind the left edge of <code class="font-mono">[i - k + 1 .. i]</code>.</li>
+              <li><b>Prune Dominated Back (<code class="font-mono text-amber-300">pollLast</code>):</b> Any earlier index <code class="font-mono">j &lt; i</code> with <code class="font-mono">nums[j] &le; nums[i]</code> can <b>never</b> become the maximum of any future window containing <code class="font-mono">i</code>.</li>
+              <li><b>Push Candidate Index (<code class="font-mono text-cyan-300">offerLast(i)</code>):</b> Append <code class="font-mono">i</code> to preserve strictly decreasing values from front to back.</li>
+              <li><b>Emit Window Maximum (<code class="font-mono text-emerald-300">peekFirst</code>):</b> Once <code class="font-mono">i &ge; k - 1</code>, the front index always holds the current window maximum in <code class="font-mono">&Omicron;(1)</code>.</li>
+            </ol>
+          </div>
+
+          <div class="grid grid-cols-2 gap-3 pt-1">
+            <div class="p-2.5 bg-white/[0.03] rounded-lg border border-white/10">
+              <span class="text-[11px] text-slate-400 uppercase font-semibold">Time Complexity</span>
+              <div class="text-sm font-bold text-emerald-400 font-mono mt-0.5">&Omicron;(N)</div>
+              <p class="text-[10px] text-slate-400 mt-0.5">Every index is pushed into <code class="font-mono">deque</code> once and popped at most once (<code class="font-mono">2N</code> operations total).</p>
+            </div>
+            <div class="p-2.5 bg-white/[0.03] rounded-lg border border-white/10">
+              <span class="text-[11px] text-slate-400 uppercase font-semibold">Space Complexity</span>
+              <div class="text-sm font-bold text-cyan-400 font-mono mt-0.5">&Omicron;(k)</div>
+              <p class="text-[10px] text-slate-400 mt-0.5">The deque stores at most <code class="font-mono">k</code> indices at any moment (excluding the <code class="font-mono">n - k + 1</code> output array).</p>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+    </footer>
+
+  </div>
+
+  <!-- JAVASCRIPT SIMULATION ENGINE WITH MONOTONIC DEQUE & LIFT-AND-ARC TRANSFERS -->
+  <script>
+    // 10 COMPREHENSIVE PRESETS
+    const PRESETS = [
+      { name: "1: LeetCode Ex 1 ([1, 3, -1, -3, 5, 3, 6, 7], k = 3)", nums: [1, 3, -1, -3, 5, 3, 6, 7], k: 3 },
+      { name: "2: LeetCode Ex 2 ([1], k = 1)", nums: [1], k: 1 },
+      { name: "3: Strictly Decreasing ([9, 7, 5, 3, 1], k = 3)", nums: [9, 7, 5, 3, 1], k: 3 },
+      { name: "4: Strictly Increasing ([1, 3, 5, 7, 9], k = 3)", nums: [1, 3, 5, 7, 9], k: 3 },
+      { name: "5: Equal Adjacent Peaks ([4, 4, 2, 4, 1], k = 2)", nums: [4, 4, 2, 4, 1], k: 2 },
+      { name: "6: All Negative Values ([-7, -2, -5, -1, -4], k = 3)", nums: [-7, -2, -5, -1, -4], k: 3 },
+      { name: "7: Full Array Window k = n ([2, 8, 4, 6], k = 4)", nums: [2, 8, 4, 6], k: 4 },
+      { name: "8: Unit Window k = 1 ([5, -2, 9, 0], k = 1)", nums: [5, -2, 9, 0], k: 1 },
+      { name: "9: Sawtooth Waves ([3, 1, 4, 1, 5, 9, 2, 6], k = 3)", nums: [3, 1, 4, 1, 5, 9, 2, 6], k: 3 },
+      { name: "10: Sudden Late Surge ([2, 1, 0, -1, 10], k = 3)", nums: [2, 1, 0, -1, 10], k: 3 }
+    ];
+
+    // APPLICATION STATE
+    let currentNums = [...PRESETS[0].nums];
+    let currentK = PRESETS[0].k;
+    let steps = [];
+    let currentStepIdx = 0;
+    let isPlaying = false;
+    let playInterval = null;
+    let playSpeed = 650;
+    let audioEnabled = true;
+
+    // WEB AUDIO SYNTHESIZER
+    let audioCtx = null;
+    function initAudio() {
+      if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      }
+    }
+    function playTone(freq = 440, type = 'sine', duration = 0.08, vol = 0.035) {
+      if (!audioEnabled) return;
+      try {
+        initAudio();
+        if (audioCtx.state === 'suspended') {
+          audioCtx.resume();
+        }
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = type;
+        osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+        gain.gain.setValueAtTime(vol, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + duration);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + duration);
+      } catch (e) {}
+    }
+
+    // DOM REFERENCES
+    const btnPlay = document.getElementById('btnPlay');
+    const playIcon = document.getElementById('playIcon');
+    const playText = document.getElementById('playText');
+    const btnPrev = document.getElementById('btnPrev');
+    const btnNext = document.getElementById('btnNext');
+    const btnReset = document.getElementById('btnReset');
+    const btnAudio = document.getElementById('btnAudio');
+    const audioIcon = document.getElementById('audioIcon');
+    const presetSelect = document.getElementById('presetSelect');
+    const customArrInput = document.getElementById('customArrInput');
+    const customKInput = document.getElementById('customKInput');
+    const btnApplyCustom = document.getElementById('btnApplyCustom');
+    const stepScrubber = document.getElementById('stepScrubber');
+    const stepCounterBadge = document.getElementById('stepCounterBadge');
+    const phaseBadge = document.getElementById('phaseBadge');
+    const kHeaderBadge = document.getElementById('kHeaderBadge');
+    const resultHeaderBadge = document.getElementById('resultHeaderBadge');
+
+    const varPtrI = document.getElementById('varPtrI');
+    const varCurVal = document.getElementById('varCurVal');
+    const varWinSpan = document.getElementById('varWinSpan');
+    const varExpireCutoff = document.getElementById('varExpireCutoff');
+    const varDequeFront = document.getElementById('varDequeFront');
+    const varDequeBack = document.getElementById('varDequeBack');
+    const varDequeSize = document.getElementById('varDequeSize');
+    const resultTelemetryCard = document.getElementById('resultTelemetryCard');
+    const varResIndex = document.getElementById('varResIndex');
+    const varResTotal = document.getElementById('varResTotal');
+
+    const stageWrapper = document.getElementById('stageWrapper');
+    const transferArcSvg = document.getElementById('transferArcSvg');
+    const flyingCloneLayer = document.getElementById('flyingCloneLayer');
+    const numsMetaTag = document.getElementById('numsMetaTag');
+    const numsScrollContainer = document.getElementById('numsScrollContainer');
+    const activeWindowFrame = document.getElementById('activeWindowFrame');
+    const activeWindowTag = document.getElementById('activeWindowTag');
+    const numsStreamArena = document.getElementById('numsStreamArena');
+
+    const dequeFrontGate = document.getElementById('dequeFrontGate');
+    const dequeBackGate = document.getElementById('dequeBackGate');
+    const dequeArena = document.getElementById('dequeArena');
+    const evictedFrontDock = document.getElementById('evictedFrontDock');
+    const evictedFrontIdx = document.getElementById('evictedFrontIdx');
+    const evictedFrontVal = document.getElementById('evictedFrontVal');
+    const evictedBackDock = document.getElementById('evictedBackDock');
+    const evictedBackIdx = document.getElementById('evictedBackIdx');
+    const evictedBackVal = document.getElementById('evictedBackVal');
+
+    const resultLenTag = document.getElementById('resultLenTag');
+    const resultArena = document.getElementById('resultArena');
+    const decisionBanner = document.getElementById('decisionBanner');
+    const decisionIcon = document.getElementById('decisionIcon');
+    const decisionText = document.getElementById('decisionText');
+    const actionPill = document.getElementById('actionPill');
+    const codeContainer = document.getElementById('codeContainer');
+    const stepDescription = document.getElementById('stepDescription');
+
+    // STRICT LINE-BY-LINE EXECUTION TRACE GENERATOR
+    function generateSteps(numsArr, k) {
+      const trace = [];
+      const nums = [...numsArr];
+      const n = nums.length;
+      const resLen = n - k + 1;
+      const result = new Array(resLen).fill(null);
+      const resultSources = new Array(resLen).fill(null);
+      const deque = [];
+      let index = 0;
+
+      // Line 4: Method entry
+      trace.push({
+        line: 4,
+        phase: "Start",
+        nums,
+        k,
+        i: -1,
+        deque: [...deque],
+        result: [...result],
+        resultSources: [...resultSources],
+        resIndex: index,
+        desc: `Entered <span class="code-font text-cyan-300 font-bold">maxSlidingWindow</span> with <span class="code-font text-slate-100">nums = [${nums.join(', ')}]</span> and window size <span class="code-font text-purple-300 font-bold">k = ${k}</span>.`,
+        soundFreq: 330
+      });
+
+      // Line 6: int n = nums.length;
+      trace.push({
+        line: 6,
+        phase: `n = ${n}`,
+        nums,
+        k,
+        i: -1,
+        deque: [...deque],
+        result: [...result],
+        resultSources: [...resultSources],
+        resIndex: index,
+        desc: `Stored array length <span class="code-font text-cyan-300 font-bold">int n = nums.length = ${n}</span>.`,
+        soundFreq: 360
+      });
+
+      // Line 7: int[] result = new int[n - k + 1];
+      trace.push({
+        line: 7,
+        phase: `Alloc result[${resLen}]`,
+        nums,
+        k,
+        i: -1,
+        deque: [...deque],
+        result: [...result],
+        resultSources: [...resultSources],
+        resIndex: index,
+        desc: `Allocated output array <span class="code-font text-emerald-300 font-bold">result = new int[${resLen}]</span> for the <span class="code-font">${n} - ${k} + 1 = ${resLen}</span> sliding window positions.`,
+        soundFreq: 390
+      });
+
+      // Line 10: Deque<Integer> deque = new ArrayDeque<>();
+      trace.push({
+        line: 10,
+        phase: "Init Deque",
+        nums,
+        k,
+        i: -1,
+        deque: [...deque],
+        result: [...result],
+        resultSources: [...resultSources],
+        resIndex: index,
+        desc: `Initialized empty monotonic <span class="code-font text-purple-300 font-bold">Deque&lt;Integer&gt; deque</span> to hold candidate indices in strictly decreasing order of their values.`,
+        soundFreq: 415
+      });
+
+      // Line 11: int index = 0;
+      trace.push({
+        line: 11,
+        phase: "Init index = 0",
+        nums,
+        k,
+        i: -1,
+        deque: [...deque],
+        result: [...result],
+        resultSources: [...resultSources],
+        resIndex: index,
+        desc: `Initialized output write pointer <span class="code-font text-sky-300 font-bold">int index = 0</span>.`,
+        soundFreq: 440
+      });
+
+      for (let i = 0; i < n; i++) {
+        // Line 13: for (int i = 0; i < n; i++)
+        trace.push({
+          line: 13,
+          phase: `Scan i = ${i}`,
+          nums,
+          k,
+          i,
+          deque: [...deque],
+          result: [...result],
+          resultSources: [...resultSources],
+          resIndex: index,
+          desc: `Outer loop <span class="code-font text-amber-300 font-bold">i = ${i}</span> (<span class="code-font">${i} &lt; ${n}</span>): Inspecting <span class="code-font text-amber-200 font-bold">nums[${i}] = ${nums[i]}</span>.`,
+          soundFreq: 465
+        });
+
+        // 1. Remove indices outside the current window (Lines 16-18)
+        while (true) {
+          const hasExpired = deque.length > 0 && deque[0] <= i - k;
+          const frontStr = deque.length > 0 ? `deque.peekFirst() = ${deque[0]}` : 'deque is empty';
+
+          trace.push({
+            line: [16, 17],
+            phase: hasExpired ? `Expired [${deque[0]}]` : "Check Front Bounds",
+            nums,
+            k,
+            i,
+            deque: [...deque],
+            dequeCheckSide: hasExpired ? 'front' : undefined,
+            result: [...result],
+            resultSources: [...resultSources],
+            resIndex: index,
+            desc: deque.length === 0
+              ? `Check <span class="code-font text-purple-300">!deque.isEmpty() &amp;&amp; deque.peekFirst() &le; i - k</span>: <span class="code-font">deque</span> is empty (<b>false</b>).`
+              : hasExpired
+                ? `<span class="text-rose-400 font-bold">Out of Window!</span> <span class="code-font text-rose-300">${frontStr} &le; ${i - k}</span> is <b>true</b> &rarr; index <span class="code-font">[${deque[0]}]</span> fell behind window <span class="code-font">[${Math.max(0, i - k + 1)}..${i}]</span>.`
+                : `Check <span class="code-font text-emerald-300">${frontStr} &le; ${i - k}</span> is <b>false</b> &rarr; front index is inside active window.`,
+            soundFreq: hasExpired ? 360 : 490
+          });
+
+          if (!hasExpired) break;
+
+          const expiredIdx = deque.shift();
+          trace.push({
+            line: 18,
+            phase: `pollFirst() [${expiredIdx}]`,
+            nums,
+            k,
+            i,
+            deque: [...deque],
+            evicted: { side: 'front', idx: expiredIdx, val: nums[expiredIdx], reason: `≤ ${i - k}` },
+            transfer: { type: 'pollFirst', idx: expiredIdx, val: nums[expiredIdx] },
+            result: [...result],
+            resultSources: [...resultSources],
+            resIndex: index,
+            actionText: `deque.pollFirst() → [${expiredIdx}]`,
+            desc: `Removed expired front index <span class="code-font text-rose-300 font-bold">[${expiredIdx}]</span> (value <span class="code-font">${nums[expiredIdx]}</span>) via <span class="code-font">deque.pollFirst()</span>.`,
+            soundFreq: 330
+          });
+        }
+
+        // 2. Remove smaller or equal elements from the back (Lines 22-24)
+        while (true) {
+          const hasSmallerBack = deque.length > 0 && nums[deque[deque.length - 1]] <= nums[i];
+          const backIdx = deque.length > 0 ? deque[deque.length - 1] : -1;
+
+          trace.push({
+            line: [22, 23],
+            phase: hasSmallerBack ? `Prune [${backIdx}]` : "Check Monotonicity",
+            nums,
+            k,
+            i,
+            deque: [...deque],
+            dequeCheckSide: hasSmallerBack ? 'back' : undefined,
+            result: [...result],
+            resultSources: [...resultSources],
+            resIndex: index,
+            desc: deque.length === 0
+              ? `Check <span class="code-font text-purple-300">!deque.isEmpty() &amp;&amp; nums[deque.peekLast()] &le; nums[i]</span>: <span class="code-font">deque</span> is empty (<b>false</b>).`
+              : hasSmallerBack
+                ? `<span class="text-rose-400 font-bold">Dominated Back!</span> <span class="code-font text-rose-300">nums[${backIdx}] (${nums[backIdx]}) &le; nums[${i}] (${nums[i]})</span> is <b>true</b> &rarr; <span class="code-font">[${backIdx}]</span> can never be a future max.`
+                : `Check <span class="code-font text-emerald-300">nums[${backIdx}] (${nums[backIdx]}) &le; nums[${i}] (${nums[i]})</span> is <b>false</b> (<span class="code-font">${nums[backIdx]} &gt; ${nums[i]}</span>) &rarr; decreasing invariant holds.`,
+            soundFreq: hasSmallerBack ? 390 : 520
+          });
+
+          if (!hasSmallerBack) break;
+
+          const poppedIdx = deque.pop();
+          trace.push({
+            line: 24,
+            phase: `pollLast() [${poppedIdx}]`,
+            nums,
+            k,
+            i,
+            deque: [...deque],
+            evicted: { side: 'back', idx: poppedIdx, val: nums[poppedIdx], reason: `≤ ${nums[i]}` },
+            transfer: { type: 'pollLast', idx: poppedIdx, val: nums[poppedIdx] },
+            result: [...result],
+            resultSources: [...resultSources],
+            resIndex: index,
+            actionText: `deque.pollLast() → [${poppedIdx}]`,
+            desc: `Popped smaller/equal back index <span class="code-font text-rose-300 font-bold">[${poppedIdx}]</span> (value <span class="code-font">${nums[poppedIdx]} &le; ${nums[i]}</span>) via <span class="code-font">deque.pollLast()</span>.`,
+            soundFreq: 350
+          });
+        }
+
+        // 3. Add the current index at BACK (Line 28)
+        deque.push(i);
+        trace.push({
+          line: 28,
+          phase: `offerLast(${i})`,
+          nums,
+          k,
+          i,
+          deque: [...deque],
+          justOfferedIdx: i,
+          transfer: { type: 'offerLast', idx: i, val: nums[i] },
+          result: [...result],
+          resultSources: [...resultSources],
+          resIndex: index,
+          actionText: `deque.offerLast(${i})`,
+          desc: `Appended current index <span class="code-font text-amber-300 font-bold">[${i}]</span> (value <span class="code-font">${nums[i]}</span>) at the <span class="code-font text-purple-300">BACK</span> of <span class="code-font">deque</span>.`,
+          soundFreq: 610
+        });
+
+        // 4. Record maximum after the first window is formed (Lines 31-32)
+        const windowReady = i >= k - 1;
+        trace.push({
+          line: 31,
+          phase: windowReady ? "Window Full (True)" : `Warmup (${i} < ${k - 1})`,
+          nums,
+          k,
+          i,
+          deque: [...deque],
+          result: [...result],
+          resultSources: [...resultSources],
+          resIndex: index,
+          desc: windowReady
+            ? `Condition <span class="code-font text-emerald-300 font-bold">i (${i}) &ge; k - 1 (${k - 1})</span> is <b>true</b> &rarr; recording window maximum from <span class="code-font">deque.peekFirst()</span>.`
+            : `Condition <span class="code-font text-slate-300">i (${i}) &ge; k - 1 (${k - 1})</span> is <b>false</b> &rarr; still forming initial window of size <span class="code-font">${k}</span>.`,
+          soundFreq: windowReady ? 680 : 500
+        });
+
+        if (windowReady) {
+          const maxIdx = deque[0];
+          const maxVal = nums[maxIdx];
+          const writeSlot = index;
+          result[writeSlot] = maxVal;
+          resultSources[writeSlot] = maxIdx;
+          index++;
+
+          trace.push({
+            line: 32,
+            phase: `result[${writeSlot}] = ${maxVal}`,
+            nums,
+            k,
+            i,
+            deque: [...deque],
+            result: [...result],
+            resultSources: [...resultSources],
+            resIndex: index,
+            justFilledSlot: writeSlot,
+            transfer: { type: 'writeResult', fromIdx: maxIdx, toSlot: writeSlot, val: maxVal },
+            actionText: `result[${writeSlot}] = nums[${maxIdx}] (${maxVal})`,
+            desc: `<span class="text-emerald-400 font-bold"><i class="fa-solid fa-crown mr-1"></i>Window Max Recorded!</span> Wrote <span class="code-font text-emerald-300 font-bold">result[${writeSlot}] = nums[${maxIdx}] = ${maxVal}</span> and incremented <span class="code-font">index &rarr; ${index}</span>.`,
+            soundFreq: 840
+          });
+        }
+      }
+
+      // Line 13: Outer loop exit when i == n
+      trace.push({
+        line: 13,
+        phase: "Loop Complete",
+        nums,
+        k,
+        i: n,
+        deque: [...deque],
+        result: [...result],
+        resultSources: [...resultSources],
+        resIndex: index,
+        desc: `Loop condition <span class="code-font text-amber-300">i (${n}) &lt; n (${n})</span> is <b>false</b>. All <span class="code-font">${resLen}</span> sliding windows processed.`,
+        soundFreq: 720
+      });
+
+      // Line 36: return result;
+      trace.push({
+        line: 36,
+        phase: "Complete",
+        nums,
+        k,
+        i: -1,
+        deque: [...deque],
+        result: [...result],
+        resultSources: [...resultSources],
+        resIndex: index,
+        isComplete: true,
+        desc: `<span class="text-emerald-400 font-bold text-sm"><i class="fa-solid fa-trophy mr-1.5"></i>Complete!</span> Returned <span class="code-font text-emerald-300 font-bold text-sm">result = [${result.join(', ')}]</span>.`,
+        soundFreq: 960
+      });
+
+      return trace;
+    }
+
+    // LOCALIZED ZERO-JUMP CODE LINE HIGHLIGHTER
+    function highlightCodeLine(lineSpec) {
+      document.querySelectorAll('.code-line').forEach(el => el.classList.remove('active-line'));
+      const lineNums = Array.isArray(lineSpec) ? lineSpec : [lineSpec];
+      let firstActiveEl = null;
+
+      lineNums.forEach(num => {
+        const el = document.getElementById(`line${num}`);
+        if (el) {
+          el.classList.add('active-line');
+          if (!firstActiveEl) firstActiveEl = el;
+        }
+      });
+
+      if (firstActiveEl) {
+        const containerTop = codeContainer.scrollTop;
+        const containerBottom = containerTop + codeContainer.clientHeight;
+        const elTop = firstActiveEl.offsetTop - codeContainer.offsetTop;
+        const elBottom = elTop + firstActiveEl.clientHeight;
+
+        if (elTop < containerTop + 24) {
+          codeContainer.scrollTo({ top: Math.max(0, elTop - 24), behavior: 'smooth' });
+        } else if (elBottom > containerBottom - 24) {
+          codeContainer.scrollTo({ top: elBottom - codeContainer.clientHeight + 24, behavior: 'smooth' });
+        }
+      }
+    }
+
+    // POSITION FIXED-WIDTH SLIDING WINDOW HALO ON NUMS[]
+    function updateWindowFrame(step) {
+      const n = step.nums.length;
+      const arenaOffsetX = numsStreamArena.offsetLeft;
+      const arenaOffsetY = numsStreamArena.offsetTop;
+
+      if (!step.isComplete && n > 0 && step.i >= 0 && step.i < n) {
+        const winStart = Math.max(0, step.i - step.k + 1);
+        const leftCard = numsStreamArena.querySelector(`[data-nums-idx="${winStart}"]`);
+        const rightCard = numsStreamArena.querySelector(`[data-nums-idx="${step.i}"]`);
+
+        if (leftCard && rightCard) {
+          const padX = 5;
+          const padY = 6;
+          const xStart = arenaOffsetX + leftCard.offsetLeft - padX;
+          const width = (rightCard.offsetLeft + rightCard.offsetWidth) - leftCard.offsetLeft + padX * 2;
+          const yTop = arenaOffsetY + leftCard.offsetTop - padY;
+          const height = leftCard.offsetHeight + padY * 2;
+
+          activeWindowFrame.classList.remove('hidden');
+          activeWindowFrame.style.left = `${xStart}px`;
+          activeWindowFrame.style.width = `${width}px`;
+          activeWindowFrame.style.top = `${yTop}px`;
+          activeWindowFrame.style.height = `${height}px`;
+          activeWindowTag.textContent = `window [${winStart}..${step.i}]`;
+        }
+      } else {
+        activeWindowFrame.classList.add('hidden');
+      }
+    }
+
+    // PHYSICAL LIFT-AND-ARC TRANSFERS FOR DEQUE & RESULT[]
+    function animateStageTransfer(transfer, animateFlight) {
+      transferArcSvg.innerHTML = '';
+      flyingCloneLayer.innerHTML = '';
+      if (!transfer) return;
+
+      const stageRect = stageWrapper.getBoundingClientRect();
+
+      if (transfer.type === 'offerLast') {
+        const srcEl = numsStreamArena.querySelector(`[data-nums-idx="${transfer.idx}"]`);
+        const dstEl = dequeArena.querySelector(`[data-deque-idx="${transfer.idx}"]`) || dequeBackGate;
+        if (!srcEl || !dstEl) return;
+
+        const srcRect = srcEl.getBoundingClientRect();
+        const dstRect = dstEl.getBoundingClientRect();
+        const x1 = (srcRect.left - stageRect.left) + srcRect.width / 2;
+        const y1 = (srcRect.bottom - stageRect.top) + 4;
+        const x2 = (dstRect.left - stageRect.left) + dstRect.width / 2;
+        const y2 = (dstRect.top - stageRect.top) - 6;
+        const midX = (x1 + x2) / 2 + 24;
+        const midY = (y1 + y2) / 2;
+
+        transferArcSvg.innerHTML = `
+          <path d="M ${x1} ${y1} Q ${midX} ${midY}, ${x2} ${y2}"
+                fill="none" stroke="#fbbf24" stroke-width="2.2" class="transfer-arc-path" />
+          <circle cx="${x1}" cy="${y1}" r="4" fill="#fbbf24" />
+          <polygon points="${x2},${y2 + 3} ${x2 - 5},${y2 - 6} ${x2 + 5},${y2 - 6}" fill="#fbbf24" />
+        `;
+
+        if (!animateFlight) return;
+        spawnFlyingToken(srcRect, dstRect, stageRect, `[${transfer.idx}] → ${transfer.val}`, 'bg-amber-400 text-slate-950 shadow-amber-400/50');
+
+      } else if (transfer.type === 'pollFirst') {
+        if (evictedFrontDock.classList.contains('hidden')) return;
+        const srcRect = dequeFrontGate.getBoundingClientRect();
+        const dstRect = evictedFrontDock.getBoundingClientRect();
+        const x1 = (srcRect.left - stageRect.left) + srcRect.width / 2;
+        const y1 = (srcRect.top - stageRect.top) - 4;
+        const x2 = (dstRect.left - stageRect.left) + dstRect.width / 2;
+        const y2 = (dstRect.top - stageRect.top) - 6;
+        const midX = (x1 + x2) / 2;
+        const archY = Math.min(y1, y2) - 24;
+
+        transferArcSvg.innerHTML = `
+          <path d="M ${x1} ${y1} Q ${midX} ${archY}, ${x2} ${y2}"
+                fill="none" stroke="#fb7185" stroke-width="2.2" class="transfer-arc-path" />
+          <circle cx="${x1}" cy="${y1}" r="3.5" fill="#fb7185" />
+          <polygon points="${x2},${y2 + 3} ${x2 - 5},${y2 - 6} ${x2 + 5},${y2 - 6}" fill="#fb7185" />
+        `;
+
+        if (!animateFlight) return;
+        spawnFlyingToken(srcRect, dstRect, stageRect, `[${transfer.idx}] (${transfer.val})`, 'bg-rose-500 text-white shadow-rose-500/50');
+
+      } else if (transfer.type === 'pollLast') {
+        if (evictedBackDock.classList.contains('hidden')) return;
+        const srcRect = dequeBackGate.getBoundingClientRect();
+        const dstRect = evictedBackDock.getBoundingClientRect();
+        const x1 = (srcRect.left - stageRect.left) + srcRect.width / 2;
+        const y1 = (srcRect.top - stageRect.top) - 4;
+        const x2 = (dstRect.left - stageRect.left) + dstRect.width / 2;
+        const y2 = (dstRect.top - stageRect.top) - 6;
+        const midX = (x1 + x2) / 2;
+        const archY = Math.min(y1, y2) - 24;
+
+        transferArcSvg.innerHTML = `
+          <path d="M ${x1} ${y1} Q ${midX} ${archY}, ${x2} ${y2}"
+                fill="none" stroke="#fb7185" stroke-width="2.2" class="transfer-arc-path" />
+          <circle cx="${x1}" cy="${y1}" r="3.5" fill="#fb7185" />
+          <polygon points="${x2},${y2 + 3} ${x2 - 5},${y2 - 6} ${x2 + 5},${y2 - 6}" fill="#fb7185" />
+        `;
+
+        if (!animateFlight) return;
+        spawnFlyingToken(srcRect, dstRect, stageRect, `[${transfer.idx}] (${transfer.val})`, 'bg-rose-500 text-white shadow-rose-500/50');
+
+      } else if (transfer.type === 'writeResult') {
+        const dequeFrontEl = dequeArena.querySelector(`[data-deque-idx="${transfer.fromIdx}"]`) || dequeArena;
+        const dstEl = resultArena.querySelector(`[data-res-slot="${transfer.toSlot}"]`);
+        if (!dequeFrontEl || !dstEl) return;
+
+        const srcRect = dequeFrontEl.getBoundingClientRect();
+        const dstRect = dstEl.getBoundingClientRect();
+        const x1 = (srcRect.left - stageRect.left) + srcRect.width / 2;
+        const y1 = (srcRect.top - stageRect.top) - 4;
+        const x2 = (dstRect.left - stageRect.left) + dstRect.width / 2;
+        const y2 = (dstRect.top - stageRect.top) - 6;
+        const midX = (x1 + x2) / 2;
+        const archY = Math.min(y1, y2) - 28;
+
+        transferArcSvg.innerHTML = `
+          <path d="M ${x1} ${y1} Q ${midX} ${archY}, ${x2} ${y2}"
+                fill="none" stroke="#34d399" stroke-width="2.4" class="transfer-arc-path" />
+          <circle cx="${x1}" cy="${y1}" r="4" fill="#34d399" />
+          <polygon points="${x2},${y2 + 3} ${x2 - 5},${y2 - 6} ${x2 + 5},${y2 - 6}" fill="#34d399" />
+        `;
+
+        if (!animateFlight) return;
+        spawnFlyingToken(srcRect, dstRect, stageRect, `${transfer.val}`, 'bg-emerald-400 text-slate-950 shadow-emerald-400/50');
+      }
+    }
+
+    function spawnFlyingToken(srcRect, dstRect, stageRect, label, colorClasses) {
+      const clone = document.createElement('div');
+      clone.className = `absolute px-2.5 py-1 rounded-lg ${colorClasses} code-font text-xs font-extrabold shadow-lg pointer-events-none`;
+      clone.textContent = label;
+      clone.style.left = `${(srcRect.left - stageRect.left) + srcRect.width / 2 - 24}px`;
+      clone.style.top = `${(srcRect.top - stageRect.top) + srcRect.height / 2 - 12}px`;
+      flyingCloneLayer.appendChild(clone);
+
+      const dx = (dstRect.left + dstRect.width / 2) - (srcRect.left + srcRect.width / 2);
+      const dy = (dstRect.top + dstRect.height / 2) - (srcRect.top + srcRect.height / 2);
+      const duration = Math.min(540, Math.max(240, playSpeed * 0.78));
+
+      const anim = clone.animate([
+        { transform: 'translate(0px, 0px) scale(1)', opacity: 1 },
+        { transform: `translate(${dx * 0.45}px, ${dy * 0.45 - 26}px) scale(1.12)`, opacity: 1, offset: 0.45 },
+        { transform: `translate(${dx}px, ${dy}px) scale(0.95)`, opacity: 0.1 }
+      ], {
+        duration,
+        easing: 'cubic-bezier(0.22, 1, 0.36, 1)'
+      });
+      anim.onfinish = () => clone.remove();
+    }
+
+    // RENDER CURRENT STEP
+    function renderStep(idx, animateMovement = true) {
+      if (idx < 0 || idx >= steps.length) return;
+      const step = steps[idx];
+      const nums = step.nums;
+      const n = nums.length;
+      const k = step.k;
+      const maxAbs = Math.max(1, ...nums.map(v => Math.abs(v)));
+
+      // Update Header Scrubber & Badges
+      stepCounterBadge.textContent = `Step: ${idx + 1} / ${steps.length}`;
+      phaseBadge.textContent = step.phase;
+      kHeaderBadge.textContent = `Window k = ${k}`;
+      stepScrubber.max = steps.length - 1;
+      stepScrubber.value = idx;
+
+      const resPreview = step.result.map(v => v === null ? '?' : v).join(', ');
+      resultHeaderBadge.textContent = `Result: [${resPreview}]`;
+      numsMetaTag.textContent = `(n = ${n}, k = ${k})`;
+      resultLenTag.textContent = `len = ${step.result.length}`;
+
+      // Update Telemetry HUD Cards
+      if (step.i >= 0 && step.i < n) {
+        varPtrI.textContent = step.i;
+        varCurVal.textContent = `(val: ${nums[step.i]})`;
+        const winStart = Math.max(0, step.i - k + 1);
+        varWinSpan.textContent = `[${winStart}..${step.i}]`;
+        varExpireCutoff.textContent = `expire ≤ ${step.i - k}`;
+      } else {
+        varPtrI.textContent = '-';
+        varCurVal.textContent = '';
+        varWinSpan.textContent = '-';
+        varExpireCutoff.textContent = 'expire ≤ i - k';
+      }
+
+      if (step.deque.length > 0) {
+        const fIdx = step.deque[0];
+        const bIdx = step.deque[step.deque.length - 1];
+        varDequeFront.textContent = `[${fIdx}] → ${nums[fIdx]}`;
+        varDequeBack.textContent = `[${bIdx}] → ${nums[bIdx]}`;
+      } else {
+        varDequeFront.textContent = 'empty';
+        varDequeBack.textContent = 'empty';
+      }
+      varDequeSize.textContent = `size: ${step.deque.length}`;
+      varResIndex.textContent = step.resIndex;
+      varResTotal.textContent = `of ${step.result.length} windows`;
+
+      // Narrative Description
+      stepDescription.innerHTML = step.desc;
+
+      // 1. Render Input Array nums[] with Glassy Boxes & Bi-Directional Magnitude Bars
+      numsStreamArena.innerHTML = '';
+      const compactFit = n <= 14;
+      numsStreamArena.className = compactFit
+        ? 'relative z-20 w-full flex items-center justify-between gap-1.5 sm:gap-2 min-h-[168px]'
+        : 'relative z-20 w-max mx-auto flex items-center gap-2 min-h-[168px]';
+
+      const inDequeSet = new Set(step.deque);
+      const currentFrontIdx = step.deque.length > 0 ? step.deque[0] : -1;
+      const winStart = (step.i >= 0 && step.i < n) ? Math.max(0, step.i - k + 1) : -1;
+
+      nums.forEach((val, index) => {
+        const isScanner = (step.i === index && !step.isComplete);
+        const isInWindow = (!step.isComplete && winStart >= 0 && index >= winStart && index <= step.i);
+        const isFrontMax = (!step.isComplete && index === currentFrontIdx && isInWindow);
+        const isInDeque = inDequeSet.has(index);
+        const isExpired = (!step.isComplete && winStart > 0 && index < winStart);
+
+        const card = document.createElement('div');
+        card.dataset.numsIdx = index;
+
+        const sizeClasses = compactFit
+          ? 'flex-1 min-w-[38px] max-w-[68px] h-40 '
+          : 'w-14 h-40 shrink-0 ';
+
+        let classes = `glass-element-card relative ${sizeClasses} rounded-2xl p-2 flex flex-col items-center justify-between select-none `;
+        if (isFrontMax) {
+          classes += 'window-max-card ';
+        } else if (isScanner) {
+          classes += 'scanner-i-card ';
+        } else if (isInWindow) {
+          classes += 'in-window-card ';
+        } else if (isExpired) {
+          classes += 'expired-card ';
+        }
+        card.className = classes;
+
+        // Top Pointer / Role Badge
+        let topTag = `<span class="text-[9px] code-font text-slate-400">[${index}]</span>`;
+        if (isScanner && isFrontMax) {
+          topTag = `<span class="px-1.5 py-0.2 rounded bg-emerald-400 text-slate-950 font-extrabold text-[8px] code-font shadow">i • MAX</span>`;
+        } else if (isFrontMax) {
+          topTag = `<span class="px-1.5 py-0.2 rounded bg-emerald-400 text-slate-950 font-extrabold text-[8px] code-font shadow">MAX</span>`;
+        } else if (isScanner) {
+          topTag = `<span class="px-1.5 py-0.2 rounded bg-amber-400 text-slate-950 font-extrabold text-[8px] code-font shadow">i</span>`;
+        }
+
+        // Bi-Directional Magnitude Bar
+        const magPct = val === 0 ? 0 : Math.max(14, (Math.abs(val) / maxAbs) * 100);
+        const isPos = val > 0;
+        const isNeg = val < 0;
+
+        let posStyle = 'bg-gradient-to-t from-cyan-600/80 via-cyan-500/80 to-cyan-300 border-t border-cyan-100';
+        let negStyle = 'bg-gradient-to-b from-rose-600/80 via-rose-500/80 to-rose-400 border-b border-rose-200';
+        if (isFrontMax) {
+          posStyle = 'bg-gradient-to-t from-emerald-600 via-emerald-500 to-emerald-300 border-t border-white shadow-[0_0_14px_rgba(16,185,129,0.6)]';
+          negStyle = 'bg-gradient-to-b from-emerald-600 via-emerald-500 to-emerald-300 border-b border-white shadow-[0_0_14px_rgba(16,185,129,0.6)]';
+        } else if (isScanner) {
+          posStyle = 'bg-gradient-to-t from-amber-600 via-amber-400 to-amber-200 border-t border-white shadow-[0_0_14px_rgba(251,191,36,0.6)]';
+          negStyle = 'bg-gradient-to-b from-amber-600 via-amber-400 to-amber-200 border-b border-white shadow-[0_0_14px_rgba(251,191,36,0.6)]';
+        } else if (isInDeque) {
+          posStyle = 'bg-gradient-to-t from-purple-600 via-purple-500 to-purple-300 border-t border-purple-100';
+          negStyle = 'bg-gradient-to-b from-purple-600 via-purple-500 to-purple-300 border-b border-purple-100';
+        }
+
+        const footTag = isInDeque
+          ? `<span class="text-[8px] code-font px-1 rounded bg-purple-500/25 text-purple-200 border border-purple-400/35">in deq</span>`
+          : `<span class="text-[8px] code-font text-slate-500">${index}</span>`;
+
+        card.innerHTML = `
+          <div class="w-full flex items-center justify-center">${topTag}</div>
+          <div class="w-full flex-1 flex flex-col items-center justify-center my-1">
+            <div class="w-6 sm:w-8 h-9 flex items-end justify-center">
+              ${isPos ? `<div class="w-full rounded-t-sm transition-all duration-300 ${posStyle}" style="height: ${magPct}%;"></div>` : ''}
+            </div>
+            <div class="w-8 sm:w-10 h-[1.5px] ${val === 0 ? 'bg-slate-400' : 'bg-white/25'} rounded-full"></div>
+            <div class="w-6 sm:w-8 h-9 flex items-start justify-center">
+              ${isNeg ? `<div class="w-full rounded-b-sm transition-all duration-300 ${negStyle}" style="height: ${magPct}%;"></div>` : ''}
+            </div>
+          </div>
+          <span class="code-font text-xs sm:text-sm font-extrabold ${isFrontMax ? 'text-emerald-200' : isScanner ? 'text-amber-200' : 'text-white'}">${val}</span>
+          ${footTag}
+        `;
+        numsStreamArena.appendChild(card);
+      });
+
+      // 2. Render Monotonic Decreasing Deque<Integer> Nodes (Right-aligned against BACK gate)
+      dequeArena.innerHTML = '';
+      if (step.deque.length === 0) {
+        dequeArena.innerHTML = `<span class="w-full text-center text-xs text-slate-500 italic">empty</span>`;
+      } else {
+        step.deque.forEach((dIdx, pos) => {
+          const isFront = (pos === 0);
+          const isBack = (pos === step.deque.length - 1);
+          const isJustOffered = (step.justOfferedIdx === dIdx);
+          const isAlert = (isFront && step.dequeCheckSide === 'front') || (isBack && step.dequeCheckSide === 'back');
+
+          const node = document.createElement('div');
+          node.dataset.dequeIdx = dIdx;
+
+          let nClass = 'deque-node px-2.5 py-2 rounded-xl flex flex-col items-center justify-center gap-0.5 select-none shrink-0 ';
+          if (isAlert) {
+            nClass += 'deque-check-alert';
+          } else if (isJustOffered) {
+            nClass += 'deque-new-offer';
+          } else if (isFront) {
+            nClass += 'deque-front-max';
+          }
+          node.className = nClass;
+
+          node.innerHTML = `
+            <span class="text-[9px] code-font font-bold ${isFront ? 'text-emerald-300' : 'text-purple-300'}">idx [${dIdx}]</span>
+            <span class="code-font text-sm sm:text-base font-extrabold text-white">${nums[dIdx]}</span>
+            <span class="text-[8px] code-font text-slate-400">${isFront ? 'MAX' : isBack ? 'back' : 'cand'}</span>
+          `;
+          dequeArena.appendChild(node);
+
+          // Add decreasing ">" inequality separator between consecutive deque nodes
+          if (pos < step.deque.length - 1) {
+            const sep = document.createElement('span');
+            sep.className = 'code-font text-xs font-bold text-purple-400/75 px-0.5';
+            sep.textContent = '>';
+            dequeArena.appendChild(sep);
+          }
+        });
+      }
+
+      // Show external Thrown Out dock outside FRONT (pollFirst) or outside BACK (pollLast)
+      evictedFrontDock.classList.add('hidden');
+      evictedBackDock.classList.add('hidden');
+      if (step.evicted) {
+        if (step.evicted.side === 'front') {
+          evictedFrontDock.classList.remove('hidden');
+          evictedFrontIdx.textContent = `[${step.evicted.idx}]`;
+          evictedFrontVal.textContent = `val:${step.evicted.val} (${step.evicted.reason})`;
+        } else {
+          evictedBackDock.classList.remove('hidden');
+          evictedBackIdx.textContent = `[${step.evicted.idx}]`;
+          evictedBackVal.textContent = `val:${step.evicted.val} (${step.evicted.reason})`;
+        }
+      }
+
+      // 3. Render Output Array int[] result
+      resultArena.innerHTML = '';
+      step.result.forEach((rVal, rIdx) => {
+        const isFilled = rVal !== null;
+        const isJustFilled = (step.justFilledSlot === rIdx);
+        const srcIdx = step.resultSources[rIdx];
+
+        const slot = document.createElement('div');
+        slot.dataset.resSlot = rIdx;
+        let sClass = 'result-slot w-12 sm:w-14 h-16 rounded-xl p-1.5 flex flex-col items-center justify-between select-none ';
+        if (isJustFilled) {
+          sClass += 'just-filled-slot';
+        } else if (isFilled) {
+          sClass += 'filled-slot';
+        }
+        slot.className = sClass;
+
+        slot.innerHTML = `
+          <span class="text-[9px] code-font ${isFilled ? 'text-emerald-300 font-bold' : 'text-slate-500'}">[${rIdx}]</span>
+          <span class="code-font text-sm sm:text-base font-extrabold ${isFilled ? 'text-white' : 'text-slate-600'}">${isFilled ? rVal : '?'}</span>
+          <span class="text-[8px] code-font ${isFilled ? 'text-emerald-300/80' : 'text-slate-600'}">${isFilled ? `idx:${srcIdx}` : 'wait'}</span>
+        `;
+        resultArena.appendChild(slot);
+      });
+
+      // 4. Position Sliding Window Frame & Trigger Lift-and-Arc Transfers
+      requestAnimationFrame(() => {
+        if (!compactFit && step.i >= 0 && step.i < n) {
+          const curEl = numsStreamArena.querySelector(`[data-nums-idx="${step.i}"]`);
+          if (curEl) {
+            const targetScroll = curEl.offsetLeft - numsScrollContainer.clientWidth / 2 + curEl.offsetWidth / 2;
+            numsScrollContainer.scrollTo({ left: Math.max(0, targetScroll), behavior: 'smooth' });
+          }
+        }
+        updateWindowFrame(step);
+        animateStageTransfer(step.transfer, animateMovement);
+      });
+
+      // 5. Update Action Pill & Decision Banner
+      if (step.actionText) {
+        actionPill.classList.remove('hidden');
+        actionPill.textContent = step.actionText;
+      } else {
+        actionPill.classList.add('hidden');
+      }
+
+      if (step.isComplete || step.justFilledSlot !== undefined) {
+        decisionIcon.className = "fa-solid fa-trophy text-emerald-400 text-base";
+        decisionBanner.className = "p-3.5 rounded-xl bg-emerald-500/15 border border-emerald-400/35 text-xs flex flex-col sm:flex-row items-center justify-between gap-3 backdrop-blur-md";
+        if (step.isComplete) {
+          resultHeaderBadge.classList.add('complete-badge-anim');
+          setTimeout(() => resultHeaderBadge.classList.remove('complete-badge-anim'), 650);
+        }
+      } else if (step.evicted || step.dequeCheckSide) {
+        decisionIcon.className = "fa-solid fa-filter text-rose-400 text-base";
+        decisionBanner.className = "p-3.5 rounded-xl bg-rose-500/12 border border-rose-400/30 text-xs flex flex-col sm:flex-row items-center justify-between gap-3 backdrop-blur-md";
+      } else {
+        decisionIcon.className = "fa-solid fa-circle-info text-cyan-400 text-base";
+        decisionBanner.className = "p-3.5 rounded-xl bg-white/[0.04] border border-white/10 text-xs flex flex-col sm:flex-row items-center justify-between gap-3 backdrop-blur-md";
+      }
+      decisionText.innerHTML = step.desc;
+
+      // 6. Highlight Active Java Line & Play Audio Tone
+      highlightCodeLine(step.line);
+      if (step.soundFreq) {
+        playTone(step.soundFreq, 'sine', 0.08, 0.035);
+      }
+    }
+
+    // PLAYBACK CONTROLLER
+    function setPlaying(playing) {
+      isPlaying = playing;
+      if (isPlaying) {
+        playIcon.className = "fa-solid fa-pause";
+        playText.textContent = "Stop";
+        btnPlay.classList.add('bg-rose-500/25', 'text-rose-200', 'border-rose-400/50');
+        btnPlay.classList.remove('bg-cyan-500/25', 'text-cyan-200', 'border-cyan-400/50');
+
+        playInterval = setInterval(() => {
+          if (currentStepIdx < steps.length - 1) {
+            currentStepIdx++;
+            renderStep(currentStepIdx, true);
+          } else {
+            setPlaying(false);
+          }
+        }, playSpeed);
+      } else {
+        playIcon.className = "fa-solid fa-play";
+        playText.textContent = "Start";
+        btnPlay.classList.remove('bg-rose-500/25', 'text-rose-200', 'border-rose-400/50');
+        btnPlay.classList.add('bg-cyan-500/25', 'text-cyan-200', 'border-cyan-400/50');
+        if (playInterval) {
+          clearInterval(playInterval);
+          playInterval = null;
+        }
+      }
+    }
+
+    function initSimulation(numsArr, kVal) {
+      setPlaying(false);
+      currentNums = [...numsArr];
+      currentK = Math.max(1, Math.min(numsArr.length, kVal));
+      steps = generateSteps(currentNums, currentK);
+      currentStepIdx = 0;
+      stepScrubber.max = steps.length - 1;
+      stepScrubber.value = 0;
+      renderStep(0, false);
+    }
+
+    // EVENT LISTENERS
+    btnPlay.addEventListener('click', () => {
+      if (currentStepIdx >= steps.length - 1) {
+        currentStepIdx = 0;
+        renderStep(0, false);
+      }
+      setPlaying(!isPlaying);
+    });
+
+    btnNext.addEventListener('click', () => {
+      setPlaying(false);
+      if (currentStepIdx < steps.length - 1) {
+        currentStepIdx++;
+        renderStep(currentStepIdx, true);
+      }
+    });
+
+    btnPrev.addEventListener('click', () => {
+      setPlaying(false);
+      if (currentStepIdx > 0) {
+        currentStepIdx--;
+        renderStep(currentStepIdx, true);
+      }
+    });
+
+    btnReset.addEventListener('click', () => {
+      setPlaying(false);
+      currentStepIdx = 0;
+      renderStep(0, false);
+    });
+
+    stepScrubber.addEventListener('input', (e) => {
+      setPlaying(false);
+      currentStepIdx = parseInt(e.target.value, 10);
+      renderStep(currentStepIdx, false);
+    });
+
+    document.querySelectorAll('.speed-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.speed-btn').forEach(b => {
+          b.classList.remove('bg-cyan-500/30', 'text-cyan-200', 'font-semibold');
+        });
+        btn.classList.add('bg-cyan-500/30', 'text-cyan-200', 'font-semibold');
+        playSpeed = parseInt(btn.dataset.speed, 10);
+        if (isPlaying) {
+          setPlaying(false);
+          setPlaying(true);
+        }
+      });
+    });
+
+    btnAudio.addEventListener('click', () => {
+      audioEnabled = !audioEnabled;
+      if (audioEnabled) {
+        audioIcon.className = "fa-solid fa-volume-high";
+        btnAudio.classList.remove('text-slate-600');
+        btnAudio.classList.add('text-slate-300');
+      } else {
+        audioIcon.className = "fa-solid fa-volume-xmark";
+        btnAudio.classList.add('text-slate-600');
+        btnAudio.classList.remove('text-slate-300');
+      }
+    });
+
+    presetSelect.addEventListener('change', (e) => {
+      const idx = parseInt(e.target.value, 10);
+      customArrInput.value = PRESETS[idx].nums.join(', ');
+      customKInput.value = PRESETS[idx].k;
+      initSimulation(PRESETS[idx].nums, PRESETS[idx].k);
+    });
+
+    btnApplyCustom.addEventListener('click', () => {
+      const text = customArrInput.value.trim();
+      const parsedK = parseInt(customKInput.value, 10);
+      if (!text || isNaN(parsedK)) return;
+
+      const parsedNums = text.split(',')
+        .map(s => parseInt(s.trim(), 10))
+        .filter(n => !isNaN(n));
+
+      if (parsedNums.length >= 1) {
+        const clampedK = Math.max(1, Math.min(parsedNums.length, parsedK));
+        customArrInput.value = parsedNums.join(', ');
+        customKInput.value = clampedK;
+        initSimulation(parsedNums, clampedK);
+      }
+    });
+
+    window.addEventListener('resize', () => {
+      const step = steps[currentStepIdx];
+      if (step) {
+        updateWindowFrame(step);
+        animateStageTransfer(step.transfer, false);
+      }
+    });
+
+    window.addEventListener('keydown', (e) => {
+      if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT') return;
+      if (e.code === 'Space') {
+        e.preventDefault();
+        btnPlay.click();
+      } else if (e.code === 'ArrowRight') {
+        e.preventDefault();
+        btnNext.click();
+      } else if (e.code === 'ArrowLeft') {
+        e.preventDefault();
+        btnPrev.click();
+      }
+    });
+
+    window.onload = function() {
+      customArrInput.value = PRESETS[0].nums.join(', ');
+      customKInput.value = PRESETS[0].k;
+      initSimulation(PRESETS[0].nums, PRESETS[0].k);
+    };
+  </script>
+</body>
+</html>

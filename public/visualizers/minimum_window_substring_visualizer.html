@@ -1,0 +1,2098 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Minimum Window Substring (LeetCode 76) - Glassmorphic Visualizer</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: radial-gradient(circle at 14% 16%, #0c192c 0%, #030712 100%);
+      color: #e2e8f0;
+      min-height: 100vh;
+    }
+
+    .code-font {
+      font-family: 'Fira Code', monospace;
+    }
+
+    /* Glassmorphic Surface & Controls */
+    .glass-panel {
+      background: rgba(15, 23, 42, 0.56);
+      backdrop-filter: blur(22px);
+      -webkit-backdrop-filter: blur(22px);
+      border: 1px solid rgba(255, 255, 255, 0.11);
+      box-shadow: 0 20px 45px -15px rgba(0, 0, 0, 0.68), inset 0 1px 0 0 rgba(255, 255, 255, 0.09);
+    }
+
+    .glass-button {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .glass-button:hover:not(:disabled) {
+      background: rgba(255, 255, 255, 0.15);
+      border-color: rgba(255, 255, 255, 0.28);
+      transform: translateY(-1px);
+    }
+    .glass-button:active:not(:disabled) {
+      transform: translateY(1px);
+    }
+    .glass-button:disabled {
+      opacity: 0.35;
+      cursor: not-allowed;
+    }
+
+    /* Code Execution Line Highlight */
+    .code-line {
+      transition: all 0.2s ease;
+      border-left: 3px solid transparent;
+      padding: 2px 10px;
+    }
+    .code-line.active-line {
+      background: rgba(56, 189, 248, 0.18);
+      border-left: 3px solid #38bdf8;
+      color: #ffffff;
+      box-shadow: inset 0 0 16px rgba(56, 189, 248, 0.15);
+    }
+
+    /* Glassy Character Tiles */
+    .char-card {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      transition: all 0.28s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    .char-card.t-target-char {
+      background: linear-gradient(180deg, rgba(168, 85, 247, 0.16) 0%, rgba(126, 34, 206, 0.06) 100%);
+      border-color: rgba(192, 132, 252, 0.45);
+    }
+
+    .char-card.t-active-scan {
+      background: linear-gradient(180deg, rgba(168, 85, 247, 0.32) 0%, rgba(126, 34, 206, 0.14) 100%);
+      border-color: rgba(216, 180, 254, 0.95);
+      transform: translateY(-5px) scale(1.06);
+      box-shadow: 0 12px 26px -4px rgba(168, 85, 247, 0.48), inset 0 1px 0 rgba(255, 255, 255, 0.25);
+      z-index: 15;
+    }
+
+    .char-card.in-window-char {
+      background: linear-gradient(180deg, rgba(56, 189, 248, 0.16) 0%, rgba(14, 165, 233, 0.06) 100%);
+      border-color: rgba(56, 189, 248, 0.55);
+      box-shadow: 0 8px 20px -6px rgba(56, 189, 248, 0.28);
+    }
+
+    .char-card.valid-window-char {
+      background: linear-gradient(180deg, rgba(16, 185, 129, 0.22) 0%, rgba(5, 150, 105, 0.08) 100%);
+      border-color: rgba(52, 211, 153, 0.78);
+      box-shadow: 0 8px 22px -6px rgba(16, 185, 129, 0.35);
+    }
+
+    .char-card.expand-right-char {
+      border-color: rgba(251, 191, 36, 0.95) !important;
+      transform: translateY(-5px) scale(1.05);
+      box-shadow: 0 12px 26px -4px rgba(251, 191, 36, 0.42) !important;
+      z-index: 18;
+    }
+
+    .char-card.shrink-left-char {
+      border-color: rgba(251, 113, 133, 0.95) !important;
+      border-style: dashed;
+      transform: translateY(3px) scale(0.97);
+      box-shadow: 0 10px 24px -4px rgba(244, 63, 94, 0.42) !important;
+      z-index: 18;
+    }
+
+    .char-card.past-char {
+      opacity: 0.4;
+      background: rgba(15, 23, 42, 0.35);
+      border-color: rgba(255, 255, 255, 0.06);
+    }
+
+    .char-card.best-final-char {
+      background: linear-gradient(180deg, rgba(16, 185, 129, 0.32) 0%, rgba(5, 150, 105, 0.14) 100%) !important;
+      border-color: rgba(52, 211, 153, 0.95) !important;
+      transform: translateY(-5px) scale(1.05);
+      box-shadow: 0 12px 28px -4px rgba(16, 185, 129, 0.48) !important;
+      z-index: 20;
+    }
+
+    /* Bi-Directional Need[128] Deficit/Surplus Bucket */
+    .need-bucket {
+      background: rgba(255, 255, 255, 0.035);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      transition: all 0.28s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    .need-bucket.bucket-deficit {
+      background: linear-gradient(180deg, rgba(245, 158, 11, 0.14) 0%, rgba(217, 119, 6, 0.04) 100%);
+      border-color: rgba(251, 191, 36, 0.55);
+    }
+
+    .need-bucket.bucket-satisfied {
+      background: linear-gradient(180deg, rgba(16, 185, 129, 0.14) 0%, rgba(5, 150, 105, 0.04) 100%);
+      border-color: rgba(52, 211, 153, 0.55);
+    }
+
+    .need-bucket.bucket-surplus {
+      background: linear-gradient(180deg, rgba(56, 189, 248, 0.12) 0%, rgba(14, 165, 233, 0.04) 100%);
+      border-color: rgba(56, 189, 248, 0.45);
+    }
+
+    .need-bucket.bucket-active-pulse {
+      transform: translateY(-4px) scale(1.05);
+      border-color: rgba(56, 189, 248, 0.95) !important;
+      box-shadow: 0 12px 28px -4px rgba(56, 189, 248, 0.45) !important;
+    }
+
+    @keyframes arcDash {
+      to {
+        stroke-dashoffset: -24;
+      }
+    }
+    .transfer-arc-path {
+      stroke-dasharray: 6 6;
+      animation: arcDash 0.8s linear infinite;
+    }
+
+    @keyframes recordPulse {
+      0%, 100% { transform: scale(1); filter: drop-shadow(0 0 8px rgba(16, 185, 129, 0.45)); }
+      50% { transform: scale(1.04); filter: drop-shadow(0 0 20px rgba(16, 185, 129, 0.95)); }
+    }
+    .record-badge-anim {
+      animation: recordPulse 0.65s ease-in-out;
+    }
+
+    /* Custom Scrollbars */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: rgba(15, 23, 42, 0.4);
+    }
+    ::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.18);
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(255, 255, 255, 0.3);
+    }
+  </style>
+</head>
+<body class="p-2.5 sm:p-4 lg:px-5 lg:py-4 flex flex-col items-center justify-start min-h-screen">
+
+  <!-- Ambient Glass Glow Orbs -->
+  <div class="fixed top-6 left-1/6 w-96 h-96 bg-cyan-500/14 rounded-full blur-3xl pointer-events-none -z-10"></div>
+  <div class="fixed top-1/3 right-1/6 w-96 h-96 bg-purple-500/14 rounded-full blur-3xl pointer-events-none -z-10"></div>
+  <div class="fixed bottom-12 left-1/2 w-80 h-80 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none -z-10"></div>
+
+  <!-- MAIN WRAPPER -->
+  <div class="w-full max-w-[1560px] flex flex-col gap-5">
+
+    <!-- TOP FROSTED-GLASS CONTROLS DECK -->
+    <header class="glass-panel rounded-2xl p-4 sm:p-5 flex flex-col gap-4 sticky top-3 z-50">
+      <div class="flex flex-wrap items-center justify-between gap-4">
+
+        <!-- Title & Algorithm Metadata -->
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-cyan-500 via-emerald-400 to-purple-500 flex items-center justify-center shadow-lg shadow-cyan-500/25 text-slate-950 font-bold text-lg">
+            <i class="fa-solid fa-compress"></i>
+          </div>
+          <div>
+            <h1 class="text-lg sm:text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white via-cyan-100 to-emerald-300">
+              Minimum Window Substring
+            </h1>
+            <p class="text-xs text-slate-400 flex items-center gap-2">
+              <span class="inline-block w-2 h-2 rounded-full bg-cyan-400 animate-pulse"></span>
+              LeetCode 76 • Dynamic Expand &amp; Shrink Sliding Window + int[128] • &Omicron;(m + n) Time • &Omicron;(1) Space
+            </p>
+          </div>
+        </div>
+
+        <!-- Center Playback Controls: Reset, Previous, Start/Stop, Next -->
+        <div class="flex items-center gap-2 sm:gap-3 bg-white/5 p-1.5 rounded-xl border border-white/10 backdrop-blur-md">
+          <button id="btnReset" class="glass-button text-slate-200 hover:text-white px-3 py-2 rounded-lg text-sm flex items-center gap-1.5" title="Reset to Initial State">
+            <i class="fa-solid fa-rotate-left"></i>
+            <span class="hidden sm:inline">Reset</span>
+          </button>
+          <button id="btnPrev" class="glass-button text-slate-200 hover:text-white px-3 py-2 rounded-lg text-sm flex items-center gap-1.5" title="Previous Step (Left Arrow)">
+            <i class="fa-solid fa-backward-step"></i>
+            <span class="hidden sm:inline">Previous</span>
+          </button>
+          <button id="btnPlay" class="glass-button bg-cyan-500/25 text-cyan-200 hover:bg-cyan-500/35 border-cyan-400/50 px-4 py-2 rounded-lg text-sm font-semibold flex items-center gap-2 shadow-lg shadow-cyan-500/15" title="Start / Stop (Spacebar)">
+            <i class="fa-solid fa-play" id="playIcon"></i>
+            <span id="playText">Start</span>
+          </button>
+          <button id="btnNext" class="glass-button text-slate-200 hover:text-white px-3 py-2 rounded-lg text-sm flex items-center gap-1.5" title="Next Step (Right Arrow)">
+            <span class="hidden sm:inline">Next</span>
+            <i class="fa-solid fa-forward-step"></i>
+          </button>
+        </div>
+
+        <!-- Speed & Audio Controls -->
+        <div class="flex items-center gap-2">
+          <a href="/" class="glass-button px-3 py-2 rounded-xl text-xs font-semibold text-slate-300 hover:text-white flex items-center gap-1.5 border border-white/10 hover:border-indigo-500/40 bg-white/5 shrink-0 transition-all active:scale-95 cursor-pointer" title="Return to DSA Atlas Library">
+            <i class="fa-solid fa-arrow-left text-indigo-400"></i>
+            <span>DSA Atlas</span>
+          </a>
+          <div class="flex items-center bg-white/5 rounded-xl p-1 border border-white/10 text-xs text-slate-300 backdrop-blur-md">
+            <span class="px-2 py-1 text-slate-400"><i class="fa-solid fa-gauge-high mr-1"></i>Speed</span>
+            <button class="speed-btn px-2 py-1 rounded-lg hover:text-white transition" data-speed="1300">0.5x</button>
+            <button class="speed-btn px-2 py-1 rounded-lg bg-cyan-500/30 text-cyan-200 font-semibold transition" data-speed="650">1x</button>
+            <button class="speed-btn px-2 py-1 rounded-lg hover:text-white transition" data-speed="280">2x</button>
+            <button class="speed-btn px-2 py-1 rounded-lg hover:text-white transition" data-speed="110">4x</button>
+          </div>
+          <button id="btnAudio" class="glass-button p-2.5 rounded-xl text-slate-300 hover:text-cyan-300" title="Toggle Sound Effects">
+            <i class="fa-solid fa-volume-high" id="audioIcon"></i>
+          </button>
+        </div>
+
+      </div>
+
+      <!-- Scrubber Slider & Status Badges -->
+      <div class="flex flex-col sm:flex-row items-center gap-3 pt-2 border-t border-white/10">
+        <div class="flex flex-wrap items-center gap-2 text-xs text-slate-300 w-full sm:w-auto shrink-0">
+          <span id="stepCounterBadge" class="code-font px-2.5 py-1 rounded-md bg-white/5 border border-white/10 text-cyan-300">
+            Step: 0 / 0
+          </span>
+          <span id="phaseBadge" class="px-2.5 py-1 rounded-md bg-sky-500/20 border border-sky-400/30 text-sky-200 font-semibold">
+            Ready
+          </span>
+          <span id="formedHeaderBadge" class="px-2.5 py-1 rounded-md bg-purple-500/20 border border-purple-400/30 text-purple-200 font-bold">
+            Formed: 0 / 3
+          </span>
+          <span id="minWinHeaderBadge" class="px-2.5 py-1 rounded-md bg-emerald-500/20 border border-emerald-400/30 text-emerald-200 font-bold">
+            Min Window: ""
+          </span>
+        </div>
+        <div class="w-full flex items-center gap-3">
+          <input type="range" id="stepScrubber" min="0" max="0" value="0" class="w-full h-1.5 bg-slate-800/80 rounded-lg appearance-none cursor-pointer accent-cyan-400">
+        </div>
+      </div>
+    </header>
+
+    <!-- TEST CASES & CUSTOM (S, T) BAR -->
+    <section class="glass-panel rounded-2xl p-4 flex flex-wrap items-center justify-between gap-4">
+      <div class="flex flex-wrap items-center gap-3">
+        <label for="presetSelect" class="text-xs uppercase font-semibold text-slate-300 tracking-wider flex items-center gap-1.5">
+          <i class="fa-solid fa-flask text-cyan-400"></i> Test Cases:
+        </label>
+        <select id="presetSelect" class="bg-slate-900/75 border border-white/15 text-xs sm:text-sm text-slate-200 rounded-xl px-3 py-2 outline-none focus:border-cyan-400 backdrop-blur-md">
+          <option value="0">1: LeetCode Ex 1 (s = "ADOBECODEBANC", t = "ABC" &rarr; "BANC")</option>
+          <option value="1">2: LeetCode Ex 2 (s = "a", t = "a" &rarr; "a")</option>
+          <option value="2">3: LeetCode Ex 3 (s = "a", t = "aa" &rarr; "")</option>
+          <option value="3">4: Duplicate Targets in t (s = "AAABBCAB", t = "AABC" &rarr; "ABBC")</option>
+          <option value="4">5: Mixed Upper &amp; Lowercase (s = "abAcaBbc", t = "Abc" &rarr; "AcaBb" / "BbcA")</option>
+          <option value="5">6: Tight Window at Start (s = "XYZABCDEF", t = "XYZ" &rarr; "XYZ")</option>
+          <option value="6">7: Tight Window at End (s = "ABCDEFXYZ", t = "XYZ" &rarr; "XYZ")</option>
+          <option value="7">8: Missing Required Character (s = "ADOBECODE", t = "ABZ" &rarr; "")</option>
+          <option value="8">9: Surplus Shrink Optimization (s = "BBBBAC", t = "ABC" &rarr; "BAC")</option>
+          <option value="9">10: Exact Full Match (s = "CAB", t = "ABC" &rarr; "CAB")</option>
+        </select>
+      </div>
+
+      <div class="flex flex-wrap items-center gap-2 flex-grow max-w-lg">
+        <input type="text" id="customSInput" placeholder="Source s: ADOBECODEBANC" class="flex-1 min-w-[140px] bg-white/5 border border-white/15 rounded-xl px-3 py-2 text-xs text-slate-200 code-font outline-none focus:border-cyan-400 backdrop-blur-md" title="Source string s">
+        <input type="text" id="customTInput" placeholder="Target t: ABC" class="w-28 sm:w-32 bg-white/5 border border-white/15 rounded-xl px-3 py-2 text-xs text-slate-200 code-font outline-none focus:border-purple-400 backdrop-blur-md" title="Target string t">
+        <button id="btnApplyCustom" class="glass-button text-xs px-4 py-2 rounded-xl text-cyan-300 font-semibold shrink-0">
+          Load (s, t)
+        </button>
+      </div>
+    </section>
+
+    <!-- MAIN VISUALIZATION & CODE SECTION -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-5">
+
+      <!-- LEFT: TARGET T, DYNAMIC EXPAND/SHRINK SLIDING WINDOW & NEED[128] LEDGER -->
+      <section class="lg:col-span-7 xl:col-span-8 flex flex-col gap-5">
+
+        <!-- Live Sliding Window Telemetry Cards -->
+        <div class="grid grid-cols-2 sm:grid-cols-5 gap-3">
+
+          <!-- Left & Right Pointers -->
+          <div class="glass-panel rounded-xl p-3 flex flex-col justify-between border-cyan-400/35">
+            <span class="text-[11px] text-slate-400 uppercase font-semibold flex items-center justify-between">
+              Window [L..R]
+              <span class="w-2 h-2 rounded-full bg-cyan-400"></span>
+            </span>
+            <div class="flex items-baseline gap-1.5 mt-1.5">
+              <span id="varWinSpan" class="code-font text-base sm:text-lg font-bold text-cyan-300">-</span>
+            </div>
+            <span id="varWinAction" class="text-[10px] text-cyan-200/80 mt-1 code-font">Expand / Shrink</span>
+          </div>
+
+          <!-- Formed vs Required -->
+          <div id="formedCard" class="glass-panel rounded-xl p-3 flex flex-col justify-between border-purple-400/35">
+            <span class="text-[11px] text-slate-400 uppercase font-semibold flex items-center justify-between">
+              formed / req
+              <i class="fa-solid fa-check-double text-purple-400 text-[10px]"></i>
+            </span>
+            <div class="flex items-baseline gap-1.5 mt-1.5">
+              <span id="varFormedReq" class="code-font text-lg sm:text-xl font-bold text-purple-300">0 / 3</span>
+            </div>
+            <span id="varFormedState" class="text-[10px] text-slate-400 mt-1 code-font">Searching...</span>
+          </div>
+
+          <!-- Current Window Length -->
+          <div class="glass-panel rounded-xl p-3 flex flex-col justify-between border-sky-400/35">
+            <span class="text-[11px] text-slate-400 uppercase font-semibold flex items-center justify-between">
+              windowLength
+              <i class="fa-solid fa-ruler-horizontal text-sky-400 text-[10px]"></i>
+            </span>
+            <div class="flex items-baseline gap-1 mt-1.5">
+              <span id="varCurWinLen" class="code-font text-xl font-bold text-sky-300">-</span>
+            </div>
+            <span class="text-[10px] text-slate-400 mt-1 code-font">right - left + 1</span>
+          </div>
+
+          <!-- minLength -->
+          <div class="glass-panel rounded-xl p-3 flex flex-col justify-between border-amber-400/35">
+            <span class="text-[11px] text-slate-400 uppercase font-semibold flex items-center justify-between">
+              minLength
+              <i class="fa-solid fa-minimize text-amber-400 text-[10px]"></i>
+            </span>
+            <div class="flex items-baseline gap-1.5 mt-1.5">
+              <span id="varMinLen" class="code-font text-xl font-bold text-amber-300">&infin;</span>
+            </div>
+            <span id="varStartIdx" class="text-[10px] text-amber-200/80 mt-1 code-font">startIndex: 0</span>
+          </div>
+
+          <!-- Best Substring Result -->
+          <div id="bestSubCard" class="glass-panel rounded-xl p-3 flex flex-col justify-between border-emerald-400/35 col-span-2 sm:col-span-1">
+            <span class="text-[11px] text-slate-400 uppercase font-semibold flex items-center justify-between">
+              Best Substring
+              <i class="fa-solid fa-trophy text-emerald-400 text-[10px]"></i>
+            </span>
+            <div class="flex items-baseline gap-1.5 mt-1.5 overflow-hidden">
+              <span id="varBestSubstr" class="code-font text-base sm:text-lg font-black text-emerald-400 truncate">""</span>
+            </div>
+            <span id="varBestSubstrSub" class="text-[10px] text-emerald-300/80 mt-1 code-font">s.substring(...)</span>
+          </div>
+
+        </div>
+
+        <!-- UNIFIED TARGET T, DYNAMIC EXPAND/SHRINK STREAM S & NEED[128] LEDGER -->
+        <div id="stageWrapper" class="glass-panel relative rounded-2xl p-4 sm:p-5 flex flex-col gap-5">
+          <!-- SVG Trajectory Arc Overlay for Token Transfers & Expand/Shrink Pointer Hops -->
+          <svg id="transferArcSvg" class="absolute inset-0 w-full h-full pointer-events-none z-30 overflow-visible"></svg>
+
+          <!-- Floating Lift-and-Place Token Layer -->
+          <div id="flyingCloneLayer" class="absolute inset-0 pointer-events-none z-40"></div>
+
+          <!-- 1. TARGET STRING t & SOURCE STRING s WITH EXPAND/SHRINK DYNAMIC WINDOW -->
+          <div class="flex flex-col gap-4">
+            <div class="flex flex-wrap items-center justify-between text-xs pb-2 border-b border-white/10 gap-2">
+              <div class="flex items-center gap-3">
+                <span class="font-semibold text-purple-300 uppercase tracking-wider flex items-center gap-1.5">
+                  <i class="fa-solid fa-bullseye text-purple-400"></i>
+                  Target <span class="code-font text-white">t</span>:
+                </span>
+                <div id="tStreamArena" class="flex flex-wrap items-center gap-1">
+                  <!-- Populated dynamically -->
+                </div>
+              </div>
+
+              <div class="flex flex-wrap items-center gap-3 text-[11px]">
+                <span class="flex items-center gap-1.5">
+                  <span class="w-2.5 h-2.5 rounded-sm bg-amber-400 inline-block"></span> Expand (right++)
+                </span>
+                <span class="flex items-center gap-1.5">
+                  <span class="w-2.5 h-2.5 rounded-sm bg-rose-500 inline-block"></span> Shrink (left++)
+                </span>
+                <span class="flex items-center gap-1.5">
+                  <span class="w-2.5 h-2.5 rounded-sm bg-emerald-400 inline-block"></span> Valid (formed == req)
+                </span>
+              </div>
+            </div>
+
+            <!-- Scrollable Source String s with Expand/Shrink Pointer Hop Arc & Elastic Window Frame -->
+            <div id="sScrollContainer" class="relative w-full pt-10 pb-8 px-2.5 sm:px-3 rounded-xl bg-white/[0.02] border border-white/10 overflow-x-auto">
+              <!-- Elastic Active Window Frame [left .. right] -->
+              <div id="activeWindowFrame" class="hidden absolute rounded-2xl border-2 border-cyan-400/80 bg-cyan-400/[0.07] pointer-events-none transition-all duration-300 z-10">
+                <span id="activeWindowTag" class="absolute -top-3 left-1/2 -translate-x-1/2 px-2 py-0.5 rounded-full bg-slate-950 border border-cyan-400/75 text-cyan-200 code-font text-[9px] font-bold shadow whitespace-nowrap">
+                  window [0..0]
+                </span>
+              </div>
+
+              <!-- Best Record Substring Dashed Frame [startIndex .. startIndex + minLength - 1] -->
+              <div id="bestWindowFrame" class="hidden absolute h-3.5 border-b-2 border-x-2 border-dashed border-emerald-400/80 rounded-b-lg pointer-events-none transition-all duration-300 z-10">
+                <span id="bestWindowTag" class="absolute -bottom-4 left-1/2 -translate-x-1/2 text-[9px] code-font text-emerald-300 font-bold whitespace-nowrap">
+                  Min: ""
+                </span>
+              </div>
+
+              <!-- Source String s Character Tiles -->
+              <div id="sStreamArena" class="relative z-20 w-full flex items-center justify-between gap-1 sm:gap-1.5 min-h-[76px]">
+                <!-- Populated dynamically -->
+              </div>
+            </div>
+          </div>
+
+          <!-- 2. BI-DIRECTIONAL DEFICIT / SURPLUS LEDGER: int[] need = new int[128] -->
+          <div class="flex flex-col gap-3 pt-1">
+            <div class="flex flex-wrap items-center justify-between text-xs pb-2 border-b border-white/10 gap-2">
+              <span class="font-semibold text-slate-200 uppercase tracking-wider flex items-center gap-1.5">
+                <i class="fa-solid fa-scale-balanced text-cyan-400"></i>
+                ASCII Demand &amp; Surplus Ledger: <span class="code-font text-purple-300">int[] need = new int[128]</span>
+              </span>
+
+              <div class="flex flex-wrap items-center gap-3 text-[11px]">
+                <span class="flex items-center gap-1.5">
+                  <span class="w-2.5 h-2.5 rounded-sm bg-amber-400 inline-block"></span> &gt; 0 (Needed)
+                </span>
+                <span class="flex items-center gap-1.5">
+                  <span class="w-2.5 h-2.5 rounded-sm bg-emerald-400 inline-block"></span> == 0 (Satisfied)
+                </span>
+                <span class="flex items-center gap-1.5">
+                  <span class="w-2.5 h-2.5 rounded-sm bg-sky-400 inline-block"></span> &lt; 0 (Surplus in Window)
+                </span>
+              </div>
+            </div>
+
+            <div id="needLedgerArena" class="min-h-[164px] p-3 rounded-xl bg-white/[0.02] border border-white/10 flex flex-wrap items-stretch justify-center gap-2.5 sm:gap-3">
+              <!-- Populated dynamically with bi-directional deficit (+ above 0) & surplus (- below 0) bars -->
+            </div>
+          </div>
+
+          <!-- Live Decision Banner -->
+          <div id="decisionBanner" class="p-3.5 rounded-xl bg-white/[0.04] border border-white/10 text-xs flex flex-col sm:flex-row items-center justify-between gap-3 backdrop-blur-md">
+            <div class="flex items-center gap-2.5">
+              <i id="decisionIcon" class="fa-solid fa-circle-info text-cyan-400 text-base"></i>
+              <span id="decisionText" class="text-slate-200">Ready to populate need[128] from target t and slide the dynamic window across s.</span>
+            </div>
+            <div id="statusPill" class="hidden text-xs code-font px-3 py-1.5 rounded-lg bg-slate-950/70 border border-white/15 text-sky-200 font-semibold shrink-0">
+              <!-- e.g. formed == required (3 == 3) -->
+            </div>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- RIGHT: SYNCHRONIZED JAVA CODE CONTAINER -->
+      <section class="lg:col-span-5 xl:col-span-4 flex flex-col gap-4">
+
+        <div class="glass-panel rounded-2xl p-4 flex flex-col h-full">
+          <div class="flex items-center justify-between pb-3 border-b border-white/10 text-xs">
+            <div class="flex items-center gap-2">
+              <div class="flex gap-1.5">
+                <span class="w-3 h-3 rounded-full bg-rose-500/80 inline-block"></span>
+                <span class="w-3 h-3 rounded-full bg-amber-500/80 inline-block"></span>
+                <span class="w-3 h-3 rounded-full bg-emerald-500/80 inline-block"></span>
+              </div>
+              <span class="code-font text-slate-200 font-semibold ml-2">Solution.java</span>
+            </div>
+            <span class="text-[11px] text-cyan-300 bg-cyan-500/15 px-2.5 py-0.5 rounded border border-cyan-400/25 code-font">
+              Expand &amp; Shrink Window
+            </span>
+          </div>
+
+          <!-- Code Lines with Zero-Jump Localized Scroll -->
+          <div id="codeContainer" class="code-font text-xs sm:text-[13px] leading-relaxed text-slate-300 py-3 overflow-y-auto max-h-[600px] flex-grow select-none">
+            <div class="code-line" id="line1"><span class="text-slate-500 mr-2"> 1</span><span class="text-indigo-400 font-semibold">class</span> <span class="text-amber-300">Solution</span> {</div>
+            <div class="code-line" id="line2"><span class="text-slate-500 mr-2"> 2</span>    <span class="text-indigo-400 font-semibold">public</span> String <span class="text-cyan-300">minWindow</span>(String s, String t) {</div>
+            <div class="code-line" id="line3"><span class="text-slate-500 mr-2"> 3</span></div>
+            <div class="code-line" id="line4"><span class="text-slate-500 mr-2"> 4</span>        <span class="text-indigo-400 font-semibold">if</span> (s.length() &lt; t.length()) {</div>
+            <div class="code-line" id="line5"><span class="text-slate-500 mr-2"> 5</span>            <span class="text-indigo-400 font-semibold">return</span> <span class="text-emerald-300">""</span>;</div>
+            <div class="code-line" id="line6"><span class="text-slate-500 mr-2"> 6</span>        }</div>
+            <div class="code-line" id="line7"><span class="text-slate-500 mr-2"> 7</span></div>
+            <div class="code-line" id="line8"><span class="text-slate-500 mr-2"> 8</span>        <span class="text-indigo-400 font-semibold">int</span>[] need = <span class="text-indigo-400 font-semibold">new int</span>[<span class="text-rose-400">128</span>];</div>
+            <div class="code-line" id="line9"><span class="text-slate-500 mr-2"> 9</span></div>
+            <div class="code-line" id="line10"><span class="text-slate-500 mr-2">10</span>        <span class="text-slate-500 italic">// Store required character frequencies</span></div>
+            <div class="code-line" id="line11"><span class="text-slate-500 mr-2">11</span>        <span class="text-indigo-400 font-semibold">for</span> (<span class="text-indigo-400">char</span> ch : t.toCharArray()) {</div>
+            <div class="code-line" id="line12"><span class="text-slate-500 mr-2">12</span>            need[ch]++;</div>
+            <div class="code-line" id="line13"><span class="text-slate-500 mr-2">13</span></div>
+            <div class="code-line" id="line14"><span class="text-slate-500 mr-2">14</span>        <span class="text-indigo-400 font-semibold">int</span> left = <span class="text-rose-400">0</span>;</div>
+            <div class="code-line" id="line15"><span class="text-slate-500 mr-2">15</span>        <span class="text-indigo-400 font-semibold">int</span> formed = <span class="text-rose-400">0</span>;</div>
+            <div class="code-line" id="line16"><span class="text-slate-500 mr-2">16</span>        <span class="text-indigo-400 font-semibold">int</span> required = t.length();</div>
+            <div class="code-line" id="line17"><span class="text-slate-500 mr-2">17</span></div>
+            <div class="code-line" id="line18"><span class="text-slate-500 mr-2">18</span>        <span class="text-indigo-400 font-semibold">int</span> minLength = Integer.MAX_VALUE;</div>
+            <div class="code-line" id="line19"><span class="text-slate-500 mr-2">19</span>        <span class="text-indigo-400 font-semibold">int</span> startIndex = <span class="text-rose-400">0</span>;</div>
+            <div class="code-line" id="line20"><span class="text-slate-500 mr-2">20</span></div>
+            <div class="code-line" id="line21"><span class="text-slate-500 mr-2">21</span>        <span class="text-indigo-400 font-semibold">for</span> (<span class="text-indigo-400">int</span> right = <span class="text-rose-400">0</span>; right &lt; s.length(); right++) {</div>
+            <div class="code-line" id="line22"><span class="text-slate-500 mr-2">22</span></div>
+            <div class="code-line" id="line23"><span class="text-slate-500 mr-2">23</span>            <span class="text-indigo-400 font-semibold">char</span> ch = s.charAt(right);</div>
+            <div class="code-line" id="line24"><span class="text-slate-500 mr-2">24</span></div>
+            <div class="code-line" id="line25"><span class="text-slate-500 mr-2">25</span>            <span class="text-slate-500 italic">// Include the current character</span></div>
+            <div class="code-line" id="line26"><span class="text-slate-500 mr-2">26</span>            need[ch]--;</div>
+            <div class="code-line" id="line27"><span class="text-slate-500 mr-2">27</span></div>
+            <div class="code-line" id="line28"><span class="text-slate-500 mr-2">28</span>            <span class="text-slate-500 italic">// This character was still required</span></div>
+            <div class="code-line" id="line29"><span class="text-slate-500 mr-2">29</span>            <span class="text-indigo-400 font-semibold">if</span> (need[ch] &gt;= <span class="text-rose-400">0</span>) {</div>
+            <div class="code-line" id="line30"><span class="text-slate-500 mr-2">30</span>                formed++;</div>
+            <div class="code-line" id="line31"><span class="text-slate-500 mr-2">31</span>            }</div>
+            <div class="code-line" id="line32"><span class="text-slate-500 mr-2">32</span></div>
+            <div class="code-line" id="line33"><span class="text-slate-500 italic">// All required character occurrences are present</span></div>
+            <div class="code-line" id="line34"><span class="text-slate-500 mr-2">34</span>            <span class="text-indigo-400 font-semibold">while</span> (formed == required) {</div>
+            <div class="code-line" id="line35"><span class="text-slate-500 mr-2">35</span></div>
+            <div class="code-line" id="line36"><span class="text-slate-500 italic">// Update the minimum window</span></div>
+            <div class="code-line" id="line37"><span class="text-slate-500 mr-2">37</span>                <span class="text-indigo-400 font-semibold">int</span> windowLength = right - left + <span class="text-rose-400">1</span>;</div>
+            <div class="code-line" id="line38"><span class="text-slate-500 mr-2">38</span></div>
+            <div class="code-line" id="line39"><span class="text-slate-500 mr-2">39</span>                <span class="text-indigo-400 font-semibold">if</span> (windowLength &lt; minLength) {</div>
+            <div class="code-line" id="line40"><span class="text-slate-500 mr-2">40</span>                    minLength = windowLength;</div>
+            <div class="code-line" id="line41"><span class="text-slate-500 mr-2">41</span>                    startIndex = left;</div>
+            <div class="code-line" id="line42"><span class="text-slate-500 mr-2">42</span>                }</div>
+            <div class="code-line" id="line43"><span class="text-slate-500 mr-2">43</span></div>
+            <div class="code-line" id="line44"><span class="text-slate-500 italic">// Remove the leftmost character</span></div>
+            <div class="code-line" id="line45"><span class="text-slate-500 mr-2">45</span>                <span class="text-indigo-400 font-semibold">char</span> leftChar = s.charAt(left);</div>
+            <div class="code-line" id="line46"><span class="text-slate-500 mr-2">46</span>                need[leftChar]++;</div>
+            <div class="code-line" id="line47"><span class="text-slate-500 mr-2">47</span></div>
+            <div class="code-line" id="line48"><span class="text-slate-500 italic">// We removed a character that was required</span></div>
+            <div class="code-line" id="line49"><span class="text-slate-500 mr-2">49</span>                <span class="text-indigo-400 font-semibold">if</span> (need[leftChar] &gt; <span class="text-rose-400">0</span>) {</div>
+            <div class="code-line" id="line50"><span class="text-slate-500 mr-2">50</span>                    formed--;</div>
+            <div class="code-line" id="line51"><span class="text-slate-500 mr-2">51</span>                }</div>
+            <div class="code-line" id="line52"><span class="text-slate-500 mr-2">52</span></div>
+            <div class="code-line" id="line53"><span class="text-slate-500 mr-2">53</span>                left++;</div>
+            <div class="code-line" id="line54"><span class="text-slate-500 mr-2">54</span>            }</div>
+            <div class="code-line" id="line55"><span class="text-slate-500 mr-2">55</span>        }</div>
+            <div class="code-line" id="line56"><span class="text-slate-500 mr-2">56</span></div>
+            <div class="code-line" id="line57"><span class="text-slate-500 mr-2">57</span>        <span class="text-indigo-400 font-semibold">if</span> (minLength == Integer.MAX_VALUE) {</div>
+            <div class="code-line" id="line58"><span class="text-slate-500 mr-2">58</span>            <span class="text-indigo-400 font-semibold">return</span> <span class="text-emerald-300">""</span>;</div>
+            <div class="code-line" id="line59"><span class="text-slate-500 mr-2">59</span>        }</div>
+            <div class="code-line" id="line60"><span class="text-slate-500 mr-2">60</span></div>
+            <div class="code-line" id="line61"><span class="text-slate-500 mr-2">61</span>        <span class="text-indigo-400 font-semibold">return</span> s.substring(startIndex, startIndex + minLength);</div>
+            <div class="code-line" id="line62"><span class="text-slate-500 mr-2">62</span>    }</div>
+            <div class="code-line" id="line63"><span class="text-slate-500 mr-2">63</span>}</div>
+          </div>
+
+          <!-- Live Step Narrative Box -->
+          <div class="mt-3 p-3 bg-white/[0.04] border border-white/10 rounded-xl flex items-start gap-2.5 backdrop-blur-md">
+            <i class="fa-solid fa-circle-info text-cyan-400 mt-0.5 text-xs"></i>
+            <div class="text-xs text-slate-200 leading-relaxed" id="stepDescription">
+              Ready to run Minimum Window Substring. Click <b>Start</b> or <b>Next</b> to step through.
+            </div>
+          </div>
+
+        </div>
+
+      </section>
+
+    </div>
+
+    <!-- BOTTOM SECTION: PROBLEM STATEMENT & ARCHITECTURAL SUMMARY -->
+    <footer class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-2">
+
+      <!-- Problem Statement Card -->
+      <div class="glass-panel rounded-2xl p-5 flex flex-col gap-3">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <span class="text-rose-400 font-bold"><i class="fa-solid fa-file-lines mr-1.5"></i>Problem Statement</span>
+            <span class="px-2 py-0.5 rounded text-[11px] font-semibold bg-rose-500/20 text-rose-300 border border-rose-400/30">Hard</span>
+          </div>
+          <span class="text-xs text-slate-400 font-mono">LeetCode 76</span>
+        </div>
+
+        <p class="text-xs text-slate-300 leading-relaxed">
+          Given two strings <code class="font-mono text-cyan-300">s</code> and <code class="font-mono text-purple-300">t</code> of lengths <code class="font-mono">m</code> and <code class="font-mono">n</code> respectively, return the <b>minimum window substring</b> of <code class="font-mono">s</code> such that every character in <code class="font-mono">t</code> (<b>including duplicates</b>) is included in the window. If there is no such substring, return the empty string <code class="font-mono">""</code>.
+        </p>
+
+        <div class="space-y-2 pt-2 border-t border-white/10 text-xs text-slate-300">
+          <div class="bg-white/[0.03] p-2.5 rounded-lg border border-white/10 font-mono">
+            <span class="text-slate-400">Example 1:</span>
+            <b>Input:</b> s = "ADOBECODEBANC", t = "ABC" &rarr; <b>Output:</b> <span class="text-emerald-400 font-bold">"BANC"</span>
+            <div class="text-[11px] text-slate-400 font-sans mt-0.5">The minimum window substring "BANC" includes 'A', 'B', and 'C' from string t.</div>
+          </div>
+          <div class="bg-white/[0.03] p-2.5 rounded-lg border border-white/10 font-mono">
+            <span class="text-slate-400">Example 2:</span>
+            <b>Input:</b> s = "a", t = "a" &rarr; <b>Output:</b> <span class="text-emerald-400 font-bold">"a"</span> (Entire string s is the minimum window)
+          </div>
+          <div class="bg-white/[0.03] p-2.5 rounded-lg border border-white/10 font-mono">
+            <span class="text-slate-400">Example 3:</span>
+            <b>Input:</b> s = "a", t = "aa" &rarr; <b>Output:</b> <span class="text-rose-400 font-bold">""</span> (Both 'a's from t must be included)
+          </div>
+        </div>
+
+        <div class="text-[11px] text-slate-400">
+          <b>Constraints:</b> <code class="font-mono text-slate-300">1 &le; m, n &le; 10<sup>5</sup></code>, <code class="font-mono text-slate-300">s</code> and <code class="font-mono text-slate-300">t</code> consist of uppercase and lowercase English letters.
+        </div>
+      </div>
+
+      <!-- Algorithm Summary & Expand/Shrink Invariant Card -->
+      <div class="glass-panel rounded-2xl p-5 flex flex-col gap-3">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <span class="text-cyan-400 font-bold"><i class="fa-solid fa-brain mr-1.5"></i>Algorithm Summary &amp; Expand/Shrink Mechanics</span>
+          </div>
+          <span class="px-2 py-0.5 rounded text-[11px] font-semibold bg-cyan-500/20 text-cyan-200 border border-cyan-400/30">O(m + n) Time</span>
+        </div>
+
+        <div class="space-y-3 text-xs text-slate-300 leading-relaxed">
+          <div class="p-3 bg-cyan-950/30 border border-cyan-400/25 rounded-xl">
+            <b class="text-cyan-300 flex items-center gap-1.5 mb-1">
+              <i class="fa-solid fa-arrows-left-right"></i> Two-Phase Dynamic Sliding Window:
+            </b>
+            <ul class="list-disc list-inside space-y-0.5 text-slate-300">
+              <li><b>Expand (<code class="font-mono text-amber-300">right++</code>):</b> Absorb <code class="font-mono">s.charAt(right)</code> via <code class="font-mono">need[ch]--</code>. If <code class="font-mono">need[ch] &ge; 0</code> after decrementing, it satisfied a required copy of <code class="font-mono">t</code>, so <code class="font-mono text-emerald-300">formed++</code>.</li>
+              <li><b>Shrink (<code class="font-mono text-rose-300">left++</code>):</b> Once <code class="font-mono">formed == required</code>, contract from <code class="font-mono">left</code> to minimize window length, releasing surplus copies (<code class="font-mono">need[leftChar] &le; 0</code>) until a critical character (<code class="font-mono">need[leftChar] &gt; 0</code>) exits.</li>
+            </ul>
+          </div>
+
+          <div class="p-3 bg-purple-950/25 border border-purple-400/20 rounded-xl">
+            <b class="text-purple-300 flex items-center gap-1.5 mb-1">
+              <i class="fa-solid fa-scale-balanced"></i> Deficit vs. Surplus Sign Convention in <code class="font-mono">need[128]</code>:
+            </b>
+            Positive entries (<code class="font-mono text-amber-300">need[c] &gt; 0</code>) indicate copies still missing from the window; <code class="font-mono text-emerald-300">0</code> means exact fulfillment; negative entries (<code class="font-mono text-sky-300">need[c] &lt; 0</code>) record extra surplus copies buffered inside <code class="font-mono">[left..right]</code>.
+          </div>
+
+          <div class="grid grid-cols-2 gap-3 pt-1">
+            <div class="p-2.5 bg-white/[0.03] rounded-lg border border-white/10">
+              <span class="text-[11px] text-slate-400 uppercase font-semibold">Time Complexity</span>
+              <div class="text-sm font-bold text-emerald-400 font-mono mt-0.5">&Omicron;(M + N)</div>
+              <p class="text-[10px] text-slate-400 mt-0.5"><code class="font-mono">&Omicron;(N)</code> to count <code class="font-mono">t</code> + <code class="font-mono">&Omicron;(2M)</code> as <code class="font-mono">right</code> and <code class="font-mono">left</code> traverse <code class="font-mono">s</code> once each.</p>
+            </div>
+            <div class="p-2.5 bg-white/[0.03] rounded-lg border border-white/10">
+              <span class="text-[11px] text-slate-400 uppercase font-semibold">Space Complexity</span>
+              <div class="text-sm font-bold text-cyan-400 font-mono mt-0.5">&Omicron;(1)</div>
+              <p class="text-[10px] text-slate-400 mt-0.5">Fixed 128-entry ASCII frequency table <code class="font-mono">int[128]</code>.</p>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+    </footer>
+
+  </div>
+
+  <!-- JAVASCRIPT SIMULATION ENGINE WITH EXPAND/SHRINK HOPS & LIFT-AND-ARC TRANSFERS -->
+  <script>
+    // 10 COMPREHENSIVE PRESETS
+    const PRESETS = [
+      { name: "1: LeetCode Ex 1 (s = 'ADOBECODEBANC', t = 'ABC')", s: "ADOBECODEBANC", t: "ABC" },
+      { name: "2: LeetCode Ex 2 (s = 'a', t = 'a')", s: "a", t: "a" },
+      { name: "3: LeetCode Ex 3 (s = 'a', t = 'aa')", s: "a", t: "aa" },
+      { name: "4: Duplicate Targets in t (s = 'AAABBCAB', t = 'AABC')", s: "AAABBCAB", t: "AABC" },
+      { name: "5: Mixed Upper & Lowercase (s = 'abAcaBbc', t = 'Abc')", s: "abAcaBbc", t: "Abc" },
+      { name: "6: Tight Window at Start (s = 'XYZABCDEF', t = 'XYZ')", s: "XYZABCDEF", t: "XYZ" },
+      { name: "7: Tight Window at End (s = 'ABCDEFXYZ', t = 'XYZ')", s: "ABCDEFXYZ", t: "XYZ" },
+      { name: "8: Missing Required Character (s = 'ADOBECODE', t = 'ABZ')", s: "ADOBECODE", t: "ABZ" },
+      { name: "9: Surplus Shrink Optimization (s = 'BBBBAC', t = 'ABC')", s: "BBBBAC", t: "ABC" },
+      { name: "10: Exact Full Match (s = 'CAB', t = 'ABC')", s: "CAB", t: "ABC" }
+    ];
+
+    // APPLICATION STATE
+    let currentS = PRESETS[0].s;
+    let currentT = PRESETS[0].t;
+    let steps = [];
+    let currentStepIdx = 0;
+    let isPlaying = false;
+    let playInterval = null;
+    let playSpeed = 650;
+    let audioEnabled = true;
+
+    // WEB AUDIO SYNTHESIZER
+    let audioCtx = null;
+    function initAudio() {
+      if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      }
+    }
+    function playTone(freq = 440, type = 'sine', duration = 0.08, vol = 0.035) {
+      if (!audioEnabled) return;
+      try {
+        initAudio();
+        if (audioCtx.state === 'suspended') {
+          audioCtx.resume();
+        }
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = type;
+        osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+        gain.gain.setValueAtTime(vol, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + duration);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + duration);
+      } catch (e) {}
+    }
+
+    // DOM REFERENCES
+    const btnPlay = document.getElementById('btnPlay');
+    const playIcon = document.getElementById('playIcon');
+    const playText = document.getElementById('playText');
+    const btnPrev = document.getElementById('btnPrev');
+    const btnNext = document.getElementById('btnNext');
+    const btnReset = document.getElementById('btnReset');
+    const btnAudio = document.getElementById('btnAudio');
+    const audioIcon = document.getElementById('audioIcon');
+    const presetSelect = document.getElementById('presetSelect');
+    const customSInput = document.getElementById('customSInput');
+    const customTInput = document.getElementById('customTInput');
+    const btnApplyCustom = document.getElementById('btnApplyCustom');
+    const stepScrubber = document.getElementById('stepScrubber');
+    const stepCounterBadge = document.getElementById('stepCounterBadge');
+    const phaseBadge = document.getElementById('phaseBadge');
+    const formedHeaderBadge = document.getElementById('formedHeaderBadge');
+    const minWinHeaderBadge = document.getElementById('minWinHeaderBadge');
+
+    const varWinSpan = document.getElementById('varWinSpan');
+    const varWinAction = document.getElementById('varWinAction');
+    const formedCard = document.getElementById('formedCard');
+    const varFormedReq = document.getElementById('varFormedReq');
+    const varFormedState = document.getElementById('varFormedState');
+    const varCurWinLen = document.getElementById('varCurWinLen');
+    const varMinLen = document.getElementById('varMinLen');
+    const varStartIdx = document.getElementById('varStartIdx');
+    const bestSubCard = document.getElementById('bestSubCard');
+    const varBestSubstr = document.getElementById('varBestSubstr');
+
+    const stageWrapper = document.getElementById('stageWrapper');
+    const transferArcSvg = document.getElementById('transferArcSvg');
+    const flyingCloneLayer = document.getElementById('flyingCloneLayer');
+    const tStreamArena = document.getElementById('tStreamArena');
+    const sScrollContainer = document.getElementById('sScrollContainer');
+    const activeWindowFrame = document.getElementById('activeWindowFrame');
+    const activeWindowTag = document.getElementById('activeWindowTag');
+    const bestWindowFrame = document.getElementById('bestWindowFrame');
+    const bestWindowTag = document.getElementById('bestWindowTag');
+    const sStreamArena = document.getElementById('sStreamArena');
+    const needLedgerArena = document.getElementById('needLedgerArena');
+
+    const decisionBanner = document.getElementById('decisionBanner');
+    const decisionIcon = document.getElementById('decisionIcon');
+    const decisionText = document.getElementById('decisionText');
+    const statusPill = document.getElementById('statusPill');
+    const codeContainer = document.getElementById('codeContainer');
+    const stepDescription = document.getElementById('stepDescription');
+
+    // STRICT LINE-BY-LINE EXECUTION TRACE GENERATOR
+    function generateSteps(s, t) {
+      const trace = [];
+      const m = s.length;
+      const n = t.length;
+
+      // Track target characters first, plus any active non-target chars currently inside window
+      const targetChars = Array.from(new Set(t.split(''))).sort();
+      const targetSet = new Set(targetChars);
+      const allDistinctChars = Array.from(new Set((s + t).split(''))).sort((a, b) => {
+        const aIsT = targetSet.has(a);
+        const bIsT = targetSet.has(b);
+        if (aIsT && !bIsT) return -1;
+        if (!aIsT && bIsT) return 1;
+        return a.localeCompare(b);
+      });
+
+      const need = new Array(128).fill(0);
+      let left = 0;
+      let formed = 0;
+      const required = n;
+      let minLength = Infinity;
+      let startIndex = 0;
+
+      // Line 2: Method entry
+      trace.push({
+        line: 2,
+        phase: "Start",
+        s,
+        t,
+        targetSet,
+        allDistinctChars,
+        need: [...need],
+        tScanIdx: -1,
+        left: -1,
+        right: -1,
+        formed: 0,
+        required,
+        minLength: Infinity,
+        startIndex: 0,
+        desc: `Entered <span class="code-font text-cyan-300 font-bold">minWindow</span> with source <span class="code-font text-slate-100">"${s}"</span> (len ${m}) and target <span class="code-font text-purple-300 font-bold">"${t}"</span> (len ${n}).`,
+        soundFreq: 330
+      });
+
+      // Line 4: if (s.length() < t.length())
+      const tooShort = m < n;
+      trace.push({
+        line: 4,
+        phase: tooShort ? "s.length < t.length (True)" : "Length Check (False)",
+        s,
+        t,
+        targetSet,
+        allDistinctChars,
+        need: [...need],
+        tScanIdx: -1,
+        left: -1,
+        right: -1,
+        formed: 0,
+        required,
+        minLength: Infinity,
+        startIndex: 0,
+        desc: tooShort
+          ? `<span class="text-rose-400 font-bold">Guard Triggered!</span> <span class="code-font">s.length() (${m}) &lt; t.length() (${n})</span> is <b>true</b>.`
+          : `Length check <span class="code-font text-emerald-300">s.length() (${m}) &lt; t.length() (${n})</span> is <b>false</b>. Proceeding to allocate <span class="code-font">need[128]</span>.`,
+        soundFreq: tooShort ? 280 : 365
+      });
+
+      if (tooShort) {
+        trace.push({
+          line: 5,
+          phase: 'Return ""',
+          s,
+          t,
+          targetSet,
+          allDistinctChars,
+          need: [...need],
+          tScanIdx: -1,
+          left: -1,
+          right: -1,
+          formed: 0,
+          required,
+          minLength: Infinity,
+          startIndex: 0,
+          returnVal: "",
+          isComplete: true,
+          desc: `<span class="text-rose-400 font-bold text-sm"><i class="fa-solid fa-circle-xmark mr-1.5"></i>Returned ""!</span> Source string is shorter than target <span class="code-font">"${t}"</span>.`,
+          soundFreq: 220
+        });
+        return trace;
+      }
+
+      // Line 8: int[] need = new int[128];
+      trace.push({
+        line: 8,
+        phase: "Init need[128]",
+        s,
+        t,
+        targetSet,
+        allDistinctChars,
+        need: [...need],
+        tScanIdx: -1,
+        left: -1,
+        right: -1,
+        formed: 0,
+        required,
+        minLength: Infinity,
+        startIndex: 0,
+        desc: `Allocated ASCII frequency table <span class="code-font text-purple-300 font-bold">int[] need = new int[128]</span> (all entries initialized to 0).`,
+        soundFreq: 390
+      });
+
+      // Lines 11-12: for (char ch : t.toCharArray()) { need[ch]++; }
+      for (let ti = 0; ti < n; ti++) {
+        const tch = t[ti];
+        trace.push({
+          line: 11,
+          phase: `Target t[${ti}] = '${tch}'`,
+          s,
+          t,
+          targetSet,
+          allDistinctChars,
+          need: [...need],
+          tScanIdx: ti,
+          left: -1,
+          right: -1,
+          formed: 0,
+          required,
+          minLength: Infinity,
+          startIndex: 0,
+          desc: `Scanning target <span class="code-font text-purple-300 font-bold">t[${ti}] = '${tch}'</span> (ASCII ${tch.charCodeAt(0)}).`,
+          soundFreq: 420 + ti * 20
+        });
+
+        need[tch.charCodeAt(0)]++;
+        trace.push({
+          line: 12,
+          phase: `need['${tch}']++ (${need[tch.charCodeAt(0)]})`,
+          s,
+          t,
+          targetSet,
+          allDistinctChars,
+          need: [...need],
+          tScanIdx: ti,
+          activeBucketChar: tch,
+          transfer: { type: 'tAdd', ch: tch, idx: ti },
+          left: -1,
+          right: -1,
+          formed: 0,
+          required,
+          minLength: Infinity,
+          startIndex: 0,
+          desc: `Incremented demand <span class="code-font text-amber-300 font-bold">need['${tch}']++</span> &rarr; required count of <span class="code-font">'${tch}'</span> is <span class="code-font font-bold">${need[tch.charCodeAt(0)]}</span>.`,
+          soundFreq: 460 + ti * 25
+        });
+      }
+
+      // Line 11: Exit target loop
+      trace.push({
+        line: 11,
+        phase: "Target Counts Ready",
+        s,
+        t,
+        targetSet,
+        allDistinctChars,
+        need: [...need],
+        tScanIdx: -1,
+        left: -1,
+        right: -1,
+        formed: 0,
+        required,
+        minLength: Infinity,
+        startIndex: 0,
+        desc: `Finished recording all <span class="code-font text-purple-300 font-bold">${n}</span> required characters from <span class="code-font">"${t}"</span> into <span class="code-font">need[128]</span>.`,
+        soundFreq: 480
+      });
+
+      // Lines 15-20: Initialize sliding window pointers & record variables
+      trace.push({
+        line: 15,
+        phase: "Init left = 0",
+        s,
+        t,
+        targetSet,
+        allDistinctChars,
+        need: [...need],
+        tScanIdx: -1,
+        left: 0,
+        right: -1,
+        formed: 0,
+        required,
+        minLength: Infinity,
+        startIndex: 0,
+        desc: `Initialized left window boundary <span class="code-font text-cyan-300 font-bold">left = 0</span>.`,
+        soundFreq: 495
+      });
+
+      trace.push({
+        line: 16,
+        phase: "Init formed = 0",
+        s,
+        t,
+        targetSet,
+        allDistinctChars,
+        need: [...need],
+        tScanIdx: -1,
+        left: 0,
+        right: -1,
+        formed: 0,
+        required,
+        minLength: Infinity,
+        startIndex: 0,
+        desc: `Initialized <span class="code-font text-purple-300 font-bold">formed = 0</span> (tracks how many required character occurrences from <span class="code-font">t</span> are currently satisfied).`,
+        soundFreq: 510
+      });
+
+      trace.push({
+        line: 17,
+        phase: `required = ${required}`,
+        s,
+        t,
+        targetSet,
+        allDistinctChars,
+        need: [...need],
+        tScanIdx: -1,
+        left: 0,
+        right: -1,
+        formed: 0,
+        required,
+        minLength: Infinity,
+        startIndex: 0,
+        desc: `Set <span class="code-font text-purple-300 font-bold">required = t.length() = ${required}</span>.`,
+        soundFreq: 525
+      });
+
+      trace.push({
+        line: 19,
+        phase: "Init minLength",
+        s,
+        t,
+        targetSet,
+        allDistinctChars,
+        need: [...need],
+        tScanIdx: -1,
+        left: 0,
+        right: -1,
+        formed: 0,
+        required,
+        minLength: Infinity,
+        startIndex: 0,
+        desc: `Initialized <span class="code-font text-amber-300 font-bold">minLength = Integer.MAX_VALUE</span>.`,
+        soundFreq: 540
+      });
+
+      trace.push({
+        line: 20,
+        phase: "Init startIndex = 0",
+        s,
+        t,
+        targetSet,
+        allDistinctChars,
+        need: [...need],
+        tScanIdx: -1,
+        left: 0,
+        right: -1,
+        formed: 0,
+        required,
+        minLength: Infinity,
+        startIndex: 0,
+        desc: `Initialized <span class="code-font text-amber-300 font-bold">startIndex = 0</span>.`,
+        soundFreq: 555
+      });
+
+      // Outer Loop: for (int right = 0; right < s.length(); right++)
+      for (let right = 0; right < m; right++) {
+        // Line 22: Expand window right pointer!
+        trace.push({
+          line: 22,
+          phase: `Expand right = ${right}`,
+          s,
+          t,
+          targetSet,
+          allDistinctChars,
+          need: [...need],
+          tScanIdx: -1,
+          left,
+          right,
+          windowOp: 'expand',
+          hopArc: right > 0 ? { type: 'expand', fromIdx: right - 1, toIdx: right } : null,
+          formed,
+          required,
+          minLength,
+          startIndex,
+          desc: right > 0
+            ? `<span class="text-amber-300 font-bold">Expand Window:</span> Advanced <span class="code-font text-amber-200 font-bold">right++</span> (${right - 1} &rarr; ${right}) to include <span class="code-font">'${s[right]}'</span>.`
+            : `Outer loop <span class="code-font text-amber-300 font-bold">right = 0</span> (<span class="code-font">0 &lt; ${m}</span>): Opening window at index <span class="code-font">0</span>.`,
+          soundFreq: 560
+        });
+
+        // Line 24: char ch = s.charAt(right);
+        const ch = s[right];
+        const ascii = ch.charCodeAt(0);
+        trace.push({
+          line: 24,
+          phase: `ch = '${ch}'`,
+          s,
+          t,
+          targetSet,
+          allDistinctChars,
+          need: [...need],
+          tScanIdx: -1,
+          left,
+          right,
+          windowOp: 'expand',
+          formed,
+          required,
+          minLength,
+          startIndex,
+          desc: `Read incoming character <span class="code-font text-amber-300 font-bold">ch = s.charAt(${right}) = '${ch}'</span>.`,
+          soundFreq: 580
+        });
+
+        // Line 27: need[ch]--;
+        need[ascii]--;
+        trace.push({
+          line: 27,
+          phase: `need['${ch}']-- (${need[ascii]})`,
+          s,
+          t,
+          targetSet,
+          allDistinctChars,
+          need: [...need],
+          tScanIdx: -1,
+          left,
+          right,
+          windowOp: 'expand',
+          activeBucketChar: ch,
+          transfer: { type: 'sInclude', ch, idx: right },
+          formed,
+          required,
+          minLength,
+          startIndex,
+          desc: `Decremented <span class="code-font text-cyan-300 font-bold">need['${ch}']--</span> &rarr; <span class="code-font">need['${ch}'] = ${need[ascii]}</span> ${need[ascii] >= 0 ? '(satisfied a required copy!)' : '(extra surplus copy in window)'}.`,
+          soundFreq: 610
+        });
+
+        // Line 30: if (need[ch] >= 0)
+        const wasNeeded = need[ascii] >= 0;
+        trace.push({
+          line: 30,
+          phase: wasNeeded ? "need[ch] >= 0 (True)" : "need[ch] >= 0 (False)",
+          s,
+          t,
+          targetSet,
+          allDistinctChars,
+          need: [...need],
+          tScanIdx: -1,
+          left,
+          right,
+          windowOp: 'expand',
+          activeBucketChar: ch,
+          formed,
+          required,
+          minLength,
+          startIndex,
+          desc: wasNeeded
+            ? `Condition <span class="code-font text-emerald-300 font-bold">need['${ch}'] (${need[ascii]}) &ge; 0</span> is <b>true</b> &rarr; <span class="code-font">'${ch}'</span> was needed by <span class="code-font">t</span>.`
+            : `Condition <span class="code-font text-slate-300">need['${ch}'] (${need[ascii]}) &ge; 0</span> is <b>false</b> (<span class="code-font">${need[ascii]} &lt; 0</span>) &rarr; surplus or non-target character.`,
+          soundFreq: wasNeeded ? 640 : 530
+        });
+
+        if (wasNeeded) {
+          // Line 31: formed++;
+          formed++;
+          trace.push({
+            line: 31,
+            phase: `formed++ (${formed}/${required})`,
+            s,
+            t,
+            targetSet,
+            allDistinctChars,
+            need: [...need],
+            tScanIdx: -1,
+            left,
+            right,
+            formed,
+            required,
+            minLength,
+            startIndex,
+            statusText: `formed = ${formed} / ${required}`,
+            desc: `Incremented <span class="code-font text-emerald-300 font-bold">formed++</span> &rarr; <span class="code-font font-bold">${formed} / ${required}</span> required characters formed.`,
+            soundFreq: 680
+          });
+        }
+
+        // Inner Contraction Loop: while (formed == required)
+        while (true) {
+          const isValidWindow = (formed === required);
+
+          // Line 35: Always evaluate while (formed == required)
+          trace.push({
+            line: 35,
+            phase: isValidWindow ? `Valid (${formed} == ${required})` : `formed != required`,
+            s,
+            t,
+            targetSet,
+            allDistinctChars,
+            need: [...need],
+            tScanIdx: -1,
+            left,
+            right,
+            isValidWindow,
+            statusText: `formed (${formed}) ${isValidWindow ? '==' : '!='} required (${required})`,
+            formed,
+            required,
+            minLength,
+            startIndex,
+            desc: isValidWindow
+              ? `<span class="text-emerald-400 font-bold"><i class="fa-solid fa-check-circle mr-1"></i>Valid Window Found!</span> <span class="code-font text-emerald-300 font-bold">formed (${formed}) == required (${required})</span> is <b>true</b> &rarr; shrinking from left to minimize length.`
+              : `Contraction check <span class="code-font text-purple-300">formed (${formed}) == required (${required})</span> is <b>false</b> &rarr; resuming right expansion.`,
+            soundFreq: isValidWindow ? 740 : 510
+          });
+
+          if (!isValidWindow) break;
+
+          // Line 38: int windowLength = right - left + 1;
+          const windowLength = right - left + 1;
+          trace.push({
+            line: 38,
+            phase: `windowLength = ${windowLength}`,
+            s,
+            t,
+            targetSet,
+            allDistinctChars,
+            need: [...need],
+            tScanIdx: -1,
+            left,
+            right,
+            curWinLen: windowLength,
+            isValidWindow: true,
+            statusText: `len = ${right} - ${left} + 1 = ${windowLength}`,
+            formed,
+            required,
+            minLength,
+            startIndex,
+            desc: `Computed current valid window length: <span class="code-font text-sky-300 font-bold">windowLength = ${right} - ${left} + 1 = ${windowLength}</span> (<span class="code-font">"${s.slice(left, right + 1)}"</span>).`,
+            soundFreq: 760
+          });
+
+          // Line 40: if (windowLength < minLength)
+          const isShorter = windowLength < minLength;
+          const minDisp = minLength === Infinity ? '∞' : minLength;
+          trace.push({
+            line: 40,
+            phase: isShorter ? `New Min (${windowLength} < ${minDisp})` : `Check Min (${windowLength} ≥ ${minDisp})`,
+            s,
+            t,
+            targetSet,
+            allDistinctChars,
+            need: [...need],
+            tScanIdx: -1,
+            left,
+            right,
+            curWinLen: windowLength,
+            isValidWindow: true,
+            formed,
+            required,
+            minLength,
+            startIndex,
+            desc: isShorter
+              ? `Condition <span class="code-font text-emerald-300 font-bold">windowLength (${windowLength}) &lt; minLength (${minDisp})</span> is <b>true</b> &rarr; updating best window record!`
+              : `Condition <span class="code-font text-slate-300">windowLength (${windowLength}) &lt; minLength (${minDisp})</span> is <b>false</b>.`,
+            soundFreq: isShorter ? 800 : 620
+          });
+
+          if (isShorter) {
+            // Line 41: minLength = windowLength;
+            minLength = windowLength;
+            trace.push({
+              line: 41,
+              phase: `minLength = ${minLength}`,
+              s,
+              t,
+              targetSet,
+              allDistinctChars,
+              need: [...need],
+              tScanIdx: -1,
+              left,
+              right,
+              curWinLen: windowLength,
+              isValidWindow: true,
+              isNewRecord: true,
+              formed,
+              required,
+              minLength,
+              startIndex,
+              desc: `Updated <span class="code-font text-amber-300 font-bold">minLength = ${minLength}</span>.`,
+              soundFreq: 840
+            });
+
+            // Line 42: startIndex = left;
+            startIndex = left;
+            trace.push({
+              line: 42,
+              phase: `startIndex = ${startIndex}`,
+              s,
+              t,
+              targetSet,
+              allDistinctChars,
+              need: [...need],
+              tScanIdx: -1,
+              left,
+              right,
+              curWinLen: windowLength,
+              isValidWindow: true,
+              isNewRecord: true,
+              statusText: `Best: "${s.slice(startIndex, startIndex + minLength)}" (len=${minLength})`,
+              formed,
+              required,
+              minLength,
+              startIndex,
+              desc: `Anchored <span class="code-font text-emerald-300 font-bold">startIndex = ${startIndex}</span> &rarr; best substring so far is <span class="code-font text-emerald-200 font-bold">"${s.slice(startIndex, startIndex + minLength)}"</span>.`,
+              soundFreq: 880
+            });
+          }
+
+          // Line 46: char leftChar = s.charAt(left);
+          const leftChar = s[left];
+          const leftAscii = leftChar.charCodeAt(0);
+          trace.push({
+            line: 46,
+            phase: `leftChar = '${leftChar}'`,
+            s,
+            t,
+            targetSet,
+            allDistinctChars,
+            need: [...need],
+            tScanIdx: -1,
+            left,
+            right,
+            windowOp: 'shrink',
+            isValidWindow: true,
+            formed,
+            required,
+            minLength,
+            startIndex,
+            desc: `Preparing to release leftmost character <span class="code-font text-rose-300 font-bold">leftChar = s.charAt(${left}) = '${leftChar}'</span>.`,
+            soundFreq: 600
+          });
+
+          // Line 47: need[leftChar]++;
+          need[leftAscii]++;
+          trace.push({
+            line: 47,
+            phase: `need['${leftChar}']++ (${need[leftAscii]})`,
+            s,
+            t,
+            targetSet,
+            allDistinctChars,
+            need: [...need],
+            tScanIdx: -1,
+            left,
+            right,
+            windowOp: 'shrink',
+            activeBucketChar: leftChar,
+            transfer: { type: 'sRelease', ch: leftChar, idx: left },
+            formed,
+            required,
+            minLength,
+            startIndex,
+            desc: `Restored <span class="code-font text-rose-300 font-bold">need['${leftChar}']++</span> &rarr; <span class="code-font">need['${leftChar}'] = ${need[leftAscii]}</span>.`,
+            soundFreq: 560
+          });
+
+          // Line 50: if (need[leftChar] > 0)
+          const brokeRequirement = need[leftAscii] > 0;
+          trace.push({
+            line: 50,
+            phase: brokeRequirement ? "need[leftChar] > 0 (True)" : "need[leftChar] > 0 (False)",
+            s,
+            t,
+            targetSet,
+            allDistinctChars,
+            need: [...need],
+            tScanIdx: -1,
+            left,
+            right,
+            windowOp: 'shrink',
+            activeBucketChar: leftChar,
+            formed,
+            required,
+            minLength,
+            startIndex,
+            desc: brokeRequirement
+              ? `Condition <span class="code-font text-rose-300 font-bold">need['${leftChar}'] (${need[leftAscii]}) &gt; 0</span> is <b>true</b> &rarr; released a mandatory character!`
+              : `Condition <span class="code-font text-emerald-300">need['${leftChar}'] (${need[leftAscii]}) &gt; 0</span> is <b>false</b> (<span class="code-font">${need[leftAscii]} &le; 0</span>) &rarr; only surplus/extra copy removed.`,
+            soundFreq: brokeRequirement ? 440 : 580
+          });
+
+          if (brokeRequirement) {
+            // Line 51: formed--;
+            formed--;
+            trace.push({
+              line: 51,
+              phase: `formed-- (${formed}/${required})`,
+              s,
+              t,
+              targetSet,
+              allDistinctChars,
+              need: [...need],
+              tScanIdx: -1,
+              left,
+              right,
+              windowOp: 'shrink',
+              formed,
+              required,
+              minLength,
+              startIndex,
+              statusText: `formed = ${formed} / ${required}`,
+              desc: `Decremented <span class="code-font text-rose-300 font-bold">formed--</span> &rarr; <span class="code-font font-bold">${formed} / ${required}</span> (window is no longer complete).`,
+              soundFreq: 410
+            });
+          }
+
+          // Line 54: left++; (Shrink window with curved hop arc!)
+          const prevLeft = left;
+          left++;
+          trace.push({
+            line: 54,
+            phase: `Shrink left++ (${prevLeft} → ${left})`,
+            s,
+            t,
+            targetSet,
+            allDistinctChars,
+            need: [...need],
+            tScanIdx: -1,
+            left,
+            right,
+            windowOp: 'shrink',
+            hopArc: { type: 'shrink', fromIdx: prevLeft, toIdx: left },
+            formed,
+            required,
+            minLength,
+            startIndex,
+            desc: `<span class="text-rose-300 font-bold">Shrink Window:</span> Advanced <span class="code-font text-cyan-300 font-bold">left++</span> (${prevLeft} &rarr; ${left}).`,
+            soundFreq: 470
+          });
+        }
+      }
+
+      // Line 22: Outer loop exit when right == s.length()
+      trace.push({
+        line: 22,
+        phase: "Loop Complete",
+        s,
+        t,
+        targetSet,
+        allDistinctChars,
+        need: [...need],
+        tScanIdx: -1,
+        left,
+        right: m,
+        formed,
+        required,
+        minLength,
+        startIndex,
+        desc: `Outer loop check <span class="code-font text-amber-300">right (${m}) &lt; s.length() (${m})</span> is <b>false</b>. Finished scanning <span class="code-font">s</span>.`,
+        soundFreq: 660
+      });
+
+      // Line 58: if (minLength == Integer.MAX_VALUE)
+      const neverFound = minLength === Infinity;
+      trace.push({
+        line: 58,
+        phase: neverFound ? "No Window Found" : "Valid Answer Ready",
+        s,
+        t,
+        targetSet,
+        allDistinctChars,
+        need: [...need],
+        tScanIdx: -1,
+        left: -1,
+        right: -1,
+        formed,
+        required,
+        minLength,
+        startIndex,
+        desc: neverFound
+          ? `Condition <span class="code-font text-rose-300 font-bold">minLength == Integer.MAX_VALUE</span> is <b>true</b> &rarr; no substring of <span class="code-font">s</span> contains all characters of <span class="code-font">"${t}"</span>.`
+          : `Condition <span class="code-font text-emerald-300">minLength (${minLength}) == Integer.MAX_VALUE</span> is <b>false</b> &rarr; extracting minimum substring.`,
+        soundFreq: neverFound ? 310 : 760
+      });
+
+      if (neverFound) {
+        trace.push({
+          line: 59,
+          phase: 'Return ""',
+          s,
+          t,
+          targetSet,
+          allDistinctChars,
+          need: [...need],
+          tScanIdx: -1,
+          left: -1,
+          right: -1,
+          formed,
+          required,
+          minLength: Infinity,
+          startIndex: 0,
+          returnVal: "",
+          isComplete: true,
+          desc: `<span class="text-rose-400 font-bold text-sm"><i class="fa-solid fa-circle-xmark mr-1.5"></i>Complete!</span> Returned empty string <span class="code-font text-rose-300 font-bold text-sm">""</span>.`,
+          soundFreq: 240
+        });
+      } else {
+        const ans = s.slice(startIndex, startIndex + minLength);
+        trace.push({
+          line: 62,
+          phase: `Return "${ans}"`,
+          s,
+          t,
+          targetSet,
+          allDistinctChars,
+          need: [...need],
+          tScanIdx: -1,
+          left: startIndex,
+          right: startIndex + minLength - 1,
+          formed,
+          required,
+          minLength,
+          startIndex,
+          returnVal: ans,
+          isComplete: true,
+          desc: `<span class="text-emerald-400 font-bold text-sm"><i class="fa-solid fa-trophy mr-1.5"></i>Complete!</span> Returned <span class="code-font text-emerald-300 font-bold text-sm">"${ans}"</span> (length <span class="code-font">${minLength}</span> at indices <span class="code-font">[${startIndex}..${startIndex + minLength - 1}]</span>).`,
+          soundFreq: 960
+        });
+      }
+
+      return trace;
+    }
+
+    // LOCALIZED ZERO-JUMP CODE LINE HIGHLIGHTER
+    function highlightCodeLine(lineNum) {
+      document.querySelectorAll('.code-line').forEach(el => el.classList.remove('active-line'));
+      const activeEl = document.getElementById(`line${lineNum}`);
+      if (activeEl) {
+        activeEl.classList.add('active-line');
+
+        const containerTop = codeContainer.scrollTop;
+        const containerBottom = containerTop + codeContainer.clientHeight;
+        const elTop = activeEl.offsetTop - codeContainer.offsetTop;
+        const elBottom = elTop + activeEl.clientHeight;
+
+        if (elTop < containerTop + 24) {
+          codeContainer.scrollTo({ top: Math.max(0, elTop - 24), behavior: 'smooth' });
+        } else if (elBottom > containerBottom - 24) {
+          codeContainer.scrollTo({ top: elBottom - codeContainer.clientHeight + 24, behavior: 'smooth' });
+        }
+      }
+    }
+
+    // POSITION ELASTIC SLIDING WINDOW HALO & BEST RECORD BRACKET
+    function updateWindowFrames(step) {
+      const m = step.s.length;
+      const arenaOffsetX = sStreamArena.offsetLeft;
+      const arenaOffsetY = sStreamArena.offsetTop;
+
+      // 1. Active Window Frame [left .. right]
+      if (!step.isComplete && m > 0 && step.left >= 0 && step.right >= step.left && step.right < m) {
+        const leftCard = sStreamArena.querySelector(`[data-s-idx="${step.left}"]`);
+        const rightCard = sStreamArena.querySelector(`[data-s-idx="${step.right}"]`);
+        if (leftCard && rightCard) {
+          const padX = 5;
+          const padY = 6;
+          const xStart = arenaOffsetX + leftCard.offsetLeft - padX;
+          const width = (rightCard.offsetLeft + rightCard.offsetWidth) - leftCard.offsetLeft + padX * 2;
+          const yTop = arenaOffsetY + leftCard.offsetTop - padY;
+          const height = leftCard.offsetHeight + padY * 2;
+          const curLen = step.right - step.left + 1;
+
+          activeWindowFrame.classList.remove('hidden');
+          activeWindowFrame.style.left = `${xStart}px`;
+          activeWindowFrame.style.width = `${width}px`;
+          activeWindowFrame.style.top = `${yTop}px`;
+          activeWindowFrame.style.height = `${height}px`;
+          activeWindowTag.textContent = `window [${step.left}..${step.right}] • len=${curLen}`;
+
+          if (step.isValidWindow) {
+            activeWindowFrame.className = "absolute rounded-2xl border-2 border-emerald-400/90 bg-emerald-400/[0.09] pointer-events-none transition-all duration-300 z-10";
+            activeWindowTag.className = "absolute -top-3 left-1/2 -translate-x-1/2 px-2 py-0.5 rounded-full bg-emerald-950 border border-emerald-400/80 text-emerald-200 code-font text-[9px] font-bold shadow whitespace-nowrap";
+          } else {
+            activeWindowFrame.className = "absolute rounded-2xl border-2 border-cyan-400/80 bg-cyan-400/[0.07] pointer-events-none transition-all duration-300 z-10";
+            activeWindowTag.className = "absolute -top-3 left-1/2 -translate-x-1/2 px-2 py-0.5 rounded-full bg-slate-950 border border-cyan-400/75 text-cyan-200 code-font text-[9px] font-bold shadow whitespace-nowrap";
+          }
+        }
+      } else {
+        activeWindowFrame.classList.add('hidden');
+      }
+
+      // 2. Best Minimum Window Dashed Frame [startIndex .. startIndex + minLength - 1]
+      if (m > 0 && step.minLength !== Infinity && step.startIndex >= 0 && (step.startIndex + step.minLength - 1) < m) {
+        const bEnd = step.startIndex + step.minLength - 1;
+        const bLeftCard = sStreamArena.querySelector(`[data-s-idx="${step.startIndex}"]`);
+        const bRightCard = sStreamArena.querySelector(`[data-s-idx="${bEnd}"]`);
+        if (bLeftCard && bRightCard) {
+          const padX = 4;
+          const xStart = arenaOffsetX + bLeftCard.offsetLeft - padX;
+          const width = (bRightCard.offsetLeft + bRightCard.offsetWidth) - bLeftCard.offsetLeft + padX * 2;
+          const yTop = arenaOffsetY + bLeftCard.offsetTop + bLeftCard.offsetHeight + 4;
+          const bestSub = step.s.slice(step.startIndex, step.startIndex + step.minLength);
+
+          bestWindowFrame.classList.remove('hidden');
+          bestWindowFrame.style.left = `${xStart}px`;
+          bestWindowFrame.style.width = `${width}px`;
+          bestWindowFrame.style.top = `${yTop}px`;
+          bestWindowTag.textContent = `Min: "${bestSub}" (${step.minLength})`;
+        }
+      } else {
+        bestWindowFrame.classList.add('hidden');
+      }
+    }
+
+    // PHYSICAL LIFT-AND-ARC TRANSFERS & EXPAND/SHRINK POINTER HOP ARCS
+    function animateStageOverlays(step, animateFlight) {
+      transferArcSvg.innerHTML = '';
+      flyingCloneLayer.innerHTML = '';
+      const stageRect = stageWrapper.getBoundingClientRect();
+
+      // A. Expand / Shrink Pointer Hop Arc (matching the textbook expand / shrink diagram!)
+      if (step.hopArc) {
+        const fromCard = sStreamArena.querySelector(`[data-s-idx="${step.hopArc.fromIdx}"]`);
+        const toCard = sStreamArena.querySelector(`[data-s-idx="${step.hopArc.toIdx}"]`);
+        if (fromCard && toCard) {
+          const fRect = fromCard.getBoundingClientRect();
+          const tRect = toCard.getBoundingClientRect();
+          const x1 = (fRect.left - stageRect.left) + fRect.width / 2;
+          const y1 = (fRect.top - stageRect.top) - 4;
+          const x2 = (tRect.left - stageRect.left) + tRect.width / 2;
+          const y2 = (tRect.top - stageRect.top) - 4;
+          const midX = (x1 + x2) / 2;
+          const archY = Math.min(y1, y2) - 26;
+          const isExpand = step.hopArc.type === 'expand';
+          const color = isExpand ? '#fbbf24' : '#fb7185';
+          const label = isExpand ? 'expand' : 'shrink';
+
+          transferArcSvg.innerHTML += `
+            <path d="M ${x1} ${y1} Q ${midX} ${archY}, ${x2} ${y2}"
+                  fill="none" stroke="${color}" stroke-width="2.2" class="transfer-arc-path" />
+            <polygon points="${x2},${y2 + 2} ${x2 - 4.5},${y2 - 6} ${x2 + 4.5},${y2 - 6}" fill="${color}" />
+            <rect x="${midX - 24}" y="${archY - 12}" width="48" height="15" rx="5" fill="rgba(15, 23, 42, 0.92)" stroke="${color}" stroke-width="1" />
+            <text x="${midX}" y="${archY - 2}" text-anchor="middle" fill="${color}" font-size="9" font-family="Fira Code, monospace" font-weight="700">${label}</text>
+          `;
+        }
+      }
+
+      // B. Token Lift-and-Arc Transfer Between Strings (t / s) and need[128] Ledger
+      if (!step.transfer) return;
+      const tr = step.transfer;
+      const bucketEl = needLedgerArena.querySelector(`[data-need-char="${CSS.escape(tr.ch)}"]`);
+      if (!bucketEl) return;
+
+      const srcEl = tr.type === 'tAdd'
+        ? tStreamArena.querySelector(`[data-t-idx="${tr.idx}"]`)
+        : sStreamArena.querySelector(`[data-s-idx="${tr.idx}"]`);
+      if (!srcEl) return;
+
+      const srcRect = srcEl.getBoundingClientRect();
+      const bucketRect = bucketEl.getBoundingClientRect();
+
+      const startX = (srcRect.left - stageRect.left) + srcRect.width / 2;
+      const startY = (srcRect.bottom - stageRect.top) + 4;
+      const endX = (bucketRect.left - stageRect.left) + bucketRect.width / 2;
+      const endY = (bucketRect.top - stageRect.top) - 6;
+      const midX = (startX + endX) / 2 + 18;
+      const midY = (startY + endY) / 2;
+
+      const arcColor = tr.type === 'tAdd' ? '#c084fc' : tr.type === 'sInclude' ? '#22d3ee' : '#fb7185';
+      const badgeText = tr.type === 'tAdd' ? `+1 '${tr.ch}'` : tr.type === 'sInclude' ? `-1 '${tr.ch}'` : `+1 '${tr.ch}'`;
+      const badgeClass = tr.type === 'tAdd'
+        ? 'bg-purple-400 text-slate-950 shadow-purple-400/50'
+        : tr.type === 'sInclude'
+          ? 'bg-cyan-400 text-slate-950 shadow-cyan-400/50'
+          : 'bg-rose-500 text-white shadow-rose-500/50';
+
+      transferArcSvg.innerHTML += `
+        <path d="M ${startX} ${startY} Q ${midX} ${midY}, ${endX} ${endY}"
+              fill="none" stroke="${arcColor}" stroke-width="2.2" class="transfer-arc-path" />
+        <circle cx="${startX}" cy="${startY}" r="4" fill="${arcColor}" />
+        <polygon points="${endX},${endY + 3} ${endX - 5},${endY - 6} ${endX + 5},${endY - 6}" fill="${arcColor}" />
+      `;
+
+      if (!animateFlight) return;
+
+      const clone = document.createElement('div');
+      clone.className = `absolute px-2 py-1 rounded-lg ${badgeClass} code-font text-xs font-extrabold shadow-lg pointer-events-none`;
+      clone.textContent = badgeText;
+      clone.style.left = `${(srcRect.left - stageRect.left) + srcRect.width / 2 - 22}px`;
+      clone.style.top = `${(srcRect.top - stageRect.top) + srcRect.height / 2}px`;
+      flyingCloneLayer.appendChild(clone);
+
+      const dx = endX - startX;
+      const dy = endY - startY;
+      const duration = Math.min(520, Math.max(230, playSpeed * 0.76));
+
+      const anim = clone.animate([
+        { transform: 'translate(0px, 0px) scale(1)', opacity: 1 },
+        { transform: `translate(${dx * 0.45 + 16}px, ${dy * 0.45 - 14}px) scale(1.12)`, opacity: 1, offset: 0.45 },
+        { transform: `translate(${dx}px, ${dy}px) scale(0.95)`, opacity: 0.1 }
+      ], {
+        duration,
+        easing: 'cubic-bezier(0.22, 1, 0.36, 1)'
+      });
+      anim.onfinish = () => clone.remove();
+    }
+
+    // RENDER CURRENT STEP
+    function renderStep(idx, animateMovement = true) {
+      if (idx < 0 || idx >= steps.length) return;
+      const step = steps[idx];
+      const s = step.s;
+      const t = step.t;
+      const m = s.length;
+      const n = t.length;
+
+      // Update Header Scrubber & Badges
+      stepCounterBadge.textContent = `Step: ${idx + 1} / ${steps.length}`;
+      phaseBadge.textContent = step.phase;
+      formedHeaderBadge.textContent = `Formed: ${step.formed} / ${step.required}`;
+      stepScrubber.max = steps.length - 1;
+      stepScrubber.value = idx;
+
+      const bestSubStr = (step.minLength !== Infinity)
+        ? s.slice(step.startIndex, step.startIndex + step.minLength)
+        : '';
+      minWinHeaderBadge.textContent = step.minLength !== Infinity ? `Min Window: "${bestSubStr}"` : `Min Window: ""`;
+
+      // Update Telemetry HUD Cards
+      if (!step.isComplete && step.left >= 0 && step.right >= step.left && step.right < m) {
+        varWinSpan.textContent = `[${step.left}..${step.right}]`;
+        varWinAction.textContent = step.windowOp === 'shrink' ? 'Shrinking (left++)' : 'Expanding (right++)';
+      } else if (step.isComplete && step.minLength !== Infinity) {
+        varWinSpan.textContent = `[${step.startIndex}..${step.startIndex + step.minLength - 1}]`;
+        varWinAction.textContent = 'Optimal Window';
+      } else {
+        varWinSpan.textContent = step.left >= 0 ? `[${step.left}..-]` : '-';
+        varWinAction.textContent = 'Expand / Shrink';
+      }
+
+      varFormedReq.textContent = `${step.formed} / ${step.required}`;
+      if (step.formed === step.required) {
+        varFormedReq.className = "code-font text-lg sm:text-xl font-black text-emerald-400";
+        varFormedState.textContent = "All required satisfied ✓";
+        varFormedState.className = "text-[10px] text-emerald-300 mt-1 code-font font-bold";
+        formedCard.classList.add('border-emerald-400', 'bg-emerald-500/10');
+      } else {
+        varFormedReq.className = "code-font text-lg sm:text-xl font-bold text-purple-300";
+        varFormedState.textContent = "Searching...";
+        varFormedState.className = "text-[10px] text-slate-400 mt-1 code-font";
+        formedCard.classList.remove('border-emerald-400', 'bg-emerald-500/10');
+      }
+
+      if (!step.isComplete && step.left >= 0 && step.right >= step.left && step.right < m) {
+        varCurWinLen.textContent = step.right - step.left + 1;
+      } else if (step.isComplete && step.minLength !== Infinity) {
+        varCurWinLen.textContent = step.minLength;
+      } else {
+        varCurWinLen.textContent = '-';
+      }
+
+      if (step.minLength === Infinity) {
+        varMinLen.textContent = '∞';
+        varStartIdx.textContent = 'startIndex: 0';
+        varBestSubstr.textContent = '""';
+      } else {
+        varMinLen.textContent = step.minLength;
+        varStartIdx.textContent = `startIndex: ${step.startIndex}`;
+        varBestSubstr.textContent = `"${bestSubStr}"`;
+        if (step.isNewRecord) {
+          bestSubCard.classList.add('record-badge-anim');
+          setTimeout(() => bestSubCard.classList.remove('record-badge-anim'), 650);
+        }
+      }
+
+      // Narrative Description
+      stepDescription.innerHTML = step.desc;
+
+      // 1. Render Target String t Chips
+      tStreamArena.innerHTML = '';
+      for (let ti = 0; ti < n; ti++) {
+        const tch = t[ti];
+        const isScanning = (step.tScanIdx === ti);
+        const chip = document.createElement('div');
+        chip.dataset.tIdx = ti;
+        chip.className = `char-card w-8 h-10 rounded-lg flex flex-col items-center justify-center select-none ${
+          isScanning ? 't-active-scan' : 't-target-char'
+        }`;
+        chip.innerHTML = `
+          <span class="code-font text-xs font-extrabold ${isScanning ? 'text-white' : 'text-purple-200'}">'${tch}'</span>
+          <span class="text-[8px] code-font text-purple-300/75">[${ti}]</span>
+        `;
+        tStreamArena.appendChild(chip);
+      }
+
+      // 2. Render Source String s Character Tape (Auto-fit edge-to-edge for <= 16 chars, smooth scroll for longer strings)
+      sStreamArena.innerHTML = '';
+      const compactFit = m <= 16;
+      sStreamArena.className = compactFit
+        ? 'relative z-20 w-full flex items-center justify-between gap-1 sm:gap-1.5 min-h-[76px]'
+        : 'relative z-20 w-max mx-auto flex items-center gap-1.5 min-h-[76px]';
+
+      for (let idxChar = 0; idxChar < m; idxChar++) {
+        const ch = s[idxChar];
+        const isLeft = (step.left === idxChar && !step.isComplete);
+        const isRight = (step.right === idxChar && !step.isComplete);
+        const isInWindow = (!step.isComplete && step.left >= 0 && step.right >= step.left && idxChar >= step.left && idxChar <= step.right);
+        const isBestFinal = (step.isComplete && step.minLength !== Infinity && idxChar >= step.startIndex && idxChar < step.startIndex + step.minLength);
+        const isPast = (!step.isComplete && step.left > 0 && idxChar < step.left);
+
+        const card = document.createElement('div');
+        card.dataset.sIdx = idxChar;
+
+        const sizeClasses = compactFit
+          ? 'flex-1 min-w-[30px] max-w-[54px] h-16 '
+          : 'w-11 h-16 shrink-0 ';
+
+        let classes = `char-card relative ${sizeClasses} rounded-xl py-1.5 px-0.5 flex flex-col items-center justify-between select-none `;
+        if (isBestFinal) {
+          classes += 'best-final-char ';
+        } else if (isRight && step.windowOp === 'expand') {
+          classes += 'expand-right-char ';
+          classes += step.isValidWindow ? 'valid-window-char ' : 'in-window-char ';
+        } else if (isLeft && step.windowOp === 'shrink') {
+          classes += 'shrink-left-char ';
+        } else if (isInWindow) {
+          classes += step.isValidWindow ? 'valid-window-char ' : 'in-window-char ';
+        } else if (isPast) {
+          classes += 'past-char ';
+        }
+        card.className = classes;
+
+        // Top Pointer Tag (L / R)
+        let topTag = `<span class="text-[9px] code-font text-slate-400">[${idxChar}]</span>`;
+        if (isLeft && isRight) {
+          topTag = `<span class="px-1.5 py-0.2 rounded bg-emerald-400 text-slate-950 font-extrabold text-[9px] code-font shadow">L=R</span>`;
+        } else if (isLeft) {
+          topTag = `<span class="px-1.5 py-0.2 rounded bg-cyan-400 text-slate-950 font-extrabold text-[9px] code-font shadow">L</span>`;
+        } else if (isRight) {
+          topTag = `<span class="px-1.5 py-0.2 rounded bg-amber-400 text-slate-950 font-extrabold text-[9px] code-font shadow">R</span>`;
+        }
+
+        let glyphColor = 'text-white';
+        if (isBestFinal || (isInWindow && step.isValidWindow)) glyphColor = 'text-emerald-200';
+        else if (isRight && step.windowOp === 'expand') glyphColor = 'text-amber-200';
+        else if (isLeft && step.windowOp === 'shrink') glyphColor = 'text-rose-200';
+        else if (isInWindow) glyphColor = 'text-cyan-100';
+
+        const isReqChar = step.targetSet.has(ch);
+        const footTag = isBestFinal
+          ? `<span class="text-[8px] code-font text-emerald-300 font-bold">✓</span>`
+          : isReqChar
+            ? `<span class="text-[8px] code-font text-purple-300 font-bold">in t</span>`
+            : `<span class="text-[8px] code-font text-slate-500">${idxChar}</span>`;
+
+        card.innerHTML = `
+          <div class="w-full flex items-center justify-center">${topTag}</div>
+          <span class="code-font text-sm sm:text-base font-extrabold ${glyphColor}">'${ch}'</span>
+          ${footTag}
+        `;
+        sStreamArena.appendChild(card);
+      }
+
+      // 3. Render Bi-Directional Deficit (+ needed) & Surplus (- extra) Ledger for need[128]
+      needLedgerArena.innerHTML = '';
+      // Display all target characters plus any non-target character that currently has a non-zero count or is active
+      const visibleChars = step.allDistinctChars.filter(ch => {
+        const val = step.need[ch.charCodeAt(0)];
+        return step.targetSet.has(ch) || val !== 0 || step.activeBucketChar === ch;
+      });
+
+      const maxAbsNeed = Math.max(2, ...visibleChars.map(ch => Math.abs(step.need[ch.charCodeAt(0)])));
+
+      visibleChars.forEach((ch) => {
+        const ascii = ch.charCodeAt(0);
+        const val = step.need[ascii];
+        const isTarget = step.targetSet.has(ch);
+        const isActive = (step.activeBucketChar === ch);
+
+        const bucket = document.createElement('div');
+        bucket.dataset.needChar = ch;
+
+        let bClasses = 'need-bucket relative flex-1 min-w-[74px] max-w-[116px] rounded-xl p-2 flex flex-col items-center justify-between gap-1 select-none ';
+        if (isActive) bClasses += 'bucket-active-pulse ';
+        if (val > 0) bClasses += 'bucket-deficit ';
+        else if (val === 0 && isTarget) bClasses += 'bucket-satisfied ';
+        else if (val < 0) bClasses += 'bucket-surplus ';
+        bucket.className = bClasses;
+
+        const magPct = val === 0 ? 0 : Math.max(18, (Math.abs(val) / maxAbsNeed) * 100);
+        const roleTag = val > 0
+          ? `<span class="text-[8px] code-font text-amber-300 font-bold uppercase">need +${val}</span>`
+          : val === 0 && isTarget
+            ? `<span class="text-[8px] code-font text-emerald-300 font-bold uppercase">met ✓</span>`
+            : val < 0
+              ? `<span class="text-[8px] code-font text-sky-300 font-bold uppercase">extra ${Math.abs(val)}</span>`
+              : `<span class="text-[8px] code-font text-slate-500">neutral</span>`;
+
+        bucket.innerHTML = `
+          <div class="w-full flex items-center justify-between text-[10px] code-font">
+            <span class="font-bold text-white">'${ch}'</span>
+            <span class="text-slate-400">[${ascii}]</span>
+          </div>
+
+          <!-- Bi-Directional Bar: Positive Deficit Above 0 Line | Negative Surplus Below 0 Line -->
+          <div class="w-full flex flex-col items-center justify-center bg-black/25 rounded-lg p-1 border border-white/[0.06]">
+            <!-- Positive Upper Half (Needed > 0) -->
+            <div class="w-9 h-10 flex items-end justify-center">
+              ${val > 0 ? `<div class="w-full rounded-t-sm bg-gradient-to-t from-amber-600 to-amber-400 border-t border-amber-100 shadow-[0_0_10px_rgba(251,191,36,0.45)] transition-all duration-300" style="height: ${magPct}%;"></div>` : ''}
+            </div>
+
+            <!-- Zero Equilibrium Line -->
+            <div class="w-12 h-[2px] ${val === 0 && isTarget ? 'bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.85)]' : 'bg-white/25'} rounded-full"></div>
+
+            <!-- Negative Lower Half (Surplus in Window < 0) -->
+            <div class="w-9 h-10 flex items-start justify-center">
+              ${val < 0 ? `<div class="w-full rounded-b-sm bg-gradient-to-b from-sky-600 to-sky-400 border-b border-sky-100 shadow-[0_0_10px_rgba(56,189,248,0.45)] transition-all duration-300" style="height: ${magPct}%;"></div>` : ''}
+            </div>
+          </div>
+
+          <div class="w-full flex flex-col items-center">
+            <span class="code-font text-xs font-black ${val > 0 ? 'text-amber-300' : val === 0 && isTarget ? 'text-emerald-300' : val < 0 ? 'text-sky-300' : 'text-slate-400'}">
+              ${val > 0 ? `+${val}` : val}
+            </span>
+            ${roleTag}
+          </div>
+        `;
+        needLedgerArena.appendChild(bucket);
+      });
+
+      // 4. Position Elastic Window Frames & Trigger Expand/Shrink Hop + Lift-and-Arc Transfers
+      requestAnimationFrame(() => {
+        if (!compactFit && step.right >= 0 && step.right < m) {
+          const rightEl = sStreamArena.querySelector(`[data-s-idx="${step.right}"]`);
+          if (rightEl) {
+            const targetScroll = rightEl.offsetLeft - sScrollContainer.clientWidth / 2 + rightEl.offsetWidth / 2;
+            sScrollContainer.scrollTo({ left: Math.max(0, targetScroll), behavior: 'smooth' });
+          }
+        }
+        updateWindowFrames(step);
+        animateStageOverlays(step, animateMovement);
+      });
+
+      // 5. Update Status Pill & Decision Banner
+      if (step.statusText) {
+        statusPill.classList.remove('hidden');
+        statusPill.textContent = step.statusText;
+      } else {
+        statusPill.classList.add('hidden');
+      }
+
+      if (step.isComplete && step.returnVal !== "") {
+        decisionIcon.className = "fa-solid fa-trophy text-emerald-400 text-base";
+        decisionBanner.className = "p-3.5 rounded-xl bg-emerald-500/15 border border-emerald-400/35 text-xs flex flex-col sm:flex-row items-center justify-between gap-3 backdrop-blur-md";
+      } else if (step.isComplete && step.returnVal === "") {
+        decisionIcon.className = "fa-solid fa-circle-xmark text-rose-400 text-base";
+        decisionBanner.className = "p-3.5 rounded-xl bg-rose-500/15 border border-rose-400/35 text-xs flex flex-col sm:flex-row items-center justify-between gap-3 backdrop-blur-md";
+      } else if (step.isValidWindow || step.isNewRecord) {
+        decisionIcon.className = "fa-solid fa-circle-check text-emerald-400 text-base";
+        decisionBanner.className = "p-3.5 rounded-xl bg-emerald-500/12 border border-emerald-400/30 text-xs flex flex-col sm:flex-row items-center justify-between gap-3 backdrop-blur-md";
+      } else {
+        decisionIcon.className = "fa-solid fa-circle-info text-cyan-400 text-base";
+        decisionBanner.className = "p-3.5 rounded-xl bg-white/[0.04] border border-white/10 text-xs flex flex-col sm:flex-row items-center justify-between gap-3 backdrop-blur-md";
+      }
+      decisionText.innerHTML = step.desc;
+
+      // 6. Highlight Active Java Line & Play Audio Tone
+      highlightCodeLine(step.line);
+      if (step.soundFreq) {
+        playTone(step.soundFreq, 'sine', 0.08, 0.035);
+      }
+    }
+
+    // PLAYBACK CONTROLLER
+    function setPlaying(playing) {
+      isPlaying = playing;
+      if (isPlaying) {
+        playIcon.className = "fa-solid fa-pause";
+        playText.textContent = "Stop";
+        btnPlay.classList.add('bg-rose-500/25', 'text-rose-200', 'border-rose-400/50');
+        btnPlay.classList.remove('bg-cyan-500/25', 'text-cyan-200', 'border-cyan-400/50');
+
+        playInterval = setInterval(() => {
+          if (currentStepIdx < steps.length - 1) {
+            currentStepIdx++;
+            renderStep(currentStepIdx, true);
+          } else {
+            setPlaying(false);
+          }
+        }, playSpeed);
+      } else {
+        playIcon.className = "fa-solid fa-play";
+        playText.textContent = "Start";
+        btnPlay.classList.remove('bg-rose-500/25', 'text-rose-200', 'border-rose-400/50');
+        btnPlay.classList.add('bg-cyan-500/25', 'text-cyan-200', 'border-cyan-400/50');
+        if (playInterval) {
+          clearInterval(playInterval);
+          playInterval = null;
+        }
+      }
+    }
+
+    function initSimulation(sVal, tVal) {
+      setPlaying(false);
+      currentS = sVal;
+      currentT = tVal;
+      steps = generateSteps(currentS, currentT);
+      currentStepIdx = 0;
+      stepScrubber.max = steps.length - 1;
+      stepScrubber.value = 0;
+      renderStep(0, false);
+    }
+
+    // EVENT LISTENERS
+    btnPlay.addEventListener('click', () => {
+      if (currentStepIdx >= steps.length - 1) {
+        currentStepIdx = 0;
+        renderStep(0, false);
+      }
+      setPlaying(!isPlaying);
+    });
+
+    btnNext.addEventListener('click', () => {
+      setPlaying(false);
+      if (currentStepIdx < steps.length - 1) {
+        currentStepIdx++;
+        renderStep(currentStepIdx, true);
+      }
+    });
+
+    btnPrev.addEventListener('click', () => {
+      setPlaying(false);
+      if (currentStepIdx > 0) {
+        currentStepIdx--;
+        renderStep(currentStepIdx, true);
+      }
+    });
+
+    btnReset.addEventListener('click', () => {
+      setPlaying(false);
+      currentStepIdx = 0;
+      renderStep(0, false);
+    });
+
+    stepScrubber.addEventListener('input', (e) => {
+      setPlaying(false);
+      currentStepIdx = parseInt(e.target.value, 10);
+      renderStep(currentStepIdx, false);
+    });
+
+    document.querySelectorAll('.speed-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.speed-btn').forEach(b => {
+          b.classList.remove('bg-cyan-500/30', 'text-cyan-200', 'font-semibold');
+        });
+        btn.classList.add('bg-cyan-500/30', 'text-cyan-200', 'font-semibold');
+        playSpeed = parseInt(btn.dataset.speed, 10);
+        if (isPlaying) {
+          setPlaying(false);
+          setPlaying(true);
+        }
+      });
+    });
+
+    btnAudio.addEventListener('click', () => {
+      audioEnabled = !audioEnabled;
+      if (audioEnabled) {
+        audioIcon.className = "fa-solid fa-volume-high";
+        btnAudio.classList.remove('text-slate-600');
+        btnAudio.classList.add('text-slate-300');
+      } else {
+        audioIcon.className = "fa-solid fa-volume-xmark";
+        btnAudio.classList.add('text-slate-600');
+        btnAudio.classList.remove('text-slate-300');
+      }
+    });
+
+    presetSelect.addEventListener('change', (e) => {
+      const idx = parseInt(e.target.value, 10);
+      customSInput.value = PRESETS[idx].s;
+      customTInput.value = PRESETS[idx].t;
+      initSimulation(PRESETS[idx].s, PRESETS[idx].t);
+    });
+
+    btnApplyCustom.addEventListener('click', () => {
+      const cleanS = customSInput.value.replace(/[^A-Za-z]/g, '');
+      const cleanT = customTInput.value.replace(/[^A-Za-z]/g, '');
+      if (cleanS.length >= 1 && cleanT.length >= 1) {
+        customSInput.value = cleanS;
+        customTInput.value = cleanT;
+        initSimulation(cleanS, cleanT);
+      }
+    });
+
+    window.addEventListener('resize', () => {
+      const step = steps[currentStepIdx];
+      if (step) {
+        updateWindowFrames(step);
+        animateStageOverlays(step, false);
+      }
+    });
+
+    window.addEventListener('keydown', (e) => {
+      if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT') return;
+      if (e.code === 'Space') {
+        e.preventDefault();
+        btnPlay.click();
+      } else if (e.code === 'ArrowRight') {
+        e.preventDefault();
+        btnNext.click();
+      } else if (e.code === 'ArrowLeft') {
+        e.preventDefault();
+        btnPrev.click();
+      }
+    });
+
+    window.onload = function() {
+      customSInput.value = PRESETS[0].s;
+      customTInput.value = PRESETS[0].t;
+      initSimulation(PRESETS[0].s, PRESETS[0].t);
+    };
+  </script>
+</body>
+</html>
