@@ -195,6 +195,11 @@ const problems = [
         "number": 125,
         "title": "Valid Palindrome",
         "difficulty": "Easy"
+      },
+      {
+        "number": 567,
+        "title": "Permutation in String",
+        "difficulty": "Medium"
       }
     ],
     "leetcodeUrl": "https://leetcode.com/problems/valid-anagram/"
@@ -804,6 +809,11 @@ const problems = [
         "number": 1941,
         "title": "Check if All Characters Have Equal Number of Occurrences",
         "difficulty": "Easy"
+      },
+      {
+        "number": 567,
+        "title": "Permutation in String",
+        "difficulty": "Medium"
       }
     ],
     "leetcodeUrl": "https://leetcode.com/problems/group-anagrams/"
@@ -1492,6 +1502,11 @@ const problems = [
       {
         "number": 424,
         "title": "Longest Repeating Character Replacement",
+        "difficulty": "Medium"
+      },
+      {
+        "number": 567,
+        "title": "Permutation in String",
         "difficulty": "Medium"
       }
     ],
@@ -4210,9 +4225,128 @@ const problems = [
         "number": 125,
         "title": "Valid Palindrome",
         "difficulty": "Easy"
+      },
+      {
+        "number": 567,
+        "title": "Permutation in String",
+        "difficulty": "Medium"
       }
     ],
     "leetcodeUrl": "https://leetcode.com/problems/longest-repeating-character-replacement/"
+  },
+  {
+    "id": "permutation-in-string",
+    "number": 567,
+    "title": "Permutation in String",
+    "slug": "permutation-in-string",
+    "difficulty": "Medium",
+    "categories": [
+      "Sliding Window",
+      "Two Pointers",
+      "Hash Table",
+      "Strings"
+    ],
+    "description": "Given two strings s1 and s2, return true if s2 contains a permutation of s1, or false otherwise.\n\nIn other words, return true if one of s1's permutations is a contiguous substring of s2.",
+    "inputFormat": "s1 = string, s2 = string",
+    "outputFormat": "boolean (true if permutation exists in s2, false otherwise)",
+    "constraints": [
+      "1 <= s1.length, s2.length <= 10^4",
+      "s1 and s2 consist of lowercase English letters"
+    ],
+    "examples": [
+      {
+        "exampleNumber": 1,
+        "input": "s1 = \"ab\", s2 = \"eidbaooo\"",
+        "output": "true",
+        "explanation": "s2 contains one permutation of s1 (\"ba\" at indices [3..4]).",
+        "type": "official"
+      },
+      {
+        "exampleNumber": 2,
+        "input": "s1 = \"ab\", s2 = \"eidboaoo\"",
+        "output": "false",
+        "explanation": "None of the substrings of length 2 in s2 match the character count signature of s1.",
+        "type": "official"
+      }
+    ],
+    "approach": "Fixed-Size Sliding Window with Dual Frequency Counters: Let n = s1.length() and m = s2.length(). If n > m, return false immediately. Create two integer frequency arrays of size 26: s1Freq and windowFreq. Count character frequencies for s1 and the initial window s2[0..n-1]. If Arrays.equals(s1Freq, windowFreq), return true. Otherwise, slide the fixed-size window across s2 from right = n to m - 1: add the incoming character s2[right] (increment windowFreq[s2.charAt(right) - 'a']++) and remove the outgoing character s2[right - n] (decrement windowFreq[s2.charAt(right - n) - 'a']--). After each slide, compare s1Freq and windowFreq using Arrays.equals. If equal, return true. If the loop completes without finding a match, return false.",
+    "flowSteps": [
+      {
+        "step": 1,
+        "title": "Length Guard Check",
+        "description": "If n = s1.length() > m = s2.length(), return false immediately because no permutation can fit.",
+        "stateSnapshot": "if (n > m) return false;",
+        "highlight": "Guard"
+      },
+      {
+        "step": 2,
+        "title": "Build Target & First Window Frequencies",
+        "description": "Initialize s1Freq[26] and windowFreq[26]. Populate frequencies for all chars in s1 and the first window s2[0..n-1].",
+        "stateSnapshot": "for(i = 0..n-1) { s1Freq[s1[i]-'a']++; windowFreq[s2[i]-'a']++; }",
+        "highlight": "Count"
+      },
+      {
+        "step": 3,
+        "title": "Evaluate First Window",
+        "description": "Check if Arrays.equals(s1Freq, windowFreq). If true, return true immediately.",
+        "stateSnapshot": "if (Arrays.equals(s1Freq, windowFreq)) return true;",
+        "highlight": "Check Initial"
+      },
+      {
+        "step": 4,
+        "title": "Slide Fixed-Size Window Across s2",
+        "description": "For right from n to m - 1: add incoming char s2[right], remove outgoing char s2[right - n], and check Arrays.equals.",
+        "stateSnapshot": "windowFreq[s2[R]-'a']++; windowFreq[s2[R-n]-'a']--; if (equals) return true;",
+        "highlight": "Slide"
+      },
+      {
+        "step": 5,
+        "title": "Return False on Exhaustion",
+        "description": "If all windows of length n are traversed without finding a frequency signature match, return false.",
+        "stateSnapshot": "return false;",
+        "highlight": "Done"
+      }
+    ],
+    "timeComplexity": "O(n + m)",
+    "timeComplexityExplanation": "O(n) to compute initial frequencies plus O(26 * (m - n)) = O(m) to slide across s2 and compare fixed 26-slot frequency arrays.",
+    "spaceComplexity": "O(1)",
+    "spaceComplexityExplanation": "Fixed-size 26-element integer arrays for lowercase English letters regardless of input lengths.",
+    "visualizerUrl": "/visualizers/permutation_in_string_visualizer.html",
+    "keyObservations": [
+      "Two strings of equal length are permutations/anagrams of each other if and only if their character frequencies match identically across all 26 lowercase English letters.",
+      "Since any permutation of s1 must have length equal to s1.length() = n, every candidate is a contiguous substring of exact fixed length n.",
+      "Shifting the sliding window one step right requires updating exactly two character counts: incrementing the incoming character and decrementing the outgoing character."
+    ],
+    "importantPattern": "Fixed-Size Sliding Window with Dual Array Frequency Signature Matching",
+    "commonMistakes": [
+      "Generating all n! permutations of s1, resulting in factorial exponential time complexity.",
+      "Sorting every substring of length n in s2, degrading performance to O(m * n log n).",
+      "Missing the edge case where n > m, leading to potential array index out-of-bounds errors."
+    ],
+    "optimalApproach": "Fixed-Size Sliding Window with int[26] Array Frequency Comparison",
+    "relatedProblems": [
+      {
+        "number": 242,
+        "title": "Valid Anagram",
+        "difficulty": "Easy"
+      },
+      {
+        "number": 49,
+        "title": "Group Anagrams",
+        "difficulty": "Medium"
+      },
+      {
+        "number": 3,
+        "title": "Longest Substring Without Repeating Characters",
+        "difficulty": "Medium"
+      },
+      {
+        "number": 424,
+        "title": "Longest Repeating Character Replacement",
+        "difficulty": "Medium"
+      }
+    ],
+    "leetcodeUrl": "https://leetcode.com/problems/permutation-in-string/"
   }
 ];
 

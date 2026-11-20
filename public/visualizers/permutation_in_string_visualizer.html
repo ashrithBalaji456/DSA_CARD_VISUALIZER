@@ -1,0 +1,1741 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Permutation in String (LeetCode 567) - Glassmorphic Visualizer</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: radial-gradient(circle at 14% 16%, #0c192c 0%, #030712 100%);
+      color: #e2e8f0;
+      min-height: 100vh;
+    }
+
+    .code-font {
+      font-family: 'Fira Code', monospace;
+    }
+
+    /* Glassmorphic Surface & Controls */
+    .glass-panel {
+      background: rgba(15, 23, 42, 0.56);
+      backdrop-filter: blur(22px);
+      -webkit-backdrop-filter: blur(22px);
+      border: 1px solid rgba(255, 255, 255, 0.11);
+      box-shadow: 0 20px 45px -15px rgba(0, 0, 0, 0.68), inset 0 1px 0 0 rgba(255, 255, 255, 0.09);
+    }
+
+    .glass-button {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .glass-button:hover:not(:disabled) {
+      background: rgba(255, 255, 255, 0.15);
+      border-color: rgba(255, 255, 255, 0.28);
+      transform: translateY(-1px);
+    }
+    .glass-button:active:not(:disabled) {
+      transform: translateY(1px);
+    }
+    .glass-button:disabled {
+      opacity: 0.35;
+      cursor: not-allowed;
+    }
+
+    /* Code Execution Line Highlight */
+    .code-line {
+      transition: all 0.2s ease;
+      border-left: 3px solid transparent;
+      padding: 2px 10px;
+    }
+    .code-line.active-line {
+      background: rgba(56, 189, 248, 0.18);
+      border-left: 3px solid #38bdf8;
+      color: #ffffff;
+      box-shadow: inset 0 0 16px rgba(56, 189, 248, 0.15);
+    }
+
+    /* Glassy Character Tiles */
+    .char-card {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      transition: all 0.28s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    .char-card.s1-target-char {
+      background: linear-gradient(180deg, rgba(168, 85, 247, 0.16) 0%, rgba(126, 34, 206, 0.06) 100%);
+      border-color: rgba(192, 132, 252, 0.45);
+    }
+
+    .char-card.s1-active-scan {
+      background: linear-gradient(180deg, rgba(168, 85, 247, 0.32) 0%, rgba(126, 34, 206, 0.14) 100%);
+      border-color: rgba(216, 180, 254, 0.95);
+      transform: translateY(-5px) scale(1.06);
+      box-shadow: 0 12px 26px -4px rgba(168, 85, 247, 0.48), inset 0 1px 0 rgba(255, 255, 255, 0.25);
+      z-index: 15;
+    }
+
+    .char-card.in-window-char {
+      background: linear-gradient(180deg, rgba(56, 189, 248, 0.16) 0%, rgba(14, 165, 233, 0.06) 100%);
+      border-color: rgba(56, 189, 248, 0.55);
+      box-shadow: 0 8px 20px -6px rgba(56, 189, 248, 0.28);
+    }
+
+    .char-card.incoming-char {
+      background: linear-gradient(180deg, rgba(251, 191, 36, 0.28) 0%, rgba(245, 158, 11, 0.12) 100%) !important;
+      border-color: rgba(251, 191, 36, 0.95) !important;
+      transform: translateY(-5px) scale(1.06);
+      box-shadow: 0 12px 26px -4px rgba(251, 191, 36, 0.45) !important;
+      z-index: 20;
+    }
+
+    .char-card.outgoing-char {
+      background: linear-gradient(180deg, rgba(244, 63, 94, 0.28) 0%, rgba(225, 29, 72, 0.12) 100%) !important;
+      border-color: rgba(251, 113, 133, 0.95) !important;
+      border-style: dashed;
+      transform: translateY(3px) scale(0.97);
+      box-shadow: 0 10px 24px -4px rgba(244, 63, 94, 0.45) !important;
+      z-index: 20;
+    }
+
+    .char-card.past-char {
+      opacity: 0.42;
+      background: rgba(15, 23, 42, 0.35);
+      border-color: rgba(255, 255, 255, 0.06);
+    }
+
+    .char-card.match-perm-char {
+      background: linear-gradient(180deg, rgba(16, 185, 129, 0.30) 0%, rgba(5, 150, 105, 0.12) 100%) !important;
+      border-color: rgba(52, 211, 153, 0.95) !important;
+      transform: translateY(-5px) scale(1.05);
+      box-shadow: 0 12px 28px -4px rgba(16, 185, 129, 0.48) !important;
+      z-index: 20;
+    }
+
+    /* Dual Frequency Comparison Bucket */
+    .dual-freq-bucket {
+      background: rgba(255, 255, 255, 0.035);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      transition: all 0.28s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    .dual-freq-bucket.bucket-matched {
+      background: linear-gradient(180deg, rgba(16, 185, 129, 0.14) 0%, rgba(5, 150, 105, 0.05) 100%);
+      border-color: rgba(52, 211, 153, 0.55);
+      box-shadow: 0 8px 20px -6px rgba(16, 185, 129, 0.25);
+    }
+
+    .dual-freq-bucket.bucket-mismatch {
+      background: linear-gradient(180deg, rgba(244, 63, 94, 0.12) 0%, rgba(225, 29, 72, 0.04) 100%);
+      border-color: rgba(251, 113, 133, 0.45);
+    }
+
+    .dual-freq-bucket.bucket-active-pulse {
+      transform: translateY(-4px) scale(1.04);
+      border-color: rgba(56, 189, 248, 0.95) !important;
+      box-shadow: 0 12px 28px -4px rgba(56, 189, 248, 0.45) !important;
+    }
+
+    @keyframes arcDash {
+      to {
+        stroke-dashoffset: -24;
+      }
+    }
+    .transfer-arc-path {
+      stroke-dasharray: 6 6;
+      animation: arcDash 0.8s linear infinite;
+    }
+
+    @keyframes winCelebration {
+      0%, 100% { transform: scale(1); filter: drop-shadow(0 0 8px rgba(16, 185, 129, 0.45)); }
+      50% { transform: scale(1.04); filter: drop-shadow(0 0 22px rgba(16, 185, 129, 0.95)); }
+    }
+    .win-badge-anim {
+      animation: winCelebration 0.65s ease-in-out;
+    }
+
+    /* Custom Scrollbars */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: rgba(15, 23, 42, 0.4);
+    }
+    ::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.18);
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(255, 255, 255, 0.3);
+    }
+  </style>
+</head>
+<body class="p-4 sm:p-6 lg:p-8 flex flex-col items-center justify-start min-h-screen">
+
+  <!-- Ambient Glass Glow Orbs -->
+  <div class="fixed top-6 left-1/6 w-96 h-96 bg-purple-500/14 rounded-full blur-3xl pointer-events-none -z-10"></div>
+  <div class="fixed top-1/3 right-1/6 w-96 h-96 bg-cyan-500/14 rounded-full blur-3xl pointer-events-none -z-10"></div>
+  <div class="fixed bottom-12 left-1/2 w-80 h-80 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none -z-10"></div>
+
+  <!-- MAIN WRAPPER -->
+  <div class="w-full max-w-7xl flex flex-col gap-6">
+
+    <!-- TOP FROSTED-GLASS CONTROLS DECK -->
+    <header class="glass-panel rounded-2xl p-4 sm:p-5 flex flex-col gap-4 sticky top-4 z-50">
+      <div class="flex flex-wrap items-center justify-between gap-4">
+
+        <!-- Title & Algorithm Metadata -->
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-purple-500 via-cyan-400 to-emerald-400 flex items-center justify-center shadow-lg shadow-cyan-500/25 text-slate-950 font-bold text-lg">
+            <i class="fa-solid fa-shuffle"></i>
+          </div>
+          <div>
+            <h1 class="text-lg sm:text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white via-purple-100 to-cyan-300">
+              Permutation in String
+            </h1>
+            <p class="text-xs text-slate-400 flex items-center gap-2">
+              <span class="inline-block w-2 h-2 rounded-full bg-cyan-400 animate-pulse"></span>
+              LeetCode 567 • Fixed-Size Sliding Window + int[26] Frequency Match • &Omicron;(n + m) Time • &Omicron;(1) Space
+            </p>
+          </div>
+        </div>
+
+        <!-- Center Playback Controls: Reset, Previous, Start/Stop, Next -->
+        <div class="flex items-center gap-2 sm:gap-3 bg-white/5 p-1.5 rounded-xl border border-white/10 backdrop-blur-md">
+          <button id="btnReset" class="glass-button text-slate-200 hover:text-white px-3 py-2 rounded-lg text-sm flex items-center gap-1.5" title="Reset to Initial State">
+            <i class="fa-solid fa-rotate-left"></i>
+            <span class="hidden sm:inline">Reset</span>
+          </button>
+          <button id="btnPrev" class="glass-button text-slate-200 hover:text-white px-3 py-2 rounded-lg text-sm flex items-center gap-1.5" title="Previous Step (Left Arrow)">
+            <i class="fa-solid fa-backward-step"></i>
+            <span class="hidden sm:inline">Previous</span>
+          </button>
+          <button id="btnPlay" class="glass-button bg-cyan-500/25 text-cyan-200 hover:bg-cyan-500/35 border-cyan-400/50 px-4 py-2 rounded-lg text-sm font-semibold flex items-center gap-2 shadow-lg shadow-cyan-500/15" title="Start / Stop (Spacebar)">
+            <i class="fa-solid fa-play" id="playIcon"></i>
+            <span id="playText">Start</span>
+          </button>
+          <button id="btnNext" class="glass-button text-slate-200 hover:text-white px-3 py-2 rounded-lg text-sm flex items-center gap-1.5" title="Next Step (Right Arrow)">
+            <span class="hidden sm:inline">Next</span>
+            <i class="fa-solid fa-forward-step"></i>
+          </button>
+        </div>
+
+        <!-- Speed & Audio Controls -->
+        <div class="flex items-center gap-2">
+          <a href="/" class="glass-button px-3 py-2 rounded-xl text-xs font-semibold text-slate-300 hover:text-white flex items-center gap-1.5 border border-white/10 hover:border-indigo-500/40 bg-white/5 shrink-0 transition-all active:scale-95 cursor-pointer" title="Return to DSA Atlas Library">
+            <i class="fa-solid fa-arrow-left text-indigo-400"></i>
+            <span>DSA Atlas</span>
+          </a>
+          <div class="flex items-center bg-white/5 rounded-xl p-1 border border-white/10 text-xs text-slate-300 backdrop-blur-md">
+            <span class="px-2 py-1 text-slate-400"><i class="fa-solid fa-gauge-high mr-1"></i>Speed</span>
+            <button class="speed-btn px-2 py-1 rounded-lg hover:text-white transition" data-speed="1300">0.5x</button>
+            <button class="speed-btn px-2 py-1 rounded-lg bg-cyan-500/30 text-cyan-200 font-semibold transition" data-speed="650">1x</button>
+            <button class="speed-btn px-2 py-1 rounded-lg hover:text-white transition" data-speed="280">2x</button>
+            <button class="speed-btn px-2 py-1 rounded-lg hover:text-white transition" data-speed="110">4x</button>
+          </div>
+          <button id="btnAudio" class="glass-button p-2.5 rounded-xl text-slate-300 hover:text-cyan-300" title="Toggle Sound Effects">
+            <i class="fa-solid fa-volume-high" id="audioIcon"></i>
+          </button>
+        </div>
+
+      </div>
+
+      <!-- Scrubber Slider & Status Badges -->
+      <div class="flex flex-col sm:flex-row items-center gap-3 pt-2 border-t border-white/10">
+        <div class="flex flex-wrap items-center gap-2 text-xs text-slate-300 w-full sm:w-auto shrink-0">
+          <span id="stepCounterBadge" class="code-font px-2.5 py-1 rounded-md bg-white/5 border border-white/10 text-cyan-300">
+            Step: 0 / 0
+          </span>
+          <span id="phaseBadge" class="px-2.5 py-1 rounded-md bg-sky-500/20 border border-sky-400/30 text-sky-200 font-semibold">
+            Ready
+          </span>
+          <span id="lenHeaderBadge" class="px-2.5 py-1 rounded-md bg-purple-500/20 border border-purple-400/30 text-purple-200 font-bold">
+            n = 2, m = 8
+          </span>
+          <span id="resultHeaderBadge" class="px-2.5 py-1 rounded-md bg-white/5 border border-white/15 text-slate-300 font-bold">
+            Result: Pending
+          </span>
+        </div>
+        <div class="w-full flex items-center gap-3">
+          <input type="range" id="stepScrubber" min="0" max="0" value="0" class="w-full h-1.5 bg-slate-800/80 rounded-lg appearance-none cursor-pointer accent-cyan-400">
+        </div>
+      </div>
+    </header>
+
+    <!-- TEST CASES & CUSTOM (S1, S2) BAR -->
+    <section class="glass-panel rounded-2xl p-4 flex flex-wrap items-center justify-between gap-4">
+      <div class="flex flex-wrap items-center gap-3">
+        <label for="presetSelect" class="text-xs uppercase font-semibold text-slate-300 tracking-wider flex items-center gap-1.5">
+          <i class="fa-solid fa-flask text-cyan-400"></i> Test Cases:
+        </label>
+        <select id="presetSelect" class="bg-slate-900/75 border border-white/15 text-xs sm:text-sm text-slate-200 rounded-xl px-3 py-2 outline-none focus:border-cyan-400 backdrop-blur-md">
+          <option value="0">1: LeetCode Ex 1 (s1 = "ab", s2 = "eidbaooo" &rarr; true)</option>
+          <option value="1">2: LeetCode Ex 2 (s1 = "ab", s2 = "eidboaoo" &rarr; false)</option>
+          <option value="2">3: First Window Immediate Match (s1 = "adc", s2 = "dcda" &rarr; true)</option>
+          <option value="3">4: Match at Very End of s2 (s1 = "hello", s2 = "ooolleoooleh" &rarr; false)</option>
+          <option value="4">5: Trailing Permutation Found (s1 = "abc", s2 = "bbbca" &rarr; true)</option>
+          <option value="5">6: Duplicate Characters in s1 (s1 = "aab", s2 = "cbabaa" &rarr; true)</option>
+          <option value="6">7: Length Guard n &gt; m (s1 = "abcd", s2 = "abc" &rarr; false)</option>
+          <option value="7">8: Exact Length Match (s1 = "listen", s2 = "silent" &rarr; true)</option>
+          <option value="8">9: Single Character Match (s1 = "z", s2 = "abcze" &rarr; true)</option>
+          <option value="9">10: Completely Disjoint Letters (s1 = "xyz", s2 = "abcdef" &rarr; false)</option>
+        </select>
+      </div>
+
+      <div class="flex flex-wrap items-center gap-2 flex-grow max-w-lg">
+        <input type="text" id="customS1Input" placeholder="Pattern s1: ab" class="w-28 sm:w-32 bg-white/5 border border-white/15 rounded-xl px-3 py-2 text-xs text-slate-200 code-font lowercase outline-none focus:border-purple-400 backdrop-blur-md" title="Lowercase pattern s1">
+        <input type="text" id="customS2Input" placeholder="Text s2: eidbaooo" class="flex-1 min-w-[130px] bg-white/5 border border-white/15 rounded-xl px-3 py-2 text-xs text-slate-200 code-font lowercase outline-none focus:border-cyan-400 backdrop-blur-md" title="Lowercase search string s2">
+        <button id="btnApplyCustom" class="glass-button text-xs px-4 py-2 rounded-xl text-cyan-300 font-semibold shrink-0">
+          Load (s1, s2)
+        </button>
+      </div>
+    </section>
+
+    <!-- MAIN VISUALIZATION & CODE SECTION -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+      <!-- LEFT: S1 PATTERN, SLIDING WINDOW S2 & DUAL FREQUENCY COMPARATOR (7 Cols) -->
+      <section class="lg:col-span-7 flex flex-col gap-6">
+
+        <!-- Live Telemetry Cards -->
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+
+          <!-- Lengths n & m -->
+          <div class="glass-panel rounded-xl p-3.5 flex flex-col justify-between border-purple-400/35">
+            <span class="text-[11px] text-slate-400 uppercase font-semibold flex items-center justify-between">
+              Lengths (n, m)
+              <span class="w-2 h-2 rounded-full bg-purple-400"></span>
+            </span>
+            <div class="flex items-baseline gap-1.5 mt-1.5">
+              <span id="varLengths" class="code-font text-lg sm:text-xl font-bold text-purple-300">2, 8</span>
+            </div>
+            <span id="varLenGuard" class="text-[10px] text-purple-200/75 mt-1 code-font">n &le; m (valid)</span>
+          </div>
+
+          <!-- Active Window Bounds [left..right] -->
+          <div class="glass-panel rounded-xl p-3.5 flex flex-col justify-between border-cyan-400/35">
+            <span class="text-[11px] text-slate-400 uppercase font-semibold flex items-center justify-between">
+              Window in s2
+              <i class="fa-solid fa-expand text-cyan-400 text-[10px]"></i>
+            </span>
+            <div class="flex items-baseline gap-1.5 mt-1.5">
+              <span id="varWinSpan" class="code-font text-lg sm:text-xl font-bold text-cyan-300">-</span>
+            </div>
+            <span id="varWinSubstr" class="text-[10px] text-cyan-200/80 mt-1 code-font truncate">sub: ""</span>
+          </div>
+
+          <!-- Incoming / Outgoing Delta -->
+          <div class="glass-panel rounded-xl p-3.5 flex flex-col justify-between border-amber-400/35">
+            <span class="text-[11px] text-slate-400 uppercase font-semibold flex items-center justify-between">
+              Slide Delta
+              <i class="fa-solid fa-arrows-left-right text-amber-400 text-[10px]"></i>
+            </span>
+            <div class="flex items-baseline gap-1.5 mt-1.5">
+              <span id="varSlideDelta" class="code-font text-base sm:text-lg font-bold text-amber-300">-</span>
+            </div>
+            <span class="text-[10px] text-slate-400 mt-1 code-font">+s2[R] / -s2[R-n]</span>
+          </div>
+
+          <!-- Arrays.equals(s1Freq, windowFreq) -->
+          <div id="equalsResultCard" class="glass-panel rounded-xl p-3.5 flex flex-col justify-between border-emerald-400/35">
+            <span class="text-[11px] text-slate-400 uppercase font-semibold flex items-center justify-between">
+              Arrays.equals
+              <i class="fa-solid fa-scale-balanced text-emerald-400 text-[10px]"></i>
+            </span>
+            <div class="flex items-baseline gap-1.5 mt-1.5">
+              <span id="varEqualsStatus" class="code-font text-lg sm:text-xl font-black text-slate-400">pending</span>
+            </div>
+            <span id="varMatchBuckets" class="text-[10px] text-slate-400 mt-1 code-font">s1Freq == windowFreq</span>
+          </div>
+
+        </div>
+
+        <!-- UNIFIED STRINGS & DUAL FREQUENCY ARENA WITH LIFT-AND-ARC TRANSFERS -->
+        <div id="stageWrapper" class="glass-panel relative rounded-2xl p-5 flex flex-col gap-5">
+          <!-- SVG Trajectory Arc Overlay Connecting Strings & Dual Frequency Buckets -->
+          <svg id="transferArcSvg" class="absolute inset-0 w-full h-full pointer-events-none z-30 overflow-visible"></svg>
+
+          <!-- Floating Lift-and-Place Token Layer -->
+          <div id="flyingCloneLayer" class="absolute inset-0 pointer-events-none z-40"></div>
+
+          <!-- 1. TARGET PATTERN STRING s1 & SEARCH STRING s2 WITH FIXED-WIDTH SLIDING WINDOW -->
+          <div class="grid grid-cols-1 sm:grid-cols-12 gap-4 items-stretch">
+
+            <!-- Pattern s1 (4 Cols) -->
+            <div class="sm:col-span-4 flex flex-col gap-2">
+              <div class="flex items-center justify-between text-xs pb-1.5 border-b border-white/10">
+                <span class="font-semibold text-purple-300 uppercase tracking-wider flex items-center gap-1.5">
+                  <i class="fa-solid fa-bullseye text-purple-400"></i>
+                  Pattern <span class="code-font text-white">s1</span>
+                </span>
+                <span id="s1LenTag" class="code-font text-[10px] text-purple-200">n = 2</span>
+              </div>
+
+              <div class="flex-1 p-3 rounded-xl bg-white/[0.02] border border-white/10 flex flex-col items-center justify-center">
+                <div id="s1StreamArena" class="flex flex-wrap items-center justify-center gap-1.5">
+                  <!-- Populated dynamically -->
+                </div>
+              </div>
+            </div>
+
+            <!-- Search Text s2 with Fixed-Width Sliding Window (8 Cols) -->
+            <div class="sm:col-span-8 flex flex-col gap-2">
+              <div class="flex items-center justify-between text-xs pb-1.5 border-b border-white/10">
+                <span class="font-semibold text-cyan-300 uppercase tracking-wider flex items-center gap-1.5">
+                  <i class="fa-solid fa-tape text-cyan-400"></i>
+                  Search String <span class="code-font text-white">s2</span>
+                </span>
+                <div class="flex items-center gap-2 text-[10px]">
+                  <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-sm bg-amber-400 inline-block"></span> +right</span>
+                  <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-sm bg-rose-500 inline-block"></span> -(right-n)</span>
+                </div>
+              </div>
+
+              <div id="s2ScrollContainer" class="relative flex-1 pt-7 pb-5 px-3 rounded-xl bg-white/[0.02] border border-white/10 overflow-x-auto flex items-center justify-center">
+                <!-- Fixed-Size Sliding Window Halo [left .. right] -->
+                <div id="activeWindowFrame" class="hidden absolute rounded-2xl border-2 border-cyan-400/80 bg-cyan-400/[0.07] pointer-events-none transition-all duration-300 z-10">
+                  <span id="activeWindowTag" class="absolute -top-3 left-1/2 -translate-x-1/2 px-2 py-0.5 rounded-full bg-slate-950 border border-cyan-400/75 text-cyan-200 code-font text-[9px] font-bold shadow whitespace-nowrap">
+                    window [0..1]
+                  </span>
+                </div>
+
+                <div id="s2StreamArena" class="relative z-20 flex items-center justify-center gap-1.5 sm:gap-2 min-h-[70px]">
+                  <!-- Populated dynamically -->
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- 2. DUAL FREQUENCY SIGNATURE COMPARATOR: int[] s1Freq vs int[] windowFreq -->
+          <div class="flex flex-col gap-3 pt-1">
+            <div class="flex flex-wrap items-center justify-between text-xs pb-2 border-b border-white/10 gap-2">
+              <span class="font-semibold text-slate-200 uppercase tracking-wider flex items-center gap-1.5">
+                <i class="fa-solid fa-chart-column text-cyan-400"></i>
+                Frequency Signature Comparison: <span class="code-font text-purple-300">s1Freq[26]</span> vs <span class="code-font text-cyan-300">windowFreq[26]</span>
+              </span>
+
+              <div class="flex flex-wrap items-center gap-3 text-[11px]">
+                <span class="flex items-center gap-1.5">
+                  <span class="w-2.5 h-2.5 rounded-sm bg-purple-400 inline-block"></span> s1Freq (Target)
+                </span>
+                <span class="flex items-center gap-1.5">
+                  <span class="w-2.5 h-2.5 rounded-sm bg-cyan-400 inline-block"></span> windowFreq (Window)
+                </span>
+                <span class="flex items-center gap-1.5">
+                  <span class="w-2.5 h-2.5 rounded-sm bg-emerald-400 inline-block"></span> Equal
+                </span>
+              </div>
+            </div>
+
+            <div id="dualFreqArena" class="min-h-[146px] p-3.5 rounded-xl bg-white/[0.02] border border-white/10 flex flex-wrap items-end justify-center gap-3 sm:gap-4">
+              <!-- Populated dynamically with side-by-side s1Freq & windowFreq bars -->
+            </div>
+          </div>
+
+          <!-- Live Decision Banner -->
+          <div id="decisionBanner" class="p-3.5 rounded-xl bg-white/[0.04] border border-white/10 text-xs flex flex-col sm:flex-row items-center justify-between gap-3 backdrop-blur-md">
+            <div class="flex items-center gap-2.5">
+              <i id="decisionIcon" class="fa-solid fa-circle-info text-cyan-400 text-base"></i>
+              <span id="decisionText" class="text-slate-200">Ready to build s1Freq[26] and slide a fixed-length window across s2.</span>
+            </div>
+            <div id="comparePill" class="hidden text-xs code-font px-3 py-1.5 rounded-lg bg-slate-950/70 border border-white/15 text-sky-200 font-semibold shrink-0">
+              <!-- Arrays.equals(s1Freq, windowFreq) -->
+            </div>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- RIGHT: SYNCHRONIZED JAVA CODE CONTAINER (5 Cols) -->
+      <section class="lg:col-span-5 flex flex-col gap-4">
+
+        <div class="glass-panel rounded-2xl p-4 flex flex-col h-full">
+          <div class="flex items-center justify-between pb-3 border-b border-white/10 text-xs">
+            <div class="flex items-center gap-2">
+              <div class="flex gap-1.5">
+                <span class="w-3 h-3 rounded-full bg-rose-500/80 inline-block"></span>
+                <span class="w-3 h-3 rounded-full bg-amber-500/80 inline-block"></span>
+                <span class="w-3 h-3 rounded-full bg-emerald-500/80 inline-block"></span>
+              </div>
+              <span class="code-font text-slate-200 font-semibold ml-2">Solution.java</span>
+            </div>
+            <span class="text-[11px] text-cyan-300 bg-cyan-500/15 px-2.5 py-0.5 rounded border border-cyan-400/25 code-font">
+              Fixed Sliding Window
+            </span>
+          </div>
+
+          <!-- Code Lines with Zero-Jump Localized Scroll -->
+          <div id="codeContainer" class="code-font text-xs sm:text-[13px] leading-relaxed text-slate-300 py-3 overflow-y-auto max-h-[580px] flex-grow select-none">
+            <div class="code-line" id="line1"><span class="text-slate-500 mr-2"> 1</span><span class="text-indigo-400 font-semibold">class</span> <span class="text-amber-300">Solution</span> {</div>
+            <div class="code-line" id="line2"><span class="text-slate-500 mr-2"> 2</span>    <span class="text-indigo-400 font-semibold">public boolean</span> <span class="text-cyan-300">checkInclusion</span>(String s1, String s2) {</div>
+            <div class="code-line" id="line3"><span class="text-slate-500 mr-2"> 3</span></div>
+            <div class="code-line" id="line4"><span class="text-slate-500 mr-2"> 4</span>        <span class="text-indigo-400 font-semibold">int</span> n = s1.length();</div>
+            <div class="code-line" id="line5"><span class="text-slate-500 mr-2"> 5</span>        <span class="text-indigo-400 font-semibold">int</span> m = s2.length();</div>
+            <div class="code-line" id="line6"><span class="text-slate-500 mr-2"> 6</span></div>
+            <div class="code-line" id="line7"><span class="text-slate-500 mr-2"> 7</span>        <span class="text-indigo-400 font-semibold">if</span> (n &gt; m) {</div>
+            <div class="code-line" id="line8"><span class="text-slate-500 mr-2"> 8</span>            <span class="text-indigo-400 font-semibold">return false</span>;</div>
+            <div class="code-line" id="line9"><span class="text-slate-500 mr-2"> 9</span></div>
+            <div class="code-line" id="line10"><span class="text-slate-500 mr-2">10</span>        }</div>
+            <div class="code-line" id="line11"><span class="text-slate-500 mr-2">11</span>        <span class="text-indigo-400 font-semibold">int</span>[] s1Freq = <span class="text-indigo-400 font-semibold">new int</span>[<span class="text-rose-400">26</span>];</div>
+            <div class="code-line" id="line12"><span class="text-slate-500 mr-2">12</span>        <span class="text-indigo-400 font-semibold">int</span>[] windowFreq = <span class="text-indigo-400 font-semibold">new int</span>[<span class="text-rose-400">26</span>];</div>
+            <div class="code-line" id="line13"><span class="text-slate-500 mr-2">13</span></div>
+            <div class="code-line" id="line14"><span class="text-slate-500 mr-2">14</span>        <span class="text-slate-500 italic">// Store character frequencies of s1</span></div>
+            <div class="code-line" id="line15"><span class="text-slate-500 mr-2">15</span>        <span class="text-indigo-400 font-semibold">for</span> (<span class="text-indigo-400">int</span> i = <span class="text-rose-400">0</span>; i &lt; n; i++) {</div>
+            <div class="code-line" id="line16"><span class="text-slate-500 mr-2">16</span>            s1Freq[s1.charAt(i) - <span class="text-emerald-300">'a'</span>]++;</div>
+            <div class="code-line" id="line17"><span class="text-slate-500 mr-2">17</span>        }</div>
+            <div class="code-line" id="line18"><span class="text-slate-500 mr-2">18</span></div>
+            <div class="code-line" id="line19"><span class="text-slate-500 mr-2">19</span>        <span class="text-slate-500 italic">// Create the first window in s2</span></div>
+            <div class="code-line" id="line20"><span class="text-slate-500 mr-2">20</span>        <span class="text-indigo-400 font-semibold">for</span> (<span class="text-indigo-400">int</span> i = <span class="text-rose-400">0</span>; i &lt; n; i++) {</div>
+            <div class="code-line" id="line21"><span class="text-slate-500 mr-2">21</span>            windowFreq[s2.charAt(i) - <span class="text-emerald-300">'a'</span>]++;</div>
+            <div class="code-line" id="line22"><span class="text-slate-500 mr-2">22</span>        }</div>
+            <div class="code-line" id="line23"><span class="text-slate-500 mr-2">23</span></div>
+            <div class="code-line" id="line24"><span class="text-slate-500 mr-2">24</span>        <span class="text-slate-500 italic">// Check the first window</span></div>
+            <div class="code-line" id="line25"><span class="text-slate-500 mr-2">25</span>        <span class="text-indigo-400 font-semibold">if</span> (Arrays.equals(s1Freq, windowFreq)) {</div>
+            <div class="code-line" id="line26"><span class="text-slate-500 mr-2">26</span>            <span class="text-indigo-400 font-semibold">return true</span>;</div>
+            <div class="code-line" id="line27"><span class="text-slate-500 mr-2">27</span>        }</div>
+            <div class="code-line" id="line28"><span class="text-slate-500 mr-2">28</span></div>
+            <div class="code-line" id="line29"><span class="text-slate-500 mr-2">29</span>        <span class="text-slate-500 italic">// Slide the window through s2</span></div>
+            <div class="code-line" id="line30"><span class="text-slate-500 mr-2">30</span>        <span class="text-indigo-400 font-semibold">for</span> (<span class="text-indigo-400">int</span> right = n; right &lt; m; right++) {</div>
+            <div class="code-line" id="line31"><span class="text-slate-500 mr-2">31</span></div>
+            <div class="code-line" id="line32"><span class="text-slate-500 mr-2">32</span>            <span class="text-slate-500 italic">// Add the new character</span></div>
+            <div class="code-line" id="line33"><span class="text-slate-500 mr-2">33</span>            windowFreq[s2.charAt(right) - <span class="text-emerald-300">'a'</span>]++;</div>
+            <div class="code-line" id="line34"><span class="text-slate-500 mr-2">34</span></div>
+            <div class="code-line" id="line35"><span class="text-slate-500 mr-2">35</span>            <span class="text-slate-500 italic">// Remove the character leaving the window</span></div>
+            <div class="code-line" id="line36"><span class="text-slate-500 mr-2">36</span>            windowFreq[s2.charAt(right - n) - <span class="text-emerald-300">'a'</span>]--;</div>
+            <div class="code-line" id="line37"><span class="text-slate-500 mr-2">37</span></div>
+            <div class="code-line" id="line38"><span class="text-slate-500 mr-2">38</span>            <span class="text-slate-500 italic">// Compare frequencies</span></div>
+            <div class="code-line" id="line39"><span class="text-slate-500 mr-2">39</span>            <span class="text-indigo-400 font-semibold">if</span> (Arrays.equals(s1Freq, windowFreq)) {</div>
+            <div class="code-line" id="line40"><span class="text-slate-500 mr-2">40</span>                <span class="text-indigo-400 font-semibold">return true</span>;</div>
+            <div class="code-line" id="line41"><span class="text-slate-500 mr-2">41</span>            }</div>
+            <div class="code-line" id="line42"><span class="text-slate-500 mr-2">42</span>        }</div>
+            <div class="code-line" id="line43"><span class="text-slate-500 mr-2">43</span></div>
+            <div class="code-line" id="line44"><span class="text-slate-500 mr-2">44</span>        <span class="text-indigo-400 font-semibold">return false</span>;</div>
+            <div class="code-line" id="line45"><span class="text-slate-500 mr-2">45</span>    }</div>
+            <div class="code-line" id="line46"><span class="text-slate-500 mr-2">46</span>}</div>
+          </div>
+
+          <!-- Live Step Narrative Box -->
+          <div class="mt-3 p-3 bg-white/[0.04] border border-white/10 rounded-xl flex items-start gap-2.5 backdrop-blur-md">
+            <i class="fa-solid fa-circle-info text-cyan-400 mt-0.5 text-xs"></i>
+            <div class="text-xs text-slate-200 leading-relaxed" id="stepDescription">
+              Ready to run Permutation in String. Click <b>Start</b> or <b>Next</b> to step through.
+            </div>
+          </div>
+
+        </div>
+
+      </section>
+
+    </div>
+
+    <!-- BOTTOM SECTION: PROBLEM STATEMENT & ARCHITECTURAL SUMMARY -->
+    <footer class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-2">
+
+      <!-- Problem Statement Card -->
+      <div class="glass-panel rounded-2xl p-5 flex flex-col gap-3">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <span class="text-amber-400 font-bold"><i class="fa-solid fa-file-lines mr-1.5"></i>Problem Statement</span>
+            <span class="px-2 py-0.5 rounded text-[11px] font-semibold bg-amber-500/20 text-amber-300 border border-amber-400/30">Medium</span>
+          </div>
+          <span class="text-xs text-slate-400 font-mono">LeetCode 567</span>
+        </div>
+
+        <p class="text-xs text-slate-300 leading-relaxed">
+          Given two strings <code class="font-mono text-purple-300">s1</code> and <code class="font-mono text-cyan-300">s2</code>, return <code class="font-mono text-emerald-300">true</code> if <code class="font-mono">s2</code> contains a <b>permutation</b> of <code class="font-mono">s1</code>, or <code class="font-mono text-rose-300">false</code> otherwise.
+          <br><br>
+          In other words, return <code class="font-mono">true</code> if one of <code class="font-mono">s1</code>'s permutations is a contiguous <b>substring</b> of <code class="font-mono">s2</code>.
+        </p>
+
+        <div class="space-y-2 pt-2 border-t border-white/10 text-xs text-slate-300">
+          <div class="bg-white/[0.03] p-2.5 rounded-lg border border-white/10 font-mono">
+            <span class="text-slate-400">Example 1:</span><br>
+            <b>Input:</b> s1 = "ab", s2 = "eidbaooo" &rarr; <b>Output:</b> <span class="text-emerald-400 font-bold">true</span><br>
+            <span class="text-[11px] text-slate-400 font-sans">s2 contains one permutation of s1 ("ba" at indices [3..4]).</span>
+          </div>
+          <div class="bg-white/[0.03] p-2.5 rounded-lg border border-white/10 font-mono">
+            <span class="text-slate-400">Example 2:</span><br>
+            <b>Input:</b> s1 = "ab", s2 = "eidboaoo" &rarr; <b>Output:</b> <span class="text-rose-400 font-bold">false</span>
+          </div>
+        </div>
+
+        <div class="text-[11px] text-slate-400">
+          <b>Constraints:</b> <code class="font-mono text-slate-300">1 &le; s1.length, s2.length &le; 10<sup>4</sup></code>, <code class="font-mono text-slate-300">s1</code> and <code class="font-mono text-slate-300">s2</code> consist of lowercase English letters.
+        </div>
+      </div>
+
+      <!-- Algorithm Summary & Frequency Equivalence Proof Card -->
+      <div class="glass-panel rounded-2xl p-5 flex flex-col gap-3">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <span class="text-cyan-400 font-bold"><i class="fa-solid fa-brain mr-1.5"></i>Algorithm Summary &amp; Frequency Equivalence</span>
+          </div>
+          <span class="px-2 py-0.5 rounded text-[11px] font-semibold bg-cyan-500/20 text-cyan-200 border border-cyan-400/30">O(1) Space</span>
+        </div>
+
+        <div class="space-y-3 text-xs text-slate-300 leading-relaxed">
+          <div class="p-3 bg-purple-950/30 border border-purple-400/25 rounded-xl">
+            <b class="text-purple-300 flex items-center gap-1.5 mb-1">
+              <i class="fa-solid fa-fingerprint"></i> Frequency Signature Characterization:
+            </b>
+            Generating all <code class="font-mono">n!</code> permutations of <code class="font-mono">s1</code> is exponential. Instead, two strings of equal length <code class="font-mono">n</code> are permutations of each other <b>if and only if</b> they have identical character counts across all 26 lowercase letters (<code class="font-mono text-emerald-300 font-semibold">Arrays.equals(s1Freq, windowFreq)</code>).
+          </div>
+
+          <div class="p-3 bg-cyan-950/25 border border-cyan-400/20 rounded-xl">
+            <b class="text-cyan-300 flex items-center gap-1.5 mb-1">
+              <i class="fa-solid fa-sliders"></i> Constant-Time Window Slide (<code class="font-mono">right = n .. m - 1</code>):
+            </b>
+            As the fixed-length window of size <code class="font-mono">n</code> shifts right by 1 position, only two frequency counts change: we increment <code class="font-mono text-amber-300">windowFreq[s2.charAt(right) - 'a']++</code> and decrement <code class="font-mono text-rose-300">windowFreq[s2.charAt(right - n) - 'a']--</code>, then compare the 26-element arrays in <code class="font-mono">&Omicron;(26) = &Omicron;(1)</code> time.
+          </div>
+
+          <div class="grid grid-cols-2 gap-3 pt-1">
+            <div class="p-2.5 bg-white/[0.03] rounded-lg border border-white/10">
+              <span class="text-[11px] text-slate-400 uppercase font-semibold">Time Complexity</span>
+              <div class="text-sm font-bold text-emerald-400 font-mono mt-0.5">&Omicron;(N + M)</div>
+              <p class="text-[10px] text-slate-400 mt-0.5"><code class="font-mono">&Omicron;(N)</code> to initialize counts + <code class="font-mono">&Omicron;(26 &times; (M - N))</code> to slide across <code class="font-mono">s2</code>.</p>
+            </div>
+            <div class="p-2.5 bg-white/[0.03] rounded-lg border border-white/10">
+              <span class="text-[11px] text-slate-400 uppercase font-semibold">Space Complexity</span>
+              <div class="text-sm font-bold text-cyan-400 font-mono mt-0.5">&Omicron;(1)</div>
+              <p class="text-[10px] text-slate-400 mt-0.5">Fixed-size <code class="font-mono">int[26]</code> arrays regardless of input string length.</p>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+    </footer>
+
+  </div>
+
+  <!-- JAVASCRIPT SIMULATION ENGINE WITH SLIDING WINDOW & LIFT-AND-ARC FREQ TRANSFERS -->
+  <script>
+    // 10 COMPREHENSIVE PRESETS
+    const PRESETS = [
+      { name: "1: LeetCode Ex 1 (s1 = 'ab', s2 = 'eidbaooo')", s1: "ab", s2: "eidbaooo" },
+      { name: "2: LeetCode Ex 2 (s1 = 'ab', s2 = 'eidboaoo')", s1: "ab", s2: "eidboaoo" },
+      { name: "3: First Window Immediate Match (s1 = 'adc', s2 = 'dcda')", s1: "adc", s2: "dcda" },
+      { name: "4: No Permutation Match (s1 = 'hello', s2 = 'ooolleoooleh')", s1: "hello", s2: "ooolleoooleh" },
+      { name: "5: Trailing Permutation Found (s1 = 'abc', s2 = 'bbbca')", s1: "abc", s2: "bbbca" },
+      { name: "6: Duplicate Characters in s1 (s1 = 'aab', s2 = 'cbabaa')", s1: "aab", s2: "cbabaa" },
+      { name: "7: Length Guard n > m (s1 = 'abcd', s2 = 'abc')", s1: "abcd", s2: "abc" },
+      { name: "8: Exact Length Anagram (s1 = 'listen', s2 = 'silent')", s1: "listen", s2: "silent" },
+      { name: "9: Single Character Match (s1 = 'z', s2 = 'abcze')", s1: "z", s2: "abcze" },
+      { name: "10: Disjoint Alphabets (s1 = 'xyz', s2 = 'abcdef')", s1: "xyz", s2: "abcdef" }
+    ];
+
+    // APPLICATION STATE
+    let currentS1 = PRESETS[0].s1;
+    let currentS2 = PRESETS[0].s2;
+    let steps = [];
+    let currentStepIdx = 0;
+    let isPlaying = false;
+    let playInterval = null;
+    let playSpeed = 650;
+    let audioEnabled = true;
+
+    // WEB AUDIO SYNTHESIZER
+    let audioCtx = null;
+    function initAudio() {
+      if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      }
+    }
+    function playTone(freq = 440, type = 'sine', duration = 0.08, vol = 0.035) {
+      if (!audioEnabled) return;
+      try {
+        initAudio();
+        if (audioCtx.state === 'suspended') {
+          audioCtx.resume();
+        }
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = type;
+        osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+        gain.gain.setValueAtTime(vol, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + duration);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + duration);
+      } catch (e) {}
+    }
+
+    // DOM REFERENCES
+    const btnPlay = document.getElementById('btnPlay');
+    const playIcon = document.getElementById('playIcon');
+    const playText = document.getElementById('playText');
+    const btnPrev = document.getElementById('btnPrev');
+    const btnNext = document.getElementById('btnNext');
+    const btnReset = document.getElementById('btnReset');
+    const btnAudio = document.getElementById('btnAudio');
+    const audioIcon = document.getElementById('audioIcon');
+    const presetSelect = document.getElementById('presetSelect');
+    const customS1Input = document.getElementById('customS1Input');
+    const customS2Input = document.getElementById('customS2Input');
+    const btnApplyCustom = document.getElementById('btnApplyCustom');
+    const stepScrubber = document.getElementById('stepScrubber');
+    const stepCounterBadge = document.getElementById('stepCounterBadge');
+    const phaseBadge = document.getElementById('phaseBadge');
+    const lenHeaderBadge = document.getElementById('lenHeaderBadge');
+    const resultHeaderBadge = document.getElementById('resultHeaderBadge');
+
+    const varLengths = document.getElementById('varLengths');
+    const varLenGuard = document.getElementById('varLenGuard');
+    const varWinSpan = document.getElementById('varWinSpan');
+    const varWinSubstr = document.getElementById('varWinSubstr');
+    const varSlideDelta = document.getElementById('varSlideDelta');
+    const equalsResultCard = document.getElementById('equalsResultCard');
+    const varEqualsStatus = document.getElementById('varEqualsStatus');
+    const varMatchBuckets = document.getElementById('varMatchBuckets');
+
+    const stageWrapper = document.getElementById('stageWrapper');
+    const transferArcSvg = document.getElementById('transferArcSvg');
+    const flyingCloneLayer = document.getElementById('flyingCloneLayer');
+    const s1LenTag = document.getElementById('s1LenTag');
+    const s1StreamArena = document.getElementById('s1StreamArena');
+    const activeWindowFrame = document.getElementById('activeWindowFrame');
+    const activeWindowTag = document.getElementById('activeWindowTag');
+    const s2StreamArena = document.getElementById('s2StreamArena');
+    const dualFreqArena = document.getElementById('dualFreqArena');
+
+    const decisionBanner = document.getElementById('decisionBanner');
+    const decisionIcon = document.getElementById('decisionIcon');
+    const decisionText = document.getElementById('decisionText');
+    const comparePill = document.getElementById('comparePill');
+    const codeContainer = document.getElementById('codeContainer');
+    const stepDescription = document.getElementById('stepDescription');
+
+    function arraysEqual26(a, b) {
+      for (let i = 0; i < 26; i++) {
+        if (a[i] !== b[i]) return false;
+      }
+      return true;
+    }
+
+    // STRICT LINE-BY-LINE EXECUTION TRACE GENERATOR
+    function generateSteps(s1, s2) {
+      const trace = [];
+      const n = s1.length;
+      const m = s2.length;
+      const distinctChars = Array.from(new Set((s1 + s2).split(''))).sort();
+
+      const s1Freq = new Array(26).fill(0);
+      const windowFreq = new Array(26).fill(0);
+
+      // Line 2: Method entry
+      trace.push({
+        line: 2,
+        phase: "Start",
+        s1,
+        s2,
+        distinctChars,
+        s1Freq: [...s1Freq],
+        windowFreq: [...windowFreq],
+        s1ScanIdx: -1,
+        winLeft: -1,
+        winRight: -1,
+        returnVal: null,
+        desc: `Entered <span class="code-font text-cyan-300 font-bold">checkInclusion</span> with pattern <span class="code-font text-purple-300 font-bold">s1 = "${s1}"</span> and text <span class="code-font text-cyan-300 font-bold">s2 = "${s2}"</span>.`,
+        soundFreq: 330
+      });
+
+      // Line 4: int n = s1.length();
+      trace.push({
+        line: 4,
+        phase: `n = ${n}`,
+        s1,
+        s2,
+        distinctChars,
+        s1Freq: [...s1Freq],
+        windowFreq: [...windowFreq],
+        s1ScanIdx: -1,
+        winLeft: -1,
+        winRight: -1,
+        returnVal: null,
+        desc: `Computed pattern length <span class="code-font text-purple-300 font-bold">int n = s1.length() = ${n}</span>.`,
+        soundFreq: 355
+      });
+
+      // Line 5: int m = s2.length();
+      trace.push({
+        line: 5,
+        phase: `m = ${m}`,
+        s1,
+        s2,
+        distinctChars,
+        s1Freq: [...s1Freq],
+        windowFreq: [...windowFreq],
+        s1ScanIdx: -1,
+        winLeft: -1,
+        winRight: -1,
+        returnVal: null,
+        desc: `Computed search string length <span class="code-font text-cyan-300 font-bold">int m = s2.length() = ${m}</span>.`,
+        soundFreq: 380
+      });
+
+      // Line 7: if (n > m)
+      const tooLong = n > m;
+      trace.push({
+        line: 7,
+        phase: tooLong ? "n > m (True)" : "n > m (False)",
+        s1,
+        s2,
+        distinctChars,
+        s1Freq: [...s1Freq],
+        windowFreq: [...windowFreq],
+        s1ScanIdx: -1,
+        winLeft: -1,
+        winRight: -1,
+        returnVal: null,
+        desc: tooLong
+          ? `<span class="text-rose-400 font-bold">Length Guard Triggered!</span> <span class="code-font">n (${n}) &gt; m (${m})</span> is <b>true</b> — <span class="code-font">s2</span> is shorter than <span class="code-font">s1</span>.`
+          : `Length check <span class="code-font text-emerald-300">n (${n}) &gt; m (${m})</span> is <b>false</b> (<span class="code-font">${n} &le; ${m}</span>). Proceeding to allocate frequency arrays.`,
+        soundFreq: tooLong ? 280 : 405
+      });
+
+      if (tooLong) {
+        trace.push({
+          line: 8,
+          phase: "Return False",
+          s1,
+          s2,
+          distinctChars,
+          s1Freq: [...s1Freq],
+          windowFreq: [...windowFreq],
+          s1ScanIdx: -1,
+          winLeft: -1,
+          winRight: -1,
+          returnVal: false,
+          isComplete: true,
+          desc: `<span class="text-rose-400 font-bold text-sm"><i class="fa-solid fa-circle-xmark mr-1.5"></i>Returned false!</span> No permutation of <span class="code-font">"${s1}"</span> can fit inside <span class="code-font">"${s2}"</span>.`,
+          soundFreq: 220
+        });
+        return trace;
+      }
+
+      // Line 11: int[] s1Freq = new int[26];
+      trace.push({
+        line: 11,
+        phase: "Init s1Freq[26]",
+        s1,
+        s2,
+        distinctChars,
+        s1Freq: [...s1Freq],
+        windowFreq: [...windowFreq],
+        s1ScanIdx: -1,
+        winLeft: -1,
+        winRight: -1,
+        returnVal: null,
+        desc: `Allocated target frequency table <span class="code-font text-purple-300 font-bold">int[] s1Freq = new int[26]</span> (all 26 counts initialized to 0).`,
+        soundFreq: 425
+      });
+
+      // Line 12: int[] windowFreq = new int[26];
+      trace.push({
+        line: 12,
+        phase: "Init windowFreq[26]",
+        s1,
+        s2,
+        distinctChars,
+        s1Freq: [...s1Freq],
+        windowFreq: [...windowFreq],
+        s1ScanIdx: -1,
+        winLeft: -1,
+        winRight: -1,
+        returnVal: null,
+        desc: `Allocated sliding window frequency table <span class="code-font text-cyan-300 font-bold">int[] windowFreq = new int[26]</span> (all 26 counts initialized to 0).`,
+        soundFreq: 445
+      });
+
+      // Phase 1: Store character frequencies of s1 (Lines 15-16)
+      for (let i = 0; i < n; i++) {
+        // Line 15: for (int i = 0; i < n; i++)
+        trace.push({
+          line: 15,
+          phase: `s1 Loop i = ${i}`,
+          s1,
+          s2,
+          distinctChars,
+          s1Freq: [...s1Freq],
+          windowFreq: [...windowFreq],
+          s1ScanIdx: i,
+          winLeft: -1,
+          winRight: -1,
+          returnVal: null,
+          desc: `Loop check <span class="code-font text-purple-300 font-bold">i (${i}) &lt; n (${n})</span> is <b>true</b>. Ready to count <span class="code-font text-purple-200">s1.charAt(${i}) = '${s1[i]}'</span>.`,
+          soundFreq: 465 + i * 20
+        });
+
+        const ch = s1[i];
+        const codeIdx = ch.charCodeAt(0) - 97;
+        s1Freq[codeIdx]++;
+
+        // Line 16: s1Freq[s1.charAt(i) - 'a']++;
+        trace.push({
+          line: 16,
+          phase: `s1Freq['${ch}']++`,
+          s1,
+          s2,
+          distinctChars,
+          s1Freq: [...s1Freq],
+          windowFreq: [...windowFreq],
+          s1ScanIdx: i,
+          winLeft: -1,
+          winRight: -1,
+          activeBucketChar: ch,
+          transfer: { type: 's1Add', ch, idx: i },
+          returnVal: null,
+          desc: `Incremented <span class="code-font text-purple-200 font-bold">s1Freq['${ch}' - 'a']++</span> &rarr; target count of <span class="code-font">'${ch}'</span> is <span class="code-font font-bold">${s1Freq[codeIdx]}</span>.`,
+          soundFreq: 495 + i * 25
+        });
+      }
+
+      // Line 15: Exit s1 frequency loop when i == n
+      trace.push({
+        line: 15,
+        phase: "s1 Loop Exit",
+        s1,
+        s2,
+        distinctChars,
+        s1Freq: [...s1Freq],
+        windowFreq: [...windowFreq],
+        s1ScanIdx: -1,
+        winLeft: -1,
+        winRight: -1,
+        returnVal: null,
+        desc: `Loop check <span class="code-font text-purple-300">i (${n}) &lt; n (${n})</span> is <b>false</b>. Finished building <span class="code-font text-purple-200 font-bold">s1Freq</span>.`,
+        soundFreq: 475
+      });
+
+      // Phase 2: Create the first window in s2 (Lines 20-21)
+      for (let i = 0; i < n; i++) {
+        // Line 20: for (int i = 0; i < n; i++)
+        trace.push({
+          line: 20,
+          phase: `Init Win i = ${i}`,
+          s1,
+          s2,
+          distinctChars,
+          s1Freq: [...s1Freq],
+          windowFreq: [...windowFreq],
+          s1ScanIdx: -1,
+          winLeft: 0,
+          winRight: i,
+          incomingIdx: i,
+          returnVal: null,
+          desc: `First window loop <span class="code-font text-cyan-300 font-bold">i (${i}) &lt; n (${n})</span> is <b>true</b>. Ready to add <span class="code-font text-cyan-200">s2.charAt(${i}) = '${s2[i]}'</span>.`,
+          soundFreq: 500 + i * 20
+        });
+
+        const ch = s2[i];
+        const codeIdx = ch.charCodeAt(0) - 97;
+        windowFreq[codeIdx]++;
+
+        // Line 21: windowFreq[s2.charAt(i) - 'a']++;
+        trace.push({
+          line: 21,
+          phase: `Init Window [${i}] '${ch}'`,
+          s1,
+          s2,
+          distinctChars,
+          s1Freq: [...s1Freq],
+          windowFreq: [...windowFreq],
+          s1ScanIdx: -1,
+          winLeft: 0,
+          winRight: i,
+          incomingIdx: i,
+          activeBucketChar: ch,
+          transfer: { type: 'winAdd', ch, idx: i },
+          returnVal: null,
+          desc: `Incremented <span class="code-font text-cyan-200 font-bold">windowFreq['${ch}' - 'a']++</span> &rarr; window count of <span class="code-font">'${ch}'</span> is <span class="code-font font-bold">${windowFreq[codeIdx]}</span>.`,
+          soundFreq: 530 + i * 25
+        });
+      }
+
+      // Line 20: Exit first window loop when i == n
+      trace.push({
+        line: 20,
+        phase: "Init Window Ready",
+        s1,
+        s2,
+        distinctChars,
+        s1Freq: [...s1Freq],
+        windowFreq: [...windowFreq],
+        s1ScanIdx: -1,
+        winLeft: 0,
+        winRight: n - 1,
+        returnVal: null,
+        desc: `Loop check <span class="code-font text-cyan-300">i (${n}) &lt; n (${n})</span> is <b>false</b>. Initial window <span class="code-font text-cyan-200 font-bold">[0..${n - 1}] ("${s2.slice(0, n)}")</span> is ready.`,
+        soundFreq: 510
+      });
+
+      // Phase 3: Check the first window (Line 25)
+      const firstMatch = arraysEqual26(s1Freq, windowFreq);
+      trace.push({
+        line: 25,
+        phase: firstMatch ? "First Window Match!" : "First Window Mismatch",
+        s1,
+        s2,
+        distinctChars,
+        s1Freq: [...s1Freq],
+        windowFreq: [...windowFreq],
+        s1ScanIdx: -1,
+        winLeft: 0,
+        winRight: n - 1,
+        isCheckStep: true,
+        isMatch: firstMatch,
+        compareText: firstMatch ? "Arrays.equals == true" : "Arrays.equals == false",
+        returnVal: null,
+        desc: firstMatch
+          ? `<span class="text-emerald-400 font-bold"><i class="fa-solid fa-check mr-1"></i>Immediate Match!</span> <span class="code-font text-emerald-300 font-bold">Arrays.equals(s1Freq, windowFreq)</span> is <b>true</b> for initial window <span class="code-font">"${s2.slice(0, n)}"</span>.`
+          : `Checked initial window <span class="code-font text-cyan-300">"${s2.slice(0, n)}"</span>: <span class="code-font text-rose-300 font-bold">Arrays.equals(s1Freq, windowFreq)</span> is <b>false</b>. Entering sliding loop.`,
+        soundFreq: firstMatch ? 760 : 490
+      });
+
+      if (firstMatch) {
+        trace.push({
+          line: 26,
+          phase: "Return True",
+          s1,
+          s2,
+          distinctChars,
+          s1Freq: [...s1Freq],
+          windowFreq: [...windowFreq],
+          s1ScanIdx: -1,
+          winLeft: 0,
+          winRight: n - 1,
+          isMatch: true,
+          returnVal: true,
+          isComplete: true,
+          desc: `<span class="text-emerald-400 font-bold text-sm"><i class="fa-solid fa-trophy mr-1.5"></i>Permutation Found!</span> <span class="code-font text-emerald-300 font-bold">"${s2.slice(0, n)}"</span> at <span class="code-font">[0..${n - 1}]</span> is a permutation of <span class="code-font">"${s1}"</span>. Returned <span class="code-font text-emerald-300 font-bold text-sm">true</span>.`,
+          soundFreq: 960
+        });
+        return trace;
+      }
+
+      // Phase 4: Slide the window through s2 (Lines 30-42)
+      for (let right = n; right < m; right++) {
+        const leftAfterSlide = right - n + 1;
+        const outgoingIdx = right - n;
+        const inCh = s2[right];
+        const outCh = s2[outgoingIdx];
+
+        // Line 30: for (int right = n; right < m; right++)
+        trace.push({
+          line: 30,
+          phase: `Slide right = ${right}`,
+          s1,
+          s2,
+          distinctChars,
+          s1Freq: [...s1Freq],
+          windowFreq: [...windowFreq],
+          s1ScanIdx: -1,
+          winLeft: leftAfterSlide,
+          winRight: right,
+          incomingIdx: right,
+          outgoingIdx,
+          slideDeltaText: `+'${inCh}', -'${outCh}'`,
+          returnVal: null,
+          desc: `Slide window to <span class="code-font text-cyan-300 font-bold">[${leftAfterSlide}..${right}]</span> (<span class="code-font">"${s2.slice(leftAfterSlide, right + 1)}"</span>): entering <span class="code-font text-amber-300">'${inCh}'</span> at <span class="code-font">[${right}]</span>, leaving <span class="code-font text-rose-300">'${outCh}'</span> at <span class="code-font">[${outgoingIdx}]</span>.`,
+          soundFreq: 510
+        });
+
+        // Line 33: windowFreq[s2.charAt(right) - 'a']++;
+        windowFreq[inCh.charCodeAt(0) - 97]++;
+        trace.push({
+          line: 33,
+          phase: `Add '${inCh}' (+1)`,
+          s1,
+          s2,
+          distinctChars,
+          s1Freq: [...s1Freq],
+          windowFreq: [...windowFreq],
+          s1ScanIdx: -1,
+          winLeft: leftAfterSlide,
+          winRight: right,
+          incomingIdx: right,
+          outgoingIdx,
+          slideDeltaText: `+'${inCh}'`,
+          activeBucketChar: inCh,
+          transfer: { type: 'winAdd', ch: inCh, idx: right },
+          returnVal: null,
+          desc: `Added incoming character <span class="code-font text-amber-300 font-bold">s2.charAt(${right}) = '${inCh}'</span> &rarr; <span class="code-font text-cyan-300">windowFreq['${inCh}'] = ${windowFreq[inCh.charCodeAt(0) - 97]}</span>.`,
+          soundFreq: 600
+        });
+
+        // Line 36: windowFreq[s2.charAt(right - n) - 'a']--;
+        windowFreq[outCh.charCodeAt(0) - 97]--;
+        trace.push({
+          line: 36,
+          phase: `Remove '${outCh}' (-1)`,
+          s1,
+          s2,
+          distinctChars,
+          s1Freq: [...s1Freq],
+          windowFreq: [...windowFreq],
+          s1ScanIdx: -1,
+          winLeft: leftAfterSlide,
+          winRight: right,
+          outgoingIdx,
+          slideDeltaText: `-'${outCh}'`,
+          activeBucketChar: outCh,
+          transfer: { type: 'winRemove', ch: outCh, idx: outgoingIdx },
+          returnVal: null,
+          desc: `Removed outgoing character <span class="code-font text-rose-300 font-bold">s2.charAt(${outgoingIdx}) = '${outCh}'</span> &rarr; <span class="code-font text-cyan-300">windowFreq['${outCh}'] = ${windowFreq[outCh.charCodeAt(0) - 97]}</span>.`,
+          soundFreq: 460
+        });
+
+        // Line 39: if (Arrays.equals(s1Freq, windowFreq))
+        const isSlideMatch = arraysEqual26(s1Freq, windowFreq);
+        trace.push({
+          line: 39,
+          phase: isSlideMatch ? "Permutation Match!" : "Compare (False)",
+          s1,
+          s2,
+          distinctChars,
+          s1Freq: [...s1Freq],
+          windowFreq: [...windowFreq],
+          s1ScanIdx: -1,
+          winLeft: leftAfterSlide,
+          winRight: right,
+          isCheckStep: true,
+          isMatch: isSlideMatch,
+          compareText: isSlideMatch ? "Arrays.equals == true" : "Arrays.equals == false",
+          returnVal: null,
+          desc: isSlideMatch
+            ? `<span class="text-emerald-400 font-bold"><i class="fa-solid fa-check mr-1"></i>Frequency Match!</span> <span class="code-font text-emerald-300 font-bold">Arrays.equals(s1Freq, windowFreq)</span> is <b>true</b> for substring <span class="code-font text-emerald-200 font-bold">"${s2.slice(leftAfterSlide, right + 1)}"</span>!`
+            : `Compared <span class="code-font text-purple-300">s1Freq</span> and <span class="code-font text-cyan-300">windowFreq</span> for <span class="code-font">"${s2.slice(leftAfterSlide, right + 1)}"</span>: <b>false</b>.`,
+          soundFreq: isSlideMatch ? 780 : 490
+        });
+
+        if (isSlideMatch) {
+          // Line 40: return true;
+          trace.push({
+            line: 40,
+            phase: "Return True",
+            s1,
+            s2,
+            distinctChars,
+            s1Freq: [...s1Freq],
+            windowFreq: [...windowFreq],
+            s1ScanIdx: -1,
+            winLeft: leftAfterSlide,
+            winRight: right,
+            isMatch: true,
+            returnVal: true,
+            isComplete: true,
+            desc: `<span class="text-emerald-400 font-bold text-sm"><i class="fa-solid fa-trophy mr-1.5"></i>Permutation Found!</span> Substring <span class="code-font text-emerald-300 font-bold">"${s2.slice(leftAfterSlide, right + 1)}"</span> at <span class="code-font">[${leftAfterSlide}..${right}]</span> is a permutation of <span class="code-font">"${s1}"</span>. Returned <span class="code-font text-emerald-300 font-bold text-sm">true</span>.`,
+            soundFreq: 960
+          });
+          return trace;
+        }
+      }
+
+      // Line 30: Loop exit when right == m
+      trace.push({
+        line: 30,
+        phase: "Loop Complete",
+        s1,
+        s2,
+        distinctChars,
+        s1Freq: [...s1Freq],
+        windowFreq: [...windowFreq],
+        s1ScanIdx: -1,
+        winLeft: -1,
+        winRight: -1,
+        returnVal: null,
+        desc: `Loop condition <span class="code-font text-amber-300">right (${m}) &lt; m (${m})</span> is <b>false</b>. Exhausted all windows of length <span class="code-font">${n}</span>.`,
+        soundFreq: 420
+      });
+
+      // Line 44: return false;
+      trace.push({
+        line: 44,
+        phase: "Return False",
+        s1,
+        s2,
+        distinctChars,
+        s1Freq: [...s1Freq],
+        windowFreq: [...windowFreq],
+        s1ScanIdx: -1,
+        winLeft: -1,
+        winRight: -1,
+        returnVal: false,
+        isComplete: true,
+        desc: `<span class="text-rose-400 font-bold text-sm"><i class="fa-solid fa-circle-xmark mr-1.5"></i>Not Found!</span> No substring in <span class="code-font">"${s2}"</span> matches the frequency signature of <span class="code-font">"${s1}"</span>. Returned <span class="code-font text-rose-300 font-bold text-sm">false</span>.`,
+        soundFreq: 260
+      });
+
+      return trace;
+    }
+
+    // LOCALIZED ZERO-JUMP CODE LINE HIGHLIGHTER
+    function highlightCodeLine(lineNum) {
+      document.querySelectorAll('.code-line').forEach(el => el.classList.remove('active-line'));
+      const activeEl = document.getElementById(`line${lineNum}`);
+      if (activeEl) {
+        activeEl.classList.add('active-line');
+
+        const containerTop = codeContainer.scrollTop;
+        const containerBottom = containerTop + codeContainer.clientHeight;
+        const elTop = activeEl.offsetTop - codeContainer.offsetTop;
+        const elBottom = elTop + activeEl.clientHeight;
+
+        if (elTop < containerTop + 24) {
+          codeContainer.scrollTo({ top: Math.max(0, elTop - 24), behavior: 'smooth' });
+        } else if (elBottom > containerBottom - 24) {
+          codeContainer.scrollTo({ top: elBottom - codeContainer.clientHeight + 24, behavior: 'smooth' });
+        }
+      }
+    }
+
+    // POSITION FIXED-WIDTH SLIDING WINDOW HALO ON S2 STREAM
+    function updateWindowFrame(step) {
+      const m = step.s2.length;
+      const arenaOffsetX = s2StreamArena.offsetLeft;
+      const arenaOffsetY = s2StreamArena.offsetTop;
+
+      if (m > 0 && step.winLeft >= 0 && step.winRight >= step.winLeft && step.winRight < m) {
+        const leftCard = s2StreamArena.querySelector(`[data-s2-idx="${step.winLeft}"]`);
+        const rightCard = s2StreamArena.querySelector(`[data-s2-idx="${step.winRight}"]`);
+        if (leftCard && rightCard) {
+          const padX = 5;
+          const padY = 6;
+          const xStart = arenaOffsetX + leftCard.offsetLeft - padX;
+          const width = (rightCard.offsetLeft + rightCard.offsetWidth) - leftCard.offsetLeft + padX * 2;
+          const yTop = arenaOffsetY + leftCard.offsetTop - padY;
+          const height = leftCard.offsetHeight + padY * 2;
+
+          activeWindowFrame.classList.remove('hidden');
+          activeWindowFrame.style.left = `${xStart}px`;
+          activeWindowFrame.style.width = `${width}px`;
+          activeWindowFrame.style.top = `${yTop}px`;
+          activeWindowFrame.style.height = `${height}px`;
+          activeWindowTag.textContent = `window [${step.winLeft}..${step.winRight}]`;
+
+          if (step.isMatch) {
+            activeWindowFrame.className = "absolute rounded-2xl border-2 border-emerald-400/90 bg-emerald-400/[0.10] pointer-events-none transition-all duration-300 z-10";
+            activeWindowTag.className = "absolute -top-3 left-1/2 -translate-x-1/2 px-2 py-0.5 rounded-full bg-emerald-950 border border-emerald-400/80 text-emerald-200 code-font text-[9px] font-bold shadow whitespace-nowrap";
+          } else {
+            activeWindowFrame.className = "absolute rounded-2xl border-2 border-cyan-400/80 bg-cyan-400/[0.07] pointer-events-none transition-all duration-300 z-10";
+            activeWindowTag.className = "absolute -top-3 left-1/2 -translate-x-1/2 px-2 py-0.5 rounded-full bg-slate-950 border border-cyan-400/75 text-cyan-200 code-font text-[9px] font-bold shadow whitespace-nowrap";
+          }
+        }
+      } else {
+        activeWindowFrame.classList.add('hidden');
+      }
+    }
+
+    // PHYSICAL LIFT-AND-ARC ANIMATION BETWEEN STRINGS AND DUAL FREQUENCY BUCKETS
+    function animateFreqTransfer(transfer, animateFlight) {
+      transferArcSvg.innerHTML = '';
+      flyingCloneLayer.innerHTML = '';
+      if (!transfer) return;
+
+      const stageRect = stageWrapper.getBoundingClientRect();
+      const bucketEl = dualFreqArena.querySelector(`[data-freq-char="${transfer.ch}"]`);
+      if (!bucketEl) return;
+
+      let srcEl = null;
+      if (transfer.type === 's1Add') {
+        srcEl = s1StreamArena.querySelector(`[data-s1-idx="${transfer.idx}"]`);
+      } else {
+        srcEl = s2StreamArena.querySelector(`[data-s2-idx="${transfer.idx}"]`);
+      }
+      if (!srcEl) return;
+
+      const srcRect = srcEl.getBoundingClientRect();
+      const bucketRect = bucketEl.getBoundingClientRect();
+
+      if (transfer.type === 's1Add' || transfer.type === 'winAdd') {
+        const startX = (srcRect.left - stageRect.left) + srcRect.width / 2;
+        const startY = (srcRect.bottom - stageRect.top) + 4;
+        const endX = (bucketRect.left - stageRect.left) + bucketRect.width / 2;
+        const endY = (bucketRect.top - stageRect.top) - 6;
+
+        const midX = (startX + endX) / 2 + 18;
+        const midY = (startY + endY) / 2;
+        const arcColor = transfer.type === 's1Add' ? '#c084fc' : '#22d3ee';
+
+        transferArcSvg.innerHTML = `
+          <path d="M ${startX} ${startY} Q ${midX} ${midY}, ${endX} ${endY}"
+                fill="none" stroke="${arcColor}" stroke-width="2.2" class="transfer-arc-path" />
+          <circle cx="${startX}" cy="${startY}" r="4" fill="${arcColor}" />
+          <polygon points="${endX},${endY + 3} ${endX - 5},${endY - 6} ${endX + 5},${endY - 6}" fill="${arcColor}" />
+        `;
+
+        if (!animateFlight) return;
+
+        const clone = document.createElement('div');
+        clone.className = `absolute px-2 py-1 rounded-lg ${transfer.type === 's1Add' ? 'bg-purple-400 text-slate-950 shadow-purple-400/50' : 'bg-cyan-400 text-slate-950 shadow-cyan-400/50'} code-font text-xs font-extrabold shadow-lg pointer-events-none`;
+        clone.textContent = `+1 '${transfer.ch}'`;
+        clone.style.left = `${(srcRect.left - stageRect.left) + srcRect.width / 2 - 22}px`;
+        clone.style.top = `${(srcRect.top - stageRect.top) + srcRect.height / 2}px`;
+        flyingCloneLayer.appendChild(clone);
+
+        const dx = endX - startX;
+        const dy = endY - startY;
+        const duration = Math.min(520, Math.max(230, playSpeed * 0.76));
+
+        const anim = clone.animate([
+          { transform: 'translate(0px, 0px) scale(1)', opacity: 1 },
+          { transform: `translate(${dx * 0.45 + 16}px, ${dy * 0.45 - 14}px) scale(1.12)`, opacity: 1, offset: 0.45 },
+          { transform: `translate(${dx}px, ${dy}px) scale(0.95)`, opacity: 0.1 }
+        ], {
+          duration,
+          easing: 'cubic-bezier(0.22, 1, 0.36, 1)'
+        });
+        anim.onfinish = () => clone.remove();
+
+      } else if (transfer.type === 'winRemove') {
+        const startX = (bucketRect.left - stageRect.left) + bucketRect.width / 2;
+        const startY = (bucketRect.top - stageRect.top) - 4;
+        const endX = (srcRect.left - stageRect.left) + srcRect.width / 2;
+        const endY = (srcRect.bottom - stageRect.top) + 6;
+
+        const midX = (startX + endX) / 2 - 18;
+        const midY = (startY + endY) / 2;
+
+        transferArcSvg.innerHTML = `
+          <path d="M ${startX} ${startY} Q ${midX} ${midY}, ${endX} ${endY}"
+                fill="none" stroke="#fb7185" stroke-width="2.2" class="transfer-arc-path" />
+          <circle cx="${startX}" cy="${startY}" r="4" fill="#fb7185" />
+          <polygon points="${endX},${endY - 3} ${endX - 5},${endY + 6} ${endX + 5},${endY + 6}" fill="#fb7185" />
+        `;
+
+        if (!animateFlight) return;
+
+        const clone = document.createElement('div');
+        clone.className = 'absolute px-2 py-1 rounded-lg bg-rose-500 text-white code-font text-xs font-extrabold shadow-lg shadow-rose-500/50 pointer-events-none';
+        clone.textContent = `-1 '${transfer.ch}'`;
+        clone.style.left = `${(bucketRect.left - stageRect.left) + bucketRect.width / 2 - 22}px`;
+        clone.style.top = `${(bucketRect.top - stageRect.top) - 8}px`;
+        flyingCloneLayer.appendChild(clone);
+
+        const dx = endX - startX;
+        const dy = endY - startY;
+        const duration = Math.min(520, Math.max(230, playSpeed * 0.76));
+
+        const anim = clone.animate([
+          { transform: 'translate(0px, 0px) scale(1)', opacity: 1 },
+          { transform: `translate(${dx * 0.45 - 16}px, ${dy * 0.45}px) scale(1.1)`, opacity: 1, offset: 0.45 },
+          { transform: `translate(${dx}px, ${dy}px) scale(0.95)`, opacity: 0.1 }
+        ], {
+          duration,
+          easing: 'cubic-bezier(0.22, 1, 0.36, 1)'
+        });
+        anim.onfinish = () => clone.remove();
+      }
+    }
+
+    // RENDER CURRENT STEP
+    function renderStep(idx, animateMovement = true) {
+      if (idx < 0 || idx >= steps.length) return;
+      const step = steps[idx];
+      const s1 = step.s1;
+      const s2 = step.s2;
+      const n = s1.length;
+      const m = s2.length;
+
+      // Update Header Scrubber & Badges
+      stepCounterBadge.textContent = `Step: ${idx + 1} / ${steps.length}`;
+      phaseBadge.textContent = step.phase;
+      lenHeaderBadge.textContent = `n = ${n}, m = ${m}`;
+      stepScrubber.max = steps.length - 1;
+      stepScrubber.value = idx;
+      s1LenTag.textContent = `n = ${n}`;
+
+      if (step.returnVal === true) {
+        resultHeaderBadge.textContent = "Result: true ✓";
+        resultHeaderBadge.className = "px-2.5 py-1 rounded-md bg-emerald-500/25 border border-emerald-400/45 text-emerald-200 font-bold";
+      } else if (step.returnVal === false) {
+        resultHeaderBadge.textContent = "Result: false ✗";
+        resultHeaderBadge.className = "px-2.5 py-1 rounded-md bg-rose-500/25 border border-rose-400/45 text-rose-200 font-bold";
+      } else {
+        resultHeaderBadge.textContent = "Result: Pending";
+        resultHeaderBadge.className = "px-2.5 py-1 rounded-md bg-white/5 border border-white/15 text-slate-300 font-bold";
+      }
+
+      // Update Telemetry HUD Cards
+      varLengths.textContent = `${n}, ${m}`;
+      varLenGuard.textContent = n > m ? `${n} > ${m} (invalid)` : `${n} ≤ ${m} (valid)`;
+
+      if (step.winLeft >= 0 && step.winRight >= step.winLeft && step.winRight < m) {
+        varWinSpan.textContent = `[${step.winLeft}..${step.winRight}]`;
+        varWinSubstr.textContent = `sub: "${s2.slice(step.winLeft, step.winRight + 1)}"`;
+      } else {
+        varWinSpan.textContent = '-';
+        varWinSubstr.textContent = 'sub: ""';
+      }
+
+      varSlideDelta.textContent = step.slideDeltaText || '-';
+
+      if (step.returnVal === true || step.isMatch) {
+        varEqualsStatus.textContent = "true";
+        varEqualsStatus.className = "code-font text-lg sm:text-xl font-black text-emerald-400";
+        if (step.returnVal === true) {
+          equalsResultCard.classList.add('win-badge-anim');
+          setTimeout(() => equalsResultCard.classList.remove('win-badge-anim'), 650);
+        }
+      } else if (step.returnVal === false || step.isCheckStep) {
+        varEqualsStatus.textContent = "false";
+        varEqualsStatus.className = "code-font text-lg sm:text-xl font-black text-rose-400";
+      } else {
+        varEqualsStatus.textContent = "pending";
+        varEqualsStatus.className = "code-font text-lg sm:text-xl font-black text-slate-400";
+      }
+
+      const matchedDistinct = step.distinctChars.filter(ch => {
+        const cIdx = ch.charCodeAt(0) - 97;
+        return step.s1Freq[cIdx] === step.windowFreq[cIdx];
+      }).length;
+      varMatchBuckets.textContent = `Matched: ${matchedDistinct} / ${step.distinctChars.length} chars`;
+
+      // Narrative Description
+      stepDescription.innerHTML = step.desc;
+
+      // 1. Render Pattern s1 Character Stream
+      s1StreamArena.innerHTML = '';
+      for (let i = 0; i < n; i++) {
+        const ch = s1[i];
+        const isScanning = (step.s1ScanIdx === i);
+
+        const card = document.createElement('div');
+        card.dataset.s1Idx = i;
+        let classes = 'char-card w-10 sm:w-11 h-14 rounded-xl py-1 px-1 flex flex-col items-center justify-between select-none ';
+        if (isScanning) {
+          classes += 's1-active-scan';
+        } else if (step.isMatch) {
+          classes += 'match-perm-char';
+        } else {
+          classes += 's1-target-char';
+        }
+        card.className = classes;
+
+        const topBadge = isScanning
+          ? `<span class="px-1 py-0.2 rounded bg-purple-400 text-slate-950 font-extrabold text-[8px] code-font">i=${i}</span>`
+          : `<span class="text-[8px] code-font text-purple-300/70">[${i}]</span>`;
+
+        card.innerHTML = `
+          ${topBadge}
+          <span class="code-font text-base font-extrabold ${isScanning ? 'text-white' : step.isMatch ? 'text-emerald-200' : 'text-purple-200'}">'${ch}'</span>
+          <span class="text-[8px] code-font text-slate-400">${ch.charCodeAt(0) - 97}</span>
+        `;
+        s1StreamArena.appendChild(card);
+      }
+
+      // 2. Render Search String s2 Character Stream
+      s2StreamArena.innerHTML = '';
+      for (let idxChar = 0; idxChar < m; idxChar++) {
+        const ch = s2[idxChar];
+        const isInWindow = (step.winLeft >= 0 && step.winRight >= 0 && idxChar >= step.winLeft && idxChar <= step.winRight);
+        const isIncoming = (step.incomingIdx === idxChar);
+        const isOutgoing = (step.outgoingIdx === idxChar);
+        const isPast = (!step.isComplete && step.winLeft > 0 && idxChar < step.winLeft && !isOutgoing);
+
+        const card = document.createElement('div');
+        card.dataset.s2Idx = idxChar;
+        let classes = 'char-card relative w-10 sm:w-11 h-15 rounded-xl py-1.5 px-1 flex flex-col items-center justify-between select-none shrink-0 ';
+
+        if (step.isMatch && isInWindow) {
+          classes += 'match-perm-char';
+        } else if (isOutgoing) {
+          classes += 'outgoing-char';
+        } else if (isIncoming) {
+          classes += 'incoming-char';
+        } else if (isInWindow) {
+          classes += 'in-window-char';
+        } else if (isPast) {
+          classes += 'past-char';
+        }
+        card.className = classes;
+
+        // Top Pointer Tag
+        let topTag = `<span class="text-[9px] code-font text-slate-400">[${idxChar}]</span>`;
+        if (isIncoming) {
+          topTag = `<span class="px-1 py-0.2 rounded bg-amber-400 text-slate-950 font-extrabold text-[8px] code-font shadow">+R</span>`;
+        } else if (isOutgoing) {
+          topTag = `<span class="px-1 py-0.2 rounded bg-rose-500 text-white font-extrabold text-[8px] code-font shadow">-OUT</span>`;
+        } else if (isInWindow && idxChar === step.winLeft) {
+          topTag = `<span class="px-1 py-0.2 rounded bg-cyan-400 text-slate-950 font-extrabold text-[8px] code-font shadow">L</span>`;
+        }
+
+        let glyphColor = 'text-white';
+        if (step.isMatch && isInWindow) glyphColor = 'text-emerald-200';
+        else if (isOutgoing) glyphColor = 'text-rose-200';
+        else if (isIncoming) glyphColor = 'text-amber-200';
+        else if (isInWindow) glyphColor = 'text-cyan-100';
+
+        const footTag = step.isMatch && isInWindow
+          ? `<span class="text-[8px] code-font text-emerald-300 font-bold">✓</span>`
+          : `<span class="text-[8px] code-font text-slate-500">${idxChar}</span>`;
+
+        card.innerHTML = `
+          ${topTag}
+          <span class="code-font text-base font-extrabold ${glyphColor}">'${ch}'</span>
+          ${footTag}
+        `;
+        s2StreamArena.appendChild(card);
+      }
+
+      // 3. Render Dual Frequency Comparison Buckets (s1Freq vs windowFreq)
+      dualFreqArena.innerHTML = '';
+      const maxBarScale = Math.max(2, ...step.s1Freq, ...step.windowFreq);
+
+      step.distinctChars.forEach((ch) => {
+        const idx26 = ch.charCodeAt(0) - 97;
+        const c1 = step.s1Freq[idx26];
+        const c2 = step.windowFreq[idx26];
+        const isEqual = (c1 === c2);
+        const isActiveBucket = (step.activeBucketChar === ch);
+
+        const h1Pct = c1 === 0 ? 4 : Math.max(16, (c1 / maxBarScale) * 100);
+        const h2Pct = c2 === 0 ? 4 : Math.max(16, (c2 / maxBarScale) * 100);
+
+        const bucket = document.createElement('div');
+        bucket.dataset.freqChar = ch;
+
+        let bClasses = 'dual-freq-bucket relative w-20 sm:w-22 rounded-xl p-2 flex flex-col items-center justify-between gap-1.5 select-none ';
+        if (isActiveBucket) bClasses += 'bucket-active-pulse ';
+        if (isEqual && (c1 > 0 || step.isCheckStep || step.isComplete)) {
+          bClasses += 'bucket-matched ';
+        } else if (!isEqual && (step.isCheckStep || step.winLeft >= 0)) {
+          bClasses += 'bucket-mismatch ';
+        }
+        bucket.className = bClasses;
+
+        const statusBadge = isEqual
+          ? `<span class="px-1.5 py-0.2 rounded bg-emerald-500/25 text-emerald-300 text-[9px] font-extrabold code-font">==</span>`
+          : `<span class="px-1.5 py-0.2 rounded bg-rose-500/25 text-rose-300 text-[9px] font-extrabold code-font">!=</span>`;
+
+        bucket.innerHTML = `
+          <div class="w-full flex items-center justify-between text-[10px] code-font">
+            <span class="font-bold text-white">'${ch}' <span class="text-slate-400 font-normal">[${idx26}]</span></span>
+            ${statusBadge}
+          </div>
+
+          <!-- Side-by-Side Dual Bars: s1Freq (Left) vs windowFreq (Right) -->
+          <div class="w-full h-16 flex items-end justify-center gap-2 bg-black/25 rounded-lg p-1.5 border border-white/[0.06]">
+            <!-- s1Freq Bar -->
+            <div class="flex-1 h-full flex flex-col justify-end items-center">
+              <div class="w-full rounded-t-sm transition-all duration-300 flex items-center justify-center ${c1 > 0 ? 'bg-gradient-to-t from-purple-600 to-purple-400 border-t border-purple-200 shadow-[0_0_10px_rgba(168,85,247,0.45)]' : 'bg-slate-700/50'}"
+                   style="height: ${h1Pct}%;">
+                <span class="code-font text-[10px] font-black text-white drop-shadow">${c1}</span>
+              </div>
+            </div>
+
+            <!-- windowFreq Bar -->
+            <div class="flex-1 h-full flex flex-col justify-end items-center">
+              <div class="w-full rounded-t-sm transition-all duration-300 flex items-center justify-center ${c2 > 0 ? (isEqual ? 'bg-gradient-to-t from-emerald-600 to-emerald-400 border-t border-emerald-200 shadow-[0_0_10px_rgba(16,185,129,0.45)]' : 'bg-gradient-to-t from-cyan-600 to-cyan-400 border-t border-cyan-200 shadow-[0_0_10px_rgba(34,211,238,0.45)]') : 'bg-slate-700/50'}"
+                   style="height: ${h2Pct}%;">
+                <span class="code-font text-[10px] font-black text-white drop-shadow">${c2}</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="w-full flex items-center justify-around text-[9px] code-font text-slate-400">
+            <span class="text-purple-300">s1:${c1}</span>
+            <span class="${isEqual ? 'text-emerald-300 font-bold' : 'text-cyan-300'}">win:${c2}</span>
+          </div>
+        `;
+        dualFreqArena.appendChild(bucket);
+      });
+
+      // 4. Position Fixed-Width Sliding Window Halo & Trigger Lift-and-Arc Transfer
+      requestAnimationFrame(() => {
+        updateWindowFrame(step);
+        animateFreqTransfer(step.transfer, animateMovement);
+      });
+
+      // 5. Update Compare Pill & Decision Banner
+      if (step.compareText) {
+        comparePill.classList.remove('hidden');
+        comparePill.textContent = step.compareText;
+      } else {
+        comparePill.classList.add('hidden');
+      }
+
+      if (step.returnVal === true || step.isMatch) {
+        decisionIcon.className = "fa-solid fa-trophy text-emerald-400 text-base";
+        decisionBanner.className = "p-3.5 rounded-xl bg-emerald-500/15 border border-emerald-400/35 text-xs flex flex-col sm:flex-row items-center justify-between gap-3 backdrop-blur-md";
+      } else if (step.returnVal === false || (step.transfer && step.transfer.type === 'winRemove')) {
+        decisionIcon.className = "fa-solid fa-circle-xmark text-rose-400 text-base";
+        decisionBanner.className = "p-3.5 rounded-xl bg-rose-500/12 border border-rose-400/30 text-xs flex flex-col sm:flex-row items-center justify-between gap-3 backdrop-blur-md";
+      } else {
+        decisionIcon.className = "fa-solid fa-circle-info text-cyan-400 text-base";
+        decisionBanner.className = "p-3.5 rounded-xl bg-white/[0.04] border border-white/10 text-xs flex flex-col sm:flex-row items-center justify-between gap-3 backdrop-blur-md";
+      }
+      decisionText.innerHTML = step.desc;
+
+      // 6. Highlight Active Java Line & Play Audio Tone
+      highlightCodeLine(step.line);
+      if (step.soundFreq) {
+        playTone(step.soundFreq, 'sine', 0.08, 0.035);
+      }
+    }
+
+    // PLAYBACK CONTROLLER
+    function setPlaying(playing) {
+      isPlaying = playing;
+      if (isPlaying) {
+        playIcon.className = "fa-solid fa-pause";
+        playText.textContent = "Stop";
+        btnPlay.classList.add('bg-rose-500/25', 'text-rose-200', 'border-rose-400/50');
+        btnPlay.classList.remove('bg-cyan-500/25', 'text-cyan-200', 'border-cyan-400/50');
+
+        playInterval = setInterval(() => {
+          if (currentStepIdx < steps.length - 1) {
+            currentStepIdx++;
+            renderStep(currentStepIdx, true);
+          } else {
+            setPlaying(false);
+          }
+        }, playSpeed);
+      } else {
+        playIcon.className = "fa-solid fa-play";
+        playText.textContent = "Start";
+        btnPlay.classList.remove('bg-rose-500/25', 'text-rose-200', 'border-rose-400/50');
+        btnPlay.classList.add('bg-cyan-500/25', 'text-cyan-200', 'border-cyan-400/50');
+        if (playInterval) {
+          clearInterval(playInterval);
+          playInterval = null;
+        }
+      }
+    }
+
+    function initSimulation(s1Val, s2Val) {
+      setPlaying(false);
+      currentS1 = s1Val;
+      currentS2 = s2Val;
+      steps = generateSteps(currentS1, currentS2);
+      currentStepIdx = 0;
+      stepScrubber.max = steps.length - 1;
+      stepScrubber.value = 0;
+      renderStep(0, false);
+    }
+
+    // EVENT LISTENERS
+    btnPlay.addEventListener('click', () => {
+      if (currentStepIdx >= steps.length - 1) {
+        currentStepIdx = 0;
+        renderStep(0, false);
+      }
+      setPlaying(!isPlaying);
+    });
+
+    btnNext.addEventListener('click', () => {
+      setPlaying(false);
+      if (currentStepIdx < steps.length - 1) {
+        currentStepIdx++;
+        renderStep(currentStepIdx, true);
+      }
+    });
+
+    btnPrev.addEventListener('click', () => {
+      setPlaying(false);
+      if (currentStepIdx > 0) {
+        currentStepIdx--;
+        renderStep(currentStepIdx, true);
+      }
+    });
+
+    btnReset.addEventListener('click', () => {
+      setPlaying(false);
+      currentStepIdx = 0;
+      renderStep(0, false);
+    });
+
+    stepScrubber.addEventListener('input', (e) => {
+      setPlaying(false);
+      currentStepIdx = parseInt(e.target.value, 10);
+      renderStep(currentStepIdx, false);
+    });
+
+    document.querySelectorAll('.speed-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.speed-btn').forEach(b => {
+          b.classList.remove('bg-cyan-500/30', 'text-cyan-200', 'font-semibold');
+        });
+        btn.classList.add('bg-cyan-500/30', 'text-cyan-200', 'font-semibold');
+        playSpeed = parseInt(btn.dataset.speed, 10);
+        if (isPlaying) {
+          setPlaying(false);
+          setPlaying(true);
+        }
+      });
+    });
+
+    btnAudio.addEventListener('click', () => {
+      audioEnabled = !audioEnabled;
+      if (audioEnabled) {
+        audioIcon.className = "fa-solid fa-volume-high";
+        btnAudio.classList.remove('text-slate-600');
+        btnAudio.classList.add('text-slate-300');
+      } else {
+        audioIcon.className = "fa-solid fa-volume-xmark";
+        btnAudio.classList.add('text-slate-600');
+        btnAudio.classList.remove('text-slate-300');
+      }
+    });
+
+    presetSelect.addEventListener('change', (e) => {
+      const idx = parseInt(e.target.value, 10);
+      customS1Input.value = PRESETS[idx].s1;
+      customS2Input.value = PRESETS[idx].s2;
+      initSimulation(PRESETS[idx].s1, PRESETS[idx].s2);
+    });
+
+    btnApplyCustom.addEventListener('click', () => {
+      const cleanS1 = customS1Input.value.toLowerCase().replace(/[^a-z]/g, '');
+      const cleanS2 = customS2Input.value.toLowerCase().replace(/[^a-z]/g, '');
+      if (cleanS1.length >= 1 && cleanS2.length >= 1) {
+        customS1Input.value = cleanS1;
+        customS2Input.value = cleanS2;
+        initSimulation(cleanS1, cleanS2);
+      }
+    });
+
+    window.addEventListener('resize', () => {
+      const step = steps[currentStepIdx];
+      if (step) {
+        updateWindowFrame(step);
+        animateFreqTransfer(step.transfer, false);
+      }
+    });
+
+    window.addEventListener('keydown', (e) => {
+      if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT') return;
+      if (e.code === 'Space') {
+        e.preventDefault();
+        btnPlay.click();
+      } else if (e.code === 'ArrowRight') {
+        e.preventDefault();
+        btnNext.click();
+      } else if (e.code === 'ArrowLeft') {
+        e.preventDefault();
+        btnPrev.click();
+      }
+    });
+
+    window.onload = function() {
+      customS1Input.value = PRESETS[0].s1;
+      customS2Input.value = PRESETS[0].s2;
+      initSimulation(PRESETS[0].s1, PRESETS[0].s2);
+    };
+  </script>
+</body>
+</html>
