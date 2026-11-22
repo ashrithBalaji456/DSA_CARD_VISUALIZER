@@ -1528,6 +1528,11 @@ const problems = [
         "number": 340,
         "title": "Longest Substring with At Most K Distinct Characters",
         "difficulty": "Medium"
+      },
+      {
+        "number": 1358,
+        "title": "Number of Substrings Containing All Three Characters",
+        "difficulty": "Medium"
       }
     ],
     "leetcodeUrl": "https://leetcode.com/problems/longest-substring-without-repeating-characters/"
@@ -4280,6 +4285,11 @@ const problems = [
         "number": 340,
         "title": "Longest Substring with At Most K Distinct Characters",
         "difficulty": "Medium"
+      },
+      {
+        "number": 1358,
+        "title": "Number of Substrings Containing All Three Characters",
+        "difficulty": "Medium"
       }
     ],
     "leetcodeUrl": "https://leetcode.com/problems/longest-repeating-character-replacement/"
@@ -4643,6 +4653,11 @@ const problems = [
         "number": 340,
         "title": "Longest Substring with At Most K Distinct Characters",
         "difficulty": "Medium"
+      },
+      {
+        "number": 1358,
+        "title": "Number of Substrings Containing All Three Characters",
+        "difficulty": "Medium"
       }
     ],
     "leetcodeUrl": "https://leetcode.com/problems/minimum-window-substring/"
@@ -4755,6 +4770,11 @@ const problems = [
       {
         "number": 340,
         "title": "Longest Substring with At Most K Distinct Characters",
+        "difficulty": "Medium"
+      },
+      {
+        "number": 1358,
+        "title": "Number of Substrings Containing All Three Characters",
         "difficulty": "Medium"
       }
     ],
@@ -4871,9 +4891,133 @@ const problems = [
         "number": 76,
         "title": "Minimum Window Substring",
         "difficulty": "Hard"
+      },
+      {
+        "number": 1358,
+        "title": "Number of Substrings Containing All Three Characters",
+        "difficulty": "Medium"
       }
     ],
     "leetcodeUrl": "https://leetcode.com/problems/longest-substring-with-at-most-k-distinct-characters/"
+  },
+  {
+    "id": "number-of-substrings-containing-all-three-characters",
+    "number": 1358,
+    "title": "Number of Substrings Containing All Three Characters",
+    "slug": "number-of-substrings-containing-all-three-characters",
+    "difficulty": "Medium",
+    "categories": [
+      "Sliding Window",
+      "Two Pointers",
+      "Strings",
+      "Hash Table"
+    ],
+    "description": "Given a string s consisting only of characters a, b and c, return the number of substrings containing at least one occurrence of all these characters a, b and c.",
+    "inputFormat": "s = string",
+    "outputFormat": "int (total valid substrings)",
+    "constraints": [
+      "3 <= s.length <= 5 * 10^4",
+      "s only consists of 'a', 'b' or 'c' characters."
+    ],
+    "examples": [
+      {
+        "exampleNumber": 1,
+        "input": "s = \"abcabc\"",
+        "output": "10",
+        "explanation": "The substrings containing at least one occurrence of the characters a, b and c are \"abc\", \"abca\", \"abcab\", \"abcabc\", \"bca\", \"bcab\", \"bcabc\", \"cab\", \"cabc\" and \"abc\".",
+        "type": "official"
+      },
+      {
+        "exampleNumber": 2,
+        "input": "s = \"aaacb\"",
+        "output": "3",
+        "explanation": "The substrings containing at least one occurrence of the characters a, b and c are \"aaacb\", \"aacb\" and \"acb\".",
+        "type": "official"
+      },
+      {
+        "exampleNumber": 3,
+        "input": "s = \"abc\"",
+        "output": "1",
+        "explanation": "The only valid substring is \"abc\".",
+        "type": "official"
+      }
+    ],
+    "approach": "Sliding Window with Suffix Extension Counting: Maintain a frequency array count of size 3 for 'a', 'b', and 'c'. As the right pointer traverses s from 0 to n - 1, increment count[s.charAt(right) - 'a']. When the current window [left..right] contains at least one of each character (count[0] > 0 && count[1] > 0 && count[2] > 0), any extension to the right up to index n - 1 will also contain all three characters. Therefore, there are exactly (n - right) valid substrings starting at index left. Add (n - right) to result, decrement count[s.charAt(left) - 'a'], and advance left++ until the triad condition is broken. This counts every valid substring in strict linear time.",
+    "flowSteps": [
+      {
+        "step": 1,
+        "title": "Initialize Frequency Array & Counters",
+        "description": "Allocate int[] count = new int[3], set left = 0, and result = 0.",
+        "stateSnapshot": "int[] count = new int[3]; int left = 0, result = 0;",
+        "highlight": "Init"
+      },
+      {
+        "step": 2,
+        "title": "Expand Window to Right",
+        "description": "At index right, increment count[s.charAt(right) - 'a']++.",
+        "stateSnapshot": "count[s.charAt(right) - 'a']++;",
+        "highlight": "Expand"
+      },
+      {
+        "step": 3,
+        "title": "Count Suffix Extensions When Triad is Complete",
+        "description": "While count[0] > 0 && count[1] > 0 && count[2] > 0: add (n - right) to result because all substrings starting at left and ending from right to n-1 are valid.",
+        "stateSnapshot": "while (count[0] > 0 && count[1] > 0 && count[2] > 0) { result += n - right; count[s.charAt(left++) - 'a']--; }",
+        "highlight": "Tally"
+      },
+      {
+        "step": 4,
+        "title": "Shrink Left Boundary",
+        "description": "Decrement count[s.charAt(left) - 'a']-- and increment left++ to discover the next minimal valid window.",
+        "stateSnapshot": "count[s.charAt(left) - 'a']--; left++;",
+        "highlight": "Shrink"
+      }
+    ],
+    "timeComplexity": "O(n)",
+    "timeComplexityExplanation": "Both left and right pointers traverse the string at most once, and each operation inside the loop runs in O(1) time.",
+    "spaceComplexity": "O(1)",
+    "spaceComplexityExplanation": "Only a fixed-size 3-element integer array count is maintained for characters 'a', 'b', and 'c'.",
+    "visualizerUrl": "/visualizers/number_of_substrings_containing_all_three_characters_visualizer.html",
+    "keyObservations": [
+      "If a substring s[left..right] already contains 'a', 'b', and 'c', extending it to s[left..right+1], s[left..right+2], ..., s[left..n-1] cannot remove any characters, so all (n - right) extensions starting at left are automatically valid.",
+      "Counting batches of (n - right) suffixes converts what would be an O(n^2) substring enumeration problem into a strict O(n) single-pass algorithm.",
+      "Advancing left++ inside the while loop ensures each starting position left is counted exactly once with zero duplicates."
+    ],
+    "importantPattern": "Variable Sliding Window with Suffix Extension Counting (n - right)",
+    "commonMistakes": [
+      "Generating every substring explicitly with nested loops, leading to O(n^2) or O(n^3) TLE.",
+      "Double-counting substrings by not properly advancing left after adding (n - right).",
+      "Using dynamic HashMaps with large overhead instead of a fixed int[3] array."
+    ],
+    "optimalApproach": "Two-Pointer Sliding Window with int[3] Triad Frequency and O(1) Suffix Accumulation (result += n - right)",
+    "relatedProblems": [
+      {
+        "number": 3,
+        "title": "Longest Substring Without Repeating Characters",
+        "difficulty": "Medium"
+      },
+      {
+        "number": 424,
+        "title": "Longest Repeating Character Replacement",
+        "difficulty": "Medium"
+      },
+      {
+        "number": 1004,
+        "title": "Max Consecutive Ones III",
+        "difficulty": "Medium"
+      },
+      {
+        "number": 340,
+        "title": "Longest Substring with At Most K Distinct Characters",
+        "difficulty": "Medium"
+      },
+      {
+        "number": 76,
+        "title": "Minimum Window Substring",
+        "difficulty": "Hard"
+      }
+    ],
+    "leetcodeUrl": "https://leetcode.com/problems/number-of-substrings-containing-all-three-characters/"
   }
 ];
 
