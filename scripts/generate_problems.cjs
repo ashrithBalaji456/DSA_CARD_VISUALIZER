@@ -1523,6 +1523,11 @@ const problems = [
         "number": 1004,
         "title": "Max Consecutive Ones III",
         "difficulty": "Medium"
+      },
+      {
+        "number": 340,
+        "title": "Longest Substring with At Most K Distinct Characters",
+        "difficulty": "Medium"
       }
     ],
     "leetcodeUrl": "https://leetcode.com/problems/longest-substring-without-repeating-characters/"
@@ -4270,6 +4275,11 @@ const problems = [
         "number": 1004,
         "title": "Max Consecutive Ones III",
         "difficulty": "Medium"
+      },
+      {
+        "number": 340,
+        "title": "Longest Substring with At Most K Distinct Characters",
+        "difficulty": "Medium"
       }
     ],
     "leetcodeUrl": "https://leetcode.com/problems/longest-repeating-character-replacement/"
@@ -4628,6 +4638,11 @@ const problems = [
         "number": 1004,
         "title": "Max Consecutive Ones III",
         "difficulty": "Medium"
+      },
+      {
+        "number": 340,
+        "title": "Longest Substring with At Most K Distinct Characters",
+        "difficulty": "Medium"
       }
     ],
     "leetcodeUrl": "https://leetcode.com/problems/minimum-window-substring/"
@@ -4736,9 +4751,129 @@ const problems = [
         "number": 76,
         "title": "Minimum Window Substring",
         "difficulty": "Hard"
+      },
+      {
+        "number": 340,
+        "title": "Longest Substring with At Most K Distinct Characters",
+        "difficulty": "Medium"
       }
     ],
     "leetcodeUrl": "https://leetcode.com/problems/max-consecutive-ones-iii/"
+  },
+  {
+    "id": "longest-substring-with-at-most-k-distinct-characters",
+    "number": 340,
+    "title": "Longest Substring with At Most K Distinct Characters",
+    "slug": "longest-substring-with-at-most-k-distinct-characters",
+    "difficulty": "Medium",
+    "categories": [
+      "Sliding Window",
+      "Two Pointers",
+      "Hash Table",
+      "Strings"
+    ],
+    "description": "Given a string s and an integer k, return the length of the longest substring of s that contains at most k distinct characters.",
+    "inputFormat": "s = string, k = int",
+    "outputFormat": "int (maximum length)",
+    "constraints": [
+      "1 <= s.length <= 5 * 10^4",
+      "0 <= k <= 50",
+      "s consists of English letters."
+    ],
+    "examples": [
+      {
+        "exampleNumber": 1,
+        "input": "s = \"aababbcaacc\", k = 2",
+        "output": "6",
+        "explanation": "The longest substring with at most 2 distinct characters is \"aababb\" of length 6.",
+        "type": "official"
+      },
+      {
+        "exampleNumber": 2,
+        "input": "s = \"abcddefg\", k = 3",
+        "output": "4",
+        "explanation": "The longest substring with at most 3 distinct characters is \"bcdd\" with length 4.",
+        "type": "official"
+      },
+      {
+        "exampleNumber": 3,
+        "input": "s = \"eceba\", k = 2",
+        "output": "3",
+        "explanation": "T is \"ece\" which its length is 3.",
+        "type": "official"
+      }
+    ],
+    "approach": "Sliding Window with Frequency Map: Maintain an expandable window [left..right] and a frequency map tracking the counts of distinct characters currently in the window. As right pointer expands through s, insert or increment the count of s[right]. If the number of unique characters in the map exceeds k (map.size() > k), shrink the window from left by decrementing the count of s[left] and removing the key entirely when its frequency drops to 0, until map.size() <= k. At each valid step, update maxLength = Math.max(maxLength, right - left + 1). If k == 0, immediately return 0.",
+    "flowSteps": [
+      {
+        "step": 1,
+        "title": "Check Zero Distinct Boundary & Initialize Map",
+        "description": "If k == 0, return 0. Otherwise initialize HashMap<Character, Integer> map, left = 0, and maxLength = -1.",
+        "stateSnapshot": "if (k == 0) return 0; Map<Character, Integer> map = new HashMap<>(); left = 0, maxLen = -1;",
+        "highlight": "Init"
+      },
+      {
+        "step": 2,
+        "title": "Expand Right & Record Character Frequency",
+        "description": "Increment right and update map.put(ch, map.getOrDefault(ch, 0) + 1).",
+        "stateSnapshot": "map.put(s.charAt(right), map.getOrDefault(ch, 0) + 1);",
+        "highlight": "Expand"
+      },
+      {
+        "step": 3,
+        "title": "Shrink Left When Unique Count Exceeds K",
+        "description": "While map.size() > k: decrement count of s[left]. If count becomes 0, remove the key entirely (map.remove(leftChar)), then advance left++.",
+        "stateSnapshot": "while (map.size() > k) { if (map.get(s[left]) == 1) map.remove(s[left]); else map.put(s[left], map.get(s[left])-1); left++; }",
+        "highlight": "Shrink"
+      },
+      {
+        "step": 4,
+        "title": "Record Maximum Valid Substring Length",
+        "description": "Calculate current window size right - left + 1 and update maxLength = Math.max(maxLength, right - left + 1).",
+        "stateSnapshot": "maxLength = Math.max(maxLength, right - left + 1);",
+        "highlight": "Record"
+      }
+    ],
+    "timeComplexity": "O(n)",
+    "timeComplexityExplanation": "Both right and left pointers visit each index at most once. Character additions, lookups, and deletions in the map execute in amortized O(1) time.",
+    "spaceComplexity": "O(k)",
+    "spaceComplexityExplanation": "The hash map stores at most k + 1 distinct character keys at any given time during execution.",
+    "visualizerUrl": "/visualizers/longest_substring_with_at_most_k_distinct_characters_visualizer.html",
+    "keyObservations": [
+      "When map.size() > k, only advancing left can reduce the number of distinct characters in the window.",
+      "Crucially, when a character's frequency reaches 0, its key must be removed from the map via map.remove(), otherwise map.size() remains artificially inflated.",
+      "If k = 0, no non-empty substring can satisfy having at most 0 distinct characters, so returning 0 immediately is required."
+    ],
+    "importantPattern": "Variable-Size Sliding Window with HashMap Frequency Tracking & Key Eviction",
+    "commonMistakes": [
+      "Leaving keys with a frequency of 0 in the hash map, preventing map.size() from decreasing.",
+      "Forgetting to handle the edge case where k = 0.",
+      "Shrinking by resetting left back to right instead of incrementing left incrementally."
+    ],
+    "optimalApproach": "Dynamic Two-Pointer Sliding Window with Character Frequency Map & Zero-Frequency Eviction",
+    "relatedProblems": [
+      {
+        "number": 3,
+        "title": "Longest Substring Without Repeating Characters",
+        "difficulty": "Medium"
+      },
+      {
+        "number": 424,
+        "title": "Longest Repeating Character Replacement",
+        "difficulty": "Medium"
+      },
+      {
+        "number": 1004,
+        "title": "Max Consecutive Ones III",
+        "difficulty": "Medium"
+      },
+      {
+        "number": 76,
+        "title": "Minimum Window Substring",
+        "difficulty": "Hard"
+      }
+    ],
+    "leetcodeUrl": "https://leetcode.com/problems/longest-substring-with-at-most-k-distinct-characters/"
   }
 ];
 
