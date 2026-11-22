@@ -1517,6 +1517,11 @@ export const PROBLEMS: DSAProblem[] = [
         "number": 239,
         "title": "Sliding Window Maximum",
         "difficulty": "Hard"
+      },
+      {
+        "number": 1004,
+        "title": "Max Consecutive Ones III",
+        "difficulty": "Medium"
       }
     ],
     "leetcodeUrl": "https://leetcode.com/problems/longest-substring-without-repeating-characters/"
@@ -2268,6 +2273,11 @@ export const PROBLEMS: DSAProblem[] = [
       {
         "number": 424,
         "title": "Longest Repeating Character Replacement",
+        "difficulty": "Medium"
+      },
+      {
+        "number": 1004,
+        "title": "Max Consecutive Ones III",
         "difficulty": "Medium"
       }
     ],
@@ -4254,6 +4264,11 @@ export const PROBLEMS: DSAProblem[] = [
         "number": 239,
         "title": "Sliding Window Maximum",
         "difficulty": "Hard"
+      },
+      {
+        "number": 1004,
+        "title": "Max Consecutive Ones III",
+        "difficulty": "Medium"
       }
     ],
     "leetcodeUrl": "https://leetcode.com/problems/longest-repeating-character-replacement/"
@@ -4607,8 +4622,121 @@ export const PROBLEMS: DSAProblem[] = [
         "number": 567,
         "title": "Permutation in String",
         "difficulty": "Medium"
+      },
+      {
+        "number": 1004,
+        "title": "Max Consecutive Ones III",
+        "difficulty": "Medium"
       }
     ],
     "leetcodeUrl": "https://leetcode.com/problems/minimum-window-substring/"
+  },
+  {
+    "id": "max-consecutive-ones-iii",
+    "number": 1004,
+    "title": "Max Consecutive Ones III",
+    "slug": "max-consecutive-ones-iii",
+    "difficulty": "Medium",
+    "categories": [
+      "Sliding Window",
+      "Arrays",
+      "Two Pointers",
+      "Prefix Sum"
+    ],
+    "description": "Given a binary array nums and an integer k, return the maximum number of consecutive 1's in the array if you can flip at most k 0's.",
+    "inputFormat": "nums = int[], k = int",
+    "outputFormat": "int (maximum consecutive 1s after at most k flips)",
+    "constraints": [
+      "1 <= nums.length <= 10^5",
+      "nums[i] is either 0 or 1",
+      "0 <= k <= nums.length"
+    ],
+    "examples": [
+      {
+        "exampleNumber": 1,
+        "input": "nums = [1,1,1,0,0,0,1,1,1,1,0], k = 2",
+        "output": "6",
+        "explanation": "Flip the 0s at indices 5 and 10 (or 4 and 5) to achieve 6 consecutive 1s: [1,1,1,0,0,1,1,1,1,1,1].",
+        "type": "official"
+      },
+      {
+        "exampleNumber": 2,
+        "input": "nums = [0,0,1,1,0,0,1,1,1,0,1,1,0,0,0,1,1,1,1], k = 3",
+        "output": "10",
+        "explanation": "Flip the 0s at indices 5, 9, and 12 (or 4, 5, 9) to achieve 10 consecutive 1s.",
+        "type": "official"
+      }
+    ],
+    "approach": "Sliding Window with Zero Count Budget: Finding the longest run of 1s after flipping at most k zeros is equivalent to finding the longest contiguous subarray containing at most k zeros. Maintain two pointers left = 0 and right = 0, along with zeroCount = 0 and maxLength = 0. As right advances across nums: if nums[right] == 0, increment zeroCount++. When zeroCount exceeds k, shrink from the left by advancing left++ (decrementing zeroCount if nums[left] == 0) until zeroCount <= k. At each valid window, compute windowLength = right - left + 1 and record maxLength = Math.max(maxLength, windowLength). This yields linear O(n) time and O(1) auxiliary space.",
+    "flowSteps": [
+      {
+        "step": 1,
+        "title": "Expand Window & Count Zeros",
+        "description": "Increment zeroCount if the incoming element at nums[right] is 0.",
+        "stateSnapshot": "if (nums[right] == 0) zeroCount++;",
+        "highlight": "Expand"
+      },
+      {
+        "step": 2,
+        "title": "Shrink When Budget Exceeded",
+        "description": "While zeroCount > k, decrement zeroCount if nums[left] is 0 and advance left forward.",
+        "stateSnapshot": "while (zeroCount > k) { if (nums[left] == 0) zeroCount--; left++; }",
+        "highlight": "Shrink"
+      },
+      {
+        "step": 3,
+        "title": "Calculate Valid Window Length",
+        "description": "Calculate current window length as right - left + 1.",
+        "stateSnapshot": "int windowLength = right - left + 1;",
+        "highlight": "Window"
+      },
+      {
+        "step": 4,
+        "title": "Record Maximum Consecutive 1s",
+        "description": "Update maxLength with the largest valid window observed so far.",
+        "stateSnapshot": "maxLength = Math.max(maxLength, windowLength);",
+        "highlight": "Record"
+      }
+    ],
+    "timeComplexity": "O(n)",
+    "timeComplexityExplanation": "Both right and left pointers traverse each element of the array at most once, performing amortized O(1) work per element.",
+    "spaceComplexity": "O(1)",
+    "spaceComplexityExplanation": "Only scalar counter and pointer variables (left, right, zeroCount, maxLength) are maintained in-place.",
+    "visualizerUrl": "/visualizers/max_consecutive_ones_iii_visualizer.html",
+    "keyObservations": [
+      "Flipping at most k zeros to ones is mathematically identical to finding the longest contiguous subarray that contains at most k zeros.",
+      "The sliding window condition is monotonic: expanding right increases or keeps zeroCount equal, while advancing left decreases or keeps zeroCount equal.",
+      "Since each element enters the window once at right and exits at most once at left, total pointer advancements are bounded by 2n, ensuring strict linear runtime."
+    ],
+    "importantPattern": "Variable-Size Sliding Window with Deficit Quota (At Most K Zeros)",
+    "commonMistakes": [
+      "Attempting to generate all possible combinations of k flips, which leads to exponential O(C(n, k)) complexity.",
+      "Not decrementing zeroCount when shrinking the window from the left.",
+      "Resetting left back to right when zeroCount > k instead of incrementing left incrementally until the window becomes valid again."
+    ],
+    "optimalApproach": "Two-Pointer Sliding Window with Dynamic Left Shrinking and Zero Counter",
+    "relatedProblems": [
+      {
+        "number": 424,
+        "title": "Longest Repeating Character Replacement",
+        "difficulty": "Medium"
+      },
+      {
+        "number": 3,
+        "title": "Longest Substring Without Repeating Characters",
+        "difficulty": "Medium"
+      },
+      {
+        "number": 1446,
+        "title": "Consecutive Characters (Longest Equal Run)",
+        "difficulty": "Easy"
+      },
+      {
+        "number": 76,
+        "title": "Minimum Window Substring",
+        "difficulty": "Hard"
+      }
+    ],
+    "leetcodeUrl": "https://leetcode.com/problems/max-consecutive-ones-iii/"
   }
 ];
