@@ -1533,6 +1533,11 @@ const problems = [
         "number": 1358,
         "title": "Number of Substrings Containing All Three Characters",
         "difficulty": "Medium"
+      },
+      {
+        "number": 930,
+        "title": "Binary Subarrays With Sum",
+        "difficulty": "Medium"
       }
     ],
     "leetcodeUrl": "https://leetcode.com/problems/longest-substring-without-repeating-characters/"
@@ -2999,6 +3004,11 @@ const problems = [
         "number": 1,
         "title": "Two Sum",
         "difficulty": "Easy"
+      },
+      {
+        "number": 930,
+        "title": "Binary Subarrays With Sum",
+        "difficulty": "Medium"
       }
     ],
     "leetcodeUrl": "https://leetcode.com/problems/subarray-sum-equals-k/"
@@ -4776,6 +4786,11 @@ const problems = [
         "number": 1358,
         "title": "Number of Substrings Containing All Three Characters",
         "difficulty": "Medium"
+      },
+      {
+        "number": 930,
+        "title": "Binary Subarrays With Sum",
+        "difficulty": "Medium"
       }
     ],
     "leetcodeUrl": "https://leetcode.com/problems/max-consecutive-ones-iii/"
@@ -4896,6 +4911,11 @@ const problems = [
         "number": 1358,
         "title": "Number of Substrings Containing All Three Characters",
         "difficulty": "Medium"
+      },
+      {
+        "number": 930,
+        "title": "Binary Subarrays With Sum",
+        "difficulty": "Medium"
       }
     ],
     "leetcodeUrl": "https://leetcode.com/problems/longest-substring-with-at-most-k-distinct-characters/"
@@ -5015,9 +5035,127 @@ const problems = [
         "number": 76,
         "title": "Minimum Window Substring",
         "difficulty": "Hard"
+      },
+      {
+        "number": 930,
+        "title": "Binary Subarrays With Sum",
+        "difficulty": "Medium"
       }
     ],
     "leetcodeUrl": "https://leetcode.com/problems/number-of-substrings-containing-all-three-characters/"
+  },
+  {
+    "id": "binary-subarrays-with-sum",
+    "number": 930,
+    "title": "Binary Subarrays With Sum",
+    "slug": "binary-subarrays-with-sum",
+    "difficulty": "Medium",
+    "categories": [
+      "Sliding Window",
+      "Prefix Sum",
+      "Arrays",
+      "Hash Table"
+    ],
+    "description": "Given a binary array nums and an integer goal, return the number of non-empty subarrays with a sum goal.",
+    "inputFormat": "nums = int[], goal = int",
+    "outputFormat": "int (total subarrays with sum == goal)",
+    "constraints": [
+      "1 <= nums.length <= 3 * 10^4",
+      "nums[i] is either 0 or 1",
+      "0 <= goal <= nums.length"
+    ],
+    "examples": [
+      {
+        "exampleNumber": 1,
+        "input": "nums = [1,0,1,0,1], goal = 2",
+        "output": "4",
+        "explanation": "The 4 valid subarrays with sum 2 are: [1,0,1], [1,0,1,0], [0,1,0,1], and [1,0,1].",
+        "type": "official"
+      },
+      {
+        "exampleNumber": 2,
+        "input": "nums = [0,0,0,0,0], goal = 0",
+        "output": "15",
+        "explanation": "All 15 non-empty subarrays have sum 0.",
+        "type": "official"
+      }
+    ],
+    "approach": "Exact Sum Reduction via atMost(goal) - atMost(goal - 1): Finding subarrays with an exact sum goal in a binary array containing zeros cannot be solved with a naive single-window sliding approach because expanding with zeros doesn't increase the sum and shrinking zeros doesn't reduce it. However, counting subarrays with sum <= goal is strictly monotonic. Once a valid window [left..right] has sum <= goal, every contiguous subarray ending at right (right - left + 1) also has sum <= goal. By defining helper function atMost(nums, goal) that computes total subarrays with sum <= goal in O(n) time and O(1) space, the exact count is simply atMost(nums, goal) - atMost(nums, goal - 1). If goal < 0, atMost immediately returns 0.",
+    "flowSteps": [
+      {
+        "step": 1,
+        "title": "Formulate Reduction Identity",
+        "description": "Express exact(goal) as atMost(nums, goal) - atMost(nums, goal - 1).",
+        "stateSnapshot": "return atMost(nums, goal) - atMost(nums, goal - 1);",
+        "highlight": "Identity"
+      },
+      {
+        "step": 2,
+        "title": "Check Non-Negative Goal Guard",
+        "description": "If goal < 0, return 0 immediately since binary arrays cannot produce negative sums.",
+        "stateSnapshot": "if (goal < 0) return 0;",
+        "highlight": "Guard"
+      },
+      {
+        "step": 3,
+        "title": "Expand Window & Accumulate Sum",
+        "description": "For right from 0 to n-1: add nums[right] to sum. While sum > goal, subtract nums[left] and advance left++.",
+        "stateSnapshot": "sum += nums[right]; while (sum > goal) sum -= nums[left++];",
+        "highlight": "Slide"
+      },
+      {
+        "step": 4,
+        "title": "Tally Valid Subarrays Ending at Right",
+        "description": "Add (right - left + 1) to count, then subtract the two pass results to return the exact count.",
+        "stateSnapshot": "count += right - left + 1;",
+        "highlight": "Count"
+      }
+    ],
+    "timeComplexity": "O(n)",
+    "timeComplexityExplanation": "Two linear sliding-window passes (atMost(goal) and atMost(goal - 1)), each advancing right and left at most n times, giving 2 * 2n = O(n) operations.",
+    "spaceComplexity": "O(1)",
+    "spaceComplexityExplanation": "Uses only scalar pointers and counters (left, right, sum, count) with zero auxiliary data structures.",
+    "visualizerUrl": "/visualizers/binary_subarrays_with_sum_visualizer.html",
+    "keyObservations": [
+      "Because zeros contribute 0 to the sum, multiple windows with different left boundaries can have the exact same sum, breaking naive two-pointer shrinking.",
+      "The property sum <= goal is monotonic: adding elements increases or keeps sum same, shrinking reduces or keeps sum same.",
+      "Computing exact(k) = atMost(k) - atMost(k - 1) is a universal pattern for counting contiguous subarrays with an exact sum or condition."
+    ],
+    "importantPattern": "atMost(K) - atMost(K - 1) Sliding Window Reduction (Inclusion-Exclusion)",
+    "commonMistakes": [
+      "Attempting a single sliding window directly on exact sum == goal, which gets stuck handling leading and trailing zeros.",
+      "Forgetting the goal < 0 guard check when computing atMost(goal - 1) for goal = 0.",
+      "Using HashMap prefix sums with O(n) space when an O(1) space two-pass sliding window exists for binary arrays."
+    ],
+    "optimalApproach": "Two-Pass Sliding Window via atMost(goal) - atMost(goal - 1) with O(1) Auxiliary Space",
+    "relatedProblems": [
+      {
+        "number": 560,
+        "title": "Subarray Sum Equals K",
+        "difficulty": "Medium"
+      },
+      {
+        "number": 1004,
+        "title": "Max Consecutive Ones III",
+        "difficulty": "Medium"
+      },
+      {
+        "number": 1358,
+        "title": "Number of Substrings Containing All Three Characters",
+        "difficulty": "Medium"
+      },
+      {
+        "number": 340,
+        "title": "Longest Substring with At Most K Distinct Characters",
+        "difficulty": "Medium"
+      },
+      {
+        "number": 3,
+        "title": "Longest Substring Without Repeating Characters",
+        "difficulty": "Medium"
+      }
+    ],
+    "leetcodeUrl": "https://leetcode.com/problems/binary-subarrays-with-sum/"
   }
 ];
 

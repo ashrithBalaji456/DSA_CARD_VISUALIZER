@@ -1,0 +1,1817 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Binary Subarrays With Sum (LeetCode 930) - Glassmorphic Visualizer</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: radial-gradient(circle at 14% 16%, #0c192c 0%, #030712 100%);
+      color: #e2e8f0;
+      min-height: 100vh;
+    }
+
+    .code-font {
+      font-family: 'Fira Code', monospace;
+    }
+
+    /* Glassmorphic Surface & Controls */
+    .glass-panel {
+      background: rgba(15, 23, 42, 0.56);
+      backdrop-filter: blur(22px);
+      -webkit-backdrop-filter: blur(22px);
+      border: 1px solid rgba(255, 255, 255, 0.11);
+      box-shadow: 0 20px 45px -15px rgba(0, 0, 0, 0.68), inset 0 1px 0 0 rgba(255, 255, 255, 0.09);
+    }
+
+    .glass-button {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .glass-button:hover:not(:disabled) {
+      background: rgba(255, 255, 255, 0.15);
+      border-color: rgba(255, 255, 255, 0.28);
+      transform: translateY(-1px);
+    }
+    .glass-button:active:not(:disabled) {
+      transform: translateY(1px);
+    }
+    .glass-button:disabled {
+      opacity: 0.35;
+      cursor: not-allowed;
+    }
+
+    /* Code Execution Line Highlight with Exact Preserved Indentation */
+    .code-line {
+      white-space: pre;
+      transition: all 0.2s ease;
+      border-left: 3px solid transparent;
+      padding: 2px 10px;
+    }
+    .code-line.active-line {
+      background: rgba(56, 189, 248, 0.18);
+      border-left: 3px solid #38bdf8;
+      color: #ffffff;
+      box-shadow: inset 0 0 16px rgba(56, 189, 248, 0.15);
+    }
+
+    /* Glassy Binary Bit Tiles & Bars */
+    .bit-card {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      transition: all 0.28s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    .bit-card.past-bit {
+      opacity: 0.38;
+      background: rgba(15, 23, 42, 0.35);
+      border-color: rgba(255, 255, 255, 0.06);
+    }
+
+    .bit-card.in-window-bit {
+      background: linear-gradient(180deg, rgba(34, 211, 238, 0.18) 0%, rgba(6, 182, 212, 0.07) 100%);
+      border-color: rgba(34, 211, 238, 0.68);
+      box-shadow: 0 8px 20px -6px rgba(34, 211, 238, 0.28);
+    }
+
+    .bit-card.counted-valid-bit {
+      background: linear-gradient(180deg, rgba(16, 185, 129, 0.24) 0%, rgba(5, 150, 105, 0.09) 100%);
+      border-color: rgba(52, 211, 153, 0.88);
+      box-shadow: 0 10px 24px -4px rgba(16, 185, 129, 0.36);
+    }
+
+    .bit-card.overflow-window-bit {
+      background: linear-gradient(180deg, rgba(244, 63, 94, 0.30) 0%, rgba(225, 29, 72, 0.13) 100%) !important;
+      border-color: rgba(251, 113, 133, 0.95) !important;
+      box-shadow: 0 10px 24px -4px rgba(244, 63, 94, 0.45) !important;
+    }
+
+    .bit-card.ptr-right-bit {
+      transform: translateY(-5px) scale(1.05);
+      border-color: rgba(251, 191, 36, 0.95) !important;
+      box-shadow: 0 12px 26px -4px rgba(251, 191, 36, 0.42), inset 0 1px 0 rgba(255, 255, 255, 0.25) !important;
+      z-index: 15;
+    }
+
+    @keyframes arcDash {
+      to {
+        stroke-dashoffset: -24;
+      }
+    }
+    .transfer-arc-path {
+      stroke-dasharray: 6 6;
+      animation: arcDash 0.8s linear infinite;
+    }
+
+    @keyframes batchPop {
+      0% { transform: scale(0.84) translateY(6px); opacity: 0; }
+      70% { transform: scale(1.04) translateY(-2px); opacity: 1; }
+      100% { transform: scale(1) translateY(0); opacity: 1; }
+    }
+    .batch-row-pop {
+      animation: batchPop 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+    }
+
+    @keyframes resultPulse {
+      0%, 100% { transform: scale(1); filter: drop-shadow(0 0 8px rgba(16, 185, 129, 0.45)); }
+      50% { transform: scale(1.04); filter: drop-shadow(0 0 22px rgba(16, 185, 129, 0.95)); }
+    }
+    .result-win-anim {
+      animation: resultPulse 0.65s ease-in-out;
+    }
+
+    /* Custom Scrollbars */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: rgba(15, 23, 42, 0.4);
+    }
+    ::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.18);
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(255, 255, 255, 0.3);
+    }
+  </style>
+</head>
+<body class="p-2.5 sm:p-4 lg:px-5 lg:py-4 flex flex-col items-center justify-start min-h-screen">
+
+  <!-- Ambient Glass Glow Orbs -->
+  <div class="fixed top-6 left-1/6 w-96 h-96 bg-cyan-500/14 rounded-full blur-3xl pointer-events-none -z-10"></div>
+  <div class="fixed top-1/3 right-1/6 w-96 h-96 bg-purple-500/14 rounded-full blur-3xl pointer-events-none -z-10"></div>
+  <div class="fixed bottom-12 left-1/2 w-80 h-80 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none -z-10"></div>
+
+  <!-- MAIN WRAPPER -->
+  <div class="w-full max-w-[1560px] flex flex-col gap-5">
+
+    <!-- TOP FROSTED-GLASS CONTROLS DECK -->
+    <header class="glass-panel rounded-2xl p-4 sm:p-5 flex flex-col gap-4 sticky top-3 z-50">
+      <div class="flex flex-wrap items-center justify-between gap-4">
+
+        <!-- Title & Algorithm Metadata -->
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-cyan-500 via-purple-500 to-emerald-400 flex items-center justify-center shadow-lg shadow-cyan-500/25 text-slate-950 font-bold text-lg">
+            <i class="fa-solid fa-equals"></i>
+          </div>
+          <div>
+            <h1 class="text-lg sm:text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white via-cyan-100 to-emerald-300">
+              Binary Subarrays With Sum
+            </h1>
+            <p class="text-xs text-slate-400 flex items-center gap-2">
+              <span class="inline-block w-2 h-2 rounded-full bg-cyan-400 animate-pulse"></span>
+              LeetCode 930 • atMost(goal) &minus; atMost(goal &minus; 1) Sliding Window • &Omicron;(n) Time • &Omicron;(1) Space
+            </p>
+          </div>
+        </div>
+
+        <!-- Center Playback Controls: Reset, Previous, Start/Stop, Next -->
+        <div class="flex items-center gap-2 sm:gap-3 bg-white/5 p-1.5 rounded-xl border border-white/10 backdrop-blur-md">
+          <button id="btnReset" class="glass-button text-slate-200 hover:text-white px-3 py-2 rounded-lg text-sm flex items-center gap-1.5" title="Reset to Initial State">
+            <i class="fa-solid fa-rotate-left"></i>
+            <span class="hidden sm:inline">Reset</span>
+          </button>
+          <button id="btnPrev" class="glass-button text-slate-200 hover:text-white px-3 py-2 rounded-lg text-sm flex items-center gap-1.5" title="Previous Step (Left Arrow)">
+            <i class="fa-solid fa-backward-step"></i>
+            <span class="hidden sm:inline">Previous</span>
+          </button>
+          <button id="btnPlay" class="glass-button bg-cyan-500/25 text-cyan-200 hover:bg-cyan-500/35 border-cyan-400/50 px-4 py-2 rounded-lg text-sm font-semibold flex items-center gap-2 shadow-lg shadow-cyan-500/15" title="Start / Stop (Spacebar)">
+            <i class="fa-solid fa-play" id="playIcon"></i>
+            <span id="playText">Start</span>
+          </button>
+          <button id="btnNext" class="glass-button text-slate-200 hover:text-white px-3 py-2 rounded-lg text-sm flex items-center gap-1.5" title="Next Step (Right Arrow)">
+            <span class="hidden sm:inline">Next</span>
+            <i class="fa-solid fa-forward-step"></i>
+          </button>
+        </div>
+
+        <!-- Speed & Audio Controls + DSA Atlas Nav -->
+        <div class="flex items-center gap-2">
+          <a href="/" class="glass-button px-3 py-2 rounded-xl text-xs font-semibold text-slate-300 hover:text-white flex items-center gap-1.5 border border-white/10 hover:border-cyan-500/40 bg-white/5 shrink-0 transition-all active:scale-95 cursor-pointer no-underline" title="Return to DSA Atlas Library">
+            <i class="fa-solid fa-arrow-left text-cyan-400"></i>
+            <span>DSA Atlas</span>
+          </a>
+          <div class="flex items-center bg-white/5 rounded-xl p-1 border border-white/10 text-xs text-slate-300 backdrop-blur-md">
+            <span class="px-2 py-1 text-slate-400"><i class="fa-solid fa-gauge-high mr-1"></i>Speed</span>
+            <button class="speed-btn px-2 py-1 rounded-lg hover:text-white transition" data-speed="1300">0.5x</button>
+            <button class="speed-btn px-2 py-1 rounded-lg bg-cyan-500/30 text-cyan-200 font-semibold transition" data-speed="650">1x</button>
+            <button class="speed-btn px-2 py-1 rounded-lg hover:text-white transition" data-speed="280">2x</button>
+            <button class="speed-btn px-2 py-1 rounded-lg hover:text-white transition" data-speed="110">4x</button>
+          </div>
+          <button id="btnAudio" class="glass-button p-2.5 rounded-xl text-slate-300 hover:text-cyan-300" title="Toggle Sound Effects">
+            <i class="fa-solid fa-volume-high" id="audioIcon"></i>
+          </button>
+        </div>
+
+      </div>
+
+      <!-- Scrubber Slider & Status Badges -->
+      <div class="flex flex-col sm:flex-row items-center gap-3 pt-2 border-t border-white/10">
+        <div class="flex flex-wrap items-center gap-2 text-xs text-slate-300 w-full sm:w-auto shrink-0">
+          <span id="stepCounterBadge" class="code-font px-2.5 py-1 rounded-md bg-white/5 border border-white/10 text-cyan-300">
+            Step: 0 / 0
+          </span>
+          <span id="phaseBadge" class="px-2.5 py-1 rounded-md bg-sky-500/20 border border-sky-400/30 text-sky-200 font-semibold">
+            Ready
+          </span>
+          <span id="callHeaderBadge" class="px-2.5 py-1 rounded-md bg-purple-500/20 border border-purple-400/30 text-purple-200 font-bold">
+            Pass: Ready
+          </span>
+          <span id="exactHeaderBadge" class="px-2.5 py-1 rounded-md bg-emerald-500/20 border border-emerald-400/30 text-emerald-200 font-bold">
+            Exact Sum == 2: Pending
+          </span>
+        </div>
+        <div class="w-full flex items-center gap-3">
+          <input type="range" id="stepScrubber" min="0" max="0" value="0" class="w-full h-1.5 bg-slate-800/80 rounded-lg appearance-none cursor-pointer accent-cyan-400">
+        </div>
+      </div>
+    </header>
+
+    <!-- TEST CASES & CUSTOM (NUMS, GOAL) BAR -->
+    <section class="glass-panel rounded-2xl p-4 flex flex-wrap items-center justify-between gap-4">
+      <div class="flex flex-wrap items-center gap-3">
+        <label for="presetSelect" class="text-xs uppercase font-semibold text-slate-300 tracking-wider flex items-center gap-1.5">
+          <i class="fa-solid fa-flask text-cyan-400"></i> Test Cases:
+        </label>
+        <select id="presetSelect" class="bg-slate-900/75 border border-white/15 text-xs sm:text-sm text-slate-200 rounded-xl px-3 py-2 outline-none focus:border-cyan-400 backdrop-blur-md">
+          <option value="0">1: LeetCode Ex 1 (nums = [1,0,1,0,1], goal = 2 &rarr; 4)</option>
+          <option value="1">2: LeetCode Ex 2 (nums = [0,0,0,0,0], goal = 0 &rarr; 15)</option>
+          <option value="2">3: Zero Goal With Ones (nums = [0,1,0,0,1,0], goal = 0 &rarr; 5)</option>
+          <option value="3">4: Single Goal With Zeros (nums = [0,1,0,1,0], goal = 1 &rarr; 8)</option>
+          <option value="4">5: All Ones Array (nums = [1,1,1,1], goal = 2 &rarr; 3)</option>
+          <option value="5">6: Goal Exceeds Total Ones (nums = [1,0,1], goal = 3 &rarr; 0)</option>
+          <option value="6">7: Full Array Sum (nums = [1,0,1,1], goal = 3 &rarr; 1)</option>
+          <option value="7">8: Clustered Zeros &amp; Ones (nums = [0,0,1,1,0,0], goal = 2 &rarr; 9)</option>
+          <option value="8">9: Single Element Match (nums = [1], goal = 1 &rarr; 1)</option>
+          <option value="9">10: Single Element Miss (nums = [1], goal = 0 &rarr; 0)</option>
+        </select>
+      </div>
+
+      <div class="flex flex-wrap items-center gap-2 flex-grow max-w-lg">
+        <input type="text" id="customArrInput" placeholder="Binary array: 1,0,1,0,1" class="flex-1 min-w-[140px] bg-white/5 border border-white/15 rounded-xl px-3 py-2 text-xs text-slate-200 code-font outline-none focus:border-cyan-400 backdrop-blur-md" title="Comma-separated 0s and 1s">
+        <input type="number" id="customGoalInput" min="0" max="50" value="2" placeholder="goal" class="w-16 bg-white/5 border border-white/15 rounded-xl px-2.5 py-2 text-xs text-slate-200 code-font outline-none focus:border-purple-400 backdrop-blur-md" title="Target goal sum (>= 0)">
+        <button id="btnApplyCustom" class="glass-button text-xs px-4 py-2 rounded-xl text-cyan-300 font-semibold shrink-0">
+          Load (nums, goal)
+        </button>
+      </div>
+    </section>
+
+    <!-- MAIN VISUALIZATION & CODE SECTION -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-5">
+
+      <!-- LEFT: INCLUSION-EXCLUSION EQUATION, SLIDING WINDOW & SUBARRAY COUNTER -->
+      <section class="lg:col-span-7 xl:col-span-8 flex flex-col gap-5">
+
+        <!-- INCLUSION-EXCLUSION REDUCTION PIPELINE: atMost(goal) - atMost(goal - 1) = exact -->
+        <div class="glass-panel rounded-2xl p-3.5 sm:p-4 grid grid-cols-11 items-center gap-2 text-center">
+          <!-- Call 1: atMost(nums, goal) -->
+          <div id="call1Card" class="col-span-4 rounded-xl p-2.5 bg-white/[0.03] border border-white/10 transition-all duration-300">
+            <div class="text-[10px] uppercase tracking-wider font-bold text-cyan-300 flex items-center justify-center gap-1">
+              <i class="fa-solid fa-1 text-[9px]"></i> atMost(nums, <span id="eqGoal1">2</span>)
+            </div>
+            <div id="valAtMostGoal" class="code-font text-xl sm:text-2xl font-black text-cyan-200 mt-1">?</div>
+            <div class="text-[9px] text-slate-400 code-font">sum &le; <span id="eqGoal1Sub">2</span></div>
+          </div>
+
+          <!-- Minus Operator -->
+          <div class="col-span-1 flex items-center justify-center">
+            <span class="w-7 h-7 rounded-full bg-white/5 border border-white/15 flex items-center justify-center code-font text-base font-black text-slate-300">&minus;</span>
+          </div>
+
+          <!-- Call 2: atMost(nums, goal - 1) -->
+          <div id="call2Card" class="col-span-3 rounded-xl p-2.5 bg-white/[0.03] border border-white/10 transition-all duration-300">
+            <div class="text-[10px] uppercase tracking-wider font-bold text-purple-300 flex items-center justify-center gap-1">
+              <i class="fa-solid fa-2 text-[9px]"></i> atMost(nums, <span id="eqGoal2">1</span>)
+            </div>
+            <div id="valAtMostGoalMinus1" class="code-font text-xl sm:text-2xl font-black text-purple-200 mt-1">?</div>
+            <div class="text-[9px] text-slate-400 code-font">sum &le; <span id="eqGoal2Sub">1</span></div>
+          </div>
+
+          <!-- Equals Final Result -->
+          <div id="finalExactCard" class="col-span-3 rounded-xl p-2.5 bg-emerald-500/[0.06] border border-emerald-400/25 transition-all duration-300">
+            <div class="text-[10px] uppercase tracking-wider font-bold text-emerald-300 flex items-center justify-center gap-1">
+              <i class="fa-solid fa-trophy text-[9px]"></i> Exact == <span id="eqExactGoal">2</span>
+            </div>
+            <div id="valExactResult" class="code-font text-xl sm:text-2xl font-black text-emerald-400 mt-1">?</div>
+            <div class="text-[9px] text-emerald-300/75 code-font">final return</div>
+          </div>
+        </div>
+
+        <!-- Live Helper Variable Telemetry Cards -->
+        <div class="grid grid-cols-2 sm:grid-cols-5 gap-3">
+
+          <!-- Active Helper Parameter goal -->
+          <div class="glass-panel rounded-xl p-3 flex flex-col justify-between border-purple-400/35">
+            <span class="text-[11px] text-slate-400 uppercase font-semibold flex items-center justify-between">
+              Helper goal
+              <i class="fa-solid fa-bullseye text-purple-400 text-[10px]"></i>
+            </span>
+            <div class="flex items-baseline gap-1.5 mt-1.5">
+              <span id="varHelperGoal" class="code-font text-xl font-bold text-purple-300">-</span>
+            </div>
+            <span id="varCallTag" class="text-[10px] text-purple-200/75 mt-1 code-font">atMost(nums, goal)</span>
+          </div>
+
+          <!-- Window [left .. right] -->
+          <div class="glass-panel rounded-xl p-3 flex flex-col justify-between border-cyan-400/35">
+            <span class="text-[11px] text-slate-400 uppercase font-semibold flex items-center justify-between">
+              Window [L..R]
+              <span class="w-2 h-2 rounded-full bg-cyan-400"></span>
+            </span>
+            <div class="flex items-baseline gap-1.5 mt-1.5">
+              <span id="varWinSpan" class="code-font text-base sm:text-lg font-bold text-cyan-300">-</span>
+            </div>
+            <span id="varPtrSub" class="text-[10px] text-cyan-200/75 mt-1 code-font">left: 0, right: -</span>
+          </div>
+
+          <!-- Window Sum vs Helper Goal -->
+          <div id="sumCard" class="glass-panel rounded-xl p-3 flex flex-col justify-between border-amber-400/35">
+            <span class="text-[11px] text-slate-400 uppercase font-semibold flex items-center justify-between">
+              Window sum
+              <i class="fa-solid fa-sigma text-amber-400 text-[10px]"></i>
+            </span>
+            <div class="flex items-baseline gap-1.5 mt-1.5">
+              <span id="varWinSum" class="code-font text-xl font-bold text-amber-300">0</span>
+              <span id="varSumCond" class="text-[10px] text-slate-400 code-font"></span>
+            </div>
+            <span class="text-[10px] text-amber-200/75 mt-1 code-font">sum &le; goal</span>
+          </div>
+
+          <!-- Valid Subarrays Ending at right (right - left + 1) -->
+          <div class="glass-panel rounded-xl p-3 flex flex-col justify-between border-sky-400/35">
+            <span class="text-[11px] text-slate-400 uppercase font-semibold flex items-center justify-between">
+              Endings @ R
+              <i class="fa-solid fa-code-branch text-sky-400 text-[10px]"></i>
+            </span>
+            <div class="flex items-baseline gap-1.5 mt-1.5">
+              <span id="varEndingsGain" class="code-font text-xl font-bold text-sky-300">-</span>
+            </div>
+            <span class="text-[10px] text-slate-400 mt-1 code-font">right - left + 1</span>
+          </div>
+
+          <!-- Helper Running count -->
+          <div class="glass-panel rounded-xl p-3 flex flex-col justify-between border-emerald-400/35 col-span-2 sm:col-span-1">
+            <span class="text-[11px] text-slate-400 uppercase font-semibold flex items-center justify-between">
+              Helper count
+              <i class="fa-solid fa-calculator text-emerald-400 text-[10px]"></i>
+            </span>
+            <div class="flex items-baseline gap-1.5 mt-1.5">
+              <span id="varHelperCount" class="code-font text-2xl font-black text-emerald-400">0</span>
+            </div>
+            <span id="varHelperCountSub" class="text-[10px] text-emerald-300/85 mt-1 code-font">subarrays &le; goal</span>
+          </div>
+
+        </div>
+
+        <!-- UNIFIED STAGE: BINARY STREAM SLIDING WINDOW, SUM TANK & VALID SUBARRAY BATCHES -->
+        <div id="stageWrapper" class="glass-panel relative rounded-2xl p-4 sm:p-5 flex flex-col gap-5">
+          <!-- SVG Trajectory Arc Overlay Connecting Binary Bits & Sum Gauge -->
+          <svg id="transferArcSvg" class="absolute inset-0 w-full h-full pointer-events-none z-30 overflow-visible"></svg>
+
+          <!-- Floating Lift-and-Place Token Layer -->
+          <div id="flyingCloneLayer" class="absolute inset-0 pointer-events-none z-40"></div>
+
+          <!-- 1. BINARY ARRAY STREAM WITH ELASTIC SLIDING WINDOW -->
+          <div class="flex flex-col gap-3">
+            <div class="flex flex-wrap items-center justify-between text-xs pb-2 border-b border-white/10 gap-2">
+              <span class="font-semibold text-slate-200 uppercase tracking-wider flex items-center gap-1.5">
+                <i class="fa-solid fa-microchip text-cyan-400"></i>
+                Binary Array: <span class="code-font text-white">nums[]</span>
+                <span id="numsMetaTag" class="code-font text-cyan-300">(n = 5)</span>
+              </span>
+
+              <div class="flex flex-wrap items-center gap-3 text-[11px]">
+                <span class="flex items-center gap-1.5">
+                  <span class="w-2.5 h-2.5 rounded-sm bg-cyan-400 inline-block"></span> Valid (sum &le; goal)
+                </span>
+                <span class="flex items-center gap-1.5">
+                  <span class="w-2.5 h-2.5 rounded-sm bg-rose-500 inline-block"></span> Exceeds (sum &gt; goal)
+                </span>
+                <span class="flex items-center gap-1.5">
+                  <span class="w-2.5 h-2.5 rounded-sm bg-emerald-400 inline-block"></span> Counted Subarrays
+                </span>
+              </div>
+            </div>
+
+            <!-- Scrollable Binary Array Tape + Elastic Window Halo (Top headroom pt-12 so badge never overlaps bars) -->
+            <div id="bitsScrollContainer" class="relative w-full pt-12 pb-6 px-2.5 sm:px-3 rounded-xl bg-white/[0.02] border border-white/10 overflow-x-auto">
+              <!-- Elastic Active Window Frame [left .. right] -->
+              <div id="activeWindowFrame" class="hidden absolute rounded-2xl border-2 border-cyan-400/80 bg-cyan-400/[0.06] pointer-events-none transition-all duration-300 z-30">
+                <span id="activeWindowTag" class="absolute -top-7 left-1/2 -translate-x-1/2 px-2.5 py-0.5 rounded-full bg-slate-950/95 border border-cyan-400/80 text-cyan-200 code-font text-[10px] font-bold shadow-lg whitespace-nowrap">
+                  window [0..0] • len=1 • sum=1/2
+                </span>
+              </div>
+
+              <!-- Glassy Binary Boxes & Magnitude Bars -->
+              <div id="bitsStreamArena" class="relative z-20 w-full flex items-center justify-between gap-1 sm:gap-1.5 min-h-[124px]">
+                <!-- Populated dynamically -->
+              </div>
+            </div>
+          </div>
+
+          <!-- 2. WINDOW SUM ACCUMULATOR GAUGE & SUBARRAYS ENDING AT RIGHT LOG -->
+          <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 pt-1">
+
+            <!-- Window Sum Gauge (5 Cols) -->
+            <div class="lg:col-span-5 flex flex-col gap-2.5">
+              <div class="flex items-center justify-between text-xs pb-1.5 border-b border-white/10">
+                <span class="font-semibold text-amber-300 uppercase tracking-wider flex items-center gap-1.5">
+                  <i class="fa-solid fa-gauge text-amber-400"></i>
+                  Window <span class="code-font text-white">sum</span> vs <span class="code-font text-purple-300">goal</span>
+                </span>
+                <span id="sumRatioTag" class="code-font text-[10px] px-2 py-0.5 rounded bg-white/5 border border-white/10 text-slate-300">
+                  0 / 2
+                </span>
+              </div>
+
+              <div id="sumGaugeArena" class="min-h-[144px] p-3.5 rounded-xl bg-white/[0.02] border border-white/10 flex flex-col items-center justify-center gap-2.5">
+                <!-- Populated dynamically with segmented 1-unit blocks + overflow detector -->
+              </div>
+            </div>
+
+            <!-- Valid Subarrays Ending at right Batch Log (7 Cols) -->
+            <div class="lg:col-span-7 flex flex-col gap-2.5">
+              <div class="flex items-center justify-between text-xs pb-1.5 border-b border-white/10">
+                <span class="font-semibold text-emerald-300 uppercase tracking-wider flex items-center gap-1.5">
+                  <i class="fa-solid fa-list-check text-emerald-400"></i>
+                  Subarrays Ending @ <span class="code-font text-white">right</span> (<span class="code-font text-emerald-200">+right - left + 1</span>)
+                </span>
+                <span id="batchCountTag" class="code-font text-[10px] text-emerald-300 bg-emerald-500/15 px-2 py-0.5 rounded border border-emerald-400/30">
+                  count = 0
+                </span>
+              </div>
+
+              <div id="batchesLogArena" class="min-h-[144px] max-h-[175px] overflow-y-auto p-3 rounded-xl bg-white/[0.02] border border-white/10 flex flex-col gap-2">
+                <span class="text-xs text-slate-500 italic my-auto text-center">Every valid window [left..right] with sum &le; goal yields (right - left + 1) contiguous subarrays ending at right...</span>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Live Formula & Decision Banner -->
+          <div id="decisionBanner" class="p-3.5 rounded-xl bg-white/[0.04] border border-white/10 text-xs flex flex-col sm:flex-row items-center justify-between gap-3 backdrop-blur-md">
+            <div class="flex items-center gap-2.5">
+              <i id="decisionIcon" class="fa-solid fa-circle-info text-cyan-400 text-base"></i>
+              <span id="decisionText" class="text-slate-200">Ready to compute atMost(nums, goal) - atMost(nums, goal - 1).</span>
+            </div>
+            <div id="formulaPill" class="hidden text-xs code-font px-3 py-1.5 rounded-lg bg-slate-950/70 border border-emerald-400/35 text-emerald-200 font-semibold shrink-0">
+              <!-- e.g. count += 2 - 0 + 1 (+3) = 6 -->
+            </div>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- RIGHT: SYNCHRONIZED & PROPERLY INDENTED JAVA CODE CONTAINER -->
+      <section class="lg:col-span-5 xl:col-span-4 flex flex-col gap-4">
+
+        <div class="glass-panel rounded-2xl p-4 flex flex-col h-full">
+          <div class="flex items-center justify-between pb-3 border-b border-white/10 text-xs">
+            <div class="flex items-center gap-2">
+              <div class="flex gap-1.5">
+                <span class="w-3 h-3 rounded-full bg-rose-500/80 inline-block"></span>
+                <span class="w-3 h-3 rounded-full bg-amber-500/80 inline-block"></span>
+                <span class="w-3 h-3 rounded-full bg-emerald-500/80 inline-block"></span>
+              </div>
+              <span class="code-font text-slate-200 font-semibold ml-2">Solution.java</span>
+            </div>
+            <span class="text-[11px] text-cyan-300 bg-cyan-500/15 px-2.5 py-0.5 rounded border border-cyan-400/25 code-font">
+              AtMost Reduction
+            </span>
+          </div>
+
+          <!-- Properly Indented Java Code Lines with Zero-Jump Localized Scroll -->
+          <div id="codeContainer" class="code-font text-xs sm:text-[13px] leading-relaxed text-slate-300 py-3 overflow-x-auto overflow-y-auto max-h-[620px] flex-grow select-none">
+            <div class="code-line" id="line1"><span class="text-slate-500 mr-2"> 1</span><span class="text-indigo-400 font-semibold">class</span> <span class="text-amber-300">Solution</span> {</div>
+            <div class="code-line" id="line2"><span class="text-slate-500 mr-2"> 2</span></div>
+            <div class="code-line" id="line3"><span class="text-slate-500 mr-2"> 3</span>    <span class="text-indigo-400 font-semibold">public int</span> <span class="text-cyan-300">numSubarraysWithSum</span>(<span class="text-indigo-400">int</span>[] nums, <span class="text-indigo-400">int</span> goal) {</div>
+            <div class="code-line" id="line4"><span class="text-slate-500 mr-2"> 4</span></div>
+            <div class="code-line" id="line5"><span class="text-slate-500 mr-2"> 5</span>        <span class="text-indigo-400 font-semibold">return</span> atMost(nums, goal) - atMost(nums, goal - <span class="text-rose-400">1</span>);</div>
+            <div class="code-line" id="line6"><span class="text-slate-500 mr-2"> 6</span>    }</div>
+            <div class="code-line" id="line7"><span class="text-slate-500 mr-2"> 7</span></div>
+            <div class="code-line" id="line8"><span class="text-slate-500 mr-2"> 8</span>    <span class="text-indigo-400 font-semibold">private int</span> <span class="text-cyan-300">atMost</span>(<span class="text-indigo-400">int</span>[] nums, <span class="text-indigo-400">int</span> goal) {</div>
+            <div class="code-line" id="line9"><span class="text-slate-500 mr-2"> 9</span></div>
+            <div class="code-line" id="line10"><span class="text-slate-500 mr-2">10</span>        <span class="text-slate-500 italic">// No subarray can have a negative sum</span></div>
+            <div class="code-line" id="line11"><span class="text-slate-500 mr-2">11</span>        <span class="text-indigo-400 font-semibold">if</span> (goal &lt; <span class="text-rose-400">0</span>) {</div>
+            <div class="code-line" id="line12"><span class="text-slate-500 mr-2">12</span>            <span class="text-indigo-400 font-semibold">return</span> <span class="text-rose-400">0</span>;</div>
+            <div class="code-line" id="line13"><span class="text-slate-500 mr-2">13</span></div>
+            <div class="code-line" id="line14"><span class="text-slate-500 mr-2">14</span>        <span class="text-indigo-400 font-semibold">int</span> left = <span class="text-rose-400">0</span>;</div>
+            <div class="code-line" id="line15"><span class="text-slate-500 mr-2">15</span>        <span class="text-indigo-400 font-semibold">int</span> sum = <span class="text-rose-400">0</span>;</div>
+            <div class="code-line" id="line16"><span class="text-slate-500 mr-2">16</span>        <span class="text-indigo-400 font-semibold">int</span> count = <span class="text-rose-400">0</span>;</div>
+            <div class="code-line" id="line17"><span class="text-slate-500 mr-2">17</span></div>
+            <div class="code-line" id="line18"><span class="text-slate-500 mr-2">18</span>        <span class="text-indigo-400 font-semibold">for</span> (<span class="text-indigo-400">int</span> right = <span class="text-rose-400">0</span>; right &lt; nums.length; right++) {</div>
+            <div class="code-line" id="line19"><span class="text-slate-500 mr-2">19</span></div>
+            <div class="code-line" id="line20"><span class="text-slate-500 mr-2">20</span>            <span class="text-slate-500 italic">// Expand the window</span></div>
+            <div class="code-line" id="line21"><span class="text-slate-500 mr-2">21</span>            sum += nums[right];</div>
+            <div class="code-line" id="line22"><span class="text-slate-500 mr-2">22</span></div>
+            <div class="code-line" id="line23"><span class="text-slate-500 mr-2">23</span>            <span class="text-slate-500 italic">// Shrink while sum exceeds goal</span></div>
+            <div class="code-line" id="line24"><span class="text-slate-500 mr-2">24</span>            <span class="text-indigo-400 font-semibold">while</span> (sum &gt; goal) {</div>
+            <div class="code-line" id="line25"><span class="text-slate-500 mr-2">25</span>                sum -= nums[left];</div>
+            <div class="code-line" id="line26"><span class="text-slate-500 mr-2">26</span>                left++;</div>
+            <div class="code-line" id="line27"><span class="text-slate-500 mr-2">27</span>            }</div>
+            <div class="code-line" id="line28"><span class="text-slate-500 mr-2">28</span></div>
+            <div class="code-line" id="line29"><span class="text-slate-500 mr-2">29</span>            <span class="text-slate-500 italic">// Count all valid subarrays ending at right</span></div>
+            <div class="code-line" id="line30"><span class="text-slate-500 mr-2">30</span>            count += right - left + <span class="text-rose-400">1</span>;</div>
+            <div class="code-line" id="line31"><span class="text-slate-500 mr-2">31</span>        }</div>
+            <div class="code-line" id="line32"><span class="text-slate-500 mr-2">32</span></div>
+            <div class="code-line" id="line33"><span class="text-slate-500 mr-2">33</span>        <span class="text-indigo-400 font-semibold">return</span> count;</div>
+            <div class="code-line" id="line34"><span class="text-slate-500 mr-2">34</span>    }</div>
+            <div class="code-line" id="line35"><span class="text-slate-500 mr-2">35</span>}</div>
+          </div>
+
+          <!-- Live Step Narrative Box -->
+          <div class="mt-3 p-3 bg-white/[0.04] border border-white/10 rounded-xl flex items-start gap-2.5 backdrop-blur-md">
+            <i class="fa-solid fa-circle-info text-cyan-400 mt-0.5 text-xs"></i>
+            <div class="text-xs text-slate-200 leading-relaxed" id="stepDescription">
+              Ready to run Binary Subarrays With Sum. Click <b>Start</b> or <b>Next</b> to step through.
+            </div>
+          </div>
+
+        </div>
+
+      </section>
+
+    </div>
+
+    <!-- BOTTOM SECTION: PROBLEM STATEMENT & ARCHITECTURAL SUMMARY -->
+    <footer class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-2">
+
+      <!-- Problem Statement Card -->
+      <div class="glass-panel rounded-2xl p-5 flex flex-col gap-3">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <span class="text-amber-400 font-bold"><i class="fa-solid fa-file-lines mr-1.5"></i>Problem Statement</span>
+            <span class="px-2 py-0.5 rounded text-[11px] font-semibold bg-amber-500/20 text-amber-300 border border-amber-400/30">Medium</span>
+          </div>
+          <span class="text-xs text-slate-400 font-mono">LeetCode 930</span>
+        </div>
+
+        <p class="text-xs text-slate-300 leading-relaxed">
+          Given a binary array <code class="font-mono text-cyan-300">nums</code> and an integer <code class="font-mono text-purple-300">goal</code>, return the number of <b>non-empty subarrays</b> with a sum <code class="font-mono text-emerald-300">goal</code>.
+          <br><span class="text-[11px] text-slate-400 italic">(A subarray is a contiguous part of the array.)</span>
+        </p>
+
+        <div class="space-y-2 pt-2 border-t border-white/10 text-xs text-slate-300">
+          <div class="bg-white/[0.03] p-2.5 rounded-lg border border-white/10 font-mono">
+            <span class="text-slate-400">Example 1:</span>
+            <b>Input:</b> nums = [1,0,1,0,1], goal = 2 &rarr; <b>Output:</b> <span class="text-emerald-400 font-bold">4</span>
+            <div class="text-[11px] text-slate-400 font-sans mt-0.5">The 4 valid subarrays with sum 2 are: [<u class="text-emerald-300"><b>1,0,1</b></u>,0,1], [<u class="text-emerald-300"><b>1,0,1,0</b></u>,1], [1,<u class="text-emerald-300"><b>0,1,0,1</b></u>], and [1,0,<u class="text-emerald-300"><b>1,0,1</b></u>].</div>
+          </div>
+          <div class="bg-white/[0.03] p-2.5 rounded-lg border border-white/10 font-mono">
+            <span class="text-slate-400">Example 2:</span>
+            <b>Input:</b> nums = [0,0,0,0,0], goal = 0 &rarr; <b>Output:</b> <span class="text-emerald-400 font-bold">15</span>
+            <div class="text-[11px] text-slate-400 font-sans mt-0.5">All <code class="font-mono">5 &times; 6 / 2 = 15</code> non-empty subarrays have sum 0 (<code class="font-mono">atMost(0) - atMost(-1) = 15 - 0 = 15</code>).</div>
+          </div>
+        </div>
+
+        <div class="text-[11px] text-slate-400">
+          <b>Constraints:</b> <code class="font-mono text-slate-300">1 &le; nums.length &le; 3 &times; 10<sup>4</sup></code>, <code class="font-mono text-slate-300">nums[i]</code> is either <code class="font-mono">0</code> or <code class="font-mono">1</code>, <code class="font-mono text-slate-300">0 &le; goal &le; nums.length</code>.
+        </div>
+      </div>
+
+      <!-- Algorithm Summary & Inclusion-Exclusion Identity Card -->
+      <div class="glass-panel rounded-2xl p-5 flex flex-col gap-3">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <span class="text-cyan-400 font-bold"><i class="fa-solid fa-brain mr-1.5"></i>Algorithm Summary &amp; AtMost Reduction Proof</span>
+          </div>
+          <span class="px-2 py-0.5 rounded text-[11px] font-semibold bg-cyan-500/20 text-cyan-200 border border-cyan-400/30">O(1) Aux Space</span>
+        </div>
+
+        <div class="space-y-3 text-xs text-slate-300 leading-relaxed">
+          <div class="p-3 bg-purple-950/30 border border-purple-400/25 rounded-xl">
+            <b class="text-purple-300 flex items-center gap-1.5 mb-1">
+              <i class="fa-solid fa-calculator"></i> Why Convert <code class="font-mono">exact(goal)</code> Into <code class="font-mono">atMost(goal) &minus; atMost(goal &minus; 1)</code>?
+            </b>
+            Because <code class="font-mono">0</code>s do not change the window sum, a standard single sliding window cannot decide whether to advance <code class="font-mono">left</code> when <code class="font-mono">sum == goal</code>. Counting subarrays with <code class="font-mono">sum &le; goal</code> is strictly monotonic: once <code class="font-mono">[left..right]</code> has <code class="font-mono">sum &le; goal</code>, <b>all <code class="font-mono">right - left + 1</code> subarrays ending at <code class="font-mono">right</code></b> also satisfy <code class="font-mono">sum &le; goal</code>.
+          </div>
+
+          <div class="p-3 bg-cyan-950/25 border border-cyan-400/20 rounded-xl">
+            <b class="text-cyan-300 flex items-center gap-1.5 mb-1">
+              <i class="fa-solid fa-shield-halved"></i> Handling <code class="font-mono">goal == 0</code> Safely:
+            </b>
+            When <code class="font-mono">goal = 0</code>, the second call invokes <code class="font-mono">atMost(nums, -1)</code>. Since binary arrays contain only non-negative numbers (<code class="font-mono">0</code> and <code class="font-mono">1</code>), <code class="font-mono">if (goal &lt; 0) return 0;</code> immediately returns <code class="font-mono">0</code> in <code class="font-mono">&Omicron;(1)</code>.
+          </div>
+
+          <div class="grid grid-cols-2 gap-3 pt-1">
+            <div class="p-2.5 bg-white/[0.03] rounded-lg border border-white/10">
+              <span class="text-[11px] text-slate-400 uppercase font-semibold">Time Complexity</span>
+              <div class="text-sm font-bold text-emerald-400 font-mono mt-0.5">&Omicron;(N)</div>
+              <p class="text-[10px] text-slate-400 mt-0.5">At most two linear sliding-window passes (<code class="font-mono">2 &times; 2N = &Omicron;(N)</code>).</p>
+            </div>
+            <div class="p-2.5 bg-white/[0.03] rounded-lg border border-white/10">
+              <span class="text-[11px] text-slate-400 uppercase font-semibold">Space Complexity</span>
+              <div class="text-sm font-bold text-cyan-400 font-mono mt-0.5">&Omicron;(1)</div>
+              <p class="text-[10px] text-slate-400 mt-0.5">Purely in-place using scalar variables (<code class="font-mono">left, right, sum, count</code>).</p>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+    </footer>
+
+  </div>
+
+  <!-- JAVASCRIPT SIMULATION ENGINE WITH ATMOST REDUCTION & LIFT-AND-ARC SUM TRANSFERS -->
+  <script>
+    // 10 COMPREHENSIVE PRESETS
+    const PRESETS = [
+      { name: "1: LeetCode Ex 1 (nums = [1,0,1,0,1], goal = 2)", nums: [1,0,1,0,1], goal: 2 },
+      { name: "2: LeetCode Ex 2 (nums = [0,0,0,0,0], goal = 0)", nums: [0,0,0,0,0], goal: 0 },
+      { name: "3: Zero Goal With Ones (nums = [0,1,0,0,1,0], goal = 0)", nums: [0,1,0,0,1,0], goal: 0 },
+      { name: "4: Single Goal With Zeros (nums = [0,1,0,1,0], goal = 1)", nums: [0,1,0,1,0], goal: 1 },
+      { name: "5: All Ones Array (nums = [1,1,1,1], goal = 2)", nums: [1,1,1,1], goal: 2 },
+      { name: "6: Goal Exceeds Total Ones (nums = [1,0,1], goal = 3)", nums: [1,0,1], goal: 3 },
+      { name: "7: Full Array Sum (nums = [1,0,1,1], goal = 3)", nums: [1,0,1,1], goal: 3 },
+      { name: "8: Clustered Zeros & Ones (nums = [0,0,1,1,0,0], goal = 2)", nums: [0,0,1,1,0,0], goal: 2 },
+      { name: "9: Single Element Match (nums = [1], goal = 1)", nums: [1], goal: 1 },
+      { name: "10: Single Element Miss (nums = [1], goal = 0)", nums: [1], goal: 0 }
+    ];
+
+    // APPLICATION STATE
+    let currentNums = [...PRESETS[0].nums];
+    let currentGoal = PRESETS[0].goal;
+    let steps = [];
+    let currentStepIdx = 0;
+    let isPlaying = false;
+    let playInterval = null;
+    let playSpeed = 650;
+    let audioEnabled = true;
+
+    // WEB AUDIO SYNTHESIZER
+    let audioCtx = null;
+    function initAudio() {
+      if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      }
+    }
+    function playTone(freq = 440, type = 'sine', duration = 0.08, vol = 0.035) {
+      if (!audioEnabled) return;
+      try {
+        initAudio();
+        if (audioCtx.state === 'suspended') {
+          audioCtx.resume();
+        }
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = type;
+        osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+        gain.gain.setValueAtTime(vol, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + duration);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + duration);
+      } catch (e) {}
+    }
+
+    // DOM REFERENCES
+    const btnPlay = document.getElementById('btnPlay');
+    const playIcon = document.getElementById('playIcon');
+    const playText = document.getElementById('playText');
+    const btnPrev = document.getElementById('btnPrev');
+    const btnNext = document.getElementById('btnNext');
+    const btnReset = document.getElementById('btnReset');
+    const btnAudio = document.getElementById('btnAudio');
+    const audioIcon = document.getElementById('audioIcon');
+    const presetSelect = document.getElementById('presetSelect');
+    const customArrInput = document.getElementById('customArrInput');
+    const customGoalInput = document.getElementById('customGoalInput');
+    const btnApplyCustom = document.getElementById('btnApplyCustom');
+    const stepScrubber = document.getElementById('stepScrubber');
+    const stepCounterBadge = document.getElementById('stepCounterBadge');
+    const phaseBadge = document.getElementById('phaseBadge');
+    const callHeaderBadge = document.getElementById('callHeaderBadge');
+    const exactHeaderBadge = document.getElementById('exactHeaderBadge');
+
+    const call1Card = document.getElementById('call1Card');
+    const call2Card = document.getElementById('call2Card');
+    const finalExactCard = document.getElementById('finalExactCard');
+    const eqGoal1 = document.getElementById('eqGoal1');
+    const eqGoal1Sub = document.getElementById('eqGoal1Sub');
+    const valAtMostGoal = document.getElementById('valAtMostGoal');
+    const eqGoal2 = document.getElementById('eqGoal2');
+    const eqGoal2Sub = document.getElementById('eqGoal2Sub');
+    const valAtMostGoalMinus1 = document.getElementById('valAtMostGoalMinus1');
+    const eqExactGoal = document.getElementById('eqExactGoal');
+    const valExactResult = document.getElementById('valExactResult');
+
+    const varHelperGoal = document.getElementById('varHelperGoal');
+    const varCallTag = document.getElementById('varCallTag');
+    const varWinSpan = document.getElementById('varWinSpan');
+    const varPtrSub = document.getElementById('varPtrSub');
+    const sumCard = document.getElementById('sumCard');
+    const varWinSum = document.getElementById('varWinSum');
+    const varSumCond = document.getElementById('varSumCond');
+    const varEndingsGain = document.getElementById('varEndingsGain');
+    const varHelperCount = document.getElementById('varHelperCount');
+    const varHelperCountSub = document.getElementById('varHelperCountSub');
+
+    const stageWrapper = document.getElementById('stageWrapper');
+    const transferArcSvg = document.getElementById('transferArcSvg');
+    const flyingCloneLayer = document.getElementById('flyingCloneLayer');
+    const numsMetaTag = document.getElementById('numsMetaTag');
+    const bitsScrollContainer = document.getElementById('bitsScrollContainer');
+    const activeWindowFrame = document.getElementById('activeWindowFrame');
+    const activeWindowTag = document.getElementById('activeWindowTag');
+    const bitsStreamArena = document.getElementById('bitsStreamArena');
+
+    const sumRatioTag = document.getElementById('sumRatioTag');
+    const sumGaugeArena = document.getElementById('sumGaugeArena');
+    const batchCountTag = document.getElementById('batchCountTag');
+    const batchesLogArena = document.getElementById('batchesLogArena');
+
+    const decisionBanner = document.getElementById('decisionBanner');
+    const decisionIcon = document.getElementById('decisionIcon');
+    const decisionText = document.getElementById('decisionText');
+    const formulaPill = document.getElementById('formulaPill');
+    const codeContainer = document.getElementById('codeContainer');
+    const stepDescription = document.getElementById('stepDescription');
+
+    // STRICT LINE-BY-LINE EXECUTION TRACE GENERATOR FOR BOTH ATMOST CALLS
+    function generateSteps(numsArr, origGoal) {
+      const trace = [];
+      const nums = [...numsArr];
+      const n = nums.length;
+
+      let resCall1 = null;
+      let resCall2 = null;
+
+      // Line 3: Public entry numSubarraysWithSum(int[] nums, int goal)
+      trace.push({
+        line: 3,
+        phase: "Start",
+        activeCall: 0,
+        nums,
+        origGoal,
+        resCall1,
+        resCall2,
+        exactResult: null,
+        helperGoal: null,
+        left: -1,
+        right: -1,
+        sum: 0,
+        count: 0,
+        batches: [],
+        desc: `Entered <span class="code-font text-cyan-300 font-bold">numSubarraysWithSum</span> with <span class="code-font text-slate-100">nums = [${nums.join(', ')}]</span> and <span class="code-font text-emerald-300 font-bold">goal = ${origGoal}</span>.`,
+        soundFreq: 330
+      });
+
+      // Line 5: Calling first helper atMost(nums, goal)
+      trace.push({
+        line: 5,
+        phase: `Call 1: atMost(${origGoal})`,
+        activeCall: 1,
+        nums,
+        origGoal,
+        resCall1,
+        resCall2,
+        exactResult: null,
+        helperGoal: origGoal,
+        left: -1,
+        right: -1,
+        sum: 0,
+        count: 0,
+        batches: [],
+        desc: `Evaluating <span class="code-font text-cyan-300 font-bold">atMost(nums, ${origGoal})</span> (Pass 1 of 2) to count all subarrays with sum <span class="code-font">&le; ${origGoal}</span>.`,
+        soundFreq: 380
+      });
+
+      // Helper simulator for atMost(nums, hGoal)
+      function simulateAtMostCall(callNum, hGoal) {
+        const batches = [];
+        const snapBatches = () => batches.map(b => ({ ...b, subs: [...b.subs] }));
+        const callLabel = callNum === 1 ? `Call 1: atMost(${hGoal})` : `Call 2: atMost(${hGoal})`;
+
+        // Line 8: private int atMost(int[] nums, int goal)
+        trace.push({
+          line: 8,
+          phase: callLabel,
+          activeCall: callNum,
+          nums,
+          origGoal,
+          resCall1,
+          resCall2,
+          exactResult: null,
+          helperGoal: hGoal,
+          left: -1,
+          right: -1,
+          sum: 0,
+          count: 0,
+          batches: snapBatches(),
+          desc: `Entered helper <span class="code-font text-purple-300 font-bold">atMost(nums, goal = ${hGoal})</span>.`,
+          soundFreq: 410
+        });
+
+        // Line 11: if (goal < 0)
+        const isNegGoal = hGoal < 0;
+        trace.push({
+          line: 11,
+          phase: isNegGoal ? `goal (${hGoal}) < 0 (True)` : `goal (${hGoal}) < 0 (False)`,
+          activeCall: callNum,
+          nums,
+          origGoal,
+          resCall1,
+          resCall2,
+          exactResult: null,
+          helperGoal: hGoal,
+          left: -1,
+          right: -1,
+          sum: 0,
+          count: 0,
+          batches: snapBatches(),
+          desc: isNegGoal
+            ? `<span class="text-amber-300 font-bold">Negative Goal Guard!</span> <span class="code-font">goal (${hGoal}) &lt; 0</span> is <b>true</b> &rarr; no binary subarray can have a negative sum.`
+            : `Guard check <span class="code-font text-emerald-300">goal (${hGoal}) &lt; 0</span> is <b>false</b>. Proceeding to initialize sliding window.`,
+          soundFreq: isNegGoal ? 320 : 435
+        });
+
+        if (isNegGoal) {
+          // Line 12: return 0;
+          if (callNum === 1) resCall1 = 0;
+          else resCall2 = 0;
+
+          trace.push({
+            line: 12,
+            phase: "Return 0",
+            activeCall: callNum,
+            nums,
+            origGoal,
+            resCall1,
+            resCall2,
+            exactResult: null,
+            helperGoal: hGoal,
+            left: -1,
+            right: -1,
+            sum: 0,
+            count: 0,
+            batches: snapBatches(),
+            desc: `Returned <span class="code-font text-purple-300 font-bold">0</span> from <span class="code-font">atMost(nums, ${hGoal})</span>.`,
+            soundFreq: 480
+          });
+          return 0;
+        }
+
+        // Line 14: int left = 0;
+        let left = 0;
+        trace.push({
+          line: 14,
+          phase: "Init left = 0",
+          activeCall: callNum,
+          nums,
+          origGoal,
+          resCall1,
+          resCall2,
+          exactResult: null,
+          helperGoal: hGoal,
+          left: 0,
+          right: -1,
+          sum: 0,
+          count: 0,
+          batches: snapBatches(),
+          desc: `Initialized left window pointer <span class="code-font text-cyan-300 font-bold">int left = 0</span>.`,
+          soundFreq: 455
+        });
+
+        // Line 15: int sum = 0;
+        let sum = 0;
+        trace.push({
+          line: 15,
+          phase: "Init sum = 0",
+          activeCall: callNum,
+          nums,
+          origGoal,
+          resCall1,
+          resCall2,
+          exactResult: null,
+          helperGoal: hGoal,
+          left: 0,
+          right: -1,
+          sum: 0,
+          count: 0,
+          batches: snapBatches(),
+          desc: `Initialized current window sum <span class="code-font text-amber-300 font-bold">int sum = 0</span>.`,
+          soundFreq: 475
+        });
+
+        // Line 16: int count = 0;
+        let count = 0;
+        trace.push({
+          line: 16,
+          phase: "Init count = 0",
+          activeCall: callNum,
+          nums,
+          origGoal,
+          resCall1,
+          resCall2,
+          exactResult: null,
+          helperGoal: hGoal,
+          left: 0,
+          right: -1,
+          sum: 0,
+          count: 0,
+          batches: snapBatches(),
+          desc: `Initialized subarray counter <span class="code-font text-emerald-300 font-bold">int count = 0</span>.`,
+          soundFreq: 495
+        });
+
+        for (let right = 0; right < n; right++) {
+          // Line 18: for (int right = 0; right < nums.length; right++)
+          trace.push({
+            line: 18,
+            phase: `Expand right = ${right}`,
+            activeCall: callNum,
+            nums,
+            origGoal,
+            resCall1,
+            resCall2,
+            exactResult: null,
+            helperGoal: hGoal,
+            left,
+            right,
+            sum,
+            count,
+            batches: snapBatches(),
+            desc: `Outer loop <span class="code-font text-amber-300 font-bold">right = ${right}</span> (<span class="code-font">${right} &lt; ${n}</span>): Expanding window to <span class="code-font text-amber-200 font-bold">nums[${right}] = ${nums[right]}</span>.`,
+            soundFreq: 515
+          });
+
+          // Line 21: sum += nums[right];
+          const bitR = nums[right];
+          sum += bitR;
+          trace.push({
+            line: 21,
+            phase: `sum += ${bitR} (${sum})`,
+            activeCall: callNum,
+            nums,
+            origGoal,
+            resCall1,
+            resCall2,
+            exactResult: null,
+            helperGoal: hGoal,
+            left,
+            right,
+            sum,
+            transfer: { type: 'addBit', idx: right, val: bitR },
+            count,
+            batches: snapBatches(),
+            desc: `Added <span class="code-font text-amber-300 font-bold">nums[${right}] (${bitR})</span> &rarr; <span class="code-font text-amber-200 font-bold">sum = ${sum}</span>.`,
+            soundFreq: bitR === 1 ? 590 : 525
+          });
+
+          // Inner Shrink Loop: while (sum > goal)
+          while (true) {
+            const exceedsGoal = sum > hGoal;
+
+            // Line 24: Always evaluate while (sum > goal)
+            trace.push({
+              line: 24,
+              phase: exceedsGoal ? `sum (${sum}) > ${hGoal} (True)` : `sum (${sum}) ≤ ${hGoal} (False)`,
+              activeCall: callNum,
+              nums,
+              origGoal,
+              resCall1,
+              resCall2,
+              exactResult: null,
+              helperGoal: hGoal,
+              left,
+              right,
+              sum,
+              windowOverflow: exceedsGoal,
+              count,
+              batches: snapBatches(),
+              desc: exceedsGoal
+                ? `<span class="text-rose-400 font-bold"><i class="fa-solid fa-triangle-exclamation mr-1"></i>Window Sum Exceeded!</span> <span class="code-font text-rose-300 font-bold">sum (${sum}) &gt; goal (${hGoal})</span> is <b>true</b> &rarr; shrinking from <span class="code-font">left</span>.`
+                : `Condition <span class="code-font text-emerald-300">sum (${sum}) &gt; goal (${hGoal})</span> is <b>false</b> (<span class="code-font">${sum} &le; ${hGoal}</span>) &rarr; window is valid.`,
+              soundFreq: exceedsGoal ? 345 : 560
+            });
+
+            if (!exceedsGoal) break;
+
+            // Line 25: sum -= nums[left];
+            const bitL = nums[left];
+            sum -= bitL;
+            trace.push({
+              line: 25,
+              phase: `sum -= ${bitL} (${sum})`,
+              activeCall: callNum,
+              nums,
+              origGoal,
+              resCall1,
+              resCall2,
+              exactResult: null,
+              helperGoal: hGoal,
+              left,
+              right,
+              sum,
+              windowOverflow: sum > hGoal,
+              transfer: { type: 'subBit', idx: left, val: bitL },
+              count,
+              batches: snapBatches(),
+              desc: `Subtracted leftmost <span class="code-font text-rose-300 font-bold">nums[${left}] (${bitL})</span> &rarr; <span class="code-font text-amber-200 font-bold">sum = ${sum}</span>.`,
+              soundFreq: 420
+            });
+
+            // Line 26: left++;
+            const prevLeft = left;
+            left++;
+            trace.push({
+              line: 26,
+              phase: `left++ (${prevLeft} → ${left})`,
+              activeCall: callNum,
+              nums,
+              origGoal,
+              resCall1,
+              resCall2,
+              exactResult: null,
+              helperGoal: hGoal,
+              left,
+              right,
+              sum,
+              windowOverflow: sum > hGoal,
+              count,
+              batches: snapBatches(),
+              desc: `Shrank left window boundary: <span class="code-font text-cyan-300 font-bold">left++</span> (${prevLeft} &rarr; ${left}).`,
+              soundFreq: 460
+            });
+          }
+
+          // Line 30: count += right - left + 1;
+          const addedEndings = right - left + 1;
+          const prevCount = count;
+          count += addedEndings;
+
+          const generatedSubs = [];
+          for (let startIdx = left; startIdx <= right; startIdx++) {
+            generatedSubs.push(`[${nums.slice(startIdx, right + 1).join(',')}]`);
+          }
+          batches.push({
+            left,
+            right,
+            addedCount: addedEndings,
+            totalAfter: count,
+            subs: generatedSubs
+          });
+
+          trace.push({
+            line: 30,
+            phase: `count += ${addedEndings} (→ ${count})`,
+            activeCall: callNum,
+            nums,
+            origGoal,
+            resCall1,
+            resCall2,
+            exactResult: null,
+            helperGoal: hGoal,
+            left,
+            right,
+            sum,
+            justCounted: true,
+            endingsGain: addedEndings,
+            formulaText: `count += ${right} - ${left} + 1 (+${addedEndings}) = ${count}`,
+            count,
+            batches: snapBatches(),
+            desc: `<span class="text-emerald-400 font-bold"><i class="fa-solid fa-plus-circle mr-1"></i>Counted +${addedEndings} Valid Subarrays Ending at ${right}!</span> <span class="code-font text-emerald-200 font-bold">count = ${prevCount} + ${addedEndings} = ${count}</span>.`,
+            soundFreq: 760
+          });
+        }
+
+        // Line 18: Outer loop exit when right == nums.length
+        trace.push({
+          line: 18,
+          phase: "Loop Complete",
+          activeCall: callNum,
+          nums,
+          origGoal,
+          resCall1,
+          resCall2,
+          exactResult: null,
+          helperGoal: hGoal,
+          left,
+          right: n,
+          sum,
+          count,
+          batches: snapBatches(),
+          desc: `Loop condition <span class="code-font text-amber-300">right (${n}) &lt; nums.length (${n})</span> is <b>false</b>. Finished <span class="code-font">atMost(nums, ${hGoal})</span>.`,
+          soundFreq: 660
+        });
+
+        // Line 33: return count;
+        if (callNum === 1) resCall1 = count;
+        else resCall2 = count;
+
+        trace.push({
+          line: 33,
+          phase: `Return ${count}`,
+          activeCall: callNum,
+          nums,
+          origGoal,
+          resCall1,
+          resCall2,
+          exactResult: null,
+          helperGoal: hGoal,
+          left: -1,
+          right: -1,
+          sum,
+          count,
+          batches: snapBatches(),
+          desc: `<span class="text-cyan-300 font-bold">Pass ${callNum} Complete!</span> <span class="code-font">atMost(nums, ${hGoal})</span> returned <span class="code-font text-emerald-300 font-bold">${count}</span>.`,
+          soundFreq: 840
+        });
+
+        return count;
+      }
+
+      // Execute Pass 1: atMost(nums, goal)
+      const c1 = simulateAtMostCall(1, origGoal);
+
+      // Line 5: Calling second helper atMost(nums, goal - 1)
+      trace.push({
+        line: 5,
+        phase: `Call 2: atMost(${origGoal - 1})`,
+        activeCall: 2,
+        nums,
+        origGoal,
+        resCall1: c1,
+        resCall2: null,
+        exactResult: null,
+        helperGoal: origGoal - 1,
+        left: -1,
+        right: -1,
+        sum: 0,
+        count: 0,
+        batches: [],
+        desc: `Now evaluating <span class="code-font text-purple-300 font-bold">atMost(nums, ${origGoal - 1})</span> (Pass 2 of 2) to subtract subarrays with sum <span class="code-font">&le; ${origGoal - 1}</span>.`,
+        soundFreq: 450
+      });
+
+      // Execute Pass 2: atMost(nums, goal - 1)
+      const c2 = simulateAtMostCall(2, origGoal - 1);
+
+      // Line 5: Final return atMost(nums, goal) - atMost(nums, goal - 1)
+      const exactAns = c1 - c2;
+      trace.push({
+        line: 5,
+        phase: "Complete",
+        activeCall: 3,
+        nums,
+        origGoal,
+        resCall1: c1,
+        resCall2: c2,
+        exactResult: exactAns,
+        helperGoal: origGoal,
+        left: -1,
+        right: -1,
+        sum: 0,
+        count: exactAns,
+        batches: [],
+        isComplete: true,
+        formulaText: `${c1} - ${c2} = ${exactAns}`,
+        desc: `<span class="text-emerald-400 font-bold text-sm"><i class="fa-solid fa-trophy mr-1.5"></i>Complete!</span> Returned <span class="code-font text-cyan-300 font-bold">${c1}</span> &minus; <span class="code-font text-purple-300 font-bold">${c2}</span> = <span class="code-font text-emerald-300 font-bold text-sm">${exactAns}</span> subarrays with exact sum <span class="code-font text-emerald-200">${origGoal}</span>.`,
+        soundFreq: 960
+      });
+
+      return trace;
+    }
+
+    // LOCALIZED ZERO-JUMP CODE LINE HIGHLIGHTER
+    function highlightCodeLine(lineNum) {
+      document.querySelectorAll('.code-line').forEach(el => el.classList.remove('active-line'));
+      const activeEl = document.getElementById(`line${lineNum}`);
+      if (activeEl) {
+        activeEl.classList.add('active-line');
+
+        const containerTop = codeContainer.scrollTop;
+        const containerBottom = containerTop + codeContainer.clientHeight;
+        const elTop = activeEl.offsetTop - codeContainer.offsetTop;
+        const elBottom = elTop + activeEl.clientHeight;
+
+        if (elTop < containerTop + 24) {
+          codeContainer.scrollTo({ top: Math.max(0, elTop - 24), behavior: 'smooth' });
+        } else if (elBottom > containerBottom - 24) {
+          codeContainer.scrollTo({ top: elBottom - codeContainer.clientHeight + 24, behavior: 'smooth' });
+        }
+      }
+    }
+
+    // POSITION ELASTIC SLIDING WINDOW HALO ON NUMS[]
+    function updateWindowFrame(step) {
+      const n = step.nums.length;
+      const arenaOffsetX = bitsStreamArena.offsetLeft;
+      const arenaOffsetY = bitsStreamArena.offsetTop;
+
+      if (!step.isComplete && n > 0 && step.left >= 0 && step.right >= step.left && step.right < n) {
+        const leftCard = bitsStreamArena.querySelector(`[data-bit-idx="${step.left}"]`);
+        const rightCard = bitsStreamArena.querySelector(`[data-bit-idx="${step.right}"]`);
+        if (leftCard && rightCard) {
+          const padX = 5;
+          const padY = 5;
+          const xStart = arenaOffsetX + leftCard.offsetLeft - padX;
+          const width = (rightCard.offsetLeft + rightCard.offsetWidth) - leftCard.offsetLeft + padX * 2;
+          const yTop = arenaOffsetY + leftCard.offsetTop - padY;
+          const height = leftCard.offsetHeight + padY * 2;
+          const liveWinLen = step.right - step.left + 1;
+
+          // Keep the top label pill inside horizontal container bounds when window is narrow at edges
+          const containerW = bitsScrollContainer.clientWidth || 600;
+          let tagAlignClass = 'left-1/2 -translate-x-1/2';
+          if (width < 195 && xStart < 80) {
+            tagAlignClass = 'left-0 translate-x-0';
+          } else if (width < 195 && (xStart + width) > containerW - 80) {
+            tagAlignClass = 'right-0 translate-x-0';
+          }
+
+          activeWindowFrame.classList.remove('hidden');
+          activeWindowFrame.style.left = `${xStart}px`;
+          activeWindowFrame.style.width = `${width}px`;
+          activeWindowFrame.style.top = `${yTop}px`;
+          activeWindowFrame.style.height = `${height}px`;
+          activeWindowTag.textContent = `window [${step.left}..${step.right}] • len=${liveWinLen} • sum=${step.sum}/${step.helperGoal}`;
+
+          if (step.windowOverflow) {
+            activeWindowFrame.className = "absolute rounded-2xl border-2 border-rose-400/90 bg-rose-500/[0.09] pointer-events-none transition-all duration-300 z-30";
+            activeWindowTag.className = `absolute -top-7 ${tagAlignClass} px-2.5 py-0.5 rounded-full bg-rose-950/95 border border-rose-400/85 text-rose-200 code-font text-[10px] font-bold shadow-lg whitespace-nowrap`;
+          } else if (step.justCounted) {
+            activeWindowFrame.className = "absolute rounded-2xl border-2 border-emerald-400/90 bg-emerald-400/[0.09] pointer-events-none transition-all duration-300 z-30";
+            activeWindowTag.className = `absolute -top-7 ${tagAlignClass} px-2.5 py-0.5 rounded-full bg-emerald-950/95 border border-emerald-400/85 text-emerald-200 code-font text-[10px] font-bold shadow-lg whitespace-nowrap`;
+          } else {
+            activeWindowFrame.className = "absolute rounded-2xl border-2 border-cyan-400/80 bg-cyan-400/[0.06] pointer-events-none transition-all duration-300 z-30";
+            activeWindowTag.className = `absolute -top-7 ${tagAlignClass} px-2.5 py-0.5 rounded-full bg-slate-950/95 border border-cyan-400/80 text-cyan-200 code-font text-[10px] font-bold shadow-lg whitespace-nowrap`;
+          }
+        }
+      } else {
+        activeWindowFrame.classList.add('hidden');
+      }
+    }
+
+    // PHYSICAL LIFT-AND-ARC TRANSFERS FOR SUM += nums[right] & SUM -= nums[left]
+    function animateSumTransfer(transfer, animateFlight) {
+      transferArcSvg.innerHTML = '';
+      flyingCloneLayer.innerHTML = '';
+      if (!transfer) return;
+
+      const stageRect = stageWrapper.getBoundingClientRect();
+      const bitEl = bitsStreamArena.querySelector(`[data-bit-idx="${transfer.idx}"]`);
+      if (!bitEl) return;
+
+      const bitRect = bitEl.getBoundingClientRect();
+      const gaugeRect = sumGaugeArena.getBoundingClientRect();
+
+      if (transfer.type === 'addBit') {
+        const x1 = (bitRect.left - stageRect.left) + bitRect.width / 2;
+        const y1 = (bitRect.bottom - stageRect.top) + 4;
+        const x2 = (gaugeRect.left - stageRect.left) + gaugeRect.width / 2;
+        const y2 = (gaugeRect.top - stageRect.top) - 6;
+        const midX = (x1 + x2) / 2 + 18;
+        const midY = (y1 + y2) / 2;
+        const color = transfer.val === 1 ? '#fbbf24' : '#38bdf8';
+
+        transferArcSvg.innerHTML = `
+          <path d="M ${x1} ${y1} Q ${midX} ${midY}, ${x2} ${y2}"
+                fill="none" stroke="${color}" stroke-width="2.2" class="transfer-arc-path" />
+          <circle cx="${x1}" cy="${y1}" r="4" fill="${color}" />
+          <polygon points="${x2},${y2 + 3} ${x2 - 5},${y2 - 6} ${x2 + 5},${y2 - 6}" fill="${color}" />
+        `;
+
+        if (!animateFlight) return;
+        const clone = document.createElement('div');
+        clone.className = `absolute px-2 py-1 rounded-lg ${transfer.val === 1 ? 'bg-amber-400 text-slate-950 shadow-amber-400/50' : 'bg-sky-400 text-slate-950 shadow-sky-400/50'} code-font text-xs font-extrabold shadow-lg pointer-events-none`;
+        clone.textContent = `+${transfer.val}`;
+        clone.style.left = `${(bitRect.left - stageRect.left) + bitRect.width / 2 - 14}px`;
+        clone.style.top = `${(bitRect.top - stageRect.top) + bitRect.height / 2}px`;
+        flyingCloneLayer.appendChild(clone);
+
+        const dx = x2 - x1;
+        const dy = y2 - y1;
+        const duration = Math.min(500, Math.max(220, playSpeed * 0.74));
+        const anim = clone.animate([
+          { transform: 'translate(0px, 0px) scale(1)', opacity: 1 },
+          { transform: `translate(${dx * 0.45 + 14}px, ${dy * 0.45 - 14}px) scale(1.12)`, opacity: 1, offset: 0.45 },
+          { transform: `translate(${dx}px, ${dy}px) scale(0.95)`, opacity: 0.1 }
+        ], { duration, easing: 'cubic-bezier(0.22, 1, 0.36, 1)' });
+        anim.onfinish = () => clone.remove();
+
+      } else if (transfer.type === 'subBit') {
+        const x1 = (gaugeRect.left - stageRect.left) + gaugeRect.width / 2;
+        const y1 = (gaugeRect.top - stageRect.top) - 4;
+        const x2 = (bitRect.left - stageRect.left) + bitRect.width / 2;
+        const y2 = (bitRect.bottom - stageRect.top) + 6;
+        const midX = (x1 + x2) / 2 - 18;
+        const midY = (y1 + y2) / 2;
+
+        transferArcSvg.innerHTML = `
+          <path d="M ${x1} ${y1} Q ${midX} ${midY}, ${x2} ${y2}"
+                fill="none" stroke="#fb7185" stroke-width="2.2" class="transfer-arc-path" />
+          <circle cx="${x1}" cy="${y1}" r="4" fill="#fb7185" />
+          <polygon points="${x2},${y2 - 3} ${x2 - 5},${y2 + 6} ${x2 + 5},${y2 + 6}" fill="#fb7185" />
+        `;
+
+        if (!animateFlight) return;
+        const clone = document.createElement('div');
+        clone.className = 'absolute px-2 py-1 rounded-lg bg-rose-500 text-white code-font text-xs font-extrabold shadow-lg shadow-rose-500/50 pointer-events-none';
+        clone.textContent = `-${transfer.val}`;
+        clone.style.left = `${(gaugeRect.left - stageRect.left) + gaugeRect.width / 2 - 14}px`;
+        clone.style.top = `${(gaugeRect.top - stageRect.top) - 8}px`;
+        flyingCloneLayer.appendChild(clone);
+
+        const dx = x2 - x1;
+        const dy = y2 - y1;
+        const duration = Math.min(500, Math.max(220, playSpeed * 0.74));
+        const anim = clone.animate([
+          { transform: 'translate(0px, 0px) scale(1)', opacity: 1 },
+          { transform: `translate(${dx * 0.45 - 14}px, ${dy * 0.45}px) scale(1.1)`, opacity: 1, offset: 0.45 },
+          { transform: `translate(${dx}px, ${dy}px) scale(0.95)`, opacity: 0.1 }
+        ], { duration, easing: 'cubic-bezier(0.22, 1, 0.36, 1)' });
+        anim.onfinish = () => clone.remove();
+      }
+    }
+
+    // RENDER CURRENT STEP
+    function renderStep(idx, animateMovement = true) {
+      if (idx < 0 || idx >= steps.length) return;
+      const step = steps[idx];
+      const nums = step.nums;
+      const n = nums.length;
+      const origGoal = step.origGoal;
+
+      // Update Header Scrubber & Badges
+      stepCounterBadge.textContent = `Step: ${idx + 1} / ${steps.length}`;
+      phaseBadge.textContent = step.phase;
+      stepScrubber.max = steps.length - 1;
+      stepScrubber.value = idx;
+      numsMetaTag.textContent = `(n = ${n})`;
+
+      if (step.activeCall === 1) {
+        callHeaderBadge.textContent = `Pass 1: atMost(${origGoal})`;
+        callHeaderBadge.className = "px-2.5 py-1 rounded-md bg-cyan-500/20 border border-cyan-400/35 text-cyan-200 font-bold";
+      } else if (step.activeCall === 2) {
+        callHeaderBadge.textContent = `Pass 2: atMost(${origGoal - 1})`;
+        callHeaderBadge.className = "px-2.5 py-1 rounded-md bg-purple-500/20 border border-purple-400/35 text-purple-200 font-bold";
+      } else if (step.activeCall === 3) {
+        callHeaderBadge.textContent = "Subtracting Passes";
+        callHeaderBadge.className = "px-2.5 py-1 rounded-md bg-emerald-500/20 border border-emerald-400/35 text-emerald-200 font-bold";
+      } else {
+        callHeaderBadge.textContent = "Pass: Init";
+        callHeaderBadge.className = "px-2.5 py-1 rounded-md bg-white/5 border border-white/15 text-slate-300 font-bold";
+      }
+
+      if (step.exactResult !== null) {
+        exactHeaderBadge.textContent = `Exact Sum == ${origGoal}: ${step.exactResult}`;
+        exactHeaderBadge.className = "px-2.5 py-1 rounded-md bg-emerald-500/25 border border-emerald-400/45 text-emerald-200 font-bold";
+      } else {
+        exactHeaderBadge.textContent = `Exact Sum == ${origGoal}: Pending`;
+        exactHeaderBadge.className = "px-2.5 py-1 rounded-md bg-white/5 border border-white/15 text-slate-300 font-bold";
+      }
+
+      // Update Inclusion-Exclusion Equation Pipeline Cards
+      eqGoal1.textContent = origGoal;
+      eqGoal1Sub.textContent = origGoal;
+      valAtMostGoal.textContent = step.resCall1 !== null ? step.resCall1 : (step.activeCall === 1 && step.left >= 0 ? step.count : '?');
+
+      eqGoal2.textContent = origGoal - 1;
+      eqGoal2Sub.textContent = origGoal - 1;
+      valAtMostGoalMinus1.textContent = step.resCall2 !== null ? step.resCall2 : (step.activeCall === 2 && step.left >= 0 ? step.count : '?');
+
+      eqExactGoal.textContent = origGoal;
+      valExactResult.textContent = step.exactResult !== null ? step.exactResult : '?';
+
+      // Highlight active call card in equation bar
+      call1Card.className = step.activeCall === 1
+        ? "col-span-4 rounded-xl p-2.5 bg-cyan-500/15 border-2 border-cyan-400/80 shadow-lg shadow-cyan-500/15 transition-all duration-300"
+        : "col-span-4 rounded-xl p-2.5 bg-white/[0.03] border border-white/10 transition-all duration-300";
+
+      call2Card.className = step.activeCall === 2
+        ? "col-span-3 rounded-xl p-2.5 bg-purple-500/15 border-2 border-purple-400/80 shadow-lg shadow-purple-500/15 transition-all duration-300"
+        : "col-span-3 rounded-xl p-2.5 bg-white/[0.03] border border-white/10 transition-all duration-300";
+
+      finalExactCard.className = step.isComplete
+        ? "col-span-3 rounded-xl p-2.5 bg-emerald-500/20 border-2 border-emerald-400 shadow-lg shadow-emerald-500/25 transition-all duration-300"
+        : "col-span-3 rounded-xl p-2.5 bg-emerald-500/[0.06] border border-emerald-400/25 transition-all duration-300";
+
+      // Update Telemetry HUD Cards
+      varHelperGoal.textContent = step.helperGoal !== null ? step.helperGoal : '-';
+      varCallTag.textContent = step.helperGoal !== null ? `atMost(nums, ${step.helperGoal})` : 'numSubarraysWithSum';
+
+      const hasLiveWindow = !step.isComplete && step.left >= 0 && step.right >= 0 && step.right < n;
+      if (hasLiveWindow) {
+        varWinSpan.textContent = step.right >= step.left ? `[${step.left}..${step.right}]` : 'empty';
+        varPtrSub.textContent = `left: ${step.left}, right: ${step.right}`;
+      } else {
+        varWinSpan.textContent = step.left >= 0 ? `[${step.left}..-]` : '-';
+        varPtrSub.textContent = `left: ${step.left >= 0 ? step.left : '-'}, right: -`;
+      }
+
+      varWinSum.textContent = step.sum;
+      if (step.windowOverflow) {
+        varWinSum.className = "code-font text-xl font-black text-rose-400";
+        varSumCond.textContent = `> ${step.helperGoal}!`;
+        varSumCond.className = "text-[10px] text-rose-300 code-font font-bold";
+        sumCard.classList.add('border-rose-400', 'bg-rose-500/10');
+      } else {
+        varWinSum.className = "code-font text-xl font-bold text-amber-300";
+        varSumCond.textContent = step.helperGoal !== null ? `≤ ${step.helperGoal}` : '';
+        varSumCond.className = "text-[10px] text-emerald-300 code-font";
+        sumCard.classList.remove('border-rose-400', 'bg-rose-500/10');
+      }
+
+      if (step.endingsGain !== undefined) {
+        varEndingsGain.textContent = `+${step.endingsGain}`;
+      } else if (hasLiveWindow && !step.windowOverflow) {
+        varEndingsGain.textContent = `${step.right - step.left + 1}`;
+      } else {
+        varEndingsGain.textContent = '-';
+      }
+
+      varHelperCount.textContent = step.count;
+      varHelperCountSub.textContent = step.isComplete
+        ? `exact sum == ${origGoal}`
+        : step.helperGoal !== null
+          ? `sum ≤ ${step.helperGoal}`
+          : 'subarrays ≤ goal';
+
+      // Narrative Description
+      stepDescription.innerHTML = step.desc;
+
+      // 1. Render Binary Array Stream with Elastic Window
+      bitsStreamArena.innerHTML = '';
+      const compactFit = n <= 16;
+      bitsStreamArena.className = compactFit
+        ? 'relative z-20 w-full flex items-center justify-between gap-1 sm:gap-1.5 min-h-[124px]'
+        : 'relative z-20 w-max mx-auto flex items-center gap-1.5 min-h-[124px]';
+
+      nums.forEach((bit, index) => {
+        const isLeft = (step.left === index && !step.isComplete);
+        const isRight = (step.right === index && !step.isComplete);
+        const isInWindow = (!step.isComplete && step.left >= 0 && step.right >= 0 && index >= step.left && index <= step.right);
+        const isPast = (!step.isComplete && step.left > 0 && index < step.left);
+
+        const card = document.createElement('div');
+        card.dataset.bitIdx = index;
+
+        const sizeClasses = compactFit
+          ? 'flex-1 min-w-[30px] max-w-[56px] h-31 '
+          : 'w-11 h-31 shrink-0 ';
+
+        let classes = `bit-card relative ${sizeClasses} rounded-2xl p-1.5 flex flex-col items-center justify-between select-none `;
+        if (step.windowOverflow && isInWindow) {
+          classes += 'overflow-window-bit ';
+        } else if (step.justCounted && isInWindow) {
+          classes += 'counted-valid-bit ';
+        } else if (isInWindow) {
+          classes += 'in-window-bit ';
+        } else if (isPast) {
+          classes += 'past-bit ';
+        }
+
+        if (isRight) {
+          classes += 'ptr-right-bit ';
+        }
+        card.className = classes;
+
+        // Top Pointer Badges (L, R)
+        let topTag = `<span class="text-[9px] code-font text-slate-400">[${index}]</span>`;
+        if (isLeft && isRight) {
+          topTag = `<span class="px-1.5 py-0.2 rounded bg-emerald-400 text-slate-950 font-extrabold text-[8px] code-font shadow">L=R</span>`;
+        } else if (isLeft) {
+          topTag = `<span class="px-1.5 py-0.2 rounded bg-cyan-400 text-slate-950 font-extrabold text-[8px] code-font shadow">L</span>`;
+        } else if (isRight) {
+          topTag = `<span class="px-1.5 py-0.2 rounded bg-amber-400 text-slate-950 font-extrabold text-[8px] code-font shadow">R</span>`;
+        }
+
+        // Visual Bit Bar (Tall amber/cyan bar for 1, compact slate bar for 0)
+        const barHeightPct = bit === 1 ? 100 : 20;
+        let barStyle = bit === 1
+          ? 'bg-gradient-to-t from-amber-600/80 to-amber-400/90 border-t border-amber-200'
+          : 'bg-slate-700/70 border-t border-slate-500/50';
+
+        if (step.windowOverflow && isInWindow && bit === 1) {
+          barStyle = 'bg-gradient-to-t from-rose-600 to-rose-400 border-t border-rose-200 shadow-[0_0_12px_rgba(244,63,94,0.65)]';
+        } else if (step.justCounted && isInWindow && bit === 1) {
+          barStyle = 'bg-gradient-to-t from-emerald-600 to-emerald-400 border-t border-emerald-100 shadow-[0_0_12px_rgba(16,185,129,0.6)]';
+        } else if (isInWindow && bit === 1) {
+          barStyle = 'bg-gradient-to-t from-cyan-600 to-cyan-400 border-t border-cyan-100 shadow-[0_0_12px_rgba(34,211,238,0.55)]';
+        }
+
+        const valColor = bit === 1 ? 'text-white' : 'text-slate-400';
+
+        card.innerHTML = `
+          <div class="w-full flex items-center justify-center">${topTag}</div>
+          <div class="w-full h-11 flex items-end justify-center my-1 px-0.5">
+            <div class="w-full max-w-[26px] rounded-t-sm transition-all duration-300 ${barStyle}" style="height: ${barHeightPct}%;"></div>
+          </div>
+          <span class="code-font text-xs sm:text-sm font-extrabold ${valColor}">${bit}</span>
+          <span class="text-[8px] code-font text-slate-500">${index}</span>
+        `;
+        bitsStreamArena.appendChild(card);
+      });
+
+      // 2. Render Window Sum Gauge (Segmented 1-unit blocks vs helperGoal)
+      sumGaugeArena.innerHTML = '';
+      if (step.helperGoal === null) {
+        sumRatioTag.textContent = '-';
+        sumGaugeArena.innerHTML = `<span class="text-xs text-slate-500 italic text-center">Waiting to invoke atMost(nums, goal)...</span>`;
+      } else if (step.helperGoal < 0) {
+        sumRatioTag.textContent = `goal = ${step.helperGoal} (< 0)`;
+        sumGaugeArena.innerHTML = `
+          <div class="px-3 py-2 rounded-xl border border-dashed border-amber-400/60 bg-amber-500/10 text-center code-font">
+            <div class="text-xs font-bold text-amber-300">goal = ${step.helperGoal} &lt; 0</div>
+            <div class="text-[11px] text-slate-300 mt-1">Returns <span class="text-emerald-300 font-bold">0</span> immediately</div>
+          </div>
+        `;
+      } else {
+        sumRatioTag.textContent = `${step.sum} / ${step.helperGoal}`;
+        const totalBlocks = Math.max(1, step.helperGoal, step.sum);
+        let blocksHtml = `<div class="w-full flex items-center justify-center gap-1.5 flex-wrap">`;
+
+        for (let b = 0; b < totalBlocks; b++) {
+          const isFilled = b < step.sum;
+          const isOverflow = b >= step.helperGoal && isFilled;
+          const isQuotaSlot = b < step.helperGoal;
+
+          if (isOverflow) {
+            blocksHtml += `
+              <div class="w-9 h-12 rounded-lg bg-rose-500/30 border-2 border-rose-400 flex flex-col items-center justify-center shadow-lg shadow-rose-500/25">
+                <span class="code-font text-xs font-black text-rose-200">+1</span>
+                <span class="text-[8px] code-font text-rose-300 font-bold">OVER</span>
+              </div>
+            `;
+          } else if (isFilled) {
+            blocksHtml += `
+              <div class="w-9 h-12 rounded-lg bg-amber-400/25 border border-amber-300/80 flex flex-col items-center justify-center shadow-md shadow-amber-400/20">
+                <span class="code-font text-xs font-black text-amber-200">+1</span>
+                <span class="text-[8px] code-font text-amber-300/80">#${b + 1}</span>
+              </div>
+            `;
+          } else if (isQuotaSlot) {
+            blocksHtml += `
+              <div class="w-9 h-12 rounded-lg bg-white/[0.02] border border-dashed border-slate-500/40 flex flex-col items-center justify-center">
+                <span class="code-font text-[10px] text-slate-500">0</span>
+                <span class="text-[8px] code-font text-slate-600">#${b + 1}</span>
+              </div>
+            `;
+          }
+        }
+        blocksHtml += `</div>`;
+
+        const statusLine = step.helperGoal === 0 && step.sum === 0
+          ? `<span class="text-[11px] code-font text-emerald-300">goal = 0 (only 0-sum windows allowed)</span>`
+          : step.sum > step.helperGoal
+            ? `<span class="text-[11px] code-font text-rose-300 font-bold">sum (${step.sum}) &gt; goal (${step.helperGoal}) &rarr; Shrink!</span>`
+            : `<span class="text-[11px] code-font text-emerald-300">sum (${step.sum}) &le; goal (${step.helperGoal})</span>`;
+
+        sumGaugeArena.innerHTML = `${blocksHtml}${statusLine}`;
+      }
+
+      // 3. Render Valid Subarrays Ending at right Batch Log
+      batchesLogArena.innerHTML = '';
+      batchCountTag.textContent = step.isComplete
+        ? `exact = ${step.exactResult}`
+        : `count = ${step.count}`;
+
+      if (step.isComplete) {
+        batchesLogArena.innerHTML = `
+          <div class="my-auto p-3 rounded-xl bg-emerald-500/15 border border-emerald-400/40 text-center code-font flex flex-col gap-1">
+            <span class="text-xs text-emerald-200 font-bold">Final Inclusion-Exclusion Subtraction</span>
+            <span class="text-sm font-black text-white">atMost(${origGoal}) &minus; atMost(${origGoal - 1}) = <span class="text-cyan-300">${step.resCall1}</span> &minus; <span class="text-purple-300">${step.resCall2}</span> = <span class="text-emerald-300">${step.exactResult}</span></span>
+          </div>
+        `;
+      } else if (step.batches.length === 0) {
+        batchesLogArena.innerHTML = `<span class="text-xs text-slate-500 italic my-auto text-center">Every valid window [left..right] with sum &le; ${step.helperGoal !== null ? step.helperGoal : origGoal} yields (right - left + 1) contiguous subarrays ending at right...</span>`;
+      } else {
+        step.batches.forEach((b, bIdx) => {
+          const isLatest = (bIdx === step.batches.length - 1) && step.justCounted;
+          const row = document.createElement('div');
+          row.className = `p-2 rounded-lg border text-[11px] code-font flex flex-col gap-1 ${
+            isLatest
+              ? 'batch-row-pop bg-emerald-500/20 border-emerald-400/50 text-emerald-100 shadow-md shadow-emerald-500/15'
+              : 'bg-white/[0.03] border-white/10 text-slate-300'
+          }`;
+
+          const chipsHtml = b.subs.map(sub => `<span class="px-1.5 py-0.2 rounded bg-black/35 border border-emerald-400/30 text-emerald-200">${sub}</span>`).join(' ');
+          row.innerHTML = `
+            <div class="flex items-center justify-between">
+              <span class="text-cyan-300 font-bold">R=${b.right}, L=${b.left}</span>
+              <span class="text-emerald-300 font-extrabold">+${b.addedCount} (count=${b.totalAfter})</span>
+            </div>
+            <div class="flex flex-wrap items-center gap-1">${chipsHtml}</div>
+          `;
+          batchesLogArena.appendChild(row);
+        });
+        batchesLogArena.scrollTop = batchesLogArena.scrollHeight;
+      }
+
+      // 4. Position Elastic Window Frame & Trigger Lift-and-Arc Sum Transfers
+      requestAnimationFrame(() => {
+        if (!compactFit && step.right >= 0 && step.right < n) {
+          const rightEl = bitsStreamArena.querySelector(`[data-bit-idx="${step.right}"]`);
+          if (rightEl) {
+            const targetScroll = rightEl.offsetLeft - bitsScrollContainer.clientWidth / 2 + rightEl.offsetWidth / 2;
+            bitsScrollContainer.scrollTo({ left: Math.max(0, targetScroll), behavior: 'smooth' });
+          }
+        }
+        updateWindowFrame(step);
+        animateSumTransfer(step.transfer, animateMovement);
+      });
+
+      // 5. Update Formula Pill & Decision Banner
+      if (step.formulaText) {
+        formulaPill.classList.remove('hidden');
+        formulaPill.textContent = step.formulaText;
+      } else {
+        formulaPill.classList.add('hidden');
+      }
+
+      if (step.isComplete || step.justCounted) {
+        decisionIcon.className = "fa-solid fa-trophy text-emerald-400 text-base";
+        decisionBanner.className = "p-3.5 rounded-xl bg-emerald-500/15 border border-emerald-400/35 text-xs flex flex-col sm:flex-row items-center justify-between gap-3 backdrop-blur-md";
+        if (step.isComplete) {
+          finalExactCard.classList.add('result-win-anim');
+          setTimeout(() => finalExactCard.classList.remove('result-win-anim'), 650);
+        }
+      } else if (step.windowOverflow) {
+        decisionIcon.className = "fa-solid fa-triangle-exclamation text-rose-400 text-base";
+        decisionBanner.className = "p-3.5 rounded-xl bg-rose-500/12 border border-rose-400/30 text-xs flex flex-col sm:flex-row items-center justify-between gap-3 backdrop-blur-md";
+      } else {
+        decisionIcon.className = "fa-solid fa-circle-info text-cyan-400 text-base";
+        decisionBanner.className = "p-3.5 rounded-xl bg-white/[0.04] border border-white/10 text-xs flex flex-col sm:flex-row items-center justify-between gap-3 backdrop-blur-md";
+      }
+      decisionText.innerHTML = step.desc;
+
+      // 6. Highlight Active Java Line & Play Audio Tone
+      highlightCodeLine(step.line);
+      if (step.soundFreq) {
+        playTone(step.soundFreq, 'sine', 0.08, 0.035);
+      }
+    }
+
+    // PLAYBACK CONTROLLER
+    function setPlaying(playing) {
+      isPlaying = playing;
+      if (isPlaying) {
+        playIcon.className = "fa-solid fa-pause";
+        playText.textContent = "Stop";
+        btnPlay.classList.add('bg-rose-500/25', 'text-rose-200', 'border-rose-400/50');
+        btnPlay.classList.remove('bg-cyan-500/25', 'text-cyan-200', 'border-cyan-400/50');
+
+        playInterval = setInterval(() => {
+          if (currentStepIdx < steps.length - 1) {
+            currentStepIdx++;
+            renderStep(currentStepIdx, true);
+          } else {
+            setPlaying(false);
+          }
+        }, playSpeed);
+      } else {
+        playIcon.className = "fa-solid fa-play";
+        playText.textContent = "Start";
+        btnPlay.classList.remove('bg-rose-500/25', 'text-rose-200', 'border-rose-400/50');
+        btnPlay.classList.add('bg-cyan-500/25', 'text-cyan-200', 'border-cyan-400/50');
+        if (playInterval) {
+          clearInterval(playInterval);
+          playInterval = null;
+        }
+      }
+    }
+
+    function initSimulation(numsArr, goalVal) {
+      setPlaying(false);
+      currentNums = [...numsArr];
+      currentGoal = Math.max(0, goalVal);
+      steps = generateSteps(currentNums, currentGoal);
+      currentStepIdx = 0;
+      stepScrubber.max = steps.length - 1;
+      stepScrubber.value = 0;
+      renderStep(0, false);
+    }
+
+    // EVENT LISTENERS
+    btnPlay.addEventListener('click', () => {
+      if (currentStepIdx >= steps.length - 1) {
+        currentStepIdx = 0;
+        renderStep(0, false);
+      }
+      setPlaying(!isPlaying);
+    });
+
+    btnNext.addEventListener('click', () => {
+      setPlaying(false);
+      if (currentStepIdx < steps.length - 1) {
+        currentStepIdx++;
+        renderStep(currentStepIdx, true);
+      }
+    });
+
+    btnPrev.addEventListener('click', () => {
+      setPlaying(false);
+      if (currentStepIdx > 0) {
+        currentStepIdx--;
+        renderStep(currentStepIdx, true);
+      }
+    });
+
+    btnReset.addEventListener('click', () => {
+      setPlaying(false);
+      currentStepIdx = 0;
+      renderStep(0, false);
+    });
+
+    stepScrubber.addEventListener('input', (e) => {
+      setPlaying(false);
+      currentStepIdx = parseInt(e.target.value, 10);
+      renderStep(currentStepIdx, false);
+    });
+
+    document.querySelectorAll('.speed-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.speed-btn').forEach(b => {
+          b.classList.remove('bg-cyan-500/30', 'text-cyan-200', 'font-semibold');
+        });
+        btn.classList.add('bg-cyan-500/30', 'text-cyan-200', 'font-semibold');
+        playSpeed = parseInt(btn.dataset.speed, 10);
+        if (isPlaying) {
+          setPlaying(false);
+          setPlaying(true);
+        }
+      });
+    });
+
+    btnAudio.addEventListener('click', () => {
+      audioEnabled = !audioEnabled;
+      if (audioEnabled) {
+        audioIcon.className = "fa-solid fa-volume-high";
+        btnAudio.classList.remove('text-slate-600');
+        btnAudio.classList.add('text-slate-300');
+      } else {
+        audioIcon.className = "fa-solid fa-volume-xmark";
+        btnAudio.classList.add('text-slate-600');
+        btnAudio.classList.remove('text-slate-300');
+      }
+    });
+
+    presetSelect.addEventListener('change', (e) => {
+      const idx = parseInt(e.target.value, 10);
+      customArrInput.value = PRESETS[idx].nums.join(',');
+      customGoalInput.value = PRESETS[idx].goal;
+      initSimulation(PRESETS[idx].nums, PRESETS[idx].goal);
+    });
+
+    btnApplyCustom.addEventListener('click', () => {
+      const text = customArrInput.value.trim();
+      const parsedGoal = parseInt(customGoalInput.value, 10);
+      if (!text || isNaN(parsedGoal)) return;
+
+      const parsedNums = text.split(',')
+        .map(s => parseInt(s.trim(), 10))
+        .filter(n => n === 0 || n === 1);
+
+      if (parsedNums.length >= 1) {
+        const clampedGoal = Math.max(0, parsedGoal);
+        customArrInput.value = parsedNums.join(',');
+        customGoalInput.value = clampedGoal;
+        initSimulation(parsedNums, clampedGoal);
+      }
+    });
+
+    window.addEventListener('resize', () => {
+      const step = steps[currentStepIdx];
+      if (step) {
+        updateWindowFrame(step);
+        animateSumTransfer(step.transfer, false);
+      }
+    });
+
+    window.addEventListener('keydown', (e) => {
+      if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT') return;
+      if (e.code === 'Space') {
+        e.preventDefault();
+        btnPlay.click();
+      } else if (e.code === 'ArrowRight') {
+        e.preventDefault();
+        btnNext.click();
+      } else if (e.code === 'ArrowLeft') {
+        e.preventDefault();
+        btnPrev.click();
+      }
+    });
+
+    window.onload = function() {
+      customArrInput.value = PRESETS[0].nums.join(',');
+      customGoalInput.value = PRESETS[0].goal;
+      initSimulation(PRESETS[0].nums, PRESETS[0].goal);
+    };
+  </script>
+</body>
+</html>
