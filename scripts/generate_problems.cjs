@@ -73,6 +73,7 @@ const problems = [
     "spaceComplexity": "O(n)",
     "spaceComplexityExplanation": "Stores at most n elements in the hash map.",
     "visualizerUrl": "/visualizers/two_sum_visualizer.html",
+    "addedDate": "2026-11-09",
     "keyObservations": [
       "Look backward using a hash table in O(1) instead of nested loops in O(n^2)."
     ],
@@ -172,6 +173,7 @@ const problems = [
     "spaceComplexity": "O(1)",
     "spaceComplexityExplanation": "Fixed-size array of 26 integers.",
     "visualizerUrl": "/visualizers/valid_anagram_visualizer.html",
+    "addedDate": "2026-11-09",
     "keyObservations": [
       "Two strings are anagrams if and only if their character counts are identical."
     ],
@@ -266,6 +268,7 @@ const problems = [
     "spaceComplexity": "O(n)",
     "spaceComplexityExplanation": "Set stores up to n elements.",
     "visualizerUrl": "/visualizers/contains_duplicate_visualizer.html",
+    "addedDate": "2026-11-09",
     "keyObservations": [
       "Early termination upon first duplicate avoids full traversal on average."
     ],
@@ -351,6 +354,7 @@ const problems = [
     "spaceComplexity": "O(1)",
     "spaceComplexityExplanation": "Fixed memory for 81 entries.",
     "visualizerUrl": "/visualizers/valid_sudoku_visualizer.html",
+    "addedDate": "2026-11-09",
     "keyObservations": [
       "Box index formula Math.floor(r/3)*3 + Math.floor(c/3) maps (r, c) to box 0..8."
     ],
@@ -422,6 +426,7 @@ const problems = [
     "spaceComplexity": "O(1)",
     "spaceComplexityExplanation": "Output array does not count as extra space.",
     "visualizerUrl": "/visualizers/product_of_array_except_self_visualizer.html",
+    "addedDate": "2026-11-09",
     "keyObservations": [
       "Product except self is prefixProduct * postfixProduct."
     ],
@@ -500,6 +505,7 @@ const problems = [
     "spaceComplexity": "O(n)",
     "spaceComplexityExplanation": "Buckets and hash map store up to n elements.",
     "visualizerUrl": "/visualizers/top_k_frequent_elements_visualizer.html",
+    "addedDate": "2026-11-09",
     "keyObservations": [
       "Max frequency is bounded by n, enabling bucket indexing."
     ],
@@ -572,6 +578,7 @@ const problems = [
     "spaceComplexity": "O(1)",
     "spaceComplexityExplanation": "Only candidate and count variables.",
     "visualizerUrl": "/visualizers/majority_element_visualizer.html",
+    "addedDate": "2026-11-09",
     "keyObservations": [
       "Majority element withstands cancellation from all other elements."
     ],
@@ -643,6 +650,7 @@ const problems = [
     "spaceComplexity": "O(1)",
     "spaceComplexityExplanation": "Fixed dual candidate pointers.",
     "visualizerUrl": "/visualizers/majority_element_ii_visualizer.html",
+    "addedDate": "2026-11-09",
     "keyObservations": [
       "At most k-1 elements can exceed n/k frequency."
     ],
@@ -714,6 +722,7 @@ const problems = [
     "spaceComplexity": "O(n)",
     "spaceComplexityExplanation": "HashSet stores up to n elements.",
     "visualizerUrl": "/visualizers/longest_consecutive_sequence_visualizer.html",
+    "addedDate": "2026-11-09",
     "keyObservations": [
       "Filter starting numbers with !has(x - 1) to avoid redundant scans."
     ],
@@ -791,6 +800,7 @@ const problems = [
     "spaceComplexity": "O(n * k)",
     "spaceComplexityExplanation": "Stores all characters across anagram groups.",
     "visualizerUrl": "/visualizers/group_anagrams_visualizer.html",
+    "addedDate": "2026-11-09",
     "keyObservations": [
       "All anagrams share the identical sorted character representation."
     ],
@@ -865,6 +875,7 @@ const problems = [
     "spaceComplexity": "O(n)",
     "spaceComplexityExplanation": "Holds meetings array.",
     "visualizerUrl": "/visualizers/max_meetings_visualizer.html",
+    "addedDate": "2026-11-09",
     "keyObservations": [
       "Earliest end time leaves the maximum possible remaining time for subsequent meetings."
     ],
@@ -939,6 +950,7 @@ const problems = [
     "spaceComplexity": "O(1)",
     "spaceComplexityExplanation": "Only scalar sums stored.",
     "visualizerUrl": "/visualizers/balanced_split_array_visualizer.html",
+    "addedDate": "2026-11-09",
     "keyObservations": [
       "rightSum = totalSum - leftSum - nums[i] eliminates extra array allocations."
     ],
@@ -1015,6 +1027,7 @@ const problems = [
     "spaceComplexity": "O(1)",
     "spaceComplexityExplanation": "Only two pointer variables.",
     "visualizerUrl": "/visualizers/floyd_s_cycle_detection_visualizer.html",
+    "addedDate": "2026-11-09",
     "keyObservations": [
       "In a cyclic track, the faster runner is guaranteed to lap the slower runner."
     ],
@@ -1091,6 +1104,7 @@ const problems = [
     "spaceComplexity": "O(k)",
     "spaceComplexityExplanation": "Heap stores at most k items.",
     "visualizerUrl": "/visualizers/k_closest_points_to_origin_visualizer.html",
+    "addedDate": "2026-11-09",
     "keyObservations": [
       "Square root is unnecessary since x^2 + y^2 preserves relative order."
     ],
@@ -1155,6 +1169,7 @@ const problems = [
     "spaceComplexity": "O(1)",
     "spaceComplexityExplanation": "Constant space.",
     "visualizerUrl": "/visualizers/min_moves_to_equal_elements_visualizer.html",
+    "addedDate": "2026-11-09",
     "keyObservations": [
       "Incrementing n - 1 elements by 1 is relative to decrementing 1 element by 1."
     ],
@@ -1227,6 +1242,7 @@ const problems = [
     "spaceComplexity": "O(n^2)",
     "spaceComplexityExplanation": "Queue stores at most n^2 coordinates.",
     "visualizerUrl": "/visualizers/grid_reachability_bfs_visualizer.html",
+    "addedDate": "2026-11-09",
     "keyObservations": [
       "BFS guarantees shortest path in unweighted graphs."
     ],
@@ -1299,6 +1315,7 @@ const problems = [
     "spaceComplexity": "O(1)",
     "spaceComplexityExplanation": "In-place sorting.",
     "visualizerUrl": "/visualizers/meeting_overlap_visualizer.html",
+    "addedDate": "2026-11-09",
     "keyObservations": [
       "Sorting brings potential overlapping intervals directly adjacent to each other."
     ],
@@ -1369,6 +1386,7 @@ const problems = [
     "spaceComplexity": "O(1)",
     "spaceComplexityExplanation": "Constant variables.",
     "visualizerUrl": "/visualizers/max_inventory_increase_visualizer.html",
+    "addedDate": "2026-11-09",
     "keyObservations": [
       "If currentSum drops below 0, discard it and restart at current element."
     ],
@@ -1466,6 +1484,7 @@ const problems = [
     "spaceComplexity": "O(min(n, |Σ|))",
     "spaceComplexityExplanation": "The HashSet stores at most min(n, |Σ|) distinct characters where Σ is the character alphabet.",
     "visualizerUrl": "/visualizers/longest_substring_without_repeating_characters_visualizer.html",
+    "addedDate": "2026-11-20",
     "keyObservations": [
       "Contiguous substring constraint makes this ideal for a two-pointer sliding window where right expands and left contracts.",
       "Using a HashSet guarantees O(1) membership checks to immediately catch duplicate characters.",
@@ -1588,6 +1607,7 @@ const problems = [
     "spaceComplexity": "O(n)",
     "spaceComplexityExplanation": "Dual stacks each hold n elements.",
     "visualizerUrl": "/visualizers/minstack_dual_stack_visualizer.html",
+    "addedDate": "2026-11-09",
     "keyObservations": [
       "Pairing each value with the minimum seen up to that level enables instant rollback on pop."
     ],
@@ -1662,6 +1682,7 @@ const problems = [
     "spaceComplexity": "O(1)",
     "spaceComplexityExplanation": "At most 26 lowercase English characters.",
     "visualizerUrl": "/visualizers/same_frequencies_hashmap_visualizer.html",
+    "addedDate": "2026-11-09",
     "keyObservations": [
       "A Set of map values having size 1 implies all frequencies are identical."
     ],
@@ -1731,6 +1752,7 @@ const problems = [
     "spaceComplexity": "O(1)",
     "spaceComplexityExplanation": "Two pointers only.",
     "visualizerUrl": "/visualizers/middle_of_the_linked_list_visualizer.html",
+    "addedDate": "2026-11-09",
     "keyObservations": [
       "Fast travels at 2x speed, leaving slow at exactly 0.5x when fast finishes."
     ],
@@ -1799,6 +1821,7 @@ const problems = [
     "spaceComplexity": "O(1)",
     "spaceComplexityExplanation": "In-place pointer redirection.",
     "visualizerUrl": "/visualizers/remove_duplicates_linked_list_visualizer.html",
+    "addedDate": "2026-11-09",
     "keyObservations": [
       "Because list is sorted, duplicates are strictly consecutive."
     ],
@@ -1868,6 +1891,7 @@ const problems = [
     "spaceComplexity": "O(n)",
     "spaceComplexityExplanation": "Total capacity holds n items.",
     "visualizerUrl": "/visualizers/queue_using_two_stacks_visualizer.html",
+    "addedDate": "2026-11-09",
     "keyObservations": [
       "Reversing order twice produces original FIFO ordering."
     ],
@@ -1937,6 +1961,7 @@ const problems = [
     "spaceComplexity": "O(n)",
     "spaceComplexityExplanation": "Stack and map store up to n elements.",
     "visualizerUrl": "/visualizers/next_greater_element_visualizer.html",
+    "addedDate": "2026-11-09",
     "keyObservations": [
       "A monotonic decreasing stack naturally pairs elements with their first larger rightward neighbor."
     ],
@@ -2010,6 +2035,7 @@ const problems = [
     "spaceComplexity": "O(1)",
     "spaceComplexityExplanation": "Two scalar variables.",
     "visualizerUrl": "/visualizers/second_largest_playing_card_visualizer.html",
+    "addedDate": "2026-11-09",
     "keyObservations": [
       "Sorting costs O(n log n); two variables achieve optimal O(n) and O(1) space."
     ],
@@ -2072,6 +2098,7 @@ const problems = [
     "spaceComplexity": "O(1)",
     "spaceComplexityExplanation": "In-place modification.",
     "visualizerUrl": "/visualizers/prefix_sum_array_visualizer.html",
+    "addedDate": "2026-11-09",
     "keyObservations": [
       "Prefix sums enable O(1) range sum queries range(i, j) = prefix[j] - prefix[i-1]."
     ],
@@ -2134,6 +2161,7 @@ const problems = [
     "spaceComplexity": "O(n)",
     "spaceComplexityExplanation": "Set stores visited unique items.",
     "visualizerUrl": "/visualizers/first_repeated_element_visualizer.html",
+    "addedDate": "2026-11-09",
     "keyObservations": [
       "Checking set containment sequentially guarantees the first repeat encountered is earliest in time."
     ],
@@ -2210,6 +2238,7 @@ const problems = [
     "spaceComplexity": "O(n)",
     "spaceComplexityExplanation": "Stack holds up to n characters.",
     "visualizerUrl": "/visualizers/balanced_parentheses_stack_visualizer.html",
+    "addedDate": "2026-11-09",
     "keyObservations": [
       "Last opened bracket must be the first closed bracket (LIFO)."
     ],
@@ -2272,6 +2301,7 @@ const problems = [
     "spaceComplexity": "O(1)",
     "spaceComplexityExplanation": "Two scalar counters.",
     "visualizerUrl": "/visualizers/longest_equal_run_playing_card_visualizer.html",
+    "addedDate": "2026-11-09",
     "keyObservations": [
       "Resetting the running counter on character change preserves contiguous runs."
     ],
@@ -2353,6 +2383,7 @@ const problems = [
     "spaceComplexity": "O(1)",
     "spaceComplexityExplanation": "In-place two-pointer swap.",
     "visualizerUrl": "/visualizers/array_rotation_playing_card_visualizer.html",
+    "addedDate": "2026-11-09",
     "keyObservations": [
       "Three simple reversals achieve cyclic rotation without allocating any extra buffer."
     ],
@@ -2423,6 +2454,7 @@ const problems = [
     "spaceComplexity": "O(1)",
     "spaceComplexityExplanation": "In-place sorting.",
     "visualizerUrl": "/visualizers/minimum_arrows_to_burst_balloons_visualizer.html",
+    "addedDate": "2026-11-09",
     "keyObservations": [
       "Placing an arrow at the earliest balloon end maximizes the chance of piercing subsequent overlapping balloons."
     ],
@@ -2500,6 +2532,7 @@ const problems = [
     "spaceComplexity": "O(1)",
     "spaceComplexityExplanation": "Only maxReach variable.",
     "visualizerUrl": "/visualizers/jump_game_visualizer.html",
+    "addedDate": "2026-11-09",
     "keyObservations": [
       "At every step, extending the furthest reachable index guarantees optimal greedy progression."
     ],
@@ -2562,6 +2595,7 @@ const problems = [
     "spaceComplexity": "O(1)",
     "spaceComplexityExplanation": "Constant space.",
     "visualizerUrl": "/visualizers/greedy_coin_change_visualizer.html",
+    "addedDate": "2026-11-09",
     "keyObservations": [
       "Greedy works optimally for canonical coin systems (e.g., US currency)."
     ],
@@ -2626,6 +2660,7 @@ const problems = [
     "spaceComplexity": "O(n)",
     "spaceComplexityExplanation": "Holds items with density ratios.",
     "visualizerUrl": "/visualizers/fractional_knapsack_visualizer.html",
+    "addedDate": "2026-11-09",
     "keyObservations": [
       "Because items can be divided, taking the highest value density item is provably optimal."
     ],
@@ -2696,6 +2731,7 @@ const problems = [
     "spaceComplexity": "O(1)",
     "spaceComplexityExplanation": "Two pointers only.",
     "visualizerUrl": "/visualizers/railway_platforms_visualizer.html",
+    "addedDate": "2026-11-09",
     "keyObservations": [
       "Sorting arrivals and departures separately converts the problem into chronological events."
     ],
@@ -2781,6 +2817,7 @@ const problems = [
     "spaceComplexity": "O(n)",
     "spaceComplexityExplanation": "One auxiliary array temp[] of size n for merging, plus O(log n) call stack.",
     "visualizerUrl": "/visualizers/reverse_pairs_visualizer.html",
+    "addedDate": "2026-11-09",
     "keyObservations": [
       "Sorting the halves allows the right pointer to advance monotonically without resetting, keeping countPairs strictly linear O(n).",
       "Always cast nums[left] and nums[right] to 64-bit long (2L * nums[right]) to prevent integer overflow."
@@ -2874,6 +2911,7 @@ const problems = [
     "spaceComplexity": "O(n)",
     "spaceComplexityExplanation": "Stores at most n distinct prefix sums in the hash table.",
     "visualizerUrl": "/visualizers/maximum_size_subarray_sum_equals_k.html",
+    "addedDate": "2026-11-10",
     "keyObservations": [
       "Subarray sum nums[j+1..i] = prefix[i] - prefix[j]. Thus prefix[j] = prefix[i] - k.",
       "Only save the earliest index where each prefix sum appears to maximize the span (i - j).",
@@ -2973,6 +3011,7 @@ const problems = [
     "spaceComplexity": "O(n)",
     "spaceComplexityExplanation": "The hash map stores at most n + 1 distinct prefix sum values.",
     "visualizerUrl": "/visualizers/subarray_sum_equals_k.html",
+    "addedDate": "2026-11-10",
     "keyObservations": [
       "Subarray sum between indices (j, i] equals prefixSum[i] - prefixSum[j]. Setting this to k yields prefixSum[j] = prefixSum[i] - k.",
       "Always initialize the map with { 0: 1 } to capture subarrays whose sum equals k starting from index 0.",
@@ -3083,6 +3122,7 @@ const problems = [
     "spaceComplexity": "O(1)",
     "spaceComplexityExplanation": "O(1) auxiliary space beyond the output array and sorting stack space.",
     "visualizerUrl": "/visualizers/three_sum_visualizer.html",
+    "addedDate": "2026-11-13",
     "keyObservations": [
       "Sorting transforms 3Sum into n Two Sum (sorted) problems, reducing time complexity from O(n^3) to O(n^2).",
       "To guarantee unique triplets without a HashSet, skip duplicate elements at the anchor (i), the left pointer, and the right pointer.",
@@ -3202,6 +3242,7 @@ const problems = [
     "spaceComplexity": "O(1)",
     "spaceComplexityExplanation": "Mutates the input array completely in place without auxiliary data structures.",
     "visualizerUrl": "/visualizers/next_permutation_visualizer.html",
+    "addedDate": "2026-11-19",
     "keyObservations": [
       "Any suffix that is non-increasing is already at its maximum lexicographical configuration and cannot be increased.",
       "The first element from the right that drops (nums[i] < nums[i+1]) is the highest-value position that can be made larger.",
@@ -3301,6 +3342,7 @@ const problems = [
     "spaceComplexity": "O(1)",
     "spaceComplexityExplanation": "Operates strictly in place using three integer pointers.",
     "visualizerUrl": "/visualizers/sort_colors_visualizer.html",
+    "addedDate": "2026-11-19",
     "keyObservations": [
       "When swapping nums[mid] with nums[low], nums[low] is guaranteed to be 1, so mid can safely advance.",
       "When swapping nums[mid] with nums[high], the element arriving at mid from high is unknown, so mid must NOT advance until checked.",
@@ -3410,6 +3452,7 @@ const problems = [
     "spaceComplexity": "O(1)",
     "spaceComplexityExplanation": "Requires no string copies, regex filtering buffers, or reversed string allocations.",
     "visualizerUrl": "/visualizers/valid_palindrome_visualizer.html",
+    "addedDate": "2026-11-19",
     "keyObservations": [
       "Pre-filtering the string with regex or building a new string requires O(n) extra heap memory; two pointers do it in O(1) space.",
       "Numbers ('0'-'9') are alphanumeric and must match identically without case conversion.",
@@ -3517,6 +3560,7 @@ const problems = [
     "spaceComplexity": "O(1)",
     "spaceComplexityExplanation": "Operates strictly in constant auxiliary memory without hash tables.",
     "visualizerUrl": "/visualizers/two_sum_ii_visualizer.html",
+    "addedDate": "2026-11-19",
     "keyObservations": [
       "Because the array is already sorted, increasing left strictly increases the sum, and decreasing right strictly decreases the sum.",
       "The sorted property eliminates the need for hash map memory, reducing space complexity from O(n) to O(1).",
@@ -3625,6 +3669,7 @@ const problems = [
     "spaceComplexity": "O(n)",
     "spaceComplexityExplanation": "Allocates intermediate StringBuilders to hold transformed chunk sum strings during each round.",
     "visualizerUrl": "/visualizers/calculate_digit_sum_of_a_string_visualizer.html",
+    "addedDate": "2026-11-19",
     "keyObservations": [
       "The last chunk may have fewer than k digits, but must be summed identically.",
       "The sum can produce multi-digit strings (e.g. 9+9+9 = 27), which contribute multiple characters to the next round.",
@@ -3723,6 +3768,7 @@ const problems = [
     "spaceComplexity": "O(1)",
     "spaceComplexityExplanation": "Maintains only four scalar variables (left, right, leftMax, rightMax) without prefix/suffix arrays or stacks.",
     "visualizerUrl": "/visualizers/trapping_rain_water_visualizer.html",
+    "addedDate": "2026-11-19",
     "keyObservations": [
       "Water level above any bar is strictly governed by min(maxLeft, maxRight) - height.",
       "If height[left] < height[right], we know with certainty that leftMax < rightMax (or bounded by right's height), so the water trapped at left depends only on leftMax.",
@@ -3822,6 +3868,7 @@ const problems = [
     "spaceComplexity": "O(1)",
     "spaceComplexityExplanation": "Requires only constant extra memory for pointer indices and area trackers.",
     "visualizerUrl": "/visualizers/container_with_most_water_visualizer.html",
+    "addedDate": "2026-11-19",
     "keyObservations": [
       "Width decreases on every single step. To find a larger area with smaller width, we MUST find taller lines.",
       "The shorter line is the limiting bottleneck; moving the taller line can never produce a larger area.",
@@ -3935,6 +3982,7 @@ const problems = [
     "spaceComplexity": "O(1)",
     "spaceComplexityExplanation": "Operates strictly in-place inside the trailing buffer zeros of nums1 using three pointer variables.",
     "visualizerUrl": "/visualizers/merge_two_sorted_arrays_without_extra_space_visualizer.html",
+    "addedDate": "2026-11-19",
     "keyObservations": [
       "Merging forwards from index 0 would overwrite unread nums1 elements, requiring an O(m) auxiliary array.",
       "Merging backwards from index m + n - 1 guarantees k >= i at all times, making overwriting unread elements physically impossible.",
@@ -4035,6 +4083,7 @@ const problems = [
     "spaceComplexity": "O(1)",
     "spaceComplexityExplanation": "Operates purely in-place using scalar pointers without hash sets or auxiliary storage.",
     "visualizerUrl": "/visualizers/four_sum_visualizer.html",
+    "addedDate": "2026-11-19",
     "keyObservations": [
       "Sorting reduces 4Sum from O(n^4) brute force down to O(n^3) by transforming the inner pair into sorted Two Sum.",
       "Guarantees unique quadruplets without a HashSet by skipping identical consecutive values at i, j, left, and right.",
@@ -4133,6 +4182,7 @@ const problems = [
     "spaceComplexity": "O(1)",
     "spaceComplexityExplanation": "Requires only two integer variables (minPrice and maxProfit).",
     "visualizerUrl": "/visualizers/best_time_to_buy_and_sell_stock_visualizer.html",
+    "addedDate": "2026-11-20",
     "keyObservations": [
       "To maximize profit = prices[sell] - prices[buy] where buy < sell, we greedily buy at the lowest historical price before the current day.",
       "Updating minPrice when a new low is seen never invalidates past profits, as earlier profits are already safely stored in maxProfit.",
@@ -4239,6 +4289,7 @@ const problems = [
     "spaceComplexity": "O(1)",
     "spaceComplexityExplanation": "Fixed 26-slot integer frequency array for uppercase English letters.",
     "visualizerUrl": "/visualizers/longest_repeating_character_replacement_visualizer.html",
+    "addedDate": "2026-11-20",
     "keyObservations": [
       "To maximize the window while keeping at most k replacements, keep the most frequent letter intact and replace all other (windowLength - maxFreq) letters.",
       "The condition (right - left + 1) - maxFreq <= k defines a valid window.",
@@ -4382,6 +4433,7 @@ const problems = [
     "spaceComplexity": "O(1)",
     "spaceComplexityExplanation": "Fixed-size 26-element integer arrays for lowercase English letters regardless of input lengths.",
     "visualizerUrl": "/visualizers/permutation_in_string_visualizer.html",
+    "addedDate": "2026-11-20",
     "keyObservations": [
       "Two strings of equal length are permutations/anagrams of each other if and only if their character frequencies match identically across all 26 lowercase English letters.",
       "Since any permutation of s1 must have length equal to s1.length() = n, every candidate is a contiguous substring of exact fixed length n.",
@@ -4500,6 +4552,7 @@ const problems = [
     "spaceComplexity": "O(k)",
     "spaceComplexityExplanation": "The deque holds at most k indices representing candidate maximums within any single sliding window.",
     "visualizerUrl": "/visualizers/sliding_window_maximum_visualizer.html",
+    "addedDate": "2026-11-20",
     "keyObservations": [
       "An element nums[j] where j < i and nums[j] <= nums[i] is permanently obsolete because nums[i] is greater or equal and will outlive nums[j] in future windows.",
       "Storing indices rather than values in the deque allows instant O(1) verification of whether the maximum element has slid out of bounds.",
@@ -4621,6 +4674,7 @@ const problems = [
     "spaceComplexity": "O(1)",
     "spaceComplexityExplanation": "Fixed 128-element integer array for ASCII characters.",
     "visualizerUrl": "/visualizers/minimum_window_substring_visualizer.html",
+    "addedDate": "2026-11-20",
     "keyObservations": [
       "Positive values in need[c] represent deficit (characters still missing); negative values represent surplus (extra copies buffered inside the window).",
       "formed only increments when need[ch] >= 0 upon decrement, ensuring duplicate target characters are correctly required.",
@@ -4744,6 +4798,7 @@ const problems = [
     "spaceComplexity": "O(1)",
     "spaceComplexityExplanation": "Only scalar counter and pointer variables (left, right, zeroCount, maxLength) are maintained in-place.",
     "visualizerUrl": "/visualizers/max_consecutive_ones_iii_visualizer.html",
+    "addedDate": "2026-11-22",
     "keyObservations": [
       "Flipping at most k zeros to ones is mathematically identical to finding the longest contiguous subarray that contains at most k zeros.",
       "The sliding window condition is monotonic: expanding right increases or keeps zeroCount equal, while advancing left decreases or keeps zeroCount equal.",
@@ -4874,6 +4929,7 @@ const problems = [
     "spaceComplexity": "O(k)",
     "spaceComplexityExplanation": "The hash map stores at most k + 1 distinct character keys at any given time during execution.",
     "visualizerUrl": "/visualizers/longest_substring_with_at_most_k_distinct_characters_visualizer.html",
+    "addedDate": "2026-11-22",
     "keyObservations": [
       "When map.size() > k, only advancing left can reduce the number of distinct characters in the window.",
       "Crucially, when a character's frequency reaches 0, its key must be removed from the map via map.remove(), otherwise map.size() remains artificially inflated.",
@@ -4998,6 +5054,7 @@ const problems = [
     "spaceComplexity": "O(1)",
     "spaceComplexityExplanation": "Only a fixed-size 3-element integer array count is maintained for characters 'a', 'b', and 'c'.",
     "visualizerUrl": "/visualizers/number_of_substrings_containing_all_three_characters_visualizer.html",
+    "addedDate": "2026-11-23",
     "keyObservations": [
       "If a substring s[left..right] already contains 'a', 'b', and 'c', extending it to s[left..right+1], s[left..right+2], ..., s[left..n-1] cannot remove any characters, so all (n - right) extensions starting at left are automatically valid.",
       "Counting batches of (n - right) suffixes converts what would be an O(n^2) substring enumeration problem into a strict O(n) single-pass algorithm.",
@@ -5116,6 +5173,7 @@ const problems = [
     "spaceComplexity": "O(1)",
     "spaceComplexityExplanation": "Uses only scalar pointers and counters (left, right, sum, count) with zero auxiliary data structures.",
     "visualizerUrl": "/visualizers/binary_subarrays_with_sum_visualizer.html",
+    "addedDate": "2026-11-23",
     "keyObservations": [
       "Because zeros contribute 0 to the sum, multiple windows with different left boundaries can have the exact same sum, breaking naive two-pointer shrinking.",
       "The property sum <= goal is monotonic: adding elements increases or keeps sum same, shrinking reduces or keeps sum same.",

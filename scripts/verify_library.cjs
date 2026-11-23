@@ -17,8 +17,13 @@ for (const p of problems) {
 let emptyRelated = 0;
 let brokenLinks = 0;
 let missingVisualizers = 0;
+let missingDates = 0;
 
 for (const p of problems) {
+  if (!p.addedDate) {
+    console.error(`Problem #${p.number} (${p.title}) has no addedDate!`);
+    missingDates++;
+  }
   if (!p.relatedProblems || p.relatedProblems.length === 0) {
     console.error(`Problem #${p.number} (${p.title}) has NO related problems!`);
     emptyRelated++;
@@ -49,8 +54,9 @@ console.log('Total Problems:', problems.length);
 console.log('Empty related lists:', emptyRelated);
 console.log('Broken related links:', brokenLinks);
 console.log('Missing visualizers:', missingVisualizers);
+console.log('Missing added dates:', missingDates);
 
-if (emptyRelated === 0 && brokenLinks === 0 && missingVisualizers === 0) {
+if (emptyRelated === 0 && brokenLinks === 0 && missingVisualizers === 0 && missingDates === 0) {
   console.log('ALL VERIFICATIONS PASSED PERFECTLY!');
 } else {
   console.error('VERIFICATION FAILED!');

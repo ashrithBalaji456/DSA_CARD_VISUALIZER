@@ -14,6 +14,7 @@ import {
   Sparkles,
   Link as LinkIcon,
   ArrowRight,
+  Calendar,
 } from 'lucide-react';
 import type { DSAProblem } from '../types/problem';
 import { DifficultyBadge } from './DifficultyBadge';
@@ -63,6 +64,12 @@ export const ProblemDetail: React.FC<Props> = ({
                 Problem #{problem.number}
               </span>
               <DifficultyBadge difficulty={problem.difficulty} size="md" />
+              {problem.addedDate && (
+                <span className="flex items-center gap-1.5 text-xs px-2.5 py-0.5 rounded-full bg-white/5 border border-white/10 text-slate-300 font-mono">
+                  <Calendar className="w-3 h-3 text-indigo-400" />
+                  <span>Added {problem.addedDate}</span>
+                </span>
+              )}
               {problem.categories.map((cat) => (
                 <span
                   key={cat}

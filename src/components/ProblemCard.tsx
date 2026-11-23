@@ -9,9 +9,20 @@ import {
   HardDrive,
   Sparkles,
   Info,
+  Calendar,
 } from 'lucide-react';
 import type { DSAProblem } from '../types/problem';
 import { DifficultyBadge } from './DifficultyBadge';
+
+const formatDate = (dateStr?: string): string => {
+  if (!dateStr) return '';
+  if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) {
+    const [year, month, day] = dateStr.split('-').map(Number);
+    const date = new Date(year, month - 1, day);
+    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  }
+  return dateStr;
+};
 
 interface Props {
   problem: DSAProblem;
@@ -38,16 +49,25 @@ export const ProblemCard: React.FC<Props> = ({
       <div className="absolute top-0 right-0 -mr-16 -mt-16 w-32 h-32 bg-indigo-500/5 rounded-full blur-2xl group-hover:bg-indigo-500/10 transition-colors pointer-events-none" />
 
       <div>
-        {/* Top bar: Problem number, difficulty, and bookmark / solved action buttons */}
+        {/* Top bar: Problem number, difficulty, added date, and bookmark / solved action buttons */}
         <div className="flex items-center justify-between gap-2 mb-3.5">
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5 flex-wrap">
             <span className="font-mono text-xs font-semibold px-2 py-0.5 rounded-md bg-white/[0.06] border border-white/10 text-slate-300">
               #{problem.number}
             </span>
             <DifficultyBadge difficulty={problem.difficulty} size="sm" />
+            {problem.addedDate && (
+              <span
+                className="inline-flex items-center gap-1 text-[11px] font-mono text-slate-400 bg-white/[0.04] px-2 py-0.5 rounded-md border border-white/10"
+                title={`Added to library on ${formatDate(problem.addedDate)}`}
+              >
+                <Calendar className="w-3 h-3 text-indigo-400/80 shrink-0" />
+                <span>{formatDate(problem.addedDate)}</span>
+              </span>
+            )}
           </div>
 
-          <div className="flex items-center gap-1.5">
+          <div className="flex items-center gap-1.5 shrink-0">
             {/* Bookmark button */}
             <button
               onClick={(e) => {

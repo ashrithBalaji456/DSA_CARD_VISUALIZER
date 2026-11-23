@@ -35,6 +35,7 @@ export interface DSAProblem {
   spaceComplexity: string;
   spaceComplexityExplanation: string;
   visualizerUrl?: string; // path to interactive HTML visualizer page (e.g. '/visualizers/majority_element_ii_visualizer.html')
+  addedDate?: string; // date the problem was added to the library (e.g. 'Nov 23, 2026')
   keyObservations?: string[];
   importantPattern?: string;
   commonMistakes?: string[];
