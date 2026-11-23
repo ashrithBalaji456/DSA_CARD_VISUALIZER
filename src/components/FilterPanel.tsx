@@ -52,6 +52,8 @@ export const FilterPanel: React.FC<Props> = ({
   ];
 
   const sortOptions = [
+    { value: 'date-desc', label: 'Date Added (Newest First)' },
+    { value: 'date-asc', label: 'Date Added (Oldest First)' },
     { value: 'number-asc', label: 'Problem Number (Ascending)' },
     { value: 'number-desc', label: 'Problem Number (Descending)' },
     { value: 'difficulty-asc', label: 'Difficulty (Easy to Hard)' },
@@ -94,7 +96,7 @@ export const FilterPanel: React.FC<Props> = ({
             type="text"
             value={searchQuery}
             onChange={(e) => onSearchChange?.(e.target.value)}
-            placeholder="Search problems by title, #number, pattern, or keyword..."
+            placeholder="Search problems by title, #number, date (e.g. Nov 23), pattern..."
             className="w-full bg-transparent text-xs sm:text-sm text-white placeholder-slate-400 outline-none"
           />
           {searchQuery && (

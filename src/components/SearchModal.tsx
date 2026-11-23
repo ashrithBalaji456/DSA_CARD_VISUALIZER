@@ -7,9 +7,21 @@ import {
   CornerDownLeft,
   Sparkles,
   Layers,
+  Calendar,
 } from 'lucide-react';
 import type { DSAProblem } from '../types/problem';
 import { DifficultyBadge } from './DifficultyBadge';
+import { matchDateHelper } from '../utils/filters';
+
+const formatDate = (dateStr?: string): string => {
+  if (!dateStr) return '';
+  if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) {
+    const [year, month, day] = dateStr.split('-').map(Number);
+    const date = new Date(year, month - 1, day);
+    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  }
+  return dateStr;
+};
 
 interface Props {
   isOpen: boolean;
@@ -53,7 +65,8 @@ export const SearchModal: React.FC<Props> = ({
       const matchDesc = p.description.toLowerCase().includes(q);
       const matchCat = p.categories.some((c) => c.toLowerCase().includes(q));
       const matchPattern = p.importantPattern?.toLowerCase().includes(q) || false;
-      return matchNum || matchTitle || matchDesc || matchCat || matchPattern;
+      const matchDate = matchDateHelper(p.addedDate, q);
+      return matchNum || matchTitle || matchDesc || matchCat || matchPattern || matchDate;
     });
   }, [problems, query]);
 
@@ -122,7 +135,7 @@ export const SearchModal: React.FC<Props> = ({
             type="text"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search problems by name, #number, topic, or pattern (e.g. #1, Reverse Pairs, Two Pointers)..."
+            placeholder="Search problems by name, #number, date (e.g. Nov 23), topic, or pattern..."
             className="w-full bg-transparent text-sm sm:text-base text-white placeholder-slate-400 outline-none font-medium"
           />
           {query ? (
@@ -178,6 +191,12 @@ export const SearchModal: React.FC<Props> = ({
                         {p.title}
                       </span>
                       <DifficultyBadge difficulty={p.difficulty} size="sm" />
+                      {p.addedDate && (
+                        <span className="hidden sm:inline-flex items-center gap-1 text-[10px] font-mono text-slate-400 bg-white/[0.04] px-1.5 py-0.5 rounded border border-white/5">
+                          <Calendar className="w-2.5 h-2.5 text-indigo-400" />
+                          <span>{formatDate(p.addedDate)}</span>
+                        </span>
+                      )}
                     </div>
                     <div className="flex items-center gap-2 text-[11px] text-slate-400">
                       <span className="flex items-center gap-1 text-slate-300">

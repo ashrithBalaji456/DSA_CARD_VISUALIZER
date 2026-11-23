@@ -68,7 +68,7 @@ export const Hero: React.FC<Props> = ({
               type="text"
               value={searchQuery}
               onChange={(e) => onSearchChange(e.target.value)}
-              placeholder="Search problems, topics, or problem numbers (e.g., Two Sum, #1, Sliding Window)..."
+              placeholder="Search problems by name, topic, #number, or date (e.g. Nov 23, Two Sum, Sliding Window)..."
               className="w-full bg-transparent text-sm sm:text-base text-white placeholder-slate-400 outline-none"
             />
             {searchQuery && (

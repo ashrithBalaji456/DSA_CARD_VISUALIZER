@@ -56,7 +56,15 @@ export interface CategoryInfo {
   color: string;
 }
 
-export type SortOption = 'number-asc' | 'number-desc' | 'difficulty-asc' | 'difficulty-desc' | 'title-asc' | 'title-desc';
+export type SortOption =
+  | 'number-asc'
+  | 'number-desc'
+  | 'difficulty-asc'
+  | 'difficulty-desc'
+  | 'title-asc'
+  | 'title-desc'
+  | 'date-desc'
+  | 'date-asc';
 
 export type StatusFilter = 'all' | 'solved' | 'unsolved' | 'bookmarked';
 

@@ -14,6 +14,7 @@ import { ProblemGrid } from './components/ProblemGrid';
 import { ProblemDetail } from './components/ProblemDetail';
 import { ProgressDashboard } from './components/ProgressDashboard';
 import { SearchModal } from './components/SearchModal';
+import { LatestAdditionsNotification } from './components/LatestAdditionsNotification';
 import {
   Sparkles,
   BookOpen,
@@ -63,6 +64,18 @@ export function App() {
     bookmarkedCount,
     setBookmarkedIds,
   } = useBookmarks();
+
+  // Latest 3 added problems computed automatically from PROBLEMS array
+  const latestThreeProblems = useMemo(() => {
+    return [...PROBLEMS]
+      .sort((a, b) => {
+        const dateA = a.addedDate || '1970-01-01';
+        const dateB = b.addedDate || '1970-01-01';
+        const cmp = dateB.localeCompare(dateA);
+        return cmp !== 0 ? cmp : b.number - a.number;
+      })
+      .slice(0, 3);
+  }, []);
 
   // Handle global shortcut keys ('/' or Cmd/Ctrl+K to open search, 'Escape' to close)
   useEffect(() => {
@@ -161,6 +174,12 @@ export function App() {
         totalCount={totalCount}
         bookmarkedCount={bookmarkedCount}
         onOpenSearch={() => setIsSearchModalOpen(true)}
+        latestProblems={latestThreeProblems}
+        onSelectProblem={setSelectedProblem}
+        onSortByDate={() => {
+          setSortBy('date-desc');
+          setActiveTab('problems');
+        }}
       />
 
       {/* Main Content Area */}
@@ -181,6 +200,25 @@ export function App() {
                 if (q) setActiveTab('problems');
               }}
               onSelectFilter={handleHeroFilterClick}
+            />
+
+            {/* Notification Section: Latest 3 Added Problem Cards */}
+            <LatestAdditionsNotification
+              latestProblems={latestThreeProblems}
+              solvedIds={solvedIds}
+              bookmarkedIds={bookmarkedIds}
+              onToggleSolved={toggleSolved}
+              onToggleBookmark={toggleBookmark}
+              onExplore={setSelectedProblem}
+              onSelectCategory={(cat) => {
+                setSelectedCategory(cat.toLowerCase().replace(/ /g, '-'));
+                setActiveTab('problems');
+              }}
+              onSortByDate={() => {
+                setSortBy('date-desc');
+                setActiveTab('problems');
+              }}
+              onViewAll={() => setActiveTab('problems')}
             />
 
             {/* Category Quick Overview */}
