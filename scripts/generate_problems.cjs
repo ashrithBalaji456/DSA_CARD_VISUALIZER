@@ -1977,6 +1977,11 @@ const problems = [
     "optimalApproach": "Monotonic Stack + Hash Map Lookup",
     "relatedProblems": [
       {
+        "number": 739,
+        "title": "Daily Temperatures",
+        "difficulty": "Medium"
+      },
+      {
         "number": 155,
         "title": "Min Stack (Dual Stack O(1) Minimum)",
         "difficulty": "Medium"
@@ -5468,6 +5473,115 @@ const problems = [
       }
     ],
     "leetcodeUrl": "https://leetcode.com/problems/evaluate-reverse-polish-notation/"
+  },
+  {
+    "id": "daily-temperatures",
+    "number": 739,
+    "title": "Daily Temperatures",
+    "slug": "daily-temperatures",
+    "difficulty": "Medium",
+    "categories": [
+      "Stacks",
+      "Arrays"
+    ],
+    "description": "Given an array of integers temperatures represents the daily temperatures, return an array answer such that answer[i] is the number of days you have to wait after the ith day to get a warmer temperature. If there is no future day for which this is possible, keep answer[i] == 0 instead.",
+    "inputFormat": "temperatures = int[]",
+    "outputFormat": "int[] (days to wait for a warmer temperature)",
+    "constraints": [
+      "1 <= temperatures.length <= 10^5",
+      "30 <= temperatures[i] <= 100"
+    ],
+    "examples": [
+      {
+        "exampleNumber": 1,
+        "input": "temperatures = [73,74,75,71,69,72,76,73]",
+        "output": "[1,1,4,2,1,1,0,0]",
+        "explanation": "For day 2 (75), day 6 (76) is the next warmer day (6 - 2 = 4 days wait).",
+        "type": "official"
+      },
+      {
+        "exampleNumber": 2,
+        "input": "temperatures = [30,40,50,60]",
+        "output": "[1,1,1,0]",
+        "explanation": "Strictly increasing temperatures mean each day waits 1 day except the last.",
+        "type": "official"
+      },
+      {
+        "exampleNumber": 3,
+        "input": "temperatures = [30,60,90]",
+        "output": "[1,1,0]",
+        "explanation": "Day 0 waits 1 day for 60, day 1 waits 1 day for 90.",
+        "type": "official"
+      }
+    ],
+    "approach": "Monotonic Decreasing Stack: Maintain a Stack<Integer> of day indices whose temperatures are monotonically decreasing from bottom to top. As each day i arrives, while temperatures[i] > temperatures[stack.peek()], pop prevIndex and record answer[prevIndex] = i - prevIndex, then push i.",
+    "flowSteps": [
+      {
+        "step": 1,
+        "title": "Resolve Colder Waiting Days",
+        "description": "While !stack.isEmpty() && temperatures[i] > temperatures[stack.peek()], pop prevIndex and set answer[prevIndex] = i - prevIndex.",
+        "stateSnapshot": "answer[prevIndex] = i - prevIndex",
+        "highlight": "Monotonic Pop"
+      },
+      {
+        "step": 2,
+        "title": "Push Current Day Index",
+        "description": "Push current day index i onto the stack to await a warmer future day.",
+        "stateSnapshot": "stack.push(i)",
+        "highlight": "Push"
+      },
+      {
+        "step": 3,
+        "title": "Return Answer Array",
+        "description": "Any unresolved indices remaining in the stack automatically retain their default value 0.",
+        "stateSnapshot": "return answer",
+        "highlight": "Complete"
+      }
+    ],
+    "timeComplexity": "O(n)",
+    "timeComplexityExplanation": "Amortized linear time: each day index is pushed onto the stack at most once and popped at most once (at most 2n stack operations).",
+    "spaceComplexity": "O(n)",
+    "spaceComplexityExplanation": "The monotonic stack holds up to n day indices in the worst case (strictly decreasing temperatures).",
+    "visualizerUrl": "/visualizers/daily_temperatures_monotonic_stack_visualizer.html",
+    "addedDate": "2026-11-25",
+    "keyObservations": [
+      "Storing indices rather than temperatures on the stack allows both temperature lookup (temperatures[stack.peek()]) and exact day-distance calculation (i - prevIndex).",
+      "Even though there is a while loop inside a for loop, each index is pushed once and popped at most once, guaranteeing O(n) total runtime."
+    ],
+    "importantPattern": "Monotonic Decreasing Stack (Next Greater Element)",
+    "commonMistakes": [
+      "Using >= instead of > when comparing temperatures[i] with temperatures[stack.peek()], which wrongly counts equal temperatures as warmer.",
+      "Pushing temperature values instead of array indices, losing the ability to compute (i - prevIndex)."
+    ],
+    "optimalApproach": "Single-Pass Monotonic Decreasing Stack<Integer> of Indices",
+    "relatedProblems": [
+      {
+        "number": 496,
+        "title": "Next Greater Element I",
+        "difficulty": "Easy"
+      },
+      {
+        "number": 239,
+        "title": "Sliding Window Maximum",
+        "difficulty": "Hard"
+      },
+      {
+        "number": 20,
+        "title": "Valid Parentheses (Balanced Stack)",
+        "difficulty": "Easy"
+      },
+      {
+        "number": 155,
+        "title": "Min Stack (Dual Stack O(1) Minimum)",
+        "difficulty": "Medium"
+      },
+      {
+        "number": 150,
+        "title": "Evaluate Reverse Polish Notation",
+        "difficulty": "Medium"
+      }
+    ],
+    "leetcodeUrl": "https://leetcode.com/problems/daily-temperatures/"
   }
 ];
 

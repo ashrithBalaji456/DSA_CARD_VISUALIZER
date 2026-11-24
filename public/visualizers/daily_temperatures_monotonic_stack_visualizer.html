@@ -1,0 +1,1575 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Daily Temperatures - Glassmorphic Visualizer</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: radial-gradient(circle at 14% 16%, #0c192c 0%, #030712 100%);
+      color: #e2e8f0;
+      min-height: 100vh;
+    }
+
+    .code-font {
+      font-family: 'Fira Code', monospace;
+    }
+
+    /* Glassmorphic Surface & Controls */
+    .glass-panel {
+      background: rgba(15, 23, 42, 0.56);
+      backdrop-filter: blur(22px);
+      -webkit-backdrop-filter: blur(22px);
+      border: 1px solid rgba(255, 255, 255, 0.11);
+      box-shadow: 0 20px 45px -15px rgba(0, 0, 0, 0.68), inset 0 1px 0 0 rgba(255, 255, 255, 0.09);
+    }
+
+    .glass-button {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .glass-button:hover:not(:disabled) {
+      background: rgba(255, 255, 255, 0.15);
+      border-color: rgba(255, 255, 255, 0.28);
+      transform: translateY(-1px);
+    }
+    .glass-button:active:not(:disabled) {
+      transform: translateY(1px);
+    }
+    .glass-button:disabled {
+      opacity: 0.35;
+      cursor: not-allowed;
+    }
+
+    /* Code Execution Line Highlight with Exact Preserved Indentation */
+    .code-line {
+      white-space: pre;
+      transition: all 0.2s ease;
+      border-left: 3px solid transparent;
+      padding: 2px 10px;
+    }
+    .code-line.active-line {
+      background: rgba(56, 189, 248, 0.18);
+      border-left: 3px solid #38bdf8;
+      color: #ffffff;
+      box-shadow: inset 0 0 16px rgba(56, 189, 248, 0.15);
+    }
+
+    /* Glassy Temperature Day Cards & Thermal Bars */
+    .temp-card {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      transition: all 0.28s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    .temp-card.in-stack-day {
+      background: linear-gradient(180deg, rgba(56, 189, 248, 0.16) 0%, rgba(14, 165, 233, 0.06) 100%);
+      border-color: rgba(56, 189, 248, 0.62);
+      box-shadow: 0 8px 20px -6px rgba(56, 189, 248, 0.25);
+    }
+
+    .temp-card.resolved-day {
+      background: linear-gradient(180deg, rgba(16, 185, 129, 0.16) 0%, rgba(5, 150, 105, 0.05) 100%);
+      border-color: rgba(52, 211, 153, 0.55);
+    }
+
+    .temp-card.colder-target-day {
+      background: linear-gradient(180deg, rgba(168, 85, 247, 0.28) 0%, rgba(126, 34, 206, 0.12) 100%) !important;
+      border-color: rgba(192, 132, 252, 0.95) !important;
+      transform: translateY(-4px) scale(1.03);
+      box-shadow: 0 12px 26px -4px rgba(168, 85, 247, 0.45) !important;
+      z-index: 15;
+    }
+
+    .temp-card.warmer-scanner-day {
+      background: linear-gradient(180deg, rgba(251, 146, 60, 0.28) 0%, rgba(234, 88, 12, 0.12) 100%) !important;
+      border-color: rgba(251, 191, 36, 0.95) !important;
+      transform: translateY(-6px) scale(1.05);
+      box-shadow: 0 12px 28px -4px rgba(249, 115, 22, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.28) !important;
+      z-index: 20;
+    }
+
+    /* Vertical Open-Topped U-Shaped Monotonic Stack Vessel */
+    .lifo-stack-vessel {
+      background: linear-gradient(180deg, rgba(15, 23, 42, 0.24) 0%, rgba(14, 116, 144, 0.20) 100%);
+      border-left: 2.5px solid rgba(34, 211, 238, 0.78);
+      border-right: 2.5px solid rgba(34, 211, 238, 0.78);
+      border-bottom: 2.5px solid rgba(34, 211, 238, 0.85);
+      border-top: none;
+      border-bottom-left-radius: 18px;
+      border-bottom-right-radius: 18px;
+      box-shadow:
+        inset 0 -16px 32px rgba(34, 211, 238, 0.08),
+        0 14px 30px -10px rgba(0, 0, 0, 0.65);
+    }
+
+    /* Glassy Stacked Day-Index Item Inside LIFO Vessel */
+    .stack-day-box {
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      background: linear-gradient(90deg, rgba(56, 189, 248, 0.22) 0%, rgba(168, 85, 247, 0.14) 100%);
+      border: 1px solid rgba(56, 189, 248, 0.68);
+      color: #e0f2fe;
+      transition: all 0.28s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    .stack-day-box.just-pushed {
+      transform: scale(1.04);
+      border-color: rgba(251, 191, 36, 0.95) !important;
+      box-shadow: 0 0 22px rgba(251, 191, 36, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.35);
+    }
+
+    .stack-day-box.colder-peek-alert {
+      background: linear-gradient(90deg, rgba(249, 115, 22, 0.32) 0%, rgba(244, 63, 94, 0.16) 100%) !important;
+      border-color: rgba(251, 146, 60, 0.95) !important;
+      transform: scale(1.04);
+      box-shadow: 0 0 22px rgba(249, 115, 22, 0.5);
+    }
+
+    /* Answer Output Array Slot Cards */
+    .answer-slot {
+      background: rgba(255, 255, 255, 0.035);
+      border: 1px dashed rgba(148, 163, 184, 0.35);
+      backdrop-filter: blur(10px);
+      transition: all 0.28s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    .answer-slot.answer-resolved {
+      background: linear-gradient(180deg, rgba(16, 185, 129, 0.18) 0%, rgba(5, 150, 105, 0.06) 100%);
+      border: 1px solid rgba(52, 211, 153, 0.62);
+    }
+
+    .answer-slot.answer-just-written {
+      background: linear-gradient(180deg, rgba(16, 185, 129, 0.34) 0%, rgba(5, 150, 105, 0.15) 100%) !important;
+      border: 1.5px solid rgba(52, 211, 153, 0.98) !important;
+      transform: translateY(-5px) scale(1.06);
+      box-shadow: 0 12px 28px -4px rgba(16, 185, 129, 0.52) !important;
+      z-index: 20;
+    }
+
+    @keyframes arcDash {
+      to {
+        stroke-dashoffset: -24;
+      }
+    }
+    .transfer-arc-path {
+      stroke-dasharray: 6 6;
+      animation: arcDash 0.8s linear infinite;
+    }
+
+    @keyframes completePulse {
+      0%, 100% { transform: scale(1); filter: drop-shadow(0 0 8px rgba(16, 185, 129, 0.45)); }
+      50% { transform: scale(1.04); filter: drop-shadow(0 0 20px rgba(16, 185, 129, 0.95)); }
+    }
+    .complete-badge-anim {
+      animation: completePulse 0.65s ease-in-out;
+    }
+
+    /* Custom Scrollbars */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: rgba(15, 23, 42, 0.4);
+    }
+    ::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.18);
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(255, 255, 255, 0.3);
+    }
+  </style>
+</head>
+<body class="p-2.5 sm:p-4 lg:px-5 lg:py-4 flex flex-col items-center justify-start min-h-screen">
+
+  <!-- Ambient Glass Glow Orbs -->
+  <div class="fixed top-6 left-1/6 w-96 h-96 bg-cyan-500/14 rounded-full blur-3xl pointer-events-none -z-10"></div>
+  <div class="fixed top-1/3 right-1/6 w-96 h-96 bg-orange-500/12 rounded-full blur-3xl pointer-events-none -z-10"></div>
+  <div class="fixed bottom-12 left-1/2 w-80 h-80 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none -z-10"></div>
+
+  <!-- MAIN WRAPPER -->
+  <div class="w-full max-w-[1560px] flex flex-col gap-5">
+
+    <!-- TOP FROSTED-GLASS CONTROLS DECK -->
+    <header class="glass-panel rounded-2xl p-4 sm:p-5 flex flex-col gap-4 sticky top-3 z-50">
+      <div class="flex flex-wrap items-center justify-between gap-4">
+
+        <!-- Title & Algorithm Metadata -->
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-cyan-500 via-orange-400 to-emerald-400 flex items-center justify-center shadow-lg shadow-orange-500/25 text-slate-950 font-bold text-lg">
+            <i class="fa-solid fa-temperature-three-quarters"></i>
+          </div>
+          <div>
+            <h1 class="text-lg sm:text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white via-amber-100 to-cyan-300">
+              Daily Temperatures
+            </h1>
+            <p class="text-xs text-slate-400 flex items-center gap-2">
+              <span class="inline-block w-2 h-2 rounded-full bg-cyan-400 animate-pulse"></span>
+              Next Warmer Day (LeetCode 739) • Monotonic Decreasing Stack&lt;Integer&gt; • &Omicron;(n) Time • &Omicron;(n) Space
+            </p>
+          </div>
+        </div>
+
+        <!-- Center Playback Controls: Reset, Previous, Start/Stop, Next -->
+        <div class="flex items-center gap-2 sm:gap-3 bg-white/5 p-1.5 rounded-xl border border-white/10 backdrop-blur-md">
+          <button id="btnReset" class="glass-button text-slate-200 hover:text-white px-3 py-2 rounded-lg text-sm flex items-center gap-1.5" title="Reset to Initial State">
+            <i class="fa-solid fa-rotate-left"></i>
+            <span class="hidden sm:inline">Reset</span>
+          </button>
+          <button id="btnPrev" class="glass-button text-slate-200 hover:text-white px-3 py-2 rounded-lg text-sm flex items-center gap-1.5" title="Previous Step (Left Arrow)">
+            <i class="fa-solid fa-backward-step"></i>
+            <span class="hidden sm:inline">Previous</span>
+          </button>
+          <button id="btnPlay" class="glass-button bg-cyan-500/25 text-cyan-200 hover:bg-cyan-500/35 border-cyan-400/50 px-4 py-2 rounded-lg text-sm font-semibold flex items-center gap-2 shadow-lg shadow-cyan-500/15" title="Start / Stop (Spacebar)">
+            <i class="fa-solid fa-play" id="playIcon"></i>
+            <span id="playText">Start</span>
+          </button>
+          <button id="btnNext" class="glass-button text-slate-200 hover:text-white px-3 py-2 rounded-lg text-sm flex items-center gap-1.5" title="Next Step (Right Arrow)">
+            <span class="hidden sm:inline">Next</span>
+            <i class="fa-solid fa-forward-step"></i>
+          </button>
+        </div>
+
+        <!-- Speed & Audio Controls -->
+        <div class="flex items-center gap-2">
+          <div class="flex items-center bg-white/5 rounded-xl p-1 border border-white/10 text-xs text-slate-300 backdrop-blur-md">
+            <span class="px-2 py-1 text-slate-400"><i class="fa-solid fa-gauge-high mr-1"></i>Speed</span>
+            <button class="speed-btn px-2 py-1 rounded-lg hover:text-white transition" data-speed="1300">0.5x</button>
+            <button class="speed-btn px-2 py-1 rounded-lg bg-cyan-500/30 text-cyan-200 font-semibold transition" data-speed="650">1x</button>
+            <button class="speed-btn px-2 py-1 rounded-lg hover:text-white transition" data-speed="280">2x</button>
+            <button class="speed-btn px-2 py-1 rounded-lg hover:text-white transition" data-speed="110">4x</button>
+          </div>
+          <button id="btnAudio" class="glass-button p-2.5 rounded-xl text-slate-300 hover:text-cyan-300" title="Toggle Sound Effects">
+            <i class="fa-solid fa-volume-high" id="audioIcon"></i>
+          </button>
+        </div>
+
+      </div>
+
+      <!-- Scrubber Slider & Status Badges -->
+      <div class="flex flex-col sm:flex-row items-center gap-3 pt-2 border-t border-white/10">
+        <div class="flex flex-wrap items-center gap-2 text-xs text-slate-300 w-full sm:w-auto shrink-0">
+          <span id="stepCounterBadge" class="code-font px-2.5 py-1 rounded-md bg-white/5 border border-white/10 text-cyan-300">
+            Step: 0 / 0
+          </span>
+          <span id="phaseBadge" class="px-2.5 py-1 rounded-md bg-sky-500/20 border border-sky-400/30 text-sky-200 font-semibold">
+            Ready
+          </span>
+          <span id="stackSizeHeaderBadge" class="px-2.5 py-1 rounded-md bg-purple-500/20 border border-purple-400/30 text-purple-200 font-bold">
+            stack.size(): 0
+          </span>
+          <span id="resolvedHeaderBadge" class="px-2.5 py-1 rounded-md bg-emerald-500/20 border border-emerald-400/30 text-emerald-200 font-bold">
+            Resolved: 0 / 8
+          </span>
+        </div>
+        <div class="w-full flex items-center gap-3">
+          <input type="range" id="stepScrubber" min="0" max="0" value="0" class="w-full h-1.5 bg-slate-800/80 rounded-lg appearance-none cursor-pointer accent-cyan-400">
+        </div>
+      </div>
+    </header>
+
+    <!-- TEST CASES & CUSTOM TEMPERATURES BAR -->
+    <section class="glass-panel rounded-2xl p-4 flex flex-wrap items-center justify-between gap-4">
+      <div class="flex flex-wrap items-center gap-3">
+        <label for="presetSelect" class="text-xs uppercase font-semibold text-slate-300 tracking-wider flex items-center gap-1.5">
+          <i class="fa-solid fa-flask text-cyan-400"></i> Forecast Scenarios:
+        </label>
+        <select id="presetSelect" class="bg-slate-900/75 border border-white/15 text-xs sm:text-sm text-slate-200 rounded-xl px-3 py-2 outline-none focus:border-cyan-400 backdrop-blur-md">
+          <option value="0">1: Example 1 ([73, 74, 75, 71, 69, 72, 76, 73] &rarr; [1, 1, 4, 2, 1, 1, 0, 0])</option>
+          <option value="1">2: Example 2 Warm Streak ([30, 40, 50, 60] &rarr; [1, 1, 1, 0])</option>
+          <option value="2">3: Example 3 Heatwave ([30, 60, 90] &rarr; [1, 1, 0])</option>
+          <option value="3">4: Cooling Cold Front ([85, 80, 75, 70, 65] &rarr; [0, 0, 0, 0, 0])</option>
+          <option value="4">5: Equal Temperatures Plateau ([70, 70, 70, 75] &rarr; [3, 2, 1, 0])</option>
+          <option value="5">6: Deep Valley &amp; Spike ([80, 62, 58, 60, 65, 90] &rarr; [5, 3, 1, 1, 1, 0])</option>
+          <option value="6">7: Alternating Fronts ([65, 78, 64, 82, 60, 88] &rarr; [1, 2, 1, 2, 1, 0])</option>
+          <option value="7">8: Peak First, Never Warmer ([95, 72, 74, 71, 76] &rarr; [0, 1, 2, 1, 0])</option>
+          <option value="8">9: Two-Day Warmup ([55, 68] &rarr; [1, 0])</option>
+          <option value="9">10: Single Day Forecast ([72] &rarr; [0])</option>
+        </select>
+      </div>
+
+      <div class="flex items-center gap-2 flex-grow max-w-md">
+        <input type="text" id="customTempsInput" placeholder="Temperatures (30..100): 73, 74, 75, 71, 69, 72, 76, 73" class="w-full bg-white/5 border border-white/15 rounded-xl px-3 py-2 text-xs text-slate-200 code-font outline-none focus:border-cyan-400 backdrop-blur-md" title="Comma-separated daily temperatures">
+        <button id="btnApplyCustom" class="glass-button text-xs px-4 py-2 rounded-xl text-cyan-300 font-semibold shrink-0">
+          Load Temps
+        </button>
+      </div>
+    </section>
+
+    <!-- MAIN VISUALIZATION & CODE SECTION -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-5">
+
+      <!-- LEFT: THERMAL TIMELINE, VERTICAL MONOTONIC STACK & ANSWER ARRAY -->
+      <section class="lg:col-span-7 xl:col-span-8 flex flex-col gap-5">
+
+        <!-- Live Variable Telemetry Cards -->
+        <div class="grid grid-cols-2 sm:grid-cols-5 gap-3">
+
+          <!-- Current Day i & Temperature -->
+          <div class="glass-panel rounded-xl p-3 flex flex-col justify-between border-amber-400/35">
+            <span class="text-[11px] text-slate-400 uppercase font-semibold flex items-center justify-between">
+              Current Day (i)
+              <span class="w-2 h-2 rounded-full bg-amber-400"></span>
+            </span>
+            <div class="flex items-baseline gap-1.5 mt-1.5">
+              <span id="varPtrI" class="code-font text-xl font-bold text-amber-300">-</span>
+              <span id="varCurTemp" class="text-xs text-amber-200 code-font font-bold"></span>
+            </div>
+            <span class="text-[10px] text-amber-200/75 mt-1 code-font">temperatures[i]</span>
+          </div>
+
+          <!-- stack.peek() -->
+          <div class="glass-panel rounded-xl p-3 flex flex-col justify-between border-cyan-400/35">
+            <span class="text-[11px] text-slate-400 uppercase font-semibold flex items-center justify-between">
+              stack.peek()
+              <i class="fa-solid fa-eye text-cyan-400 text-[10px]"></i>
+            </span>
+            <div class="flex items-baseline gap-1.5 mt-1.5">
+              <span id="varStackPeek" class="code-font text-base sm:text-lg font-bold text-cyan-300">empty</span>
+            </div>
+            <span class="text-[10px] text-cyan-200/75 mt-1 code-font">Coldest waiting day</span>
+          </div>
+
+          <!-- Popped Register: int prevIndex -->
+          <div class="glass-panel rounded-xl p-3 flex flex-col justify-between border-purple-400/35">
+            <span class="text-[11px] text-slate-400 uppercase font-semibold flex items-center justify-between">
+              int prevIndex
+              <i class="fa-solid fa-arrow-up-from-bracket text-purple-400 text-[10px]"></i>
+            </span>
+            <div class="flex items-baseline gap-1.5 mt-1.5">
+              <span id="varPrevIdx" class="code-font text-xl font-bold text-slate-400">-</span>
+              <span id="varPrevTemp" class="text-xs text-purple-200 code-font"></span>
+            </div>
+            <span class="text-[10px] text-purple-200/75 mt-1 code-font">stack.pop()</span>
+          </div>
+
+          <!-- Wait Days Formula: i - prevIndex -->
+          <div class="glass-panel rounded-xl p-3 flex flex-col justify-between border-sky-400/35">
+            <span class="text-[11px] text-slate-400 uppercase font-semibold flex items-center justify-between">
+              Wait Days
+              <i class="fa-solid fa-hourglass-half text-sky-400 text-[10px]"></i>
+            </span>
+            <div class="flex items-baseline gap-1.5 mt-1.5">
+              <span id="varWaitDays" class="code-font text-xl font-bold text-sky-300">-</span>
+            </div>
+            <span id="varWaitFormula" class="text-[10px] text-slate-400 mt-1 code-font">i - prevIndex</span>
+          </div>
+
+          <!-- Resolved Days Counter -->
+          <div id="resolvedStatsCard" class="glass-panel rounded-xl p-3 flex flex-col justify-between border-emerald-400/35 col-span-2 sm:col-span-1">
+            <span class="text-[11px] text-slate-400 uppercase font-semibold flex items-center justify-between">
+              Resolved
+              <i class="fa-solid fa-check-double text-emerald-400 text-[10px]"></i>
+            </span>
+            <div class="flex items-baseline gap-1.5 mt-1.5">
+              <span id="varResolvedCount" class="code-font text-xl font-black text-emerald-400">0 / 8</span>
+            </div>
+            <span class="text-[10px] text-emerald-300/80 mt-1 code-font">Remaining stay 0</span>
+          </div>
+
+        </div>
+
+        <!-- UNIFIED STAGE: TEMPERATURES[] TIMELINE, VERTICAL LIFO STACK & ANSWER[] ARRAY -->
+        <div id="stageWrapper" class="glass-panel relative rounded-2xl p-4 sm:p-5 flex flex-col gap-5">
+          <!-- SVG Trajectory Arc Overlay for Warmer-Day Span Bridges, Stack Push/Pop & Answer Writes -->
+          <svg id="transferArcSvg" class="absolute inset-0 w-full h-full pointer-events-none z-30 overflow-visible"></svg>
+
+          <!-- Floating Lift-and-Place Clone Layer -->
+          <div id="flyingCloneLayer" class="absolute inset-0 pointer-events-none z-40"></div>
+
+          <!-- 1. DAILY TEMPERATURES TIMELINE: int[] temperatures -->
+          <div class="flex flex-col gap-2.5">
+            <div class="flex flex-wrap items-center justify-between text-xs pb-2 border-b border-white/10 gap-2">
+              <span class="font-semibold text-slate-200 uppercase tracking-wider flex items-center gap-1.5">
+                <i class="fa-solid fa-temperature-high text-orange-400"></i>
+                Daily Forecast: <span class="code-font text-white">int[] temperatures</span>
+                <span id="tempsLenTag" class="code-font text-cyan-300">(n = 8)</span>
+              </span>
+
+              <div class="flex flex-wrap items-center gap-3 text-[11px]">
+                <span class="flex items-center gap-1.5">
+                  <span class="w-2.5 h-2.5 rounded-sm bg-amber-400 inline-block"></span> Current Day (i)
+                </span>
+                <span class="flex items-center gap-1.5">
+                  <span class="w-2.5 h-2.5 rounded-sm bg-cyan-400 inline-block"></span> Waiting in Stack
+                </span>
+                <span class="flex items-center gap-1.5">
+                  <span class="w-2.5 h-2.5 rounded-sm bg-emerald-400 inline-block"></span> Warmer Found
+                </span>
+              </div>
+            </div>
+
+            <!-- Scrollable Thermal Boxes & Proportional Mercury Bars (Extra top clearance pt-9 for warmer-day span arc) -->
+            <div id="tempsScrollContainer" class="relative w-full pt-9 pb-3 px-2.5 sm:px-3 rounded-xl bg-white/[0.02] border border-white/10 overflow-x-auto">
+              <div id="tempsStreamArena" class="relative z-20 w-full flex items-center justify-between gap-1.5 sm:gap-2 min-h-[168px]">
+                <!-- Populated dynamically with glassy temperature boxes + thermal bars -->
+              </div>
+            </div>
+          </div>
+
+          <!-- 2. VERTICAL MONOTONIC STACK<INTEGER> & OUTPUT ARRAY INT[] ANSWER -->
+          <div class="grid grid-cols-1 md:grid-cols-12 gap-5 items-stretch pt-1">
+
+            <!-- Left (5 Cols): Open-Topped Vertical Monotonic Decreasing Stack<Integer> -->
+            <div class="md:col-span-5 flex flex-col gap-2">
+              <div class="flex items-center justify-between text-xs pb-1.5 border-b border-white/10">
+                <span class="font-semibold text-cyan-300 uppercase tracking-wider flex items-center gap-1.5">
+                  <i class="fa-solid fa-layer-group text-cyan-400"></i>
+                  Monotonic <span class="code-font text-white">Stack&lt;Integer&gt;</span>
+                </span>
+                <span id="stackOrderBadge" class="code-font text-[10px] px-2 py-0.5 rounded bg-white/5 border border-white/10 text-slate-300">
+                  Decreasing Temps
+                </span>
+              </div>
+
+              <div class="relative flex-1 min-h-[255px] p-3.5 rounded-xl bg-white/[0.015] border border-white/10 flex flex-col items-center justify-end">
+                <!-- Open Mouth Entry Indicator Above Stack -->
+                <div class="w-44 sm:w-48 flex items-center justify-between text-[9px] code-font text-slate-400 pb-1.5 px-1">
+                  <span class="text-cyan-300 font-bold"><i class="fa-solid fa-arrow-down mr-1"></i>push(i)</span>
+                  <span>OPEN TOP</span>
+                  <span class="text-purple-300 font-bold">pop()<i class="fa-solid fa-arrow-up ml-1"></i></span>
+                </div>
+
+                <!-- U-Shaped Glass Vessel (Stacks Bottom-to-Top via flex-col-reverse) -->
+                <div id="stackVessel" class="lifo-stack-vessel relative w-44 sm:w-48 h-[196px] p-2.5 flex flex-col-reverse items-center justify-start gap-2 overflow-y-auto">
+                  <span class="my-auto text-xs text-slate-500 italic code-font">empty stack</span>
+                </div>
+
+                <span class="text-[10px] code-font text-slate-400 mt-2">Stores unresolved day indices</span>
+              </div>
+            </div>
+
+            <!-- Right (7 Cols): Resolution Chamber & Output Array int[] answer -->
+            <div class="md:col-span-7 flex flex-col gap-3">
+              <div class="flex items-center justify-between text-xs pb-1.5 border-b border-white/10">
+                <span class="font-semibold text-emerald-300 uppercase tracking-wider flex items-center gap-1.5">
+                  <i class="fa-solid fa-calendar-check text-emerald-400"></i>
+                  Resolution Chamber &amp; Output <span class="code-font text-white">int[] answer</span>
+                </span>
+                <span id="answerLenTag" class="code-font text-[10px] px-2 py-0.5 rounded bg-emerald-500/15 border border-emerald-400/30 text-emerald-200">
+                  len = 8
+                </span>
+              </div>
+
+              <!-- Wait-Days Resolution Chamber (prevIndex popped -> answer[prevIndex] = i - prevIndex) -->
+              <div id="resolutionChamber" class="p-3.5 rounded-xl bg-white/[0.02] border border-white/10 flex flex-wrap items-center justify-around gap-2">
+                <!-- Popped Colder Day (prevIndex) -->
+                <div class="flex flex-col items-center gap-1">
+                  <span class="text-[10px] code-font text-purple-300 font-bold">prevIndex (popped)</span>
+                  <div id="resPrevBox" class="w-20 h-14 rounded-xl bg-white/[0.03] border border-dashed border-slate-500/40 flex flex-col items-center justify-center transition-all duration-300">
+                    <span id="resPrevVal" class="code-font text-sm font-black text-slate-500">-</span>
+                    <span id="resPrevTempSub" class="text-[9px] code-font text-slate-500">colder day</span>
+                  </div>
+                </div>
+
+                <!-- Distance Formula -->
+                <div class="flex flex-col items-center justify-center pt-3">
+                  <span class="code-font text-xs text-slate-400">i &minus; prevIndex</span>
+                  <span class="code-font text-sm font-black text-amber-300" id="resDiffExpr">-</span>
+                </div>
+
+                <!-- Computed Wait Days Box -->
+                <div class="flex flex-col items-center gap-1">
+                  <span class="text-[10px] code-font text-emerald-300 font-bold">answer[prevIndex]</span>
+                  <div id="resWaitBox" class="w-20 h-14 rounded-xl bg-white/[0.03] border border-dashed border-slate-500/40 flex flex-col items-center justify-center transition-all duration-300">
+                    <span id="resWaitVal" class="code-font text-lg font-black text-slate-500">-</span>
+                    <span class="text-[8px] code-font text-slate-400">DAYS WAIT</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Output Array: int[] answer -->
+              <div class="flex-1 p-3.5 rounded-xl bg-white/[0.02] border border-white/10 flex flex-col justify-between gap-2">
+                <div class="flex items-center justify-between text-[11px]">
+                  <span class="font-semibold text-slate-200 uppercase tracking-wider flex items-center gap-1.5">
+                    <i class="fa-solid fa-table-cells text-cyan-400"></i> Output Array: <span class="code-font text-cyan-300">answer[]</span>
+                  </span>
+                  <span class="code-font text-[10px] text-slate-400">Default = 0 (if no warmer day)</span>
+                </div>
+
+                <div id="answerArrayArena" class="w-full flex items-center justify-between gap-1.5 sm:gap-2 min-h-[74px]">
+                  <!-- Populated dynamically with glassy boxes -->
+                </div>
+              </div>
+
+            </div>
+
+          </div>
+
+          <!-- Live Decision Banner -->
+          <div id="decisionBanner" class="p-3.5 rounded-xl bg-white/[0.04] border border-white/10 text-xs flex flex-col sm:flex-row items-center justify-between gap-3 backdrop-blur-md">
+            <div class="flex items-center gap-2.5">
+              <i id="decisionIcon" class="fa-solid fa-circle-info text-cyan-400 text-base"></i>
+              <span id="decisionText" class="text-slate-200">Ready to find how many days each day must wait for a warmer temperature.</span>
+            </div>
+            <div id="actionPill" class="hidden text-xs code-font px-3 py-1.5 rounded-lg bg-slate-950/70 border border-white/15 text-emerald-200 font-semibold shrink-0">
+              <!-- e.g. answer[0] = 1 - 0 = 1 -->
+            </div>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- RIGHT: SYNCHRONIZED & PROPERLY INDENTED JAVA CODE CONTAINER -->
+      <section class="lg:col-span-5 xl:col-span-4 flex flex-col gap-4">
+
+        <div class="glass-panel rounded-2xl p-4 flex flex-col h-full">
+          <div class="flex items-center justify-between pb-3 border-b border-white/10 text-xs">
+            <div class="flex items-center gap-2">
+              <div class="flex gap-1.5">
+                <span class="w-3 h-3 rounded-full bg-rose-500/80 inline-block"></span>
+                <span class="w-3 h-3 rounded-full bg-amber-500/80 inline-block"></span>
+                <span class="w-3 h-3 rounded-full bg-emerald-500/80 inline-block"></span>
+              </div>
+              <span class="code-font text-slate-200 font-semibold ml-2">Solution.java</span>
+            </div>
+            <span class="text-[11px] text-cyan-300 bg-cyan-500/15 px-2.5 py-0.5 rounded border border-cyan-400/25 code-font">
+              Monotonic Stack
+            </span>
+          </div>
+
+          <!-- Properly Indented Java Code Lines with Zero-Jump Localized Scroll -->
+          <div id="codeContainer" class="code-font text-xs sm:text-[13px] leading-relaxed text-slate-300 py-3 overflow-x-auto overflow-y-auto max-h-[620px] flex-grow select-none">
+            <div class="code-line" id="line1"><span class="text-slate-500 mr-2"> 1</span><span class="text-indigo-400 font-semibold">import</span> java.util.*;</div>
+            <div class="code-line" id="line2"><span class="text-slate-500 mr-2"> 2</span></div>
+            <div class="code-line" id="line3"><span class="text-slate-500 mr-2"> 3</span><span class="text-indigo-400 font-semibold">class</span> <span class="text-amber-300">Solution</span> {</div>
+            <div class="code-line" id="line4"><span class="text-slate-500 mr-2"> 4</span>    <span class="text-indigo-400 font-semibold">public int</span>[] <span class="text-cyan-300">dailyTemperatures</span>(<span class="text-indigo-400">int</span>[] temperatures) {</div>
+            <div class="code-line" id="line5"><span class="text-slate-500 mr-2"> 5</span></div>
+            <div class="code-line" id="line6"><span class="text-slate-500 mr-2"> 6</span>        <span class="text-indigo-400 font-semibold">int</span> n = temperatures.length;</div>
+            <div class="code-line" id="line7"><span class="text-slate-500 mr-2"> 7</span></div>
+            <div class="code-line" id="line8"><span class="text-slate-500 mr-2"> 8</span>        <span class="text-indigo-400 font-semibold">int</span>[] answer = <span class="text-indigo-400 font-semibold">new int</span>[n];</div>
+            <div class="code-line" id="line9"><span class="text-slate-500 mr-2"> 9</span></div>
+            <div class="code-line" id="line10"><span class="text-slate-500 mr-2">10</span>        Stack&lt;Integer&gt; stack = <span class="text-indigo-400 font-semibold">new</span> Stack&lt;&gt;();</div>
+            <div class="code-line" id="line11"><span class="text-slate-500 mr-2">11</span></div>
+            <div class="code-line" id="line12"><span class="text-slate-500 mr-2">12</span>        <span class="text-indigo-400 font-semibold">for</span> (<span class="text-indigo-400">int</span> i = <span class="text-rose-400">0</span>; i &lt; n; i++) {</div>
+            <div class="code-line" id="line13"><span class="text-slate-500 mr-2">13</span></div>
+            <div class="code-line" id="line14"><span class="text-slate-500 mr-2">14</span>            <span class="text-slate-500 italic">// Find previous days with colder temperatures</span></div>
+            <div class="code-line" id="line15"><span class="text-slate-500 mr-2">15</span>            <span class="text-indigo-400 font-semibold">while</span> (!stack.isEmpty() &amp;&amp;</div>
+            <div class="code-line" id="line16"><span class="text-slate-500 mr-2">16</span>                   temperatures[i] &gt; temperatures[stack.peek()]) {</div>
+            <div class="code-line" id="line17"><span class="text-slate-500 mr-2">17</span></div>
+            <div class="code-line" id="line18"><span class="text-slate-500 mr-2">18</span>                <span class="text-indigo-400 font-semibold">int</span> prevIndex = stack.pop();</div>
+            <div class="code-line" id="line19"><span class="text-slate-500 mr-2">19</span></div>
+            <div class="code-line" id="line20"><span class="text-slate-500 mr-2">20</span>                answer[prevIndex] = i - prevIndex;</div>
+            <div class="code-line" id="line21"><span class="text-slate-500 mr-2">21</span>            }</div>
+            <div class="code-line" id="line22"><span class="text-slate-500 mr-2">22</span></div>
+            <div class="code-line" id="line23"><span class="text-slate-500 mr-2">23</span>            <span class="text-slate-500 italic">// Store current day's index</span></div>
+            <div class="code-line" id="line24"><span class="text-slate-500 mr-2">24</span>            stack.push(i);</div>
+            <div class="code-line" id="line25"><span class="text-slate-500 mr-2">25</span>        }</div>
+            <div class="code-line" id="line26"><span class="text-slate-500 mr-2">26</span></div>
+            <div class="code-line" id="line27"><span class="text-slate-500 mr-2">27</span>        <span class="text-indigo-400 font-semibold">return</span> answer;</div>
+            <div class="code-line" id="line28"><span class="text-slate-500 mr-2">28</span>    }</div>
+            <div class="code-line" id="line29"><span class="text-slate-500 mr-2">29</span>}</div>
+          </div>
+
+          <!-- Live Step Narrative Box -->
+          <div class="mt-3 p-3 bg-white/[0.04] border border-white/10 rounded-xl flex items-start gap-2.5 backdrop-blur-md">
+            <i class="fa-solid fa-circle-info text-cyan-400 mt-0.5 text-xs"></i>
+            <div class="text-xs text-slate-200 leading-relaxed" id="stepDescription">
+              Ready to run Daily Temperatures. Click <b>Start</b> or <b>Next</b> to step through.
+            </div>
+          </div>
+
+        </div>
+
+      </section>
+
+    </div>
+
+    <!-- BOTTOM SECTION: PROBLEM STATEMENT & ARCHITECTURAL SUMMARY -->
+    <footer class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-2">
+
+      <!-- Problem Statement Card -->
+      <div class="glass-panel rounded-2xl p-5 flex flex-col gap-3">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <span class="text-amber-400 font-bold"><i class="fa-solid fa-file-lines mr-1.5"></i>Problem Statement</span>
+            <span class="px-2 py-0.5 rounded text-[11px] font-semibold bg-amber-500/20 text-amber-300 border border-amber-400/30">Medium</span>
+          </div>
+          <span class="text-xs text-slate-400 font-mono">Daily Temperatures (LeetCode 739)</span>
+        </div>
+
+        <p class="text-xs text-slate-300 leading-relaxed">
+          Given an array of integers <code class="font-mono text-cyan-300">temperatures</code> representing the daily temperatures, return an array <code class="font-mono text-emerald-300">answer</code> such that <code class="font-mono">answer[i]</code> is the <b>number of days you have to wait</b> after the <code class="font-mono">i<sup>th</sup></code> day to get a <b>warmer temperature</b>. If there is no future day for which this is possible, keep <code class="font-mono">answer[i] == 0</code> instead.
+        </p>
+
+        <div class="space-y-2 pt-2 border-t border-white/10 text-xs text-slate-300">
+          <div class="bg-white/[0.03] p-2.5 rounded-lg border border-white/10 font-mono">
+            <span class="text-slate-400">Example 1:</span><br>
+            <b>Input:</b> temperatures = [73,74,75,71,69,72,76,73]<br>
+            <b>Output:</b> <span class="text-emerald-400 font-bold">[1,1,4,2,1,1,0,0]</span>
+          </div>
+          <div class="bg-white/[0.03] p-2.5 rounded-lg border border-white/10 font-mono grid grid-cols-1 sm:grid-cols-2 gap-1.5">
+            <div><span class="text-slate-400">Example 2:</span> [30,40,50,60] &rarr; <span class="text-emerald-400 font-bold">[1,1,1,0]</span></div>
+            <div><span class="text-slate-400">Example 3:</span> [30,60,90] &rarr; <span class="text-emerald-400 font-bold">[1,1,0]</span></div>
+          </div>
+        </div>
+
+        <div class="text-[11px] text-slate-400">
+          <b>Constraints:</b> <code class="font-mono text-slate-300">1 &le; temperatures.length &le; 10<sup>5</sup></code>, <code class="font-mono text-slate-300">30 &le; temperatures[i] &le; 100</code>.
+        </div>
+      </div>
+
+      <!-- Algorithm Summary & Monotonic Decreasing Stack Proof Card -->
+      <div class="glass-panel rounded-2xl p-5 flex flex-col gap-3">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <span class="text-cyan-400 font-bold"><i class="fa-solid fa-brain mr-1.5"></i>Algorithm Summary &amp; Monotonic Stack Invariant</span>
+          </div>
+          <span class="px-2 py-0.5 rounded text-[11px] font-semibold bg-cyan-500/20 text-cyan-200 border border-cyan-400/30">O(N) Time • O(N) Space</span>
+        </div>
+
+        <div class="space-y-3 text-xs text-slate-300 leading-relaxed">
+          <div class="p-3 bg-cyan-950/30 border border-cyan-400/25 rounded-xl">
+            <b class="text-cyan-300 flex items-center gap-1.5 mb-1">
+              <i class="fa-solid fa-layer-group"></i> Why Store Indices in Monotonic Decreasing Order?
+            </b>
+            <code class="font-mono text-cyan-300 font-semibold">Stack&lt;Integer&gt; stack</code> stores indices of previous days whose warmer day has not yet arrived, ordered from <b>warmest at the bottom to coldest at the top</b>. When day <code class="font-mono">i</code> arrives with a warmer temperature (<code class="font-mono text-amber-300">temperatures[i] &gt; temperatures[stack.peek()]</code>), it immediately resolves all colder days sitting on top of the stack with wait time <code class="font-mono text-emerald-300 font-bold">i - prevIndex</code>.
+          </div>
+
+          <div class="p-3 bg-purple-950/25 border border-purple-400/20 rounded-xl">
+            <b class="text-purple-300 flex items-center gap-1.5 mb-1">
+              <i class="fa-solid fa-bolt"></i> Why Nested Loops Still Run in Amortized <code class="font-mono">&Omicron;(N)</code> Time:
+            </b>
+            Every day index <code class="font-mono">0 .. n - 1</code> is pushed onto <code class="font-mono">stack</code> <b>at most once</b> (Line 24) and popped <b>at most once</b> (Line 18). Therefore, across the entire <code class="font-mono">for</code> loop, the inner <code class="font-mono">while</code> loop executes at most <code class="font-mono">N</code> pops in total (<code class="font-mono">2N = &Omicron;(N)</code>).
+          </div>
+
+          <div class="grid grid-cols-2 gap-3 pt-1">
+            <div class="p-2.5 bg-white/[0.03] rounded-lg border border-white/10">
+              <span class="text-[11px] text-slate-400 uppercase font-semibold">Time Complexity</span>
+              <div class="text-sm font-bold text-emerald-400 font-mono mt-0.5">&Omicron;(N)</div>
+              <p class="text-[10px] text-slate-400 mt-0.5">Linear single pass; each index enters and leaves <code class="font-mono">stack</code> at most once.</p>
+            </div>
+            <div class="p-2.5 bg-white/[0.03] rounded-lg border border-white/10">
+              <span class="text-[11px] text-slate-400 uppercase font-semibold">Space Complexity</span>
+              <div class="text-sm font-bold text-cyan-400 font-mono mt-0.5">&Omicron;(N)</div>
+              <p class="text-[10px] text-slate-400 mt-0.5">Worst-case stack depth is <code class="font-mono">N</code> when temperatures strictly decrease (e.g., <code class="font-mono">[85, 80, 75]</code>).</p>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+    </footer>
+
+  </div>
+
+  <!-- JAVASCRIPT SIMULATION ENGINE WITH VERTICAL MONOTONIC STACK & LIFT-AND-ARC TRANSFERS -->
+  <script>
+    // 10 COMPREHENSIVE FORECAST PRESETS
+    const PRESETS = [
+      { name: "1: Example 1 ([73, 74, 75, 71, 69, 72, 76, 73])", temps: [73, 74, 75, 71, 69, 72, 76, 73] },
+      { name: "2: Example 2 Warm Streak ([30, 40, 50, 60])", temps: [30, 40, 50, 60] },
+      { name: "3: Example 3 Heatwave ([30, 60, 90])", temps: [30, 60, 90] },
+      { name: "4: Cooling Cold Front ([85, 80, 75, 70, 65])", temps: [85, 80, 75, 70, 65] },
+      { name: "5: Equal Temperatures Plateau ([70, 70, 70, 75])", temps: [70, 70, 70, 75] },
+      { name: "6: Deep Valley & Spike ([80, 62, 58, 60, 65, 90])", temps: [80, 62, 58, 60, 65, 90] },
+      { name: "7: Alternating Fronts ([65, 78, 64, 82, 60, 88])", temps: [65, 78, 64, 82, 60, 88] },
+      { name: "8: Peak First, Never Warmer ([95, 72, 74, 71, 76])", temps: [95, 72, 74, 71, 76] },
+      { name: "9: Two-Day Warmup ([55, 68])", temps: [55, 68] },
+      { name: "10: Single Day Forecast ([72])", temps: [72] }
+    ];
+
+    // APPLICATION STATE
+    let currentTemps = [...PRESETS[0].temps];
+    let steps = [];
+    let currentStepIdx = 0;
+    let isPlaying = false;
+    let playInterval = null;
+    let playSpeed = 650;
+    let audioEnabled = true;
+
+    // WEB AUDIO SYNTHESIZER
+    let audioCtx = null;
+    function initAudio() {
+      if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      }
+    }
+    function playTone(freq = 440, type = 'sine', duration = 0.08, vol = 0.035) {
+      if (!audioEnabled) return;
+      try {
+        initAudio();
+        if (audioCtx.state === 'suspended') {
+          audioCtx.resume();
+        }
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = type;
+        osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+        gain.gain.setValueAtTime(vol, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + duration);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + duration);
+      } catch (e) {}
+    }
+
+    // DOM REFERENCES
+    const btnPlay = document.getElementById('btnPlay');
+    const playIcon = document.getElementById('playIcon');
+    const playText = document.getElementById('playText');
+    const btnPrev = document.getElementById('btnPrev');
+    const btnNext = document.getElementById('btnNext');
+    const btnReset = document.getElementById('btnReset');
+    const btnAudio = document.getElementById('btnAudio');
+    const audioIcon = document.getElementById('audioIcon');
+    const presetSelect = document.getElementById('presetSelect');
+    const customTempsInput = document.getElementById('customTempsInput');
+    const btnApplyCustom = document.getElementById('btnApplyCustom');
+    const stepScrubber = document.getElementById('stepScrubber');
+    const stepCounterBadge = document.getElementById('stepCounterBadge');
+    const phaseBadge = document.getElementById('phaseBadge');
+    const stackSizeHeaderBadge = document.getElementById('stackSizeHeaderBadge');
+    const resolvedHeaderBadge = document.getElementById('resolvedHeaderBadge');
+
+    const varPtrI = document.getElementById('varPtrI');
+    const varCurTemp = document.getElementById('varCurTemp');
+    const varStackPeek = document.getElementById('varStackPeek');
+    const varPrevIdx = document.getElementById('varPrevIdx');
+    const varPrevTemp = document.getElementById('varPrevTemp');
+    const varWaitDays = document.getElementById('varWaitDays');
+    const varWaitFormula = document.getElementById('varWaitFormula');
+    const resolvedStatsCard = document.getElementById('resolvedStatsCard');
+    const varResolvedCount = document.getElementById('varResolvedCount');
+
+    const stageWrapper = document.getElementById('stageWrapper');
+    const transferArcSvg = document.getElementById('transferArcSvg');
+    const flyingCloneLayer = document.getElementById('flyingCloneLayer');
+    const tempsLenTag = document.getElementById('tempsLenTag');
+    const tempsScrollContainer = document.getElementById('tempsScrollContainer');
+    const tempsStreamArena = document.getElementById('tempsStreamArena');
+
+    const stackOrderBadge = document.getElementById('stackOrderBadge');
+    const stackVessel = document.getElementById('stackVessel');
+    const answerLenTag = document.getElementById('answerLenTag');
+    const resPrevBox = document.getElementById('resPrevBox');
+    const resPrevVal = document.getElementById('resPrevVal');
+    const resPrevTempSub = document.getElementById('resPrevTempSub');
+    const resDiffExpr = document.getElementById('resDiffExpr');
+    const resWaitBox = document.getElementById('resWaitBox');
+    const resWaitVal = document.getElementById('resWaitVal');
+    const answerArrayArena = document.getElementById('answerArrayArena');
+
+    const decisionBanner = document.getElementById('decisionBanner');
+    const decisionIcon = document.getElementById('decisionIcon');
+    const decisionText = document.getElementById('decisionText');
+    const actionPill = document.getElementById('actionPill');
+    const codeContainer = document.getElementById('codeContainer');
+    const stepDescription = document.getElementById('stepDescription');
+
+    // HELPER: Thermal Bar Color by Temperature Value
+    function getThermalBarGradient(temp, minT, maxT) {
+      const ratio = maxT === minT ? 0.5 : (temp - minT) / (maxT - minT);
+      if (ratio >= 0.72) {
+        return 'bg-gradient-to-t from-orange-600 via-amber-500 to-amber-300 border-t border-amber-100';
+      }
+      if (ratio >= 0.4) {
+        return 'bg-gradient-to-t from-sky-600 via-cyan-500 to-cyan-300 border-t border-cyan-100';
+      }
+      return 'bg-gradient-to-t from-indigo-600 via-blue-500 to-sky-300 border-t border-sky-100';
+    }
+
+    // STRICT LINE-BY-LINE EXECUTION TRACE GENERATOR
+    function generateSteps(tempsArr) {
+      const trace = [];
+      const temps = [...tempsArr];
+      const n = temps.length;
+      const answer = new Array(n).fill(0);
+      const resolved = new Array(n).fill(false);
+      const stack = []; // Stores day indices in monotonically decreasing order of temperatures
+
+      const countResolved = () => resolved.filter(Boolean).length;
+
+      // Line 4: Method entry
+      trace.push({
+        line: 4,
+        phase: "Start",
+        temps,
+        i: -1,
+        stack: [...stack],
+        answer: [...answer],
+        resolved: [...resolved],
+        resolvedCount: 0,
+        prevIndex: null,
+        waitDays: null,
+        desc: `Entered <span class="code-font text-cyan-300 font-bold">dailyTemperatures</span> with <span class="code-font text-slate-100">[${temps.join(', ')}]</span> (<span class="code-font">n = ${n}</span>).`,
+        soundFreq: 330
+      });
+
+      // Line 6: int n = temperatures.length;
+      trace.push({
+        line: 6,
+        phase: `n = ${n}`,
+        temps,
+        i: -1,
+        stack: [...stack],
+        answer: [...answer],
+        resolved: [...resolved],
+        resolvedCount: 0,
+        prevIndex: null,
+        waitDays: null,
+        desc: `Stored forecast length <span class="code-font text-cyan-300 font-bold">int n = temperatures.length = ${n}</span>.`,
+        soundFreq: 360
+      });
+
+      // Line 8: int[] answer = new int[n];
+      trace.push({
+        line: 8,
+        phase: `Alloc answer[${n}]`,
+        temps,
+        i: -1,
+        stack: [...stack],
+        answer: [...answer],
+        resolved: [...resolved],
+        resolvedCount: 0,
+        prevIndex: null,
+        waitDays: null,
+        desc: `Allocated output array <span class="code-font text-emerald-300 font-bold">int[] answer = new int[${n}]</span> (all entries default to <span class="code-font">0</span>).`,
+        soundFreq: 390
+      });
+
+      // Line 10: Stack<Integer> stack = new Stack<>();
+      trace.push({
+        line: 10,
+        phase: "Init Stack",
+        temps,
+        i: -1,
+        stack: [...stack],
+        answer: [...answer],
+        resolved: [...resolved],
+        resolvedCount: 0,
+        prevIndex: null,
+        waitDays: null,
+        desc: `Initialized empty monotonic decreasing <span class="code-font text-cyan-300 font-bold">Stack&lt;Integer&gt; stack</span> to store indices of unresolved days.`,
+        soundFreq: 415
+      });
+
+      for (let i = 0; i < n; i++) {
+        // Line 12: for (int i = 0; i < n; i++)
+        trace.push({
+          line: 12,
+          phase: `Day i = ${i} (${temps[i]}°)`,
+          temps,
+          i,
+          stack: [...stack],
+          answer: [...answer],
+          resolved: [...resolved],
+          resolvedCount: countResolved(),
+          prevIndex: null,
+          waitDays: null,
+          desc: `Outer loop <span class="code-font text-amber-300 font-bold">i = ${i}</span> (<span class="code-font">${i} &lt; ${n}</span>): Today's temperature is <span class="code-font text-amber-200 font-bold">${temps[i]}&deg;</span>.`,
+          soundFreq: 445
+        });
+
+        // Inner While Loop: while (!stack.isEmpty() && temperatures[i] > temperatures[stack.peek()])
+        while (true) {
+          const isWarmer = stack.length > 0 && temps[i] > temps[stack[stack.length - 1]];
+          const topIdx = stack.length > 0 ? stack[stack.length - 1] : -1;
+
+          // Lines 15-16: Always evaluate multi-line while condition!
+          trace.push({
+            line: [15, 16],
+            phase: isWarmer ? `Warmer (${temps[i]}° > ${temps[topIdx]}°)` : "Check Stack Top",
+            temps,
+            i,
+            colderTargetIdx: isWarmer ? topIdx : -1,
+            stackAlertTop: isWarmer,
+            stack: [...stack],
+            answer: [...answer],
+            resolved: [...resolved],
+            resolvedCount: countResolved(),
+            prevIndex: null,
+            waitDays: null,
+            desc: stack.length === 0
+              ? `Check <span class="code-font text-cyan-300">!stack.isEmpty() &amp;&amp; temperatures[${i}] &gt; temperatures[stack.peek()]</span>: <span class="code-font">stack</span> is empty (<b>false</b>) &rarr; proceeding to push day <span class="code-font">[${i}]</span>.`
+              : isWarmer
+                ? `<span class="text-orange-300 font-bold"><i class="fa-solid fa-fire mr-1"></i>Warmer Temperature Found!</span> <span class="code-font text-amber-300">temperatures[${i}] (${temps[i]}&deg;) &gt; temperatures[${topIdx}] (${temps[topIdx]}&deg;)</span> is <b>true</b> &rarr; resolving day <span class="code-font">[${topIdx}]</span>.`
+                : `Check <span class="code-font text-slate-300">temperatures[${i}] (${temps[i]}&deg;) &gt; temperatures[${topIdx}] (${temps[topIdx]}&deg;)</span> is <b>false</b> (<span class="code-font">${temps[i]}&deg; &le; ${temps[topIdx]}&deg;</span>) &rarr; exiting <span class="code-font">while</span> loop.`,
+            soundFreq: isWarmer ? 580 : 475
+          });
+
+          if (!isWarmer) break;
+
+          // Line 18: int prevIndex = stack.pop();
+          const prevIndex = stack.pop();
+          trace.push({
+            line: 18,
+            phase: `prevIndex = ${prevIndex}`,
+            temps,
+            i,
+            colderTargetIdx: prevIndex,
+            stack: [...stack],
+            answer: [...answer],
+            resolved: [...resolved],
+            resolvedCount: countResolved(),
+            prevIndex,
+            waitDays: null,
+            transfer: { type: 'popToChamber', prevIdx: prevIndex, prevTemp: temps[prevIndex] },
+            actionText: `int prevIndex = stack.pop() → ${prevIndex}`,
+            desc: `Popped colder day index <span class="code-font text-purple-300 font-bold">int prevIndex = stack.pop() = ${prevIndex}</span> (<span class="code-font">${temps[prevIndex]}&deg;</span>).`,
+            soundFreq: 630
+          });
+
+          // Line 20: answer[prevIndex] = i - prevIndex;
+          const waitDays = i - prevIndex;
+          answer[prevIndex] = waitDays;
+          resolved[prevIndex] = true;
+          trace.push({
+            line: 20,
+            phase: `answer[${prevIndex}] = ${waitDays}`,
+            temps,
+            i,
+            colderTargetIdx: prevIndex,
+            spanBridge: { fromIdx: prevIndex, toIdx: i, waitDays },
+            stack: [...stack],
+            answer: [...answer],
+            resolved: [...resolved],
+            resolvedCount: countResolved(),
+            justWrittenSlot: prevIndex,
+            prevIndex,
+            waitDays,
+            transfer: { type: 'writeAnswer', prevIdx: prevIndex, waitDays },
+            actionText: `answer[${prevIndex}] = ${i} - ${prevIndex} = ${waitDays}`,
+            desc: `<span class="text-emerald-400 font-bold"><i class="fa-solid fa-check-circle mr-1"></i>Resolved Day [${prevIndex}]!</span> Set <span class="code-font text-emerald-300 font-bold">answer[${prevIndex}] = ${i} - ${prevIndex} = ${waitDays}</span> day${waitDays === 1 ? '' : 's'}.`,
+            soundFreq: 760
+          });
+        }
+
+        // Line 24: stack.push(i);
+        stack.push(i);
+        trace.push({
+          line: 24,
+          phase: `stack.push(${i})`,
+          temps,
+          i,
+          stack: [...stack],
+          justPushedStack: true,
+          transfer: { type: 'pushToStack', dayIdx: i, temp: temps[i] },
+          actionText: `stack.push(${i})`,
+          answer: [...answer],
+          resolved: [...resolved],
+          resolvedCount: countResolved(),
+          prevIndex: null,
+          waitDays: null,
+          desc: `Pushed current day index <span class="code-font text-cyan-300 font-bold">[${i}]</span> (<span class="code-font">${temps[i]}&deg;</span>) onto <span class="code-font text-purple-300">stack</span> to await a warmer future day.`,
+          soundFreq: 540
+        });
+      }
+
+      // Line 12: Outer loop exit when i == n
+      trace.push({
+        line: 12,
+        phase: "Loop Complete",
+        temps,
+        i: n,
+        stack: [...stack],
+        answer: [...answer],
+        resolved: [...resolved],
+        resolvedCount: countResolved(),
+        prevIndex: null,
+        waitDays: null,
+        desc: `Loop condition <span class="code-font text-amber-300">i (${n}) &lt; n (${n})</span> is <b>false</b>. Any remaining day${stack.length === 1 ? '' : 's'} on <span class="code-font">stack</span> (<span class="code-font">[${stack.join(', ')}]</span>) never saw a warmer day and keep <span class="code-font">answer[idx] = 0</span>.`,
+        soundFreq: 700
+      });
+
+      // Line 27: return answer;
+      trace.push({
+        line: 27,
+        phase: "Complete",
+        temps,
+        i: -1,
+        stack: [...stack],
+        answer: [...answer],
+        resolved: [...resolved],
+        resolvedCount: countResolved(),
+        prevIndex: null,
+        waitDays: null,
+        isComplete: true,
+        desc: `<span class="text-emerald-400 font-bold text-sm"><i class="fa-solid fa-trophy mr-1.5"></i>Complete!</span> Returned <span class="code-font text-emerald-300 font-bold text-sm">answer = [${answer.join(', ')}]</span>.`,
+        soundFreq: 960
+      });
+
+      return trace;
+    }
+
+    // LOCALIZED ZERO-JUMP CODE LINE HIGHLIGHTER
+    function highlightCodeLine(lineSpec) {
+      document.querySelectorAll('.code-line').forEach(el => el.classList.remove('active-line'));
+      const lineNums = Array.isArray(lineSpec) ? lineSpec : [lineSpec];
+      let firstActiveEl = null;
+
+      lineNums.forEach(num => {
+        const el = document.getElementById(`line${num}`);
+        if (el) {
+          el.classList.add('active-line');
+          if (!firstActiveEl) firstActiveEl = el;
+        }
+      });
+
+      if (firstActiveEl) {
+        const containerTop = codeContainer.scrollTop;
+        const containerBottom = containerTop + codeContainer.clientHeight;
+        const elTop = firstActiveEl.offsetTop - codeContainer.offsetTop;
+        const elBottom = elTop + firstActiveEl.clientHeight;
+
+        if (elTop < containerTop + 24) {
+          codeContainer.scrollTo({ top: Math.max(0, elTop - 24), behavior: 'smooth' });
+        } else if (elBottom > containerBottom - 24) {
+          codeContainer.scrollTo({ top: elBottom - codeContainer.clientHeight + 24, behavior: 'smooth' });
+        }
+      }
+    }
+
+    // PHYSICAL LIFT-AND-ARC TRANSFERS & WARMER-DAY SPAN BRIDGE OVERLAY
+    function animateStageOverlays(step, animateFlight) {
+      transferArcSvg.innerHTML = '';
+      flyingCloneLayer.innerHTML = '';
+      const stageRect = stageWrapper.getBoundingClientRect();
+      let svgHtml = '';
+
+      // A. Warmer-Day Span Bridge Arc above temperatures[] from [prevIndex] to [i]
+      if (step.spanBridge) {
+        const fromCard = tempsStreamArena.querySelector(`[data-temp-idx="${step.spanBridge.fromIdx}"]`);
+        const toCard = tempsStreamArena.querySelector(`[data-temp-idx="${step.spanBridge.toIdx}"]`);
+        if (fromCard && toCard) {
+          const fRect = fromCard.getBoundingClientRect();
+          const tRect = toCard.getBoundingClientRect();
+          const x1 = (fRect.left - stageRect.left) + fRect.width / 2;
+          const y1 = (fRect.top - stageRect.top) - 4;
+          const x2 = (tRect.left - stageRect.left) + tRect.width / 2;
+          const y2 = (tRect.top - stageRect.top) - 4;
+          const midX = (x1 + x2) / 2;
+          const archY = Math.min(y1, y2) - 26;
+          const label = `+${step.spanBridge.waitDays}d`;
+
+          svgHtml += `
+            <path d="M ${x1} ${y1} Q ${midX} ${archY}, ${x2} ${y2}"
+                  fill="none" stroke="#34d399" stroke-width="2.4" class="transfer-arc-path" />
+            <circle cx="${x1}" cy="${y1}" r="3.8" fill="#c084fc" />
+            <polygon points="${x2},${y2 + 2} ${x2 - 5},${y2 - 6} ${x2 + 5},${y2 - 6}" fill="#34d399" />
+            <rect x="${midX - 20}" y="${archY - 11}" width="40" height="15" rx="5" fill="rgba(15, 23, 42, 0.94)" stroke="#34d399" stroke-width="1" />
+            <text x="${midX}" y="${archY - 1}" text-anchor="middle" fill="#6ee7b7" font-size="9" font-family="Fira Code, monospace" font-weight="700">${label}</text>
+          `;
+        }
+      }
+
+      // B. Lift-and-Arc Transfers for Push, Pop & Answer Write
+      if (step.transfer) {
+        const tr = step.transfer;
+
+        if (tr.type === 'pushToStack') {
+          const tempEl = tempsStreamArena.querySelector(`[data-temp-idx="${tr.dayIdx}"]`);
+          const topStackEl = stackVessel.querySelector('[data-stack-top="true"]') || stackVessel;
+          if (tempEl && topStackEl) {
+            const srcRect = tempEl.getBoundingClientRect();
+            const vesselRect = stackVessel.getBoundingClientRect();
+            const targetRect = topStackEl.getBoundingClientRect();
+
+            const x1 = (srcRect.left - stageRect.left) + srcRect.width / 2;
+            const y1 = (srcRect.bottom - stageRect.top) + 4;
+            const x2 = (vesselRect.left - stageRect.left) + vesselRect.width / 2;
+            const y2 = (vesselRect.top - stageRect.top) + 6;
+            const midX = (x1 + x2) / 2 - 20;
+            const midY = Math.min(y1, y2) - 16;
+
+            svgHtml += `
+              <path d="M ${x1} ${y1} Q ${midX} ${midY}, ${x2} ${y2}"
+                    fill="none" stroke="#22d3ee" stroke-width="2.4" class="transfer-arc-path" />
+              <circle cx="${x1}" cy="${y1}" r="4" fill="#fbbf24" />
+              <polygon points="${x2},${y2 + 4} ${x2 - 5},${y2 - 5} ${x2 + 5},${y2 - 5}" fill="#22d3ee" />
+            `;
+
+            if (animateFlight) {
+              spawnFlyingBox(srcRect, targetRect, stageRect, `[${tr.dayIdx}] • ${tr.temp}°`, 'stack-day-box', vesselRect.top);
+            }
+          }
+        } else if (tr.type === 'popToChamber') {
+          const vesselRect = stackVessel.getBoundingClientRect();
+          const dstRect = resPrevBox.getBoundingClientRect();
+
+          const x1 = (vesselRect.left - stageRect.left) + vesselRect.width / 2;
+          const y1 = (vesselRect.top - stageRect.top) + 4;
+          const x2 = (dstRect.left - stageRect.left) + dstRect.width / 2;
+          const y2 = (dstRect.top - stageRect.top) - 6;
+          const midX = (x1 + x2) / 2;
+          const archY = Math.min(y1, y2) - 32;
+
+          svgHtml += `
+            <path d="M ${x1} ${y1} Q ${midX} ${archY}, ${x2} ${y2}"
+                  fill="none" stroke="#c084fc" stroke-width="2.4" class="transfer-arc-path" />
+            <circle cx="${x1}" cy="${y1}" r="4" fill="#c084fc" />
+            <polygon points="${x2},${y2 + 3} ${x2 - 5},${y2 - 6} ${x2 + 5},${y2 - 6}" fill="#c084fc" />
+          `;
+
+          if (animateFlight) {
+            spawnFlyingBox(vesselRect, dstRect, stageRect, `[${tr.prevIdx}] • ${tr.prevTemp}°`, 'stack-day-box colder-peek-alert', vesselRect.top);
+          }
+        } else if (tr.type === 'writeAnswer') {
+          const srcRect = resWaitBox.getBoundingClientRect();
+          const ansEl = answerArrayArena.querySelector(`[data-ans-idx="${tr.prevIdx}"]`);
+          if (ansEl) {
+            const dstRect = ansEl.getBoundingClientRect();
+            const x1 = (srcRect.left - stageRect.left) + srcRect.width / 2;
+            const y1 = (srcRect.bottom - stageRect.top) + 4;
+            const x2 = (dstRect.left - stageRect.left) + dstRect.width / 2;
+            const y2 = (dstRect.top - stageRect.top) - 6;
+            const midX = (x1 + x2) / 2 + 16;
+            const midY = (y1 + y2) / 2;
+
+            svgHtml += `
+              <path d="M ${x1} ${y1} Q ${midX} ${midY}, ${x2} ${y2}"
+                    fill="none" stroke="#34d399" stroke-width="2.4" class="transfer-arc-path" />
+              <circle cx="${x1}" cy="${y1}" r="4" fill="#34d399" />
+              <polygon points="${x2},${y2 + 3} ${x2 - 5},${y2 - 6} ${x2 + 5},${y2 - 6}" fill="#34d399" />
+            `;
+
+            if (animateFlight) {
+              spawnFlyingBox(srcRect, dstRect, stageRect, `${tr.waitDays}d`, 'bg-emerald-400 text-slate-950 border border-white', srcRect.top);
+            }
+          }
+        }
+      }
+
+      transferArcSvg.innerHTML = svgHtml;
+    }
+
+    function spawnFlyingBox(srcRect, dstRect, stageRect, label, styleClasses, arcApexTop) {
+      const clone = document.createElement('div');
+      clone.className = `${styleClasses} absolute px-3 h-9 rounded-xl flex items-center justify-center code-font text-xs font-extrabold shadow-xl pointer-events-none whitespace-nowrap`;
+      clone.textContent = label;
+      clone.style.left = `${(srcRect.left - stageRect.left) + (srcRect.width - 84) / 2}px`;
+      clone.style.top = `${(srcRect.top - stageRect.top) + (srcRect.height - 36) / 2}px`;
+      flyingCloneLayer.appendChild(clone);
+
+      const dx = (dstRect.left + dstRect.width / 2) - (srcRect.left + srcRect.width / 2);
+      const dy = (dstRect.top + dstRect.height / 2) - (srcRect.top + srcRect.height / 2);
+      const liftY = Math.min(dy, (arcApexTop - srcRect.top)) - 26;
+      const duration = Math.min(540, Math.max(240, playSpeed * 0.78));
+
+      const anim = clone.animate([
+        { transform: 'translate(0px, 0px) scale(0.95)', opacity: 1 },
+        { transform: `translate(${dx * 0.55}px, ${liftY}px) scale(1.08)`, opacity: 1, offset: 0.48 },
+        { transform: `translate(${dx}px, ${dy}px) scale(1)`, opacity: 0.15 }
+      ], {
+        duration,
+        easing: 'cubic-bezier(0.22, 1, 0.36, 1)'
+      });
+      anim.onfinish = () => clone.remove();
+    }
+
+    // RENDER CURRENT STEP
+    function renderStep(idx, animateMovement = true) {
+      if (idx < 0 || idx >= steps.length) return;
+      const step = steps[idx];
+      const temps = step.temps;
+      const n = temps.length;
+      const minT = Math.min(...temps);
+      const maxT = Math.max(...temps);
+
+      // Update Header Scrubber & Badges
+      stepCounterBadge.textContent = `Step: ${idx + 1} / ${steps.length}`;
+      phaseBadge.textContent = step.phase;
+      stackSizeHeaderBadge.textContent = `stack.size(): ${step.stack.length}`;
+      resolvedHeaderBadge.textContent = `Resolved: ${step.resolvedCount} / ${n}`;
+      stepScrubber.max = steps.length - 1;
+      stepScrubber.value = idx;
+      tempsLenTag.textContent = `(n = ${n})`;
+      answerLenTag.textContent = `len = ${n}`;
+
+      // Update Telemetry HUD Cards
+      if (step.i >= 0 && step.i < n) {
+        varPtrI.textContent = step.i;
+        varCurTemp.textContent = `(${temps[step.i]}°)`;
+      } else {
+        varPtrI.textContent = '-';
+        varCurTemp.textContent = '';
+      }
+
+      if (step.stack.length > 0) {
+        const topIdx = step.stack[step.stack.length - 1];
+        varStackPeek.textContent = `[${topIdx}] → ${temps[topIdx]}°`;
+      } else {
+        varStackPeek.textContent = 'empty';
+      }
+
+      if (step.prevIndex !== null && step.prevIndex !== undefined) {
+        varPrevIdx.textContent = step.prevIndex;
+        varPrevIdx.className = "code-font text-xl font-bold text-purple-300";
+        varPrevTemp.textContent = `(${temps[step.prevIndex]}°)`;
+      } else {
+        varPrevIdx.textContent = '-';
+        varPrevIdx.className = "code-font text-xl font-bold text-slate-400";
+        varPrevTemp.textContent = '';
+      }
+
+      if (step.waitDays !== null && step.waitDays !== undefined) {
+        varWaitDays.textContent = `${step.waitDays}d`;
+        varWaitFormula.textContent = `${step.i} - ${step.prevIndex} = ${step.waitDays}`;
+      } else {
+        varWaitDays.textContent = '-';
+        varWaitFormula.textContent = 'i - prevIndex';
+      }
+
+      varResolvedCount.textContent = `${step.resolvedCount} / ${n}`;
+      if (step.isComplete) {
+        resolvedStatsCard.classList.add('complete-badge-anim');
+        setTimeout(() => resolvedStatsCard.classList.remove('complete-badge-anim'), 650);
+      }
+
+      // Narrative Description
+      stepDescription.innerHTML = step.desc;
+
+      // 1. Render Daily Temperatures Timeline (Glassy Boxes + Thermal Mercury Bars)
+      tempsStreamArena.innerHTML = '';
+      const compactFit = n <= 12;
+      tempsStreamArena.className = compactFit
+        ? 'relative z-20 w-full flex items-center justify-between gap-1.5 sm:gap-2 min-h-[168px]'
+        : 'relative z-20 w-max mx-auto flex items-center gap-2 min-h-[168px]';
+
+      const inStackSet = new Set(step.stack);
+
+      temps.forEach((temp, index) => {
+        const isScanner = (step.i === index && !step.isComplete);
+        const isColderTarget = (step.colderTargetIdx === index);
+        const isInStack = inStackSet.has(index);
+        const isResolved = step.resolved[index];
+
+        const card = document.createElement('div');
+        card.dataset.tempIdx = index;
+
+        const sizeClasses = compactFit
+          ? 'flex-1 min-w-[44px] max-w-[74px] h-40 '
+          : 'w-14 h-40 shrink-0 ';
+
+        let classes = `temp-card relative ${sizeClasses} rounded-2xl p-2 flex flex-col items-center justify-between select-none `;
+        if (isScanner) {
+          classes += 'warmer-scanner-day ';
+        } else if (isColderTarget) {
+          classes += 'colder-target-day ';
+        } else if (isInStack) {
+          classes += 'in-stack-day ';
+        } else if (isResolved) {
+          classes += 'resolved-day ';
+        }
+        card.className = classes;
+
+        // Top Pointer / Role Badge
+        let topTag = `<span class="text-[9px] code-font text-slate-400">[${index}]</span>`;
+        if (isScanner) {
+          topTag = `<span class="px-1.5 py-0.2 rounded bg-amber-400 text-slate-950 font-extrabold text-[8px] code-font shadow">i=${index}</span>`;
+        } else if (isColderTarget) {
+          topTag = `<span class="px-1.5 py-0.2 rounded bg-purple-400 text-slate-950 font-extrabold text-[8px] code-font shadow">prev</span>`;
+        }
+
+        // Proportional Thermal Mercury Bar
+        const barPct = maxT === minT ? 60 : Math.max(20, ((temp - minT) / (maxT - minT)) * 80 + 20);
+        const barGrad = getThermalBarGradient(temp, minT, maxT);
+
+        // Status Footer Tag
+        let footTag = `<span class="text-[8px] code-font text-slate-500">day ${index}</span>`;
+        if (isResolved) {
+          footTag = `<span class="text-[8px] code-font px-1.5 py-0.2 rounded bg-emerald-500/25 text-emerald-200 font-bold">+${step.answer[index]}d ✓</span>`;
+        } else if (isInStack) {
+          footTag = `<span class="text-[8px] code-font px-1.5 py-0.2 rounded bg-cyan-500/20 text-cyan-200">wait</span>`;
+        }
+
+        card.innerHTML = `
+          <div class="w-full flex items-center justify-center">${topTag}</div>
+          <div class="w-full h-16 flex items-end justify-center my-1 bg-black/25 rounded-lg p-1 border border-white/[0.06]">
+            <div class="w-full max-w-[26px] rounded-t-sm transition-all duration-300 ${barGrad}" style="height: ${barPct}%;"></div>
+          </div>
+          <span class="code-font text-xs sm:text-sm font-extrabold ${isScanner ? 'text-amber-200' : isColderTarget ? 'text-purple-200' : 'text-white'}">${temp}&deg;</span>
+          ${footTag}
+        `;
+        tempsStreamArena.appendChild(card);
+      });
+
+      // 2. Render Vertical Open-Topped Monotonic Decreasing Stack<Integer>
+      stackVessel.innerHTML = '';
+      if (step.stack.length === 0) {
+        stackOrderBadge.textContent = "empty stack";
+        stackVessel.innerHTML = `<span class="my-auto text-xs text-slate-500 italic code-font">empty stack</span>`;
+      } else {
+        const topDay = step.stack[step.stack.length - 1];
+        stackOrderBadge.textContent = `TOP: [${topDay}] (${temps[topDay]}°)`;
+
+        step.stack.forEach((dayIdx, sPos) => {
+          const isTop = (sPos === step.stack.length - 1);
+          const block = document.createElement('div');
+          if (isTop) block.dataset.stackTop = "true";
+
+          let bClass = 'stack-day-box w-full h-9 rounded-xl px-2.5 flex items-center justify-between select-none shrink-0 ';
+          if (isTop && step.justPushedStack) bClass += 'just-pushed ';
+          if (isTop && step.stackAlertTop) bClass += 'colder-peek-alert ';
+          block.className = bClass;
+
+          const topBadge = isTop
+            ? `<span class="px-1.5 py-0.2 rounded bg-amber-400 text-slate-950 font-extrabold text-[8px] code-font shadow">TOP</span>`
+            : `<span class="text-[9px] code-font text-slate-400">#${sPos}</span>`;
+
+          block.innerHTML = `
+            <span class="text-[9px] code-font text-cyan-200 font-bold">idx [${dayIdx}]</span>
+            <span class="code-font text-xs sm:text-sm font-black text-white">${temps[dayIdx]}&deg;</span>
+            ${topBadge}
+          `;
+          stackVessel.appendChild(block);
+        });
+      }
+
+      // 3. Render Resolution Chamber & Output Array int[] answer
+      if (step.prevIndex !== null && step.prevIndex !== undefined) {
+        resPrevVal.textContent = `[${step.prevIndex}]`;
+        resPrevVal.className = "code-font text-base font-black text-purple-200";
+        resPrevTempSub.textContent = `${temps[step.prevIndex]}°`;
+        resPrevBox.className = "w-20 h-14 rounded-xl bg-purple-500/20 border border-purple-400 flex flex-col items-center justify-center transition-all duration-300 shadow-lg shadow-purple-500/20";
+
+        if (step.waitDays !== null && step.waitDays !== undefined) {
+          resDiffExpr.textContent = `${step.i} - ${step.prevIndex} = ${step.waitDays}`;
+          resWaitVal.textContent = `${step.waitDays}`;
+          resWaitVal.className = "code-font text-lg font-black text-emerald-200";
+          resWaitBox.className = "w-20 h-14 rounded-xl bg-emerald-500/25 border border-emerald-400 flex flex-col items-center justify-center transition-all duration-300 shadow-lg shadow-emerald-500/25";
+        } else {
+          resDiffExpr.textContent = `${step.i} - ${step.prevIndex}`;
+          resWaitVal.textContent = "?";
+          resWaitVal.className = "code-font text-lg font-black text-slate-400";
+          resWaitBox.className = "w-20 h-14 rounded-xl bg-white/[0.03] border border-dashed border-slate-500/40 flex flex-col items-center justify-center transition-all duration-300";
+        }
+      } else {
+        resPrevVal.textContent = "-";
+        resPrevVal.className = "code-font text-sm font-black text-slate-500";
+        resPrevTempSub.textContent = "colder day";
+        resPrevBox.className = "w-20 h-14 rounded-xl bg-white/[0.03] border border-dashed border-slate-500/40 flex flex-col items-center justify-center transition-all duration-300";
+        resDiffExpr.textContent = "-";
+        resWaitVal.textContent = "-";
+        resWaitVal.className = "code-font text-lg font-black text-slate-500";
+        resWaitBox.className = "w-20 h-14 rounded-xl bg-white/[0.03] border border-dashed border-slate-500/40 flex flex-col items-center justify-center transition-all duration-300";
+      }
+
+      // Render answer[] boxes
+      answerArrayArena.innerHTML = '';
+      step.answer.forEach((ansVal, aIdx) => {
+        const isRes = step.resolved[aIdx];
+        const isJustWritten = (step.justWrittenSlot === aIdx);
+
+        const slot = document.createElement('div');
+        slot.dataset.ansIdx = aIdx;
+
+        const sizeClasses = compactFit
+          ? 'flex-1 min-w-[36px] max-w-[66px] h-16 '
+          : 'w-12 h-16 shrink-0 ';
+
+        let sClass = `answer-slot ${sizeClasses} rounded-xl p-1 flex flex-col items-center justify-between select-none `;
+        if (isJustWritten) sClass += 'answer-just-written ';
+        else if (isRes) sClass += 'answer-resolved ';
+        slot.className = sClass;
+
+        slot.innerHTML = `
+          <span class="text-[9px] code-font ${isRes ? 'text-emerald-300 font-bold' : 'text-slate-400'}">[${aIdx}]</span>
+          <span class="code-font text-sm sm:text-base font-extrabold ${isRes ? 'text-white' : 'text-slate-500'}">${ansVal}</span>
+          <span class="text-[8px] code-font ${isRes ? 'text-emerald-300' : 'text-slate-600'}">${isRes ? 'days' : '0'}</span>
+        `;
+        answerArrayArena.appendChild(slot);
+      });
+
+      // 4. Trigger Span Bridge & Lift-and-Arc Transfers + Auto-Scroll Timeline
+      requestAnimationFrame(() => {
+        if (!compactFit && step.i >= 0 && step.i < n) {
+          const curEl = tempsStreamArena.querySelector(`[data-temp-idx="${step.i}"]`);
+          if (curEl) {
+            const targetScroll = curEl.offsetLeft - tempsScrollContainer.clientWidth / 2 + curEl.offsetWidth / 2;
+            tempsScrollContainer.scrollTo({ left: Math.max(0, targetScroll), behavior: 'smooth' });
+          }
+        }
+        animateStageOverlays(step, animateMovement);
+      });
+
+      // 5. Update Action Pill & Decision Banner
+      if (step.actionText) {
+        actionPill.classList.remove('hidden');
+        actionPill.textContent = step.actionText;
+      } else {
+        actionPill.classList.add('hidden');
+      }
+
+      if (step.isComplete || step.justWrittenSlot !== undefined) {
+        decisionIcon.className = "fa-solid fa-trophy text-emerald-400 text-base";
+        decisionBanner.className = "p-3.5 rounded-xl bg-emerald-500/15 border border-emerald-400/35 text-xs flex flex-col sm:flex-row items-center justify-between gap-3 backdrop-blur-md";
+      } else if (step.stackAlertTop || step.prevIndex !== null) {
+        decisionIcon.className = "fa-solid fa-fire text-amber-400 text-base";
+        decisionBanner.className = "p-3.5 rounded-xl bg-amber-500/12 border border-amber-400/30 text-xs flex flex-col sm:flex-row items-center justify-between gap-3 backdrop-blur-md";
+      } else {
+        decisionIcon.className = "fa-solid fa-circle-info text-cyan-400 text-base";
+        decisionBanner.className = "p-3.5 rounded-xl bg-white/[0.04] border border-white/10 text-xs flex flex-col sm:flex-row items-center justify-between gap-3 backdrop-blur-md";
+      }
+      decisionText.innerHTML = step.desc;
+
+      // 6. Highlight Active Java Line & Play Audio Tone
+      highlightCodeLine(step.line);
+      if (step.soundFreq) {
+        playTone(step.soundFreq, 'sine', 0.08, 0.035);
+      }
+    }
+
+    // PLAYBACK CONTROLLER
+    function setPlaying(playing) {
+      isPlaying = playing;
+      if (isPlaying) {
+        playIcon.className = "fa-solid fa-pause";
+        playText.textContent = "Stop";
+        btnPlay.classList.add('bg-rose-500/25', 'text-rose-200', 'border-rose-400/50');
+        btnPlay.classList.remove('bg-cyan-500/25', 'text-cyan-200', 'border-cyan-400/50');
+
+        playInterval = setInterval(() => {
+          if (currentStepIdx < steps.length - 1) {
+            currentStepIdx++;
+            renderStep(currentStepIdx, true);
+          } else {
+            setPlaying(false);
+          }
+        }, playSpeed);
+      } else {
+        playIcon.className = "fa-solid fa-play";
+        playText.textContent = "Start";
+        btnPlay.classList.remove('bg-rose-500/25', 'text-rose-200', 'border-rose-400/50');
+        btnPlay.classList.add('bg-cyan-500/25', 'text-cyan-200', 'border-cyan-400/50');
+        if (playInterval) {
+          clearInterval(playInterval);
+          playInterval = null;
+        }
+      }
+    }
+
+    function initSimulation(tempsArr) {
+      setPlaying(false);
+      currentTemps = [...tempsArr];
+      steps = generateSteps(currentTemps);
+      currentStepIdx = 0;
+      stepScrubber.max = steps.length - 1;
+      stepScrubber.value = 0;
+      renderStep(0, false);
+    }
+
+    // EVENT LISTENERS
+    btnPlay.addEventListener('click', () => {
+      if (currentStepIdx >= steps.length - 1) {
+        currentStepIdx = 0;
+        renderStep(0, false);
+      }
+      setPlaying(!isPlaying);
+    });
+
+    btnNext.addEventListener('click', () => {
+      setPlaying(false);
+      if (currentStepIdx < steps.length - 1) {
+        currentStepIdx++;
+        renderStep(currentStepIdx, true);
+      }
+    });
+
+    btnPrev.addEventListener('click', () => {
+      setPlaying(false);
+      if (currentStepIdx > 0) {
+        currentStepIdx--;
+        renderStep(currentStepIdx, true);
+      }
+    });
+
+    btnReset.addEventListener('click', () => {
+      setPlaying(false);
+      currentStepIdx = 0;
+      renderStep(0, false);
+    });
+
+    stepScrubber.addEventListener('input', (e) => {
+      setPlaying(false);
+      currentStepIdx = parseInt(e.target.value, 10);
+      renderStep(currentStepIdx, false);
+    });
+
+    document.querySelectorAll('.speed-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.speed-btn').forEach(b => {
+          b.classList.remove('bg-cyan-500/30', 'text-cyan-200', 'font-semibold');
+        });
+        btn.classList.add('bg-cyan-500/30', 'text-cyan-200', 'font-semibold');
+        playSpeed = parseInt(btn.dataset.speed, 10);
+        if (isPlaying) {
+          setPlaying(false);
+          setPlaying(true);
+        }
+      });
+    });
+
+    btnAudio.addEventListener('click', () => {
+      audioEnabled = !audioEnabled;
+      if (audioEnabled) {
+        audioIcon.className = "fa-solid fa-volume-high";
+        btnAudio.classList.remove('text-slate-600');
+        btnAudio.classList.add('text-slate-300');
+      } else {
+        audioIcon.className = "fa-solid fa-volume-xmark";
+        btnAudio.classList.add('text-slate-600');
+        btnAudio.classList.remove('text-slate-300');
+      }
+    });
+
+    presetSelect.addEventListener('change', (e) => {
+      const idx = parseInt(e.target.value, 10);
+      customTempsInput.value = PRESETS[idx].temps.join(', ');
+      initSimulation(PRESETS[idx].temps);
+    });
+
+    btnApplyCustom.addEventListener('click', () => {
+      const text = customTempsInput.value.trim();
+      if (!text) return;
+      const parsed = text.split(',')
+        .map(s => parseInt(s.trim(), 10))
+        .filter(n => !isNaN(n) && n >= 1 && n <= 150);
+
+      if (parsed.length >= 1) {
+        customTempsInput.value = parsed.join(', ');
+        initSimulation(parsed);
+      }
+    });
+
+    window.addEventListener('resize', () => {
+      const step = steps[currentStepIdx];
+      if (step) {
+        animateStageOverlays(step, false);
+      }
+    });
+
+    window.addEventListener('keydown', (e) => {
+      if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT') return;
+      if (e.code === 'Space') {
+        e.preventDefault();
+        btnPlay.click();
+      } else if (e.code === 'ArrowRight') {
+        e.preventDefault();
+        btnNext.click();
+      } else if (e.code === 'ArrowLeft') {
+        e.preventDefault();
+        btnPrev.click();
+      }
+    });
+
+    window.onload = function() {
+      customTempsInput.value = PRESETS[0].temps.join(', ');
+      initSimulation(PRESETS[0].temps);
+    };
+  </script>
+</body>
+</html>
