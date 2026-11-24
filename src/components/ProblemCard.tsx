@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   ExternalLink,
   Bookmark,
@@ -46,6 +46,13 @@ export const ProblemCard: React.FC<Props> = ({
   onSelectCategory,
   onSelectRelatedProblem,
 }) => {
+  const [showAllRelated, setShowAllRelated] = useState(false);
+  const visibleRelated = problem.relatedProblems
+    ? showAllRelated
+      ? problem.relatedProblems
+      : problem.relatedProblems.slice(0, 3)
+    : [];
+  const remainingRelatedCount = problem.relatedProblems ? problem.relatedProblems.length - 3 : 0;
   return (
     <div className="glass-card rounded-2xl p-5 flex flex-col justify-between group relative overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:border-indigo-500/30">
       {/* Ambient gradient hover effect inside card */}
@@ -214,12 +221,19 @@ export const ProblemCard: React.FC<Props> = ({
                 <GitBranch className="w-3 h-3 text-indigo-400/80 shrink-0" />
                 <span>Related Problems:</span>
               </span>
-              <span className="text-[9px] text-slate-500 font-mono">
-                {problem.relatedProblems.length} similar
-              </span>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setShowAllRelated(!showAllRelated);
+                }}
+                className="text-[9px] text-slate-400 hover:text-indigo-300 font-mono transition-colors cursor-pointer select-none"
+                title={showAllRelated ? 'Collapse to top 3' : `Expand to see all ${problem.relatedProblems.length}`}
+              >
+                {problem.relatedProblems.length} similar {remainingRelatedCount > 0 && (showAllRelated ? '▴' : '▾')}
+              </button>
             </div>
             <div className="flex flex-wrap items-center gap-1.5">
-              {problem.relatedProblems.slice(0, 3).map((rel) => (
+              {visibleRelated.map((rel) => (
                 <button
                   key={rel.number || rel.title}
                   onClick={(e) => {
@@ -237,6 +251,18 @@ export const ProblemCard: React.FC<Props> = ({
                   <span className="truncate max-w-[110px] sm:max-w-[130px]">{rel.title}</span>
                 </button>
               ))}
+              {remainingRelatedCount > 0 && (
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setShowAllRelated(!showAllRelated);
+                  }}
+                  className="inline-flex items-center gap-0.5 px-2 py-0.5 rounded-lg bg-indigo-500/10 hover:bg-indigo-500/25 border border-indigo-500/25 hover:border-indigo-500/40 text-[10px] text-indigo-300 hover:text-indigo-100 font-mono font-medium transition-all cursor-pointer active:scale-95 select-none"
+                  title={showAllRelated ? 'Show top 3 related' : `View ${remainingRelatedCount} more related problems`}
+                >
+                  <span>{showAllRelated ? 'less' : `+${remainingRelatedCount} more`}</span>
+                </button>
+              )}
             </div>
           </div>
         )}
