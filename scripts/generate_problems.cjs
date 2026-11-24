@@ -1585,20 +1585,20 @@ const problems = [
         "type": "official"
       }
     ],
-    "approach": "Dual Stack technique: Maintain primary stack for values and secondary stack for running minimums. Every push pushes min(val, minStack.top()).",
+    "approach": "Dual Stack technique: Maintain primary stack for values and secondary minStack for prefix minimums. Every push pushes Math.min(val, minStack.peek()), and pop() pops both stacks in O(1) time.",
     "flowSteps": [
       {
         "step": 1,
         "title": "Push Operation",
-        "description": "stack.push(val); minStack.push(min(val, currentMin)).",
+        "description": "stack.push(val); minStack.push(minStack.isEmpty() ? val : Math.min(val, minStack.peek())).",
         "stateSnapshot": "minStack keeps track of minimum at each depth",
         "highlight": "Push"
       },
       {
         "step": 2,
-        "title": "GetMin in O(1)",
-        "description": "minStack.top() directly returns current minimum.",
-        "stateSnapshot": "return minStack.top()",
+        "title": "Pop & GetMin in O(1)",
+        "description": "pop() pops both stack and minStack; getMin() returns minStack.peek() in O(1).",
+        "stateSnapshot": "return minStack.peek()",
         "highlight": "O(1) Min"
       }
     ],
@@ -1607,7 +1607,7 @@ const problems = [
     "spaceComplexity": "O(n)",
     "spaceComplexityExplanation": "Dual stacks each hold n elements.",
     "visualizerUrl": "/visualizers/minstack_dual_stack_visualizer.html",
-    "addedDate": "2026-11-09",
+    "addedDate": "2026-11-25",
     "keyObservations": [
       "Pairing each value with the minimum seen up to that level enables instant rollback on pop."
     ],

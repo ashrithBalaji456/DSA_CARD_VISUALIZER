@@ -3,1284 +3,1651 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>MinStack &bull; Glassmorphic Visualizer</title>
+  <title>Min Stack (LeetCode 155) - Glassmorphic Visualizer</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-
   <style>
+    @import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700;800&display=swap');
+
     body {
       font-family: 'Inter', sans-serif;
-      background: radial-gradient(circle at 15% 15%, #091e3a 0%, #060e22 45%, #02050e 100%);
+      background: radial-gradient(circle at 14% 16%, #0c192c 0%, #030712 100%);
+      color: #e2e8f0;
       min-height: 100vh;
-      color: #f1f5f9;
-      overflow-x: hidden;
     }
+
     .code-font {
-      font-family: 'JetBrains Mono', monospace;
+      font-family: 'Fira Code', monospace;
     }
-    .glass-card {
-      background: rgba(15, 23, 42, 0.65);
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
-      border: 1px solid rgba(255, 255, 255, 0.09);
-      box-shadow: 0 20px 45px -10px rgba(0, 0, 0, 0.75), inset 0 1px 1px 0 rgba(255, 255, 255, 0.12);
+
+    /* Glassmorphic Surface & Controls */
+    .glass-panel {
+      background: rgba(15, 23, 42, 0.56);
+      backdrop-filter: blur(22px);
+      -webkit-backdrop-filter: blur(22px);
+      border: 1px solid rgba(255, 255, 255, 0.11);
+      box-shadow: 0 20px 45px -15px rgba(0, 0, 0, 0.68), inset 0 1px 0 0 rgba(255, 255, 255, 0.09);
     }
-    .glass-input {
-      background: rgba(8, 14, 30, 0.75);
-      backdrop-filter: blur(14px);
-      border: 1px solid rgba(255, 255, 255, 0.12);
-    }
-    .glass-btn {
+
+    .glass-button {
       background: rgba(255, 255, 255, 0.06);
-      backdrop-filter: blur(12px);
-      border: 1px solid rgba(255, 255, 255, 0.12);
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
       transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
     }
-    .glass-btn:hover {
-      background: rgba(255, 255, 255, 0.16);
-      border-color: rgba(255, 255, 255, 0.3);
+    .glass-button:hover:not(:disabled) {
+      background: rgba(255, 255, 255, 0.15);
+      border-color: rgba(255, 255, 255, 0.28);
       transform: translateY(-1px);
     }
-    .glass-btn:active {
-      transform: translateY(1px) scale(0.97);
+    .glass-button:active:not(:disabled) {
+      transform: translateY(1px);
     }
+    .glass-button:disabled {
+      opacity: 0.35;
+      cursor: not-allowed;
+    }
+
+    /* Code Execution Line Highlight with Exact Preserved Indentation */
     .code-line {
-      transition: background-color 0.18s ease, border-color 0.18s ease;
+      white-space: pre;
+      transition: all 0.2s ease;
+      border-left: 3px solid transparent;
+      padding: 2px 10px;
     }
-    .code-active {
-      background-color: rgba(56, 189, 248, 0.22) !important;
-      border-left: 4px solid #38bdf8 !important;
+    .code-line.active-line {
+      background: rgba(56, 189, 248, 0.18);
+      border-left: 3px solid #38bdf8;
       color: #ffffff;
-      font-weight: 600;
+      box-shadow: inset 0 0 16px rgba(56, 189, 248, 0.15);
     }
-    .stack-card, .op-pill {
-      transition: all 0.32s cubic-bezier(0.34, 1.56, 0.64, 1);
+
+    /* Operation Call Pill in Pipeline */
+    .op-chip {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      backdrop-filter: blur(10px);
+      transition: all 0.28s cubic-bezier(0.34, 1.56, 0.64, 1);
     }
-    @keyframes pulseCyan {
-      0%, 100% { box-shadow: 0 0 15px rgba(56, 189, 248, 0.45); transform: scale(1.03); }
-      50% { box-shadow: 0 0 28px rgba(56, 189, 248, 0.85); transform: scale(1.06); }
+    .op-chip.op-done {
+      background: rgba(16, 185, 129, 0.12);
+      border-color: rgba(52, 211, 153, 0.42);
     }
-    @keyframes pulseEmerald {
-      0%, 100% { box-shadow: 0 0 15px rgba(16, 185, 129, 0.45); transform: scale(1.03); }
-      50% { box-shadow: 0 0 28px rgba(16, 185, 129, 0.85); transform: scale(1.06); }
+    .op-chip.op-active {
+      background: linear-gradient(180deg, rgba(251, 191, 36, 0.24) 0%, rgba(245, 158, 11, 0.10) 100%);
+      border-color: rgba(251, 191, 36, 0.95);
+      transform: translateY(-4px) scale(1.04);
+      box-shadow: 0 10px 24px -4px rgba(251, 191, 36, 0.42), inset 0 1px 0 rgba(255, 255, 255, 0.25);
+      z-index: 20;
     }
-    @keyframes pulseAmber {
-      0%, 100% { box-shadow: 0 0 15px rgba(245, 158, 11, 0.45); transform: scale(1.03); }
-      50% { box-shadow: 0 0 28px rgba(245, 158, 11, 0.85); transform: scale(1.06); }
+
+    /* Vertical Open-Topped U-Shaped LIFO Stack Vessels */
+    .lifo-vessel-main {
+      background: linear-gradient(180deg, rgba(15, 23, 42, 0.24) 0%, rgba(14, 116, 144, 0.20) 100%);
+      border-left: 2.5px solid rgba(34, 211, 238, 0.78);
+      border-right: 2.5px solid rgba(34, 211, 238, 0.78);
+      border-bottom: 2.5px solid rgba(34, 211, 238, 0.85);
+      border-top: none;
+      border-bottom-left-radius: 18px;
+      border-bottom-right-radius: 18px;
+      box-shadow:
+        inset 0 -16px 32px rgba(34, 211, 238, 0.08),
+        0 14px 30px -10px rgba(0, 0, 0, 0.65);
     }
-    @keyframes pulseRose {
-      0%, 100% { box-shadow: 0 0 15px rgba(244, 63, 94, 0.5); transform: scale(1.03); }
-      50% { box-shadow: 0 0 32px rgba(244, 63, 94, 0.9); transform: scale(1.06); }
+
+    .lifo-vessel-min {
+      background: linear-gradient(180deg, rgba(15, 23, 42, 0.24) 0%, rgba(107, 33, 168, 0.22) 100%);
+      border-left: 2.5px solid rgba(192, 132, 252, 0.78);
+      border-right: 2.5px solid rgba(192, 132, 252, 0.78);
+      border-bottom: 2.5px solid rgba(192, 132, 252, 0.85);
+      border-top: none;
+      border-bottom-left-radius: 18px;
+      border-bottom-right-radius: 18px;
+      box-shadow:
+        inset 0 -16px 32px rgba(168, 85, 247, 0.09),
+        0 14px 30px -10px rgba(0, 0, 0, 0.65);
     }
-    .card-active-cyan {
-      animation: pulseCyan 1.6s infinite ease-in-out;
-      border-color: #38bdf8 !important;
+
+    /* Glassy Stacked Element Box Inside Vessels */
+    .stack-node-box {
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      transition: all 0.28s cubic-bezier(0.34, 1.56, 0.64, 1);
     }
-    .card-active-emerald {
-      animation: pulseEmerald 1.6s infinite ease-in-out;
-      border-color: #10b981 !important;
+    .stack-node-box.node-main {
+      background: linear-gradient(90deg, rgba(34, 211, 238, 0.22) 0%, rgba(14, 165, 233, 0.12) 100%);
+      border: 1px solid rgba(56, 189, 248, 0.65);
+      color: #e0f2fe;
     }
-    .card-active-amber {
-      animation: pulseAmber 1.6s infinite ease-in-out;
-      border-color: #f59e0b !important;
+    .stack-node-box.node-min {
+      background: linear-gradient(90deg, rgba(168, 85, 247, 0.24) 0%, rgba(126, 34, 206, 0.12) 100%);
+      border: 1px solid rgba(192, 132, 252, 0.68);
+      color: #f3e8ff;
     }
-    .card-active-rose {
-      animation: pulseRose 1.4s infinite ease-in-out;
-      border-color: #f43f5e !important;
+    .stack-node-box.node-just-pushed {
+      transform: scale(1.03);
+      border-color: rgba(251, 191, 36, 0.95) !important;
+      box-shadow: 0 0 22px rgba(251, 191, 36, 0.48), inset 0 1px 0 rgba(255, 255, 255, 0.35);
     }
-    @keyframes ambientGlow {
-      0%, 100% { opacity: 0.3; transform: scale(1); }
-      50% { opacity: 0.55; transform: scale(1.08); }
+    .stack-node-box.node-peek-glow {
+      background: linear-gradient(90deg, rgba(16, 185, 129, 0.32) 0%, rgba(5, 150, 105, 0.16) 100%) !important;
+      border-color: rgba(52, 211, 153, 0.95) !important;
+      transform: scale(1.04);
+      box-shadow: 0 0 24px rgba(16, 185, 129, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.35);
     }
-    .glow-blob {
-      animation: ambientGlow 9s ease-in-out infinite;
+
+    @keyframes arcDash {
+      to {
+        stroke-dashoffset: -24;
+      }
     }
+    .transfer-arc-path {
+      stroke-dasharray: 6 6;
+      animation: arcDash 0.8s linear infinite;
+    }
+
+    @keyframes returnPulse {
+      0%, 100% { transform: scale(1); filter: drop-shadow(0 0 8px rgba(16, 185, 129, 0.45)); }
+      50% { transform: scale(1.04); filter: drop-shadow(0 0 20px rgba(16, 185, 129, 0.95)); }
+    }
+    .return-pulse-anim {
+      animation: returnPulse 0.6s ease-in-out;
+    }
+
+    /* Custom Scrollbars */
     ::-webkit-scrollbar {
-      width: 5px;
-      height: 5px;
+      width: 6px;
+      height: 6px;
     }
     ::-webkit-scrollbar-track {
-      background: rgba(8, 14, 30, 0.5);
+      background: rgba(15, 23, 42, 0.4);
     }
     ::-webkit-scrollbar-thumb {
-      background: rgba(255, 255, 255, 0.2);
+      background: rgba(255, 255, 255, 0.18);
       border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(255, 255, 255, 0.3);
     }
   </style>
 </head>
-<body class="p-3 sm:p-5 text-slate-100 flex flex-col justify-between relative min-h-screen">
+<body class="p-2.5 sm:p-4 lg:px-5 lg:py-4 flex flex-col items-center justify-start min-h-screen">
 
-  <!-- Ambient Glass Background Blobs -->
-  <div class="fixed top-[-10%] left-[-5%] w-[45vw] h-[45vw] rounded-full bg-cyan-600/15 blur-[130px] pointer-events-none -z-10 glow-blob"></div>
-  <div class="fixed bottom-[-15%] right-[-5%] w-[50vw] h-[50vw] rounded-full bg-emerald-600/15 blur-[140px] pointer-events-none -z-10 glow-blob" style="animation-delay: -3.5s;"></div>
-  <div class="fixed top-[40%] right-[25%] w-[35vw] h-[35vw] rounded-full bg-amber-600/10 blur-[130px] pointer-events-none -z-10 glow-blob" style="animation-delay: -1.5s;"></div>
+  <!-- Ambient Glass Glow Orbs -->
+  <div class="fixed top-6 left-1/6 w-96 h-96 bg-cyan-500/14 rounded-full blur-3xl pointer-events-none -z-10"></div>
+  <div class="fixed top-1/3 right-1/6 w-96 h-96 bg-purple-500/14 rounded-full blur-3xl pointer-events-none -z-10"></div>
+  <div class="fixed bottom-12 left-1/2 w-80 h-80 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none -z-10"></div>
 
-  <header class="max-w-7xl mx-auto w-full mb-3">
-    <div class="glass-card p-3.5 sm:p-4 rounded-2xl flex flex-col lg:flex-row items-center justify-between gap-3 shadow-2xl">
-      <div class="flex items-center gap-3">
-        <div class="w-11 h-11 rounded-xl bg-gradient-to-tr from-cyan-500 via-teal-500 to-emerald-500 flex items-center justify-center shadow-lg shadow-cyan-500/25 text-white text-xl font-bold">
-          <i class="fa-solid fa-layer-group"></i>
+  <!-- MAIN WRAPPER -->
+  <div class="w-full max-w-[1560px] flex flex-col gap-5">
+
+    <!-- TOP FROSTED-GLASS CONTROLS DECK -->
+    <header class="glass-panel rounded-2xl p-4 sm:p-5 flex flex-col gap-4 sticky top-3 z-50">
+      <div class="flex flex-wrap items-center justify-between gap-4">
+
+        <!-- Title & Algorithm Metadata -->
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-cyan-500 via-purple-500 to-emerald-400 flex items-center justify-center shadow-lg shadow-cyan-500/25 text-slate-950 font-bold text-lg">
+            <i class="fa-solid fa-layer-group"></i>
+          </div>
+          <div>
+            <h1 class="text-lg sm:text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white via-cyan-100 to-purple-300">
+              Min Stack
+            </h1>
+            <p class="text-xs text-slate-400 flex items-center gap-2">
+              <span class="inline-block w-2 h-2 rounded-full bg-cyan-400 animate-pulse"></span>
+              LeetCode 155 • Dual Synchronized LIFO Stacks (stack &amp; minStack) • &Omicron;(1) Time • &Omicron;(n) Space
+            </p>
+          </div>
         </div>
-        <div>
-          <h1 class="text-base sm:text-xl font-extrabold tracking-tight bg-gradient-to-r from-cyan-300 via-teal-200 to-emerald-300 bg-clip-text text-transparent">
-            MinStack &bull; O(1) Minimum Stack Visualizer
-          </h1>
-          <p class="text-xs text-slate-400 font-mono">
-            Dual ArrayDeque Design: <span class="text-cyan-300 font-semibold">stack</span> + <span class="text-emerald-300 font-semibold">minStack</span> in <span class="text-amber-300 font-semibold">O(1)</span> Time
-          </p>
-        </div>
-      </div>
 
-      <!-- Interactive Live Operation Appender & Sample Controls -->
-      <div class="flex flex-wrap items-center justify-center gap-2">
-        <div class="flex items-center gap-1.5 glass-input px-2.5 py-1 rounded-xl text-xs">
-          <span class="text-cyan-400 font-semibold font-mono">val:</span>
-          <input id="inputPushVal" type="number" value="-3" class="bg-transparent px-1 py-0.5 rounded text-cyan-200 font-mono w-14 border-none focus:outline-none text-center" placeholder="val">
-          <button id="btnAddPush" class="px-2.5 py-1 bg-cyan-600 hover:bg-cyan-500 text-white font-semibold rounded-lg text-xs transition">
-            + push()
+        <!-- Center Playback Controls: Reset, Previous, Start/Stop, Next -->
+        <div class="flex items-center gap-2 sm:gap-3 bg-white/5 p-1.5 rounded-xl border border-white/10 backdrop-blur-md">
+          <button id="btnReset" class="glass-button text-slate-200 hover:text-white px-3 py-2 rounded-lg text-sm flex items-center gap-1.5" title="Reset to Initial State">
+            <i class="fa-solid fa-rotate-left"></i>
+            <span class="hidden sm:inline">Reset</span>
           </button>
-        </div>
-
-        <button id="btnAddPop" class="glass-btn px-2.5 py-1.5 text-rose-300 rounded-xl text-xs font-mono font-semibold" title="Append pop() operation">
-          + pop()
-        </button>
-
-        <button id="btnAddTop" class="glass-btn px-2.5 py-1.5 text-amber-300 rounded-xl text-xs font-mono font-semibold" title="Append top() operation">
-          + top()
-        </button>
-
-        <button id="btnAddGetMin" class="glass-btn px-2.5 py-1.5 text-emerald-300 rounded-xl text-xs font-mono font-semibold" title="Append getMin() operation">
-          + getMin()
-        </button>
-
-        <button id="btnSampleNext" class="glass-btn px-3 py-1.5 text-slate-200 rounded-xl text-xs transition" title="Cycle preset operation sequences">
-          <i class="fa-solid fa-shuffle text-amber-400 mr-1"></i> Preset
-        </button>
-
-        <button id="btnSoundToggle" class="glass-btn px-2.5 py-1.5 text-slate-300 rounded-xl text-xs transition" title="Toggle Sound">
-          <i id="soundIcon" class="fa-solid fa-volume-high text-cyan-400"></i>
-        </button>
-      </div>
-    </div>
-  </header>
-
-  <section class="max-w-7xl mx-auto w-full mb-4">
-    <div class="glass-card p-3.5 sm:p-4 rounded-2xl border border-white/10 shadow-2xl flex flex-col gap-3">
-      
-      <div class="flex flex-wrap items-center justify-between gap-3">
-        <!-- Top action buttons: Reset, Prev, Start/Stop, Next -->
-        <div class="flex items-center gap-2">
-          <a href="/" class="glass-button px-3 py-1.5 rounded-xl text-xs font-semibold text-slate-300 hover:text-white flex items-center gap-1.5 border border-white/10 hover:border-indigo-500/40 bg-white/5 shrink-0 transition-all active:scale-95 cursor-pointer" title="Return to DSA Atlas Library"><i class="fa-solid fa-arrow-left text-indigo-400"></i><span>DSA Atlas</span></a>
-          <button id="btnReset" class="glass-btn w-10 h-10 rounded-xl text-slate-300 flex items-center justify-center hover:text-white" title="Reset to beginning">
+          <button id="btnPrev" class="glass-button text-slate-200 hover:text-white px-3 py-2 rounded-lg text-sm flex items-center gap-1.5" title="Previous Step (Left Arrow)">
             <i class="fa-solid fa-backward-step"></i>
+            <span class="hidden sm:inline">Previous</span>
           </button>
-          
-          <button id="btnPrev" class="glass-btn px-3.5 h-10 rounded-xl text-slate-200 flex items-center gap-2 text-xs sm:text-sm font-semibold hover:text-white" title="Previous step">
-            <i class="fa-solid fa-chevron-left text-xs"></i> Prev
-          </button>
-
-          <button id="btnPlayPause" class="px-5 h-10 rounded-xl bg-gradient-to-r from-cyan-500 via-teal-600 to-emerald-600 hover:from-cyan-400 hover:to-emerald-500 active:scale-95 text-white flex items-center gap-2 text-xs sm:text-sm font-bold shadow-lg shadow-cyan-500/30 transition">
-            <i id="playIcon" class="fa-solid fa-play text-xs"></i>
+          <button id="btnPlay" class="glass-button bg-cyan-500/25 text-cyan-200 hover:bg-cyan-500/35 border-cyan-400/50 px-4 py-2 rounded-lg text-sm font-semibold flex items-center gap-2 shadow-lg shadow-cyan-500/15" title="Start / Stop (Spacebar)">
+            <i class="fa-solid fa-play" id="playIcon"></i>
             <span id="playText">Start</span>
           </button>
-
-          <button id="btnNext" class="glass-btn px-3.5 h-10 rounded-xl text-slate-200 flex items-center gap-2 text-xs sm:text-sm font-semibold hover:text-white" title="Next step">
-            Next <i class="fa-solid fa-chevron-right text-xs"></i>
+          <button id="btnNext" class="glass-button text-slate-200 hover:text-white px-3 py-2 rounded-lg text-sm flex items-center gap-1.5" title="Next Step (Right Arrow)">
+            <span class="hidden sm:inline">Next</span>
+            <i class="fa-solid fa-forward-step"></i>
           </button>
         </div>
 
-        <!-- Step Phase Badge & Status Info -->
+        <!-- Speed & Audio Controls -->
         <div class="flex items-center gap-2">
-          <span class="inline-flex items-center px-3 py-1.5 rounded-full text-xs font-semibold bg-cyan-950/70 text-cyan-300 border border-cyan-500/30 backdrop-blur-md">
-            <span class="w-2 h-2 rounded-full bg-cyan-400 mr-2 animate-pulse"></span>
-            <span id="topPhaseBadge">Phase: Ready</span>
-          </span>
-          <span id="topStepCounterBadge" class="text-xs glass-input text-slate-300 px-3 py-1.5 rounded-full font-mono">
-            Step 0 / 0
-          </span>
+          <div class="flex items-center bg-white/5 rounded-xl p-1 border border-white/10 text-xs text-slate-300 backdrop-blur-md">
+            <span class="px-2 py-1 text-slate-400"><i class="fa-solid fa-gauge-high mr-1"></i>Speed</span>
+            <button class="speed-btn px-2 py-1 rounded-lg hover:text-white transition" data-speed="1300">0.5x</button>
+            <button class="speed-btn px-2 py-1 rounded-lg bg-cyan-500/30 text-cyan-200 font-semibold transition" data-speed="650">1x</button>
+            <button class="speed-btn px-2 py-1 rounded-lg hover:text-white transition" data-speed="280">2x</button>
+            <button class="speed-btn px-2 py-1 rounded-lg hover:text-white transition" data-speed="110">4x</button>
+          </div>
+          <button id="btnAudio" class="glass-button p-2.5 rounded-xl text-slate-300 hover:text-cyan-300" title="Toggle Sound Effects">
+            <i class="fa-solid fa-volume-high" id="audioIcon"></i>
+          </button>
         </div>
 
-        <!-- Speed Selector Options -->
-        <div class="flex items-center gap-2">
-          <span class="text-xs text-slate-400 font-medium hidden sm:inline">Speed:</span>
-          <div class="flex items-center glass-input rounded-xl p-1 text-xs">
-            <button class="speed-btn px-2.5 py-1 rounded-lg text-slate-300 hover:text-white" data-speed="1400">0.5x</button>
-            <button class="speed-btn px-2.5 py-1 rounded-lg bg-cyan-600 text-white font-bold" data-speed="780">1x</button>
-            <button class="speed-btn px-2.5 py-1 rounded-lg text-slate-300 hover:text-white" data-speed="400">2x</button>
-            <button class="speed-btn px-2.5 py-1 rounded-lg text-slate-300 hover:text-white" data-speed="180">4x</button>
-          </div>
-        </div>
       </div>
 
-      <!-- Scrubber Timeline Slider -->
-      <div class="flex items-center gap-3 pt-1 border-t border-white/5">
-        <span class="text-xs font-mono text-slate-400 w-10 text-right" id="sliderCurrent">0</span>
-        <input id="stepSlider" type="range" min="0" max="0" value="0" class="w-full h-1.5 bg-slate-800/80 rounded-lg appearance-none cursor-pointer accent-cyan-500">
-        <span class="text-xs font-mono text-slate-400 w-10" id="sliderTotal">0</span>
+      <!-- Scrubber Slider & Status Badges -->
+      <div class="flex flex-col sm:flex-row items-center gap-3 pt-2 border-t border-white/10">
+        <div class="flex flex-wrap items-center gap-2 text-xs text-slate-300 w-full sm:w-auto shrink-0">
+          <span id="stepCounterBadge" class="code-font px-2.5 py-1 rounded-md bg-white/5 border border-white/10 text-cyan-300">
+            Step: 0 / 0
+          </span>
+          <span id="phaseBadge" class="px-2.5 py-1 rounded-md bg-sky-500/20 border border-sky-400/30 text-sky-200 font-semibold">
+            Ready
+          </span>
+          <span id="depthHeaderBadge" class="px-2.5 py-1 rounded-md bg-cyan-500/20 border border-cyan-400/30 text-cyan-200 font-bold">
+            Depth: 0
+          </span>
+          <span id="minHeaderBadge" class="px-2.5 py-1 rounded-md bg-purple-500/20 border border-purple-400/30 text-purple-200 font-bold">
+            Current Min: -
+          </span>
+        </div>
+        <div class="w-full flex items-center gap-3">
+          <input type="range" id="stepScrubber" min="0" max="0" value="0" class="w-full h-1.5 bg-slate-800/80 rounded-lg appearance-none cursor-pointer accent-cyan-400">
+        </div>
+      </div>
+    </header>
+
+    <!-- TEST CASES & CUSTOM OPERATION BUILDER BAR -->
+    <section class="glass-panel rounded-2xl p-4 flex flex-wrap items-center justify-between gap-4">
+      <div class="flex flex-wrap items-center gap-3">
+        <label for="presetSelect" class="text-xs uppercase font-semibold text-slate-300 tracking-wider flex items-center gap-1.5">
+          <i class="fa-solid fa-flask text-cyan-400"></i> Operation Scenarios:
+        </label>
+        <select id="presetSelect" class="bg-slate-900/75 border border-white/15 text-xs sm:text-sm text-slate-200 rounded-xl px-3 py-2 outline-none focus:border-cyan-400 backdrop-blur-md">
+          <option value="0">1: LeetCode Ex 1 (push -2, 0, -3 &rarr; getMin, pop, top, getMin)</option>
+          <option value="1">2: Duplicate Minimums Trap (push 0, 1, 0 &rarr; getMin, pop, getMin)</option>
+          <option value="2">3: Strictly Decreasing Pushes (push 10, 7, 4, 1 &rarr; pop &amp; getMin)</option>
+          <option value="3">4: Strictly Increasing Pushes (push 2, 5, 9, 14 &rarr; top &amp; getMin)</option>
+          <option value="4">5: Interleaved Push &amp; Pop (push 5, 3, pop, push 2, 8, getMin)</option>
+          <option value="5">6: Negative &amp; Positive Swing (push -1, 4, -5, -5, pop, getMin)</option>
+          <option value="6">7: 32-Bit Int Extremes (push 2147483647, -2147483648, getMin, pop, getMin)</option>
+          <option value="7">8: Drain &amp; Rebuild Stack (push 6, 3, pop, pop, push 9, 4, getMin)</option>
+          <option value="8">9: All Identical Values (push 7, 7, 7 &rarr; pop, getMin, top)</option>
+          <option value="9">10: Single Element Queries (push 42 &rarr; top, getMin, pop)</option>
+        </select>
       </div>
 
-    </div>
-  </section>
+      <!-- Quick Append Custom Operation Controls -->
+      <div class="flex flex-wrap items-center gap-2">
+        <span class="text-[11px] uppercase font-semibold text-slate-400 tracking-wider">Append Call:</span>
+        <input type="number" id="customPushVal" value="-4" class="w-20 bg-white/5 border border-white/15 rounded-xl px-2.5 py-1.5 text-xs text-slate-200 code-font outline-none focus:border-cyan-400 backdrop-blur-md" title="Integer value to push">
+        <button id="btnAddPush" class="glass-button text-xs px-3 py-1.5 rounded-xl text-cyan-300 font-semibold">
+          + push(val)
+        </button>
+        <button id="btnAddPop" class="glass-button text-xs px-3 py-1.5 rounded-xl text-rose-300 font-semibold">
+          + pop()
+        </button>
+        <button id="btnAddTop" class="glass-button text-xs px-3 py-1.5 rounded-xl text-sky-300 font-semibold">
+          + top()
+        </button>
+        <button id="btnAddGetMin" class="glass-button text-xs px-3 py-1.5 rounded-xl text-purple-300 font-semibold">
+          + getMin()
+        </button>
+      </div>
+    </section>
 
-  <main class="max-w-7xl mx-auto w-full grid grid-cols-1 lg:grid-cols-12 gap-5 flex-grow mb-4">
-    
-    <!-- Left Column: Dual Stack Chambers & Operation Sequence (7 cols) -->
-    <div class="lg:col-span-7 flex flex-col gap-4">
-      
-      <div class="glass-card rounded-3xl p-4 sm:p-5 flex flex-col justify-between min-h-[600px] relative overflow-hidden shadow-2xl gap-3.5">
-        
-        <!-- Arena Header Metadata -->
-        <div class="flex flex-wrap items-center justify-between z-10 gap-2">
-          <div class="flex items-center gap-2 text-xs font-mono text-slate-300 glass-input px-3 py-1.5 rounded-full">
-            <span class="text-cyan-300 font-semibold" id="arenaStackInfo">stack.size() = 0</span>
-            <span class="text-slate-500">&bull;</span>
-            <span class="text-emerald-300 font-semibold" id="arenaMinStackInfo">minStack.size() = 0</span>
-          </div>
+    <!-- MAIN VISUALIZATION & CODE SECTION -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-5">
 
-          <div class="flex items-center gap-2 glass-input px-3 py-1.5 rounded-full text-xs">
-            <span id="arenaStatusDot" class="w-2.5 h-2.5 rounded-full bg-cyan-400"></span>
-            <span id="arenaStatusText" class="text-slate-300 font-mono text-[11px]">Ready</span>
-          </div>
-        </div>
+      <!-- LEFT: COMMAND PIPELINE, DUAL SYNCHRONIZED LIFO STACKS & MIN EVALUATOR -->
+      <section class="lg:col-span-7 xl:col-span-8 flex flex-col gap-5">
 
-        <!-- Operation Sequence Ribbon -->
-        <div class="glass-input p-3 rounded-2xl border border-white/10 flex flex-col gap-2">
-          <div class="flex items-center justify-between text-xs font-mono">
-            <span class="text-slate-300 font-bold flex items-center gap-1.5">
-              <i class="fa-solid fa-list-ol text-cyan-400"></i> Operation Sequence Queue
+        <!-- Live Telemetry Cards -->
+        <div class="grid grid-cols-2 sm:grid-cols-5 gap-3">
+
+          <!-- Active Method Call -->
+          <div class="glass-panel rounded-xl p-3 flex flex-col justify-between border-amber-400/35">
+            <span class="text-[11px] text-slate-400 uppercase font-semibold flex items-center justify-between">
+              Active Method
+              <span class="w-2 h-2 rounded-full bg-amber-400"></span>
             </span>
-            <span id="opProgressText" class="text-[11px] text-slate-400">0 / 0 executed</span>
+            <div class="flex items-baseline gap-1.5 mt-1.5">
+              <span id="varActiveOp" class="code-font text-base sm:text-lg font-bold text-amber-300 truncate">MinStack()</span>
+            </div>
+            <span id="varOpIndexSub" class="text-[10px] text-amber-200/75 mt-1 code-font">Call 1 of 8</span>
           </div>
-          <div id="opsRibbonContainer" class="flex flex-wrap items-center gap-1.5 py-1 min-h-[38px]">
-            <!-- Dynamically populated operation pills -->
+
+          <!-- stack.peek() -->
+          <div class="glass-panel rounded-xl p-3 flex flex-col justify-between border-cyan-400/35">
+            <span class="text-[11px] text-slate-400 uppercase font-semibold flex items-center justify-between">
+              stack.peek()
+              <i class="fa-solid fa-arrow-up text-cyan-400 text-[10px]"></i>
+            </span>
+            <div class="flex items-baseline gap-1.5 mt-1.5">
+              <span id="varStackPeek" class="code-font text-xl font-bold text-cyan-300">empty</span>
+            </div>
+            <span id="varStackSizeSub" class="text-[10px] text-cyan-200/75 mt-1 code-font">stack.size(): 0</span>
           </div>
+
+          <!-- minStack.peek() -->
+          <div class="glass-panel rounded-xl p-3 flex flex-col justify-between border-purple-400/35">
+            <span class="text-[11px] text-slate-400 uppercase font-semibold flex items-center justify-between">
+              minStack.peek()
+              <i class="fa-solid fa-crown text-purple-400 text-[10px]"></i>
+            </span>
+            <div class="flex items-baseline gap-1.5 mt-1.5">
+              <span id="varMinPeek" class="code-font text-xl font-bold text-purple-300">empty</span>
+            </div>
+            <span class="text-[10px] text-purple-200/75 mt-1 code-font">O(1) prefix min</span>
+          </div>
+
+          <!-- Math.min(val, minStack.peek()) Evaluator -->
+          <div class="glass-panel rounded-xl p-3 flex flex-col justify-between border-sky-400/35">
+            <span class="text-[11px] text-slate-400 uppercase font-semibold flex items-center justify-between">
+              Min Formula
+              <i class="fa-solid fa-calculator text-sky-400 text-[10px]"></i>
+            </span>
+            <div class="flex items-baseline gap-1.5 mt-1.5 overflow-hidden">
+              <span id="varMinCalc" class="code-font text-sm sm:text-base font-bold text-sky-300 truncate">-</span>
+            </div>
+            <span class="text-[10px] text-slate-400 mt-1 code-font">Math.min(val, peek)</span>
+          </div>
+
+          <!-- Method Return Value -->
+          <div id="returnResultCard" class="glass-panel rounded-xl p-3 flex flex-col justify-between border-emerald-400/35 col-span-2 sm:col-span-1">
+            <span class="text-[11px] text-slate-400 uppercase font-semibold flex items-center justify-between">
+              Return Output
+              <i class="fa-solid fa-reply text-emerald-400 text-[10px]"></i>
+            </span>
+            <div class="flex items-baseline gap-1.5 mt-1.5">
+              <span id="varReturnVal" class="code-font text-xl font-black text-slate-400">null</span>
+            </div>
+            <span id="varReturnRole" class="text-[10px] text-slate-400 mt-1 code-font">void / int</span>
+          </div>
+
         </div>
 
-        <!-- Dynamic Action Callout Banner -->
-        <div id="comparisonBanner" class="min-h-[42px] flex items-center justify-center">
-          <span class="text-xs font-mono text-slate-400 glass-input px-4 py-1.5 rounded-full">
-            Click Start or Next to trace MinStack operations
-          </span>
-        </div>
+        <!-- UNIFIED STAGE: OPERATION CALL PIPELINE & DUAL VERTICAL LIFO STACK VESSELS -->
+        <div id="stageWrapper" class="glass-panel relative rounded-2xl p-4 sm:p-5 flex flex-col gap-5">
+          <!-- SVG Trajectory Arc Overlay Connecting Operation Calls, stack & minStack -->
+          <svg id="transferArcSvg" class="absolute inset-0 w-full h-full pointer-events-none z-30 overflow-visible"></svg>
 
-        <!-- Dual Stack Chambers Grid -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 flex-grow">
-          
-          <!-- Primary Stack Chamber: Deque<Integer> stack -->
-          <div class="glass-input p-3.5 rounded-2xl border border-cyan-500/25 flex flex-col justify-between relative min-h-[290px]">
-            <div class="flex items-center justify-between border-b border-white/10 pb-2">
-              <div class="flex items-center gap-2">
-                <span class="w-2.5 h-2.5 rounded-full bg-cyan-400"></span>
-                <span class="text-xs font-bold font-mono text-cyan-300">Deque&lt;Integer&gt; stack</span>
-              </div>
-              <span id="stackTopBadge" class="text-[11px] font-mono px-2 py-0.5 rounded-md bg-cyan-950/80 text-cyan-300 border border-cyan-500/30">
-                peek: empty
+          <!-- Floating Lift-and-Place Token Layer -->
+          <div id="flyingCloneLayer" class="absolute inset-0 pointer-events-none z-40"></div>
+
+          <!-- 1. METHOD CALL PIPELINE & RETURN ARRAY -->
+          <div class="flex flex-col gap-2.5">
+            <div class="flex flex-wrap items-center justify-between text-xs pb-2 border-b border-white/10 gap-2">
+              <span class="font-semibold text-slate-200 uppercase tracking-wider flex items-center gap-1.5">
+                <i class="fa-solid fa-terminal text-amber-400"></i>
+                Method Call Sequence &amp; Outputs
+              </span>
+              <span id="outputArrayPreview" class="code-font text-[11px] text-emerald-300 bg-emerald-500/15 px-2.5 py-0.5 rounded border border-emerald-400/30">
+                Output: [null]
               </span>
             </div>
 
-            <!-- Vertical Stack Container (Top of stack at top of box) -->
-            <div id="mainStackContainer" class="flex flex-col items-center justify-end gap-2 my-auto py-3 px-2 min-h-[210px] border-x-2 border-b-2 border-cyan-500/20 rounded-b-2xl bg-slate-950/40 relative">
-              <!-- Dynamically rendered stack cards -->
-            </div>
-
-            <div class="text-[11px] font-mono text-slate-400 text-center pt-1.5 flex items-center justify-between">
-              <span>All pushed elements</span>
-              <span class="text-cyan-400">LIFO Chamber</span>
+            <div id="opsPipelineArena" class="w-full py-2.5 px-2 rounded-xl bg-white/[0.02] border border-white/10 flex items-center gap-2 overflow-x-auto">
+              <!-- Populated dynamically with operation chips + return values -->
             </div>
           </div>
 
-          <!-- Minimum Stack Chamber: Deque<Integer> minStack -->
-          <div class="glass-input p-3.5 rounded-2xl border border-emerald-500/25 flex flex-col justify-between relative min-h-[290px]">
-            <div class="flex items-center justify-between border-b border-white/10 pb-2">
-              <div class="flex items-center gap-2">
-                <span class="w-2.5 h-2.5 rounded-full bg-emerald-400"></span>
-                <span class="text-xs font-bold font-mono text-emerald-300">Deque&lt;Integer&gt; minStack</span>
+          <!-- 2. DUAL SYNCHRONIZED OPEN-TOPPED VERTICAL LIFO STACK VESSELS -->
+          <div class="grid grid-cols-1 md:grid-cols-12 gap-5 items-stretch pt-1">
+
+            <!-- LEFT VESSEL (6 Cols): Stack<Integer> stack (Main Values) -->
+            <div class="md:col-span-6 flex flex-col gap-2">
+              <div class="flex items-center justify-between text-xs pb-1.5 border-b border-white/10">
+                <span class="font-semibold text-cyan-300 uppercase tracking-wider flex items-center gap-1.5">
+                  <i class="fa-solid fa-layer-group text-cyan-400"></i>
+                  Main Stack: <span class="code-font text-white">Stack&lt;Integer&gt; stack</span>
+                </span>
+                <span id="mainStackBadge" class="code-font text-[10px] px-2 py-0.5 rounded bg-cyan-500/15 border border-cyan-400/30 text-cyan-200">
+                  size = 0
+                </span>
               </div>
-              <span id="minStackTopBadge" class="text-[11px] font-mono px-2 py-0.5 rounded-md bg-emerald-950/80 text-emerald-300 border border-emerald-500/30">
-                min: empty
-              </span>
+
+              <div class="relative flex-1 min-h-[270px] p-4 rounded-xl bg-white/[0.015] border border-white/10 flex flex-col items-center justify-end">
+                <!-- Open Mouth Entry Header -->
+                <div class="w-44 sm:w-48 flex items-center justify-between text-[9px] code-font text-slate-400 pb-1.5 px-1">
+                  <span class="text-cyan-300 font-bold"><i class="fa-solid fa-arrow-down mr-1"></i>push(val)</span>
+                  <span>OPEN TOP</span>
+                  <span class="text-rose-300 font-bold">pop()<i class="fa-solid fa-arrow-up ml-1"></i></span>
+                </div>
+
+                <!-- U-Shaped Glass Vessel for Main stack -->
+                <div id="mainStackVessel" class="lifo-vessel-main relative w-44 sm:w-48 h-[212px] p-2.5 flex flex-col-reverse items-center justify-start gap-2 overflow-y-auto">
+                  <span class="my-auto text-xs text-slate-500 italic code-font">empty stack</span>
+                </div>
+
+                <!-- External Ejected Dock on stack.pop() -->
+                <div id="poppedMainDock" class="hidden absolute top-3 right-3 px-2.5 py-1.5 rounded-xl border border-dashed border-rose-400/80 bg-rose-500/15 flex flex-col items-center select-none">
+                  <span class="text-[8px] code-font text-rose-400 font-bold uppercase">stack.pop()</span>
+                  <span id="poppedMainVal" class="code-font text-sm font-extrabold text-rose-200 line-through">-3</span>
+                </div>
+
+                <span class="text-[10px] code-font text-slate-400 mt-2">Stores every pushed element in LIFO order</span>
+              </div>
             </div>
 
-            <!-- Vertical MinStack Container -->
-            <div id="minStackContainer" class="flex flex-col items-center justify-end gap-2 my-auto py-3 px-2 min-h-[210px] border-x-2 border-b-2 border-emerald-500/20 rounded-b-2xl bg-slate-950/40 relative">
-              <!-- Dynamically rendered minStack cards -->
+            <!-- RIGHT VESSEL (6 Cols): Stack<Integer> minStack (Running Minimums) -->
+            <div class="md:col-span-6 flex flex-col gap-2">
+              <div class="flex items-center justify-between text-xs pb-1.5 border-b border-white/10">
+                <span class="font-semibold text-purple-300 uppercase tracking-wider flex items-center gap-1.5">
+                  <i class="fa-solid fa-crown text-purple-400"></i>
+                  Min Stack: <span class="code-font text-white">Stack&lt;Integer&gt; minStack</span>
+                </span>
+                <span id="minStackBadge" class="code-font text-[10px] px-2 py-0.5 rounded bg-purple-500/15 border border-purple-400/30 text-purple-200">
+                  size = 0
+                </span>
+              </div>
+
+              <div class="relative flex-1 min-h-[270px] p-4 rounded-xl bg-white/[0.015] border border-white/10 flex flex-col items-center justify-end">
+                <!-- Open Mouth Entry Header -->
+                <div class="w-44 sm:w-48 flex items-center justify-between text-[9px] code-font text-slate-400 pb-1.5 px-1">
+                  <span class="text-purple-300 font-bold"><i class="fa-solid fa-arrow-down mr-1"></i>push(min)</span>
+                  <span>OPEN TOP</span>
+                  <span class="text-rose-300 font-bold">pop()<i class="fa-solid fa-arrow-up ml-1"></i></span>
+                </div>
+
+                <!-- U-Shaped Glass Vessel for minStack -->
+                <div id="minStackVessel" class="lifo-vessel-min relative w-44 sm:w-48 h-[212px] p-2.5 flex flex-col-reverse items-center justify-start gap-2 overflow-y-auto">
+                  <span class="my-auto text-xs text-slate-500 italic code-font">empty minStack</span>
+                </div>
+
+                <!-- External Ejected Dock on minStack.pop() -->
+                <div id="poppedMinDock" class="hidden absolute top-3 right-3 px-2.5 py-1.5 rounded-xl border border-dashed border-rose-400/80 bg-rose-500/15 flex flex-col items-center select-none">
+                  <span class="text-[8px] code-font text-rose-400 font-bold uppercase">minStack.pop()</span>
+                  <span id="poppedMinVal" class="code-font text-sm font-extrabold text-rose-200 line-through">-3</span>
+                </div>
+
+                <span class="text-[10px] code-font text-slate-400 mt-2">Level d stores min(stack[0..d]) in &Omicron;(1)</span>
+              </div>
             </div>
 
-            <div class="text-[11px] font-mono text-slate-400 text-center pt-1.5 flex items-center justify-between">
-              <span>Non-increasing mins (&le;)</span>
-              <span class="text-emerald-400">O(1) Min Tracker</span>
+          </div>
+
+          <!-- Live Decision & Invariant Banner -->
+          <div id="decisionBanner" class="p-3.5 rounded-xl bg-white/[0.04] border border-white/10 text-xs flex flex-col sm:flex-row items-center justify-between gap-3 backdrop-blur-md">
+            <div class="flex items-center gap-2.5">
+              <i id="decisionIcon" class="fa-solid fa-circle-info text-cyan-400 text-base"></i>
+              <span id="decisionText" class="text-slate-200">Ready to execute MinStack operations in O(1) time per call.</span>
+            </div>
+            <div id="actionPill" class="hidden text-xs code-font px-3 py-1.5 rounded-lg bg-slate-950/70 border border-white/15 text-cyan-200 font-semibold shrink-0">
+              <!-- e.g. Math.min(-3, -2) = -3 -->
+            </div>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- RIGHT: SYNCHRONIZED & PROPERLY INDENTED JAVA CODE CONTAINER -->
+      <section class="lg:col-span-5 xl:col-span-4 flex flex-col gap-4">
+
+        <div class="glass-panel rounded-2xl p-4 flex flex-col h-full">
+          <div class="flex items-center justify-between pb-3 border-b border-white/10 text-xs">
+            <div class="flex items-center gap-2">
+              <div class="flex gap-1.5">
+                <span class="w-3 h-3 rounded-full bg-rose-500/80 inline-block"></span>
+                <span class="w-3 h-3 rounded-full bg-amber-500/80 inline-block"></span>
+                <span class="w-3 h-3 rounded-full bg-emerald-500/80 inline-block"></span>
+              </div>
+              <span class="code-font text-slate-200 font-semibold ml-2">MinStack.java</span>
+            </div>
+            <span class="text-[11px] text-cyan-300 bg-cyan-500/15 px-2.5 py-0.5 rounded border border-cyan-400/25 code-font">
+              O(1) All Operations
+            </span>
+          </div>
+
+          <!-- Properly Indented Java Code Lines with Zero-Jump Localized Scroll -->
+          <div id="codeContainer" class="code-font text-xs sm:text-[13px] leading-relaxed text-slate-300 py-3 overflow-x-auto overflow-y-auto max-h-[620px] flex-grow select-none">
+            <div class="code-line" id="line1"><span class="text-slate-500 mr-2"> 1</span><span class="text-indigo-400 font-semibold">import</span> java.util.*;</div>
+            <div class="code-line" id="line2"><span class="text-slate-500 mr-2"> 2</span></div>
+            <div class="code-line" id="line3"><span class="text-slate-500 mr-2"> 3</span><span class="text-indigo-400 font-semibold">class</span> <span class="text-amber-300">MinStack</span> {</div>
+            <div class="code-line" id="line4"><span class="text-slate-500 mr-2"> 4</span></div>
+            <div class="code-line" id="line5"><span class="text-slate-500 mr-2"> 5</span>    Stack&lt;Integer&gt; stack;</div>
+            <div class="code-line" id="line6"><span class="text-slate-500 mr-2"> 6</span>    Stack&lt;Integer&gt; minStack;</div>
+            <div class="code-line" id="line7"><span class="text-slate-500 mr-2"> 7</span></div>
+            <div class="code-line" id="line8"><span class="text-slate-500 mr-2"> 8</span>    <span class="text-indigo-400 font-semibold">public</span> <span class="text-cyan-300">MinStack</span>() {</div>
+            <div class="code-line" id="line9"><span class="text-slate-500 mr-2"> 9</span></div>
+            <div class="code-line" id="line10"><span class="text-slate-500 mr-2">10</span>        stack = <span class="text-indigo-400 font-semibold">new</span> Stack&lt;&gt;();</div>
+            <div class="code-line" id="line11"><span class="text-slate-500 mr-2">11</span>        minStack = <span class="text-indigo-400 font-semibold">new</span> Stack&lt;&gt;();</div>
+            <div class="code-line" id="line12"><span class="text-slate-500 mr-2">12</span>    }</div>
+            <div class="code-line" id="line13"><span class="text-slate-500 mr-2">13</span></div>
+            <div class="code-line" id="line14"><span class="text-slate-500 mr-2">14</span>    <span class="text-indigo-400 font-semibold">public void</span> <span class="text-cyan-300">push</span>(<span class="text-indigo-400">int</span> val) {</div>
+            <div class="code-line" id="line15"><span class="text-slate-500 mr-2">15</span></div>
+            <div class="code-line" id="line16"><span class="text-slate-500 mr-2">16</span>        stack.push(val);</div>
+            <div class="code-line" id="line17"><span class="text-slate-500 mr-2">17</span></div>
+            <div class="code-line" id="line18"><span class="text-slate-500 mr-2">18</span>        <span class="text-indigo-400 font-semibold">if</span> (minStack.isEmpty()) {</div>
+            <div class="code-line" id="line19"><span class="text-slate-500 mr-2">19</span>            minStack.push(val);</div>
+            <div class="code-line" id="line20"><span class="text-slate-500 mr-2">20</span>        } <span class="text-indigo-400 font-semibold">else</span> {</div>
+            <div class="code-line" id="line21"><span class="text-slate-500 mr-2">21</span>            minStack.push(Math.min(val, minStack.peek()));</div>
+            <div class="code-line" id="line22"><span class="text-slate-500 mr-2">22</span>        }</div>
+            <div class="code-line" id="line23"><span class="text-slate-500 mr-2">23</span>    }</div>
+            <div class="code-line" id="line24"><span class="text-slate-500 mr-2">24</span></div>
+            <div class="code-line" id="line25"><span class="text-slate-500 mr-2">25</span>    <span class="text-indigo-400 font-semibold">public void</span> <span class="text-cyan-300">pop</span>() {</div>
+            <div class="code-line" id="line26"><span class="text-slate-500 mr-2">26</span></div>
+            <div class="code-line" id="line27"><span class="text-slate-500 mr-2">27</span>        stack.pop();</div>
+            <div class="code-line" id="line28"><span class="text-slate-500 mr-2">28</span>        minStack.pop();</div>
+            <div class="code-line" id="line29"><span class="text-slate-500 mr-2">29</span>    }</div>
+            <div class="code-line" id="line30"><span class="text-slate-500 mr-2">30</span></div>
+            <div class="code-line" id="line31"><span class="text-slate-500 mr-2">31</span>    <span class="text-indigo-400 font-semibold">public int</span> <span class="text-cyan-300">top</span>() {</div>
+            <div class="code-line" id="line32"><span class="text-slate-500 mr-2">32</span></div>
+            <div class="code-line" id="line33"><span class="text-slate-500 mr-2">33</span>        <span class="text-indigo-400 font-semibold">return</span> stack.peek();</div>
+            <div class="code-line" id="line34"><span class="text-slate-500 mr-2">34</span>    }</div>
+            <div class="code-line" id="line35"><span class="text-slate-500 mr-2">35</span></div>
+            <div class="code-line" id="line36"><span class="text-slate-500 mr-2">36</span>    <span class="text-indigo-400 font-semibold">public int</span> <span class="text-cyan-300">getMin</span>() {</div>
+            <div class="code-line" id="line37"><span class="text-slate-500 mr-2">37</span></div>
+            <div class="code-line" id="line38"><span class="text-slate-500 mr-2">38</span>        <span class="text-indigo-400 font-semibold">return</span> minStack.peek();</div>
+            <div class="code-line" id="line39"><span class="text-slate-500 mr-2">39</span>    }</div>
+            <div class="code-line" id="line40"><span class="text-slate-500 mr-2">40</span>}</div>
+          </div>
+
+          <!-- Live Step Narrative Box -->
+          <div class="mt-3 p-3 bg-white/[0.04] border border-white/10 rounded-xl flex items-start gap-2.5 backdrop-blur-md">
+            <i class="fa-solid fa-circle-info text-cyan-400 mt-0.5 text-xs"></i>
+            <div class="text-xs text-slate-200 leading-relaxed" id="stepDescription">
+              Ready to run Min Stack. Click <b>Start</b> or <b>Next</b> to step through.
             </div>
           </div>
 
         </div>
 
-        <!-- Explanation Callout Box -->
-        <div id="operationDetailBox" class="bg-black/40 px-3.5 py-2 rounded-xl border border-white/5 text-slate-300 text-xs font-mono leading-relaxed text-center">
-          <code class="text-emerald-300">minStack</code> only pushes <code class="text-cyan-300">val</code> when <code class="text-amber-300">minStack.isEmpty() || val &lt;= minStack.peek()</code>, ensuring the current minimum is always at <code class="text-emerald-300">minStack.peek()</code>.
-        </div>
-
-        <!-- Bottom Status Summary -->
-        <div class="z-10 glass-input p-3 rounded-2xl flex items-center justify-between gap-3 text-xs sm:text-sm">
-          <div class="flex items-center gap-2.5 overflow-hidden w-full">
-            <div id="statusDot" class="w-3.5 h-3.5 rounded-full bg-cyan-400 shrink-0"></div>
-            <p id="stepDescription" class="text-slate-200 truncate font-medium text-xs sm:text-sm">Ready to begin. Click Start or Next to execute.</p>
-          </div>
-          <div id="returnPill" class="shrink-0 px-3 py-1 rounded-xl text-xs font-bold font-mono bg-slate-800 text-slate-400 border border-slate-700">
-            pending
-          </div>
-        </div>
-      </div>
+      </section>
 
     </div>
 
-    <div class="lg:col-span-5 flex flex-col gap-4">
-      
-      <!-- Live Variable Watcher Box -->
-      <div class="glass-card rounded-2xl p-4 shadow-xl flex flex-col gap-3">
-        <h2 class="text-sm font-bold text-slate-300 flex items-center justify-between">
-          <span><i class="fa-solid fa-microchip text-cyan-400 mr-2"></i>Live Variable Watcher</span>
-          <span class="text-xs font-normal text-slate-400 font-mono">Scope: MinStack</span>
-        </h2>
-        
-        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-center">
-          <div class="glass-input p-2 rounded-xl border border-cyan-500/20">
-            <span class="text-[10px] uppercase tracking-wider text-slate-400 font-semibold block">Method</span>
-            <span id="varMethod" class="font-mono text-xs font-bold text-cyan-400">-</span>
-          </div>
-          <div class="glass-input p-2 rounded-xl border border-amber-500/20">
-            <span class="text-[10px] uppercase tracking-wider text-slate-400 font-semibold block">val / removed</span>
-            <span id="varVal" class="font-mono text-base font-bold text-amber-300">-</span>
-          </div>
-          <div class="glass-input p-2 rounded-xl border border-purple-500/20">
-            <span class="text-[10px] uppercase tracking-wider text-slate-400 font-semibold block">stack.peek()</span>
-            <span id="varStackPeek" class="font-mono text-base font-bold text-purple-300">-</span>
-          </div>
-          <div class="glass-input p-2 rounded-xl border border-emerald-500/20">
-            <span class="text-[10px] uppercase tracking-wider text-slate-400 font-semibold block">minStack.peek()</span>
-            <span id="varMinPeek" class="font-mono text-base font-bold text-emerald-300">-</span>
-          </div>
-        </div>
+    <!-- BOTTOM SECTION: PROBLEM STATEMENT & ARCHITECTURAL SUMMARY -->
+    <footer class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-2">
 
-        <!-- Condition / Operation Evaluator -->
-        <div class="glass-input p-2.5 rounded-xl text-xs flex flex-col gap-1 font-mono">
-          <div class="flex items-center justify-between text-slate-400 text-[11px]">
-            <span>Expression Evaluator:</span>
-            <span id="evalConditionName" class="text-cyan-300">Condition / Return</span>
-          </div>
-          <div class="flex items-center justify-between text-xs bg-black/40 px-3 py-1.5 rounded-lg border border-white/5">
-            <span id="evalStatement" class="text-slate-300 truncate">minStack.isEmpty() || val &lt;= minStack.peek()</span>
-            <span id="evalResult" class="font-bold text-cyan-400 shrink-0 ml-2">-</span>
-          </div>
-        </div>
-      </div>
-
-      <!-- Synchronized Java Code matching user's exact program -->
-      <div class="glass-card rounded-2xl p-4 shadow-xl flex flex-col flex-grow overflow-hidden">
-        <div class="flex items-center justify-between pb-2 border-b border-white/10 mb-2">
+      <!-- Problem Statement Card -->
+      <div class="glass-panel rounded-2xl p-5 flex flex-col gap-3">
+        <div class="flex items-center justify-between">
           <div class="flex items-center gap-2">
-            <i class="fa-brands fa-java text-rose-400 text-lg"></i>
-            <span class="text-xs font-bold text-slate-200">MinStack.java &bull; Synchronized Execution</span>
+            <span class="text-amber-400 font-bold"><i class="fa-solid fa-file-lines mr-1.5"></i>Problem Statement</span>
+            <span class="px-2 py-0.5 rounded text-[11px] font-semibold bg-amber-500/20 text-amber-300 border border-amber-400/30">Medium</span>
           </div>
-          <span class="text-[11px] text-slate-400 bg-white/5 px-2 py-0.5 rounded font-mono">O(1) Time</span>
+          <span class="text-xs text-slate-400 font-mono">LeetCode 155</span>
         </div>
 
-        <!-- Code Lines -->
-        <div class="code-font text-[11px] sm:text-xs text-slate-300 overflow-y-auto rounded-xl glass-input p-2.5 border border-white/5 select-none flex-grow max-h-[420px]" id="codeContainer">
-          <div id="code-line-1" class="code-line py-0.5 px-2 rounded flex"><span class="text-slate-600 w-7 select-none">1</span><span class="text-purple-400">import</span>&nbsp;java.util.*;</div>
-          <div id="code-line-2" class="code-line py-0.5 px-2 rounded flex"><span class="text-slate-600 w-7 select-none">2</span></div>
-          <div id="code-line-3" class="code-line py-0.5 px-2 rounded flex"><span class="text-slate-600 w-7 select-none">3</span><span class="text-purple-400">class</span>&nbsp;<span class="text-yellow-300">MinStack</span>&nbsp;{</div>
-          <div id="code-line-4" class="code-line py-0.5 px-2 rounded flex"><span class="text-slate-600 w-7 select-none">4</span>&nbsp;&nbsp;<span class="text-purple-400">private</span>&nbsp;Deque&lt;Integer&gt; stack;</div>
-          <div id="code-line-5" class="code-line py-0.5 px-2 rounded flex"><span class="text-slate-600 w-7 select-none">5</span>&nbsp;&nbsp;<span class="text-purple-400">private</span>&nbsp;Deque&lt;Integer&gt; minStack;</div>
-          <div id="code-line-6" class="code-line py-0.5 px-2 rounded flex"><span class="text-slate-600 w-7 select-none">6</span></div>
-          <div id="code-line-7" class="code-line py-0.5 px-2 rounded flex"><span class="text-slate-600 w-7 select-none">7</span>&nbsp;&nbsp;<span class="text-purple-400">public</span>&nbsp;<span class="text-blue-400">MinStack</span>() {</div>
-          <div id="code-line-8" class="code-line py-0.5 px-2 rounded flex"><span class="text-slate-600 w-7 select-none">8</span>&nbsp;&nbsp;&nbsp;&nbsp;stack = <span class="text-purple-400">new</span>&nbsp;ArrayDeque&lt;&gt;();</div>
-          <div id="code-line-9" class="code-line py-0.5 px-2 rounded flex"><span class="text-slate-600 w-7 select-none">9</span>&nbsp;&nbsp;&nbsp;&nbsp;minStack = <span class="text-purple-400">new</span>&nbsp;ArrayDeque&lt;&gt;();</div>
-          <div id="code-line-10" class="code-line py-0.5 px-2 rounded flex"><span class="text-slate-600 w-7 select-none">10</span>&nbsp;&nbsp;}</div>
-          <div id="code-line-11" class="code-line py-0.5 px-2 rounded flex"><span class="text-slate-600 w-7 select-none">11</span></div>
-          <div id="code-line-12" class="code-line py-0.5 px-2 rounded flex"><span class="text-slate-600 w-7 select-none">12</span>&nbsp;&nbsp;<span class="text-purple-400">public void</span>&nbsp;<span class="text-blue-400">push</span>(<span class="text-cyan-400">int</span>&nbsp;val) {</div>
-          <div id="code-line-13" class="code-line py-0.5 px-2 rounded flex"><span class="text-slate-600 w-7 select-none">13</span>&nbsp;&nbsp;&nbsp;&nbsp;stack.push(val);</div>
-          <div id="code-line-14" class="code-line py-0.5 px-2 rounded flex"><span class="text-slate-600 w-7 select-none">14</span></div>
-          <div id="code-line-15" class="code-line py-0.5 px-2 rounded flex"><span class="text-slate-600 w-7 select-none">15</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="text-purple-400">if</span>&nbsp;(minStack.isEmpty() || val &lt;= minStack.peek()) {</div>
-          <div id="code-line-16" class="code-line py-0.5 px-2 rounded flex"><span class="text-slate-600 w-7 select-none">16</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;minStack.push(val);</div>
-          <div id="code-line-17" class="code-line py-0.5 px-2 rounded flex"><span class="text-slate-600 w-7 select-none">17</span>&nbsp;&nbsp;&nbsp;&nbsp;}</div>
-          <div id="code-line-18" class="code-line py-0.5 px-2 rounded flex"><span class="text-slate-600 w-7 select-none">18</span>&nbsp;&nbsp;}</div>
-          <div id="code-line-19" class="code-line py-0.5 px-2 rounded flex"><span class="text-slate-600 w-7 select-none">19</span></div>
-          <div id="code-line-20" class="code-line py-0.5 px-2 rounded flex"><span class="text-slate-600 w-7 select-none">20</span>&nbsp;&nbsp;<span class="text-purple-400">public void</span>&nbsp;<span class="text-blue-400">pop</span>() {</div>
-          <div id="code-line-21" class="code-line py-0.5 px-2 rounded flex"><span class="text-slate-600 w-7 select-none">21</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="text-purple-400">if</span>&nbsp;(stack.isEmpty()) {</div>
-          <div id="code-line-22" class="code-line py-0.5 px-2 rounded flex"><span class="text-slate-600 w-7 select-none">22</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="text-purple-400">throw new</span>&nbsp;NoSuchElementException(<span class="text-emerald-300">"Stack is empty"</span>);</div>
-          <div id="code-line-23" class="code-line py-0.5 px-2 rounded flex"><span class="text-slate-600 w-7 select-none">23</span>&nbsp;&nbsp;&nbsp;&nbsp;}</div>
-          <div id="code-line-24" class="code-line py-0.5 px-2 rounded flex"><span class="text-slate-600 w-7 select-none">24</span></div>
-          <div id="code-line-25" class="code-line py-0.5 px-2 rounded flex"><span class="text-slate-600 w-7 select-none">25</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="text-cyan-400">int</span>&nbsp;removed = stack.pop();</div>
-          <div id="code-line-26" class="code-line py-0.5 px-2 rounded flex"><span class="text-slate-600 w-7 select-none">26</span></div>
-          <div id="code-line-27" class="code-line py-0.5 px-2 rounded flex"><span class="text-slate-600 w-7 select-none">27</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="text-purple-400">if</span>&nbsp;(removed == minStack.peek()) {</div>
-          <div id="code-line-28" class="code-line py-0.5 px-2 rounded flex"><span class="text-slate-600 w-7 select-none">28</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;minStack.pop();</div>
-          <div id="code-line-29" class="code-line py-0.5 px-2 rounded flex"><span class="text-slate-600 w-7 select-none">29</span>&nbsp;&nbsp;&nbsp;&nbsp;}</div>
-          <div id="code-line-30" class="code-line py-0.5 px-2 rounded flex"><span class="text-slate-600 w-7 select-none">30</span>&nbsp;&nbsp;}</div>
-          <div id="code-line-31" class="code-line py-0.5 px-2 rounded flex"><span class="text-slate-600 w-7 select-none">31</span></div>
-          <div id="code-line-32" class="code-line py-0.5 px-2 rounded flex"><span class="text-slate-600 w-7 select-none">32</span>&nbsp;&nbsp;<span class="text-purple-400">public int</span>&nbsp;<span class="text-blue-400">top</span>() {</div>
-          <div id="code-line-33" class="code-line py-0.5 px-2 rounded flex"><span class="text-slate-600 w-7 select-none">33</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="text-purple-400">if</span>&nbsp;(stack.isEmpty()) {</div>
-          <div id="code-line-34" class="code-line py-0.5 px-2 rounded flex"><span class="text-slate-600 w-7 select-none">34</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="text-purple-400">throw new</span>&nbsp;NoSuchElementException(<span class="text-emerald-300">"Stack is empty"</span>);</div>
-          <div id="code-line-35" class="code-line py-0.5 px-2 rounded flex"><span class="text-slate-600 w-7 select-none">35</span>&nbsp;&nbsp;&nbsp;&nbsp;}</div>
-          <div id="code-line-36" class="code-line py-0.5 px-2 rounded flex"><span class="text-slate-600 w-7 select-none">36</span></div>
-          <div id="code-line-37" class="code-line py-0.5 px-2 rounded flex"><span class="text-slate-600 w-7 select-none">37</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="text-purple-400">return</span>&nbsp;stack.peek();</div>
-          <div id="code-line-38" class="code-line py-0.5 px-2 rounded flex"><span class="text-slate-600 w-7 select-none">38</span>&nbsp;&nbsp;}</div>
-          <div id="code-line-39" class="code-line py-0.5 px-2 rounded flex"><span class="text-slate-600 w-7 select-none">39</span></div>
-          <div id="code-line-40" class="code-line py-0.5 px-2 rounded flex"><span class="text-slate-600 w-7 select-none">40</span>&nbsp;&nbsp;<span class="text-purple-400">public int</span>&nbsp;<span class="text-blue-400">getMin</span>() {</div>
-          <div id="code-line-41" class="code-line py-0.5 px-2 rounded flex"><span class="text-slate-600 w-7 select-none">41</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="text-purple-400">if</span>&nbsp;(minStack.isEmpty()) {</div>
-          <div id="code-line-42" class="code-line py-0.5 px-2 rounded flex"><span class="text-slate-600 w-7 select-none">42</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="text-purple-400">throw new</span>&nbsp;NoSuchElementException(<span class="text-emerald-300">"Stack is empty"</span>);</div>
-          <div id="code-line-43" class="code-line py-0.5 px-2 rounded flex"><span class="text-slate-600 w-7 select-none">43</span>&nbsp;&nbsp;&nbsp;&nbsp;}</div>
-          <div id="code-line-44" class="code-line py-0.5 px-2 rounded flex"><span class="text-slate-600 w-7 select-none">44</span></div>
-          <div id="code-line-45" class="code-line py-0.5 px-2 rounded flex"><span class="text-slate-600 w-7 select-none">45</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="text-purple-400">return</span>&nbsp;minStack.peek();</div>
-          <div id="code-line-46" class="code-line py-0.5 px-2 rounded flex"><span class="text-slate-600 w-7 select-none">46</span>&nbsp;&nbsp;}</div>
-          <div id="code-line-47" class="code-line py-0.5 px-2 rounded flex"><span class="text-slate-600 w-7 select-none">47</span>}</div>
+        <p class="text-xs text-slate-300 leading-relaxed">
+          Design a stack that supports <code class="font-mono text-cyan-300">push</code>, <code class="font-mono text-rose-300">pop</code>, <code class="font-mono text-sky-300">top</code>, and retrieving the minimum element in <b>constant <code class="font-mono">&Omicron;(1)</code> time</b>:
+          <br>&bull; <code class="font-mono">MinStack()</code> initializes the stack object.
+          <br>&bull; <code class="font-mono">void push(int val)</code> pushes the element <code class="font-mono">val</code> onto the stack.
+          <br>&bull; <code class="font-mono">void pop()</code> removes the element on the top of the stack.
+          <br>&bull; <code class="font-mono">int top()</code> gets the top element of the stack.
+          <br>&bull; <code class="font-mono">int getMin()</code> retrieves the minimum element in the stack.
+        </p>
+
+        <div class="space-y-2 pt-2 border-t border-white/10 text-xs text-slate-300">
+          <div class="bg-white/[0.03] p-2.5 rounded-lg border border-white/10 font-mono">
+            <span class="text-slate-400">Example 1:</span><br>
+            <b>Input:</b> ["MinStack","push","push","push","getMin","pop","top","getMin"]<br>
+            [[],[-2],[0],[-3],[],[],[],[]]<br>
+            <b>Output:</b> <span class="text-emerald-400 font-bold">[null,null,null,null,-3,null,0,-2]</span>
+          </div>
+        </div>
+
+        <div class="text-[11px] text-slate-400">
+          <b>Constraints:</b> <code class="font-mono text-slate-300">-2<sup>31</sup> &le; val &le; 2<sup>31</sup> - 1</code>; <code class="font-mono text-slate-300">pop</code>, <code class="font-mono text-slate-300">top</code>, and <code class="font-mono text-slate-300">getMin</code> are always called on non-empty stacks; at most <code class="font-mono text-slate-300">3 &times; 10<sup>4</sup></code> calls.
         </div>
       </div>
 
-    </div>
-  </main>
+      <!-- Algorithm Summary & Dual-Stack Prefix Minimum Invariant Card -->
+      <div class="glass-panel rounded-2xl p-5 flex flex-col gap-3">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <span class="text-cyan-400 font-bold"><i class="fa-solid fa-brain mr-1.5"></i>Algorithm Summary &amp; Dual-Stack Invariant</span>
+          </div>
+          <span class="px-2 py-0.5 rounded text-[11px] font-semibold bg-cyan-500/20 text-cyan-200 border border-cyan-400/30">O(1) Time • O(N) Space</span>
+        </div>
 
-  <!-- Footer -->
-  <footer class="max-w-7xl mx-auto w-full text-center text-xs text-slate-500 py-1 font-mono">
-    <p>MinStack Dual-Stack Visualizer &bull; O(1) Push, Pop, Top &amp; GetMin &bull; Glassmorphic Transparent UI</p>
-  </footer>
+        <div class="space-y-3 text-xs text-slate-300 leading-relaxed">
+          <div class="p-3 bg-purple-950/30 border border-purple-400/25 rounded-xl">
+            <b class="text-purple-300 flex items-center gap-1.5 mb-1">
+              <i class="fa-solid fa-layer-group"></i> Prefix-Minimum Synchronization Invariant:
+            </b>
+            Every depth level <code class="font-mono">d</code> in <code class="font-mono text-purple-300 font-semibold">minStack</code> stores the exact minimum of all elements from index <code class="font-mono">0</code> up to <code class="font-mono">d</code> in <code class="font-mono text-cyan-300">stack</code>:
+            <br><code class="font-mono text-emerald-300 font-semibold">minStack[d] = Math.min(stack[d], minStack[d - 1])</code>
+          </div>
 
+          <div class="p-3 bg-cyan-950/25 border border-cyan-400/20 rounded-xl">
+            <b class="text-cyan-300 flex items-center gap-1.5 mb-1">
+              <i class="fa-solid fa-shield-halved"></i> Why Duplicate Minimums Are Pushed:
+            </b>
+            Because <code class="font-mono">minStack</code> always has the <b>exact same height</b> as <code class="font-mono">stack</code>, popping the top element (<code class="font-mono">stack.pop()</code> and <code class="font-mono">minStack.pop()</code>) automatically restores the previous minimum in <code class="font-mono">&Omicron;(1)</code> time without needing any comparison or branching during <code class="font-mono">pop()</code>.
+          </div>
+
+          <div class="grid grid-cols-2 gap-3 pt-1">
+            <div class="p-2.5 bg-white/[0.03] rounded-lg border border-white/10">
+              <span class="text-[11px] text-slate-400 uppercase font-semibold">Time Complexity</span>
+              <div class="text-sm font-bold text-emerald-400 font-mono mt-0.5">&Omicron;(1)</div>
+              <p class="text-[10px] text-slate-400 mt-0.5">Worst-case constant time for <code class="font-mono">push</code>, <code class="font-mono">pop</code>, <code class="font-mono">top</code>, and <code class="font-mono">getMin</code>.</p>
+            </div>
+            <div class="p-2.5 bg-white/[0.03] rounded-lg border border-white/10">
+              <span class="text-[11px] text-slate-400 uppercase font-semibold">Space Complexity</span>
+              <div class="text-sm font-bold text-cyan-400 font-mono mt-0.5">&Omicron;(N)</div>
+              <p class="text-[10px] text-slate-400 mt-0.5">Two parallel stacks storing <code class="font-mono">N</code> elements each (<code class="font-mono">2N = &Omicron;(N)</code>).</p>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+    </footer>
+
+  </div>
+
+  <!-- JAVASCRIPT SIMULATION ENGINE WITH DUAL SYNCHRONIZED LIFO STACKS & LIFT-AND-ARC TRANSFERS -->
   <script>
-    class SoundEngine {
-      constructor() {
-        this.enabled = true;
-        this.ctx = null;
+    // 10 COMPREHENSIVE OPERATION SCENARIOS
+    const PRESETS = [
+      {
+        name: "1: LeetCode Ex 1 (push -2, 0, -3 -> getMin, pop, top, getMin)",
+        ops: [
+          { type: "MinStack" },
+          { type: "push", val: -2 },
+          { type: "push", val: 0 },
+          { type: "push", val: -3 },
+          { type: "getMin" },
+          { type: "pop" },
+          { type: "top" },
+          { type: "getMin" }
+        ]
+      },
+      {
+        name: "2: Duplicate Minimums Trap (push 0, 1, 0 -> getMin, pop, getMin)",
+        ops: [
+          { type: "MinStack" },
+          { type: "push", val: 0 },
+          { type: "push", val: 1 },
+          { type: "push", val: 0 },
+          { type: "getMin" },
+          { type: "pop" },
+          { type: "getMin" }
+        ]
+      },
+      {
+        name: "3: Strictly Decreasing Pushes (push 10, 7, 4, 1 -> pop & getMin)",
+        ops: [
+          { type: "MinStack" },
+          { type: "push", val: 10 },
+          { type: "push", val: 7 },
+          { type: "push", val: 4 },
+          { type: "push", val: 1 },
+          { type: "getMin" },
+          { type: "pop" },
+          { type: "getMin" }
+        ]
+      },
+      {
+        name: "4: Strictly Increasing Pushes (push 2, 5, 9, 14 -> top & getMin)",
+        ops: [
+          { type: "MinStack" },
+          { type: "push", val: 2 },
+          { type: "push", val: 5 },
+          { type: "push", val: 9 },
+          { type: "push", val: 14 },
+          { type: "top" },
+          { type: "getMin" }
+        ]
+      },
+      {
+        name: "5: Interleaved Push & Pop (push 5, 3, pop, push 2, 8, getMin)",
+        ops: [
+          { type: "MinStack" },
+          { type: "push", val: 5 },
+          { type: "push", val: 3 },
+          { type: "pop" },
+          { type: "push", val: 2 },
+          { type: "push", val: 8 },
+          { type: "getMin" },
+          { type: "top" }
+        ]
+      },
+      {
+        name: "6: Negative & Positive Swing (push -1, 4, -5, -5, pop, getMin)",
+        ops: [
+          { type: "MinStack" },
+          { type: "push", val: -1 },
+          { type: "push", val: 4 },
+          { type: "push", val: -5 },
+          { type: "push", val: -5 },
+          { type: "pop" },
+          { type: "getMin" }
+        ]
+      },
+      {
+        name: "7: 32-Bit Int Extremes (push 2147483647, -2147483648, getMin, pop, getMin)",
+        ops: [
+          { type: "MinStack" },
+          { type: "push", val: 2147483647 },
+          { type: "push", val: -2147483648 },
+          { type: "getMin" },
+          { type: "pop" },
+          { type: "getMin" }
+        ]
+      },
+      {
+        name: "8: Drain & Rebuild Stack (push 6, 3, pop, pop, push 9, 4, getMin)",
+        ops: [
+          { type: "MinStack" },
+          { type: "push", val: 6 },
+          { type: "push", val: 3 },
+          { type: "pop" },
+          { type: "pop" },
+          { type: "push", val: 9 },
+          { type: "push", val: 4 },
+          { type: "getMin" }
+        ]
+      },
+      {
+        name: "9: All Identical Values (push 7, 7, 7 -> pop, getMin, top)",
+        ops: [
+          { type: "MinStack" },
+          { type: "push", val: 7 },
+          { type: "push", val: 7 },
+          { type: "push", val: 7 },
+          { type: "pop" },
+          { type: "getMin" },
+          { type: "top" }
+        ]
+      },
+      {
+        name: "10: Single Element Queries (push 42 -> top, getMin, pop)",
+        ops: [
+          { type: "MinStack" },
+          { type: "push", val: 42 },
+          { type: "top" },
+          { type: "getMin" },
+          { type: "pop" }
+        ]
       }
-
-      init() {
-        if (!this.ctx) {
-          const AudioContext = window.AudioContext || window.webkitAudioContext;
-          if (AudioContext) {
-            this.ctx = new AudioContext();
-          }
-        }
-      }
-
-      playStep() {
-        if (!this.enabled) return;
-        this.init();
-        if (!this.ctx) return;
-        if (this.ctx.state === 'suspended') this.ctx.resume();
-
-        const osc = this.ctx.createOscillator();
-        const gain = this.ctx.createGain();
-        osc.type = 'sine';
-        osc.frequency.setValueAtTime(330, this.ctx.currentTime);
-        osc.frequency.exponentialRampToValueAtTime(270, this.ctx.currentTime + 0.04);
-
-        gain.gain.setValueAtTime(0.04, this.ctx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.04);
-
-        osc.connect(gain);
-        gain.connect(this.ctx.destination);
-        osc.start();
-        osc.stop(this.ctx.currentTime + 0.04);
-      }
-
-      playPush() {
-        if (!this.enabled) return;
-        this.init();
-        if (!this.ctx) return;
-        if (this.ctx.state === 'suspended') this.ctx.resume();
-
-        const osc = this.ctx.createOscillator();
-        const gain = this.ctx.createGain();
-        osc.type = 'sine';
-        osc.frequency.setValueAtTime(420, this.ctx.currentTime);
-        osc.frequency.exponentialRampToValueAtTime(600, this.ctx.currentTime + 0.08);
-
-        gain.gain.setValueAtTime(0.06, this.ctx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.08);
-
-        osc.connect(gain);
-        gain.connect(this.ctx.destination);
-        osc.start();
-        osc.stop(this.ctx.currentTime + 0.08);
-      }
-
-      playMinPush() {
-        if (!this.enabled) return;
-        this.init();
-        if (!this.ctx) return;
-        if (this.ctx.state === 'suspended') this.ctx.resume();
-
-        const notes = [523.25, 659.25];
-        notes.forEach((freq, idx) => {
-          const osc = this.ctx.createOscillator();
-          const gain = this.ctx.createGain();
-          osc.type = 'triangle';
-          osc.frequency.setValueAtTime(freq, this.ctx.currentTime + idx * 0.055);
-          gain.gain.setValueAtTime(0.07, this.ctx.currentTime + idx * 0.055);
-          gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + idx * 0.055 + 0.14);
-
-          osc.connect(gain);
-          gain.connect(this.ctx.destination);
-          osc.start(this.ctx.currentTime + idx * 0.055);
-          osc.stop(this.ctx.currentTime + idx * 0.055 + 0.15);
-        });
-      }
-
-      playPop() {
-        if (!this.enabled) return;
-        this.init();
-        if (!this.ctx) return;
-        if (this.ctx.state === 'suspended') this.ctx.resume();
-
-        const osc = this.ctx.createOscillator();
-        const gain = this.ctx.createGain();
-        osc.type = 'triangle';
-        osc.frequency.setValueAtTime(540, this.ctx.currentTime);
-        osc.frequency.exponentialRampToValueAtTime(340, this.ctx.currentTime + 0.09);
-
-        gain.gain.setValueAtTime(0.06, this.ctx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.09);
-
-        osc.connect(gain);
-        gain.connect(this.ctx.destination);
-        osc.start();
-        osc.stop(this.ctx.currentTime + 0.09);
-      }
-
-      playQuery() {
-        if (!this.enabled) return;
-        this.init();
-        if (!this.ctx) return;
-        if (this.ctx.state === 'suspended') this.ctx.resume();
-
-        const notes = [587.33, 880];
-        notes.forEach((freq, idx) => {
-          const osc = this.ctx.createOscillator();
-          const gain = this.ctx.createGain();
-          osc.type = 'sine';
-          osc.frequency.setValueAtTime(freq, this.ctx.currentTime + idx * 0.06);
-          gain.gain.setValueAtTime(0.07, this.ctx.currentTime + idx * 0.06);
-          gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + idx * 0.06 + 0.18);
-
-          osc.connect(gain);
-          gain.connect(this.ctx.destination);
-          osc.start(this.ctx.currentTime + idx * 0.06);
-          osc.stop(this.ctx.currentTime + idx * 0.06 + 0.19);
-        });
-      }
-    }
-
-    const sound = new SoundEngine();
-
-    function generateExecutionSteps(operations) {
-      const steps = [];
-      const stack = [];    // index 0 is bottom, stack[stack.length - 1] is top (peek)
-      const minStack = []; // index 0 is bottom, minStack[minStack.length - 1] is top (peek)
-
-      let activeOpIndex = -1;
-
-      function peekStack() {
-        return stack.length > 0 ? stack[stack.length - 1] : null;
-      }
-
-      function peekMinStack() {
-        return minStack.length > 0 ? minStack[minStack.length - 1] : null;
-      }
-
-      function record(meta) {
-        steps.push({
-          line: meta.line,
-          phase: meta.phase,
-          activeOpIndex: activeOpIndex,
-          stack: [...stack],
-          minStack: [...minStack],
-          highlightMainTop: meta.highlightMainTop ?? null, // 'push', 'pop', 'peek', null
-          highlightMinTop: meta.highlightMinTop ?? null,   // 'push', 'pop', 'peek', 'skip', null
-          varMethod: meta.varMethod ?? '-',
-          varVal: meta.varVal ?? '-',
-          varStackPeek: peekStack() !== null ? `${peekStack()}` : 'empty',
-          varMinPeek: peekMinStack() !== null ? `${peekMinStack()}` : 'empty',
-          evalStmt: meta.evalStmt ?? '-',
-          evalResult: meta.evalResult ?? '-',
-          detail: meta.detail ?? '',
-          statusType: meta.statusType ?? 'neutral', // 'neutral', 'push_main', 'push_min', 'pop', 'query', 'exception'
-          returnPillText: meta.returnPillText ?? 'running...',
-          desc: meta.desc ?? ''
-        });
-      }
-
-      // Constructor step
-      record({
-        line: 7,
-        phase: 'new MinStack()',
-        varMethod: 'MinStack()',
-        evalStmt: 'stack = new ArrayDeque<>(); minStack = new ArrayDeque<>();',
-        evalResult: 'Initialized',
-        detail: 'Initialized two empty ArrayDeques: stack (stores all values) and minStack (stores running minimums).',
-        statusType: 'neutral',
-        returnPillText: 'constructed',
-        desc: 'Constructed MinStack with empty stack and minStack.'
-      });
-
-      operations.forEach((opObj, idx) => {
-        activeOpIndex = idx;
-        const type = opObj.op;
-        const val = opObj.val;
-
-        if (type === 'push') {
-          record({
-            line: 12,
-            phase: `push(${val})`,
-            varMethod: `push(${val})`,
-            varVal: `${val}`,
-            evalStmt: `push(val = ${val})`,
-            evalResult: `Enter method`,
-            detail: `Invoked push(${val}). First, we unconditionally push ${val} onto the main stack.`,
-            statusType: 'neutral',
-            returnPillText: `push(${val})`,
-            desc: `Entered push(${val}).`
-          });
-
-          stack.push(val);
-          const currentMin = peekMinStack();
-
-          record({
-            line: 13,
-            phase: `stack.push(${val})`,
-            highlightMainTop: 'push',
-            varMethod: `push(${val})`,
-            varVal: `${val}`,
-            evalStmt: `stack.push(${val})`,
-            evalResult: `stack top = ${val}`,
-            detail: `Pushed ${val} onto main stack. Now checking if ${val} should also be pushed onto minStack.`,
-            statusType: 'push_main',
-            returnPillText: `stack.push(${val})`,
-            desc: `Pushed ${val} onto main stack.`
-          });
-
-          const isEmpty = currentMin === null;
-          const isLessOrEqual = !isEmpty && val <= currentMin;
-          const shouldPushMin = isEmpty || isLessOrEqual;
-
-          record({
-            line: 15,
-            phase: `Check minStack condition for ${val}`,
-            highlightMainTop: 'peek',
-            highlightMinTop: shouldPushMin ? 'peek' : 'skip',
-            varMethod: `push(${val})`,
-            varVal: `${val}`,
-            evalStmt: isEmpty
-              ? `minStack.isEmpty() (true) || ...`
-              : `minStack.isEmpty() (false) || ${val} <= ${currentMin}`,
-            evalResult: shouldPushMin ? 'true (Push to minStack)' : `false (${val} > ${currentMin})`,
-            detail: isEmpty
-              ? `minStack is currently empty, so ${val} becomes the initial minimum.`
-              : shouldPushMin
-                ? `${val} <= ${currentMin} is true! Note that duplicate minimums (==) MUST be pushed so popping one later doesn't lose the minimum.`
-                : `${val} > ${currentMin}, so the minimum remains ${currentMin}. We skip pushing ${val} to minStack.`,
-            statusType: 'neutral',
-            returnPillText: shouldPushMin ? 'min candidate' : 'skip minStack',
-            desc: `Checked if (${val} <= minStack.peek()): evaluated to ${shouldPushMin}.`
-          });
-
-          if (shouldPushMin) {
-            minStack.push(val);
-            record({
-              line: 16,
-              phase: `minStack.push(${val})`,
-              highlightMinTop: 'push',
-              varMethod: `push(${val})`,
-              varVal: `${val}`,
-              evalStmt: `minStack.push(${val})`,
-              evalResult: `minStack top = ${val}`,
-              detail: `Pushed ${val} onto minStack. Current minimum at minStack.peek() is now ${val}.`,
-              statusType: 'push_min',
-              returnPillText: `min = ${val}`,
-              desc: `Pushed ${val} onto minStack.`
-            });
-          }
-
-        } else if (type === 'pop') {
-          record({
-            line: 20,
-            phase: `pop()`,
-            varMethod: `pop()`,
-            evalStmt: `stack.isEmpty() -> ${stack.length === 0}`,
-            evalResult: stack.length === 0 ? 'true (Empty!)' : 'false (Has elements)',
-            detail: `Invoked pop(). Checking if stack is empty before removing the top element.`,
-            statusType: 'neutral',
-            returnPillText: `pop()`,
-            desc: `Entered pop() method.`
-          });
-
-          if (stack.length === 0) {
-            record({
-              line: 22,
-              phase: `NoSuchElementException`,
-              varMethod: `pop()`,
-              evalStmt: `throw new NoSuchElementException("Stack is empty")`,
-              evalResult: `Exception`,
-              detail: `Cannot pop from an empty MinStack! Throws NoSuchElementException.`,
-              statusType: 'exception',
-              returnPillText: `Exception!`,
-              desc: `Exception thrown: Stack is empty.`
-            });
-            return;
-          }
-
-          const removed = stack.pop();
-          const currentMin = peekMinStack();
-
-          record({
-            line: 25,
-            phase: `int removed = stack.pop() (${removed})`,
-            highlightMainTop: 'pop',
-            varMethod: `pop()`,
-            varVal: `${removed}`,
-            evalStmt: `removed = stack.pop()`,
-            evalResult: `removed = ${removed}`,
-            detail: `Popped ${removed} from main stack. Next, check if removed (${removed}) equals minStack.peek() (${currentMin}).`,
-            statusType: 'pop',
-            returnPillText: `removed = ${removed}`,
-            desc: `Popped ${removed} from main stack.`
-          });
-
-          const matchesMin = removed === currentMin;
-          record({
-            line: 27,
-            phase: `Check if (removed == minStack.peek())`,
-            highlightMinTop: matchesMin ? 'peek' : 'skip',
-            varMethod: `pop()`,
-            varVal: `${removed}`,
-            evalStmt: `${removed} == ${currentMin}`,
-            evalResult: matchesMin ? 'true (Also pop minStack!)' : 'false (Keep minStack)',
-            detail: matchesMin
-              ? `removed (${removed}) equals minStack.peek() (${currentMin}), so we must also pop it from minStack!`
-              : `removed (${removed}) != minStack.peek() (${currentMin}), so minStack remains untouched.`,
-            statusType: 'neutral',
-            returnPillText: matchesMin ? 'matches min' : 'min unchanged',
-            desc: `Checked removed (${removed}) == minStack.peek() (${currentMin}) -> ${matchesMin}.`
-          });
-
-          if (matchesMin) {
-            minStack.pop();
-            record({
-              line: 28,
-              phase: `minStack.pop() (Removed ${removed})`,
-              highlightMinTop: 'pop',
-              varMethod: `pop()`,
-              varVal: `${removed}`,
-              evalStmt: `minStack.pop()`,
-              evalResult: peekMinStack() !== null ? `new min = ${peekMinStack()}` : 'minStack empty',
-              detail: `Popped ${removed} from minStack! The previous minimum is automatically restored at the top of minStack.`,
-              statusType: 'pop',
-              returnPillText: peekMinStack() !== null ? `new min: ${peekMinStack()}` : 'empty',
-              desc: `Popped ${removed} from minStack.`
-            });
-          }
-
-        } else if (type === 'top') {
-          const topVal = peekStack();
-          record({
-            line: 37,
-            phase: `top() -> ${topVal !== null ? topVal : 'Exception'}`,
-            highlightMainTop: 'peek',
-            varMethod: `top()`,
-            varVal: topVal !== null ? `${topVal}` : '-',
-            evalStmt: `return stack.peek();`,
-            evalResult: topVal !== null ? `${topVal}` : 'NoSuchElementException',
-            detail: topVal !== null
-              ? `top() inspects stack.peek() in O(1) time without removing it, returning ${topVal}.`
-              : `Stack is empty! Throws NoSuchElementException.`,
-            statusType: topVal !== null ? 'query' : 'exception',
-            returnPillText: topVal !== null ? `return ${topVal}` : 'Exception',
-            desc: topVal !== null ? `top() returned ${topVal}.` : `top() threw exception on empty stack.`
-          });
-
-        } else if (type === 'getMin') {
-          const minVal = peekMinStack();
-          record({
-            line: 45,
-            phase: `getMin() -> ${minVal !== null ? minVal : 'Exception'}`,
-            highlightMinTop: 'peek',
-            varMethod: `getMin()`,
-            varVal: minVal !== null ? `${minVal}` : '-',
-            evalStmt: `return minStack.peek();`,
-            evalResult: minVal !== null ? `${minVal}` : 'NoSuchElementException',
-            detail: minVal !== null
-              ? `getMin() inspects minStack.peek() in O(1) time, immediately returning the minimum value ${minVal}!`
-              : `minStack is empty! Throws NoSuchElementException.`,
-            statusType: minVal !== null ? 'query' : 'exception',
-            returnPillText: minVal !== null ? `return ${minVal}` : 'Exception',
-            desc: minVal !== null ? `getMin() returned ${minVal} in O(1) time.` : `getMin() threw exception.`
-          });
-        }
-      });
-
-      return steps;
-    }
-
-    const presetSequences = [
-      // Classic LeetCode MinStack example + duplicate minimum test
-      [
-        { op: 'push', val: -2 },
-        { op: 'push', val: 0 },
-        { op: 'push', val: -3 },
-        { op: 'getMin' },
-        { op: 'pop' },
-        { op: 'top' },
-        { op: 'getMin' }
-      ],
-      // Duplicate minimums edge case (why val <= minStack.peek() uses <=)
-      [
-        { op: 'push', val: 5 },
-        { op: 'push', val: 2 },
-        { op: 'push', val: 2 },
-        { op: 'getMin' },
-        { op: 'pop' },
-        { op: 'getMin' },
-        { op: 'pop' },
-        { op: 'getMin' }
-      ],
-      // Strictly descending then ascending
-      [
-        { op: 'push', val: 10 },
-        { op: 'push', val: 7 },
-        { op: 'push', val: 12 },
-        { op: 'push', val: 3 },
-        { op: 'getMin' },
-        { op: 'pop' },
-        { op: 'getMin' }
-      ]
     ];
 
-    let presetIndex = 0;
-    let activeOperations = [...presetSequences[0]];
-    let currentSteps = [];
-    let currentStepIndex = 0;
+    // APPLICATION STATE
+    let currentOps = JSON.parse(JSON.stringify(PRESETS[0].ops));
+    let steps = [];
+    let currentStepIdx = 0;
     let isPlaying = false;
-    let playIntervalId = null;
-    let playSpeed = 780;
+    let playInterval = null;
+    let playSpeed = 650;
+    let audioEnabled = true;
 
-    // DOM Elements
-    const btnPlayPause = document.getElementById('btnPlayPause');
+    // WEB AUDIO SYNTHESIZER
+    let audioCtx = null;
+    function initAudio() {
+      if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      }
+    }
+    function playTone(freq = 440, type = 'sine', duration = 0.08, vol = 0.035) {
+      if (!audioEnabled) return;
+      try {
+        initAudio();
+        if (audioCtx.state === 'suspended') {
+          audioCtx.resume();
+        }
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = type;
+        osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+        gain.gain.setValueAtTime(vol, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + duration);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + duration);
+      } catch (e) {}
+    }
+
+    // DOM REFERENCES
+    const btnPlay = document.getElementById('btnPlay');
     const playIcon = document.getElementById('playIcon');
     const playText = document.getElementById('playText');
     const btnPrev = document.getElementById('btnPrev');
     const btnNext = document.getElementById('btnNext');
     const btnReset = document.getElementById('btnReset');
-    const topPhaseBadge = document.getElementById('topPhaseBadge');
-    const topStepCounterBadge = document.getElementById('topStepCounterBadge');
-    const stepSlider = document.getElementById('stepSlider');
-    const sliderCurrent = document.getElementById('sliderCurrent');
-    const sliderTotal = document.getElementById('sliderTotal');
-
-    const arenaStackInfo = document.getElementById('arenaStackInfo');
-    const arenaMinStackInfo = document.getElementById('arenaMinStackInfo');
-    const arenaStatusDot = document.getElementById('arenaStatusDot');
-    const arenaStatusText = document.getElementById('arenaStatusText');
-    const opsRibbonContainer = document.getElementById('opsRibbonContainer');
-    const opProgressText = document.getElementById('opProgressText');
-    const comparisonBanner = document.getElementById('comparisonBanner');
-
-    const mainStackContainer = document.getElementById('mainStackContainer');
-    const minStackContainer = document.getElementById('minStackContainer');
-    const stackTopBadge = document.getElementById('stackTopBadge');
-    const minStackTopBadge = document.getElementById('minStackTopBadge');
-    const operationDetailBox = document.getElementById('operationDetailBox');
-    const stepDescription = document.getElementById('stepDescription');
-    const statusDot = document.getElementById('statusDot');
-    const returnPill = document.getElementById('returnPill');
-
-    const varMethod = document.getElementById('varMethod');
-    const varVal = document.getElementById('varVal');
-    const varStackPeek = document.getElementById('varStackPeek');
-    const varMinPeek = document.getElementById('varMinPeek');
-    const evalStatement = document.getElementById('evalStatement');
-    const evalResult = document.getElementById('evalResult');
-
-    const inputPushVal = document.getElementById('inputPushVal');
+    const btnAudio = document.getElementById('btnAudio');
+    const audioIcon = document.getElementById('audioIcon');
+    const presetSelect = document.getElementById('presetSelect');
+    const customPushVal = document.getElementById('customPushVal');
     const btnAddPush = document.getElementById('btnAddPush');
     const btnAddPop = document.getElementById('btnAddPop');
     const btnAddTop = document.getElementById('btnAddTop');
     const btnAddGetMin = document.getElementById('btnAddGetMin');
-    const btnSampleNext = document.getElementById('btnSampleNext');
-    const btnSoundToggle = document.getElementById('btnSoundToggle');
-    const soundIcon = document.getElementById('soundIcon');
+    const stepScrubber = document.getElementById('stepScrubber');
+    const stepCounterBadge = document.getElementById('stepCounterBadge');
+    const phaseBadge = document.getElementById('phaseBadge');
+    const depthHeaderBadge = document.getElementById('depthHeaderBadge');
+    const minHeaderBadge = document.getElementById('minHeaderBadge');
 
-    function renderStep(step) {
-      if (!step) return;
+    const varActiveOp = document.getElementById('varActiveOp');
+    const varOpIndexSub = document.getElementById('varOpIndexSub');
+    const varStackPeek = document.getElementById('varStackPeek');
+    const varStackSizeSub = document.getElementById('varStackSizeSub');
+    const varMinPeek = document.getElementById('varMinPeek');
+    const varMinCalc = document.getElementById('varMinCalc');
+    const returnResultCard = document.getElementById('returnResultCard');
+    const varReturnVal = document.getElementById('varReturnVal');
+    const varReturnRole = document.getElementById('varReturnRole');
 
-      topPhaseBadge.textContent = `Phase: ${step.phase}`;
-      topStepCounterBadge.textContent = `Step ${currentStepIndex} / ${currentSteps.length - 1}`;
-      stepDescription.textContent = step.desc;
+    const stageWrapper = document.getElementById('stageWrapper');
+    const transferArcSvg = document.getElementById('transferArcSvg');
+    const flyingCloneLayer = document.getElementById('flyingCloneLayer');
+    const outputArrayPreview = document.getElementById('outputArrayPreview');
+    const opsPipelineArena = document.getElementById('opsPipelineArena');
 
-      stepSlider.value = currentStepIndex;
-      sliderCurrent.textContent = currentStepIndex;
+    const mainStackBadge = document.getElementById('mainStackBadge');
+    const mainStackVessel = document.getElementById('mainStackVessel');
+    const poppedMainDock = document.getElementById('poppedMainDock');
+    const poppedMainVal = document.getElementById('poppedMainVal');
 
-      arenaStackInfo.textContent = `stack.size() = ${step.stack.length}`;
-      arenaMinStackInfo.textContent = `minStack.size() = ${step.minStack.length}`;
+    const minStackBadge = document.getElementById('minStackBadge');
+    const minStackVessel = document.getElementById('minStackVessel');
+    const poppedMinDock = document.getElementById('poppedMinDock');
+    const poppedMinVal = document.getElementById('poppedMinVal');
 
-      const mainTop = step.stack.length > 0 ? step.stack[step.stack.length - 1] : 'empty';
-      const minTop = step.minStack.length > 0 ? step.minStack[step.minStack.length - 1] : 'empty';
-      stackTopBadge.textContent = `peek: ${mainTop}`;
-      minStackTopBadge.textContent = `min: ${minTop}`;
+    const decisionBanner = document.getElementById('decisionBanner');
+    const decisionIcon = document.getElementById('decisionIcon');
+    const decisionText = document.getElementById('decisionText');
+    const actionPill = document.getElementById('actionPill');
+    const codeContainer = document.getElementById('codeContainer');
+    const stepDescription = document.getElementById('stepDescription');
 
-      varMethod.textContent = step.varMethod;
-      varVal.textContent = step.varVal;
-      varStackPeek.textContent = step.varStackPeek;
-      varMinPeek.textContent = step.varMinPeek;
-
-      evalStatement.textContent = step.evalStmt;
-      evalResult.textContent = step.evalResult;
-      operationDetailBox.textContent = step.detail;
-      returnPill.textContent = step.returnPillText;
-
-      opProgressText.textContent = step.activeOpIndex >= 0
-        ? `Operation ${step.activeOpIndex + 1} / ${activeOperations.length}`
-        : `0 / ${activeOperations.length} executed`;
-
-      // Banner & Sound Cues
-      if (step.statusType === 'push_main') {
-        comparisonBanner.innerHTML = `
-          <div class="flex items-center gap-2 bg-cyan-950/80 text-cyan-300 border border-cyan-500/50 px-4 py-1.5 rounded-full text-xs font-mono font-bold shadow-lg shadow-cyan-500/20">
-            <i class="fa-solid fa-arrow-down text-cyan-400"></i>
-            <span>stack.push(${step.varVal}) &bull; Added to main stack</span>
-          </div>`;
-        arenaStatusDot.className = "w-2.5 h-2.5 rounded-full bg-cyan-400 animate-ping";
-        arenaStatusText.textContent = "Pushing stack";
-        statusDot.className = "w-3.5 h-3.5 rounded-full bg-cyan-400 shrink-0";
-        returnPill.className = "shrink-0 px-3 py-1 rounded-xl text-xs font-bold font-mono bg-cyan-950/80 text-cyan-300 border border-cyan-500/40";
-        sound.playPush();
-
-      } else if (step.statusType === 'push_min') {
-        comparisonBanner.innerHTML = `
-          <div class="flex items-center gap-2 bg-emerald-950/80 text-emerald-300 border border-emerald-500/50 px-4 py-1.5 rounded-full text-xs font-mono font-bold shadow-lg shadow-emerald-500/20">
-            <i class="fa-solid fa-crown text-emerald-400"></i>
-            <span>minStack.push(${step.varVal}) &bull; New or Equal Minimum Recorded!</span>
-          </div>`;
-        arenaStatusDot.className = "w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping";
-        arenaStatusText.textContent = "Pushing minStack";
-        statusDot.className = "w-3.5 h-3.5 rounded-full bg-emerald-400 shrink-0";
-        returnPill.className = "shrink-0 px-3 py-1 rounded-xl text-xs font-bold font-mono bg-emerald-950/80 text-emerald-300 border border-emerald-500/40";
-        sound.playMinPush();
-
-      } else if (step.statusType === 'pop') {
-        comparisonBanner.innerHTML = `
-          <div class="flex items-center gap-2 bg-amber-950/80 text-amber-300 border border-amber-500/50 px-4 py-1.5 rounded-full text-xs font-mono font-bold shadow-lg shadow-amber-500/20">
-            <i class="fa-solid fa-arrow-up text-amber-400"></i>
-            <span>${step.phase}</span>
-          </div>`;
-        arenaStatusDot.className = "w-2.5 h-2.5 rounded-full bg-amber-400 animate-ping";
-        arenaStatusText.textContent = "Popping";
-        statusDot.className = "w-3.5 h-3.5 rounded-full bg-amber-400 shrink-0";
-        returnPill.className = "shrink-0 px-3 py-1 rounded-xl text-xs font-bold font-mono bg-amber-950/80 text-amber-300 border border-amber-500/40";
-        sound.playPop();
-
-      } else if (step.statusType === 'query') {
-        comparisonBanner.innerHTML = `
-          <div class="flex items-center gap-2 bg-emerald-950/90 text-emerald-300 border border-emerald-500/50 px-4 py-1.5 rounded-full text-xs font-mono font-bold shadow-lg shadow-emerald-500/25">
-            <i class="fa-solid fa-bolt text-emerald-400"></i>
-            <span>O(1) Query Result: ${step.phase}</span>
-          </div>`;
-        arenaStatusDot.className = "w-2.5 h-2.5 rounded-full bg-emerald-400";
-        arenaStatusText.textContent = "O(1) Query";
-        statusDot.className = "w-3.5 h-3.5 rounded-full bg-emerald-400 shrink-0";
-        returnPill.className = "shrink-0 px-3 py-1 rounded-xl text-xs font-bold font-mono bg-emerald-950/90 text-emerald-300 border border-emerald-400";
-        sound.playQuery();
-
-      } else {
-        comparisonBanner.innerHTML = `<span class="text-xs font-mono text-slate-300 glass-input px-4 py-1.5 rounded-full">${step.phase}</span>`;
-        arenaStatusDot.className = "w-2.5 h-2.5 rounded-full bg-cyan-400";
-        arenaStatusText.textContent = "Stepping";
-        statusDot.className = "w-3.5 h-3.5 rounded-full bg-cyan-400 shrink-0";
-        returnPill.className = "shrink-0 px-3 py-1 rounded-xl text-xs font-bold font-mono bg-slate-800 text-slate-300 border border-slate-700";
-        sound.playStep();
-      }
-
-      // Highlight Active Java Code Line
-      document.querySelectorAll('.code-line').forEach(el => el.classList.remove('code-active'));
-      const activeLineEl = document.getElementById(`code-line-${step.line}`);
-      if (activeLineEl) {
-        activeLineEl.classList.add('code-active');
-        activeLineEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-      }
-
-      renderOperationsRibbon(step);
-      renderStackChambers(step);
+    function formatOpLabel(op) {
+      if (op.type === 'MinStack') return 'MinStack()';
+      if (op.type === 'push') return `push(${op.val})`;
+      if (op.type === 'pop') return 'pop()';
+      if (op.type === 'top') return 'top()';
+      return 'getMin()';
     }
 
-    function renderOperationsRibbon(step) {
-      opsRibbonContainer.innerHTML = '';
+    // STRICT LINE-BY-LINE EXECUTION TRACE GENERATOR
+    function generateSteps(opsList) {
+      const trace = [];
+      const mainStack = [];
+      const minStack = [];
+      const outputs = opsList.map(() => undefined);
 
-      activeOperations.forEach((opObj, idx) => {
-        const isCurrent = idx === step.activeOpIndex;
-        const isDone = idx < step.activeOpIndex;
-        const label = opObj.op === 'push' ? `push(${opObj.val})` : `${opObj.op}()`;
+      const snapOutputs = () => [...outputs];
 
-        const pill = document.createElement('button');
-        let classes = "op-pill px-2.5 py-1 rounded-lg font-mono text-xs border flex items-center gap-1.5 ";
-        if (isCurrent) {
-          classes += "bg-cyan-950/90 border-cyan-400 text-white font-bold shadow-md shadow-cyan-500/20 scale-105";
-        } else if (isDone) {
-          classes += "bg-slate-900/50 border-white/10 text-slate-400";
-        } else {
-          classes += "bg-slate-900/80 border-white/10 text-slate-300 hover:border-white/30";
+      opsList.forEach((op, opIdx) => {
+        const opStr = formatOpLabel(op);
+
+        if (op.type === 'MinStack') {
+          // Line 8: public MinStack()
+          trace.push({
+            line: 8,
+            phase: "Constructor",
+            opsList,
+            opIdx,
+            outputs: snapOutputs(),
+            mainStack: [...mainStack],
+            minStack: [...minStack],
+            returnDisplay: "void",
+            desc: `Invoked constructor <span class="code-font text-amber-300 font-bold">new MinStack()</span>.`,
+            soundFreq: 340
+          });
+
+          // Line 10: stack = new Stack<>();
+          trace.push({
+            line: 10,
+            phase: "Init stack",
+            opsList,
+            opIdx,
+            outputs: snapOutputs(),
+            mainStack: [...mainStack],
+            minStack: [...minStack],
+            returnDisplay: "void",
+            desc: `Initialized empty main stack <span class="code-font text-cyan-300 font-bold">stack = new Stack&lt;&gt;()</span>.`,
+            soundFreq: 375
+          });
+
+          // Line 11: minStack = new Stack<>();
+          outputs[opIdx] = null;
+          trace.push({
+            line: 11,
+            phase: "Init minStack",
+            opsList,
+            opIdx,
+            outputs: snapOutputs(),
+            mainStack: [...mainStack],
+            minStack: [...minStack],
+            returnDisplay: "null",
+            desc: `Initialized empty auxiliary minimum stack <span class="code-font text-purple-300 font-bold">minStack = new Stack&lt;&gt;()</span>. Output: <span class="code-font text-emerald-300">null</span>.`,
+            soundFreq: 410
+          });
+
+        } else if (op.type === 'push') {
+          const val = op.val;
+
+          // Line 14: public void push(int val)
+          trace.push({
+            line: 14,
+            phase: `push(${val})`,
+            opsList,
+            opIdx,
+            outputs: snapOutputs(),
+            mainStack: [...mainStack],
+            minStack: [...minStack],
+            returnDisplay: "void",
+            desc: `Entered <span class="code-font text-amber-300 font-bold">push(${val})</span>.`,
+            soundFreq: 440
+          });
+
+          // Line 16: stack.push(val);
+          mainStack.push(val);
+          trace.push({
+            line: 16,
+            phase: `stack.push(${val})`,
+            opsList,
+            opIdx,
+            outputs: snapOutputs(),
+            mainStack: [...mainStack],
+            minStack: [...minStack],
+            justPushedMain: true,
+            transfer: { type: 'pushMain', opIdx, val },
+            actionText: `stack.push(${val})`,
+            returnDisplay: "void",
+            desc: `Pushed <span class="code-font text-cyan-300 font-bold">${val}</span> onto the top of <span class="code-font text-cyan-200">stack</span> (size = ${mainStack.length}).`,
+            soundFreq: 530
+          });
+
+          // Line 18: if (minStack.isEmpty())
+          const wasEmpty = minStack.length === 0;
+          trace.push({
+            line: 18,
+            phase: wasEmpty ? "isEmpty() (True)" : "isEmpty() (False)",
+            opsList,
+            opIdx,
+            outputs: snapOutputs(),
+            mainStack: [...mainStack],
+            minStack: [...minStack],
+            returnDisplay: "void",
+            desc: wasEmpty
+              ? `Condition <span class="code-font text-purple-300 font-bold">minStack.isEmpty()</span> is <b>true</b> &rarr; <span class="code-font">${val}</span> is the first element and current minimum.`
+              : `Condition <span class="code-font text-slate-300">minStack.isEmpty()</span> is <b>false</b> (current min is <span class="code-font text-purple-300">${minStack[minStack.length - 1]}</span>) &rarr; entering <span class="code-font">else</span> branch.`,
+            soundFreq: 495
+          });
+
+          if (wasEmpty) {
+            // Line 19: minStack.push(val);
+            minStack.push(val);
+            outputs[opIdx] = null;
+            trace.push({
+              line: 19,
+              phase: `minStack.push(${val})`,
+              opsList,
+              opIdx,
+              outputs: snapOutputs(),
+              mainStack: [...mainStack],
+              minStack: [...minStack],
+              justPushedMin: true,
+              minCalcText: `${val}`,
+              transfer: { type: 'pushMin', opIdx, val },
+              actionText: `minStack.push(${val})`,
+              returnDisplay: "null",
+              desc: `Pushed <span class="code-font text-purple-300 font-bold">${val}</span> onto <span class="code-font text-purple-200">minStack</span>. Both stacks are synchronized at height <span class="code-font">${minStack.length}</span>.`,
+              soundFreq: 610
+            });
+          } else {
+            // Line 21: minStack.push(Math.min(val, minStack.peek()));
+            const prevMin = minStack[minStack.length - 1];
+            const newMin = Math.min(val, prevMin);
+            minStack.push(newMin);
+            outputs[opIdx] = null;
+            trace.push({
+              line: 21,
+              phase: `minStack.push(${newMin})`,
+              opsList,
+              opIdx,
+              outputs: snapOutputs(),
+              mainStack: [...mainStack],
+              minStack: [...minStack],
+              justPushedMin: true,
+              minCalcText: `min(${val}, ${prevMin}) = ${newMin}`,
+              transfer: { type: 'pushMin', opIdx, val: newMin },
+              actionText: `Math.min(${val}, ${prevMin}) = ${newMin}`,
+              returnDisplay: "null",
+              desc: `Computed <span class="code-font text-sky-300 font-bold">Math.min(${val}, ${prevMin}) = ${newMin}</span> and pushed <span class="code-font text-purple-300 font-bold">${newMin}</span> onto <span class="code-font">minStack</span>.`,
+              soundFreq: newMin < prevMin ? 660 : 580
+            });
+          }
+
+        } else if (op.type === 'pop') {
+          // Line 25: public void pop()
+          trace.push({
+            line: 25,
+            phase: "pop()",
+            opsList,
+            opIdx,
+            outputs: snapOutputs(),
+            mainStack: [...mainStack],
+            minStack: [...minStack],
+            returnDisplay: "void",
+            desc: `Entered <span class="code-font text-rose-300 font-bold">pop()</span> to remove the top element from both stacks.`,
+            soundFreq: 450
+          });
+
+          // Line 27: stack.pop();
+          const poppedMain = mainStack.pop();
+          trace.push({
+            line: 27,
+            phase: `stack.pop() → ${poppedMain}`,
+            opsList,
+            opIdx,
+            outputs: snapOutputs(),
+            mainStack: [...mainStack],
+            minStack: [...minStack],
+            poppedMainVal: poppedMain,
+            transfer: { type: 'popMain', val: poppedMain },
+            actionText: `stack.pop() → ${poppedMain}`,
+            returnDisplay: "void",
+            desc: `Popped <span class="code-font text-rose-300 font-bold">${poppedMain}</span> from the top of <span class="code-font text-cyan-300">stack</span>.`,
+            soundFreq: 400
+          });
+
+          // Line 28: minStack.pop();
+          const poppedMin = minStack.pop();
+          outputs[opIdx] = null;
+          trace.push({
+            line: 28,
+            phase: `minStack.pop() → ${poppedMin}`,
+            opsList,
+            opIdx,
+            outputs: snapOutputs(),
+            mainStack: [...mainStack],
+            minStack: [...minStack],
+            poppedMainVal: poppedMain,
+            poppedMinVal: poppedMin,
+            transfer: { type: 'popMin', val: poppedMin },
+            actionText: `minStack.pop() → ${poppedMin}`,
+            returnDisplay: "null",
+            desc: `Popped <span class="code-font text-rose-300 font-bold">${poppedMin}</span> from <span class="code-font text-purple-300">minStack</span> so both stacks stay synchronized${minStack.length > 0 ? ` (new minimum: <span class="code-font text-purple-200 font-bold">${minStack[minStack.length - 1]}</span>)` : ''}.`,
+            soundFreq: 370
+          });
+
+        } else if (op.type === 'top') {
+          // Line 31: public int top()
+          trace.push({
+            line: 31,
+            phase: "top()",
+            opsList,
+            opIdx,
+            outputs: snapOutputs(),
+            mainStack: [...mainStack],
+            minStack: [...minStack],
+            returnDisplay: "int",
+            desc: `Entered <span class="code-font text-sky-300 font-bold">top()</span> to inspect the top element of <span class="code-font">stack</span> in &Omicron;(1) time.`,
+            soundFreq: 520
+          });
+
+          // Line 33: return stack.peek();
+          const topVal = mainStack[mainStack.length - 1];
+          outputs[opIdx] = topVal;
+          trace.push({
+            line: 33,
+            phase: `Return ${topVal}`,
+            opsList,
+            opIdx,
+            outputs: snapOutputs(),
+            mainStack: [...mainStack],
+            minStack: [...minStack],
+            peekMainGlow: true,
+            transfer: { type: 'peekMain', opIdx, val: topVal },
+            actionText: `return stack.peek() → ${topVal}`,
+            returnDisplay: String(topVal),
+            isReturnStep: true,
+            desc: `<span class="text-emerald-400 font-bold"><i class="fa-solid fa-check-circle mr-1"></i>top() Returned ${topVal}!</span> Peeked top of <span class="code-font text-cyan-300">stack</span> without modifying either stack.`,
+            soundFreq: 780
+          });
+
+        } else if (op.type === 'getMin') {
+          // Line 36: public int getMin()
+          trace.push({
+            line: 36,
+            phase: "getMin()",
+            opsList,
+            opIdx,
+            outputs: snapOutputs(),
+            mainStack: [...mainStack],
+            minStack: [...minStack],
+            returnDisplay: "int",
+            desc: `Entered <span class="code-font text-purple-300 font-bold">getMin()</span> to retrieve the current minimum in &Omicron;(1) time.`,
+            soundFreq: 540
+          });
+
+          // Line 38: return minStack.peek();
+          const minVal = minStack[minStack.length - 1];
+          outputs[opIdx] = minVal;
+          trace.push({
+            line: 38,
+            phase: `Return ${minVal}`,
+            opsList,
+            opIdx,
+            outputs: snapOutputs(),
+            mainStack: [...mainStack],
+            minStack: [...minStack],
+            peekMinGlow: true,
+            transfer: { type: 'peekMin', opIdx, val: minVal },
+            actionText: `return minStack.peek() → ${minVal}`,
+            returnDisplay: String(minVal),
+            isReturnStep: true,
+            desc: `<span class="text-emerald-400 font-bold"><i class="fa-solid fa-crown mr-1"></i>getMin() Returned ${minVal}!</span> Retrieved top of <span class="code-font text-purple-300">minStack</span> in &Omicron;(1) without scanning <span class="code-font">stack</span>.`,
+            soundFreq: 860
+          });
         }
-        pill.className = classes;
-        pill.innerHTML = `
-          <span class="text-[10px] text-slate-500">#${idx + 1}</span>
-          <span>${label}</span>
+      });
+
+      return trace;
+    }
+
+    // LOCALIZED ZERO-JUMP CODE LINE HIGHLIGHTER
+    function highlightCodeLine(lineNum) {
+      document.querySelectorAll('.code-line').forEach(el => el.classList.remove('active-line'));
+      const activeEl = document.getElementById(`line${lineNum}`);
+      if (activeEl) {
+        activeEl.classList.add('active-line');
+
+        const containerTop = codeContainer.scrollTop;
+        const containerBottom = containerTop + codeContainer.clientHeight;
+        const elTop = activeEl.offsetTop - codeContainer.offsetTop;
+        const elBottom = elTop + activeEl.clientHeight;
+
+        if (elTop < containerTop + 24) {
+          codeContainer.scrollTo({ top: Math.max(0, elTop - 24), behavior: 'smooth' });
+        } else if (elBottom > containerBottom - 24) {
+          codeContainer.scrollTo({ top: elBottom - codeContainer.clientHeight + 24, behavior: 'smooth' });
+        }
+      }
+    }
+
+    // PHYSICAL LIFT-AND-ARC TRANSFERS FOR PUSH, POP & PEEK
+    function animateStackTransfer(transfer, animateFlight) {
+      transferArcSvg.innerHTML = '';
+      flyingCloneLayer.innerHTML = '';
+      if (!transfer) return;
+
+      const stageRect = stageWrapper.getBoundingClientRect();
+
+      if (transfer.type === 'pushMain' || transfer.type === 'pushMin') {
+        const opEl = opsPipelineArena.querySelector(`[data-op-idx="${transfer.opIdx}"]`);
+        const isMain = transfer.type === 'pushMain';
+        const vesselEl = isMain ? mainStackVessel : minStackVessel;
+        const topItemEl = vesselEl.querySelector('[data-stack-top="true"]') || vesselEl;
+        if (!opEl || !vesselEl) return;
+
+        const opRect = opEl.getBoundingClientRect();
+        const vesselRect = vesselEl.getBoundingClientRect();
+        const targetRect = topItemEl.getBoundingClientRect();
+
+        const x1 = (opRect.left - stageRect.left) + opRect.width / 2;
+        const y1 = (opRect.bottom - stageRect.top) + 4;
+        const x2 = (vesselRect.left - stageRect.left) + vesselRect.width / 2;
+        const y2 = (vesselRect.top - stageRect.top) + 6;
+        const midX = (x1 + x2) / 2 + (isMain ? -20 : 20);
+        const midY = Math.min(y1, y2) - 16;
+        const color = isMain ? '#22d3ee' : '#c084fc';
+
+        transferArcSvg.innerHTML = `
+          <path d="M ${x1} ${y1} Q ${midX} ${midY}, ${x2} ${y2}"
+                fill="none" stroke="${color}" stroke-width="2.3" class="transfer-arc-path" />
+          <circle cx="${x1}" cy="${y1}" r="4" fill="#fbbf24" />
+          <polygon points="${x2},${y2 + 4} ${x2 - 5},${y2 - 5} ${x2 + 5},${y2 - 5}" fill="${color}" />
         `;
 
-        // Allow clicking an operation pill to jump to its first step
-        pill.addEventListener('click', () => {
-          stopAutoPlay();
-          const targetStepIdx = currentSteps.findIndex(s => s.activeOpIndex === idx);
-          if (targetStepIdx !== -1) {
-            goToStep(targetStepIdx);
-          }
-        });
+        if (!animateFlight) return;
+        const clone = document.createElement('div');
+        clone.className = `stack-node-box ${isMain ? 'node-main' : 'node-min'} absolute w-36 h-9 rounded-xl flex items-center justify-center code-font text-sm font-extrabold shadow-xl pointer-events-none`;
+        clone.textContent = `${transfer.val}`;
+        clone.style.left = `${(opRect.left - stageRect.left) + (opRect.width - 144) / 2}px`;
+        clone.style.top = `${(opRect.top - stageRect.top) + (opRect.height - 36) / 2}px`;
+        flyingCloneLayer.appendChild(clone);
 
-        opsRibbonContainer.appendChild(pill);
+        const dx = (targetRect.left + targetRect.width / 2) - (opRect.left + opRect.width / 2);
+        const dy = (targetRect.top + targetRect.height / 2) - (opRect.top + opRect.height / 2);
+        const duration = Math.min(540, Math.max(240, playSpeed * 0.78));
+
+        const anim = clone.animate([
+          { transform: 'translate(0px, 0px) scale(0.9)', opacity: 1 },
+          { transform: `translate(${dx * 0.6}px, ${(vesselRect.top - opRect.top) - 24}px) scale(1.06)`, opacity: 1, offset: 0.48 },
+          { transform: `translate(${dx}px, ${dy}px) scale(1)`, opacity: 0.15 }
+        ], { duration, easing: 'cubic-bezier(0.22, 1, 0.36, 1)' });
+        anim.onfinish = () => clone.remove();
+
+      } else if (transfer.type === 'popMain' || transfer.type === 'popMin') {
+        const isMain = transfer.type === 'popMain';
+        const vesselEl = isMain ? mainStackVessel : minStackVessel;
+        const dockEl = isMain ? poppedMainDock : poppedMinDock;
+        if (!vesselEl || dockEl.classList.contains('hidden')) return;
+
+        const vesselRect = vesselEl.getBoundingClientRect();
+        const dockRect = dockEl.getBoundingClientRect();
+
+        const x1 = (vesselRect.left - stageRect.left) + vesselRect.width / 2;
+        const y1 = (vesselRect.top - stageRect.top) + 4;
+        const x2 = (dockRect.left - stageRect.left) + dockRect.width / 2;
+        const y2 = (dockRect.top - stageRect.top) + dockRect.height + 4;
+        const midX = (x1 + x2) / 2 + 16;
+        const midY = Math.min(y1, y2) - 20;
+
+        transferArcSvg.innerHTML = `
+          <path d="M ${x1} ${y1} Q ${midX} ${midY}, ${x2} ${y2}"
+                fill="none" stroke="#fb7185" stroke-width="2.2" class="transfer-arc-path" />
+          <circle cx="${x1}" cy="${y1}" r="4" fill="#fb7185" />
+          <polygon points="${x2},${y2 - 3} ${x2 - 5},${y2 + 6} ${x2 + 5},${y2 + 6}" fill="#fb7185" />
+        `;
+
+        if (!animateFlight) return;
+        const clone = document.createElement('div');
+        clone.className = 'stack-node-box absolute px-3 py-1.5 rounded-xl bg-rose-500/30 border border-rose-400 text-rose-100 code-font text-sm font-extrabold shadow-xl pointer-events-none';
+        clone.textContent = `${transfer.val}`;
+        clone.style.left = `${(vesselRect.left - stageRect.left) + (vesselRect.width - 56) / 2}px`;
+        clone.style.top = `${(vesselRect.top - stageRect.top) + 12}px`;
+        flyingCloneLayer.appendChild(clone);
+
+        const dx = (dockRect.left + dockRect.width / 2) - (vesselRect.left + vesselRect.width / 2);
+        const dy = (dockRect.top + dockRect.height / 2) - (vesselRect.top + 24);
+        const duration = Math.min(520, Math.max(230, playSpeed * 0.76));
+
+        const anim = clone.animate([
+          { transform: 'translate(0px, 0px) scale(1)', opacity: 1 },
+          { transform: `translate(${dx * 0.5}px, -32px) scale(1.08)`, opacity: 0.95, offset: 0.45 },
+          { transform: `translate(${dx}px, ${dy}px) scale(0.95)`, opacity: 0.15 }
+        ], { duration, easing: 'cubic-bezier(0.22, 1, 0.36, 1)' });
+        anim.onfinish = () => clone.remove();
+
+      } else if (transfer.type === 'peekMain' || transfer.type === 'peekMin') {
+        const isMain = transfer.type === 'peekMain';
+        const vesselEl = isMain ? mainStackVessel : minStackVessel;
+        const topItemEl = vesselEl.querySelector('[data-stack-top="true"]') || vesselEl;
+        const opEl = opsPipelineArena.querySelector(`[data-op-idx="${transfer.opIdx}"]`);
+        if (!topItemEl || !opEl) return;
+
+        const srcRect = topItemEl.getBoundingClientRect();
+        const opRect = opEl.getBoundingClientRect();
+
+        const x1 = (srcRect.left - stageRect.left) + srcRect.width / 2;
+        const y1 = (srcRect.top - stageRect.top) - 4;
+        const x2 = (opRect.left - stageRect.left) + opRect.width / 2;
+        const y2 = (opRect.bottom - stageRect.top) + 6;
+        const midX = (x1 + x2) / 2 + (isMain ? -22 : 22);
+        const midY = (y1 + y2) / 2;
+
+        transferArcSvg.innerHTML = `
+          <path d="M ${x1} ${y1} Q ${midX} ${midY}, ${x2} ${y2}"
+                fill="none" stroke="#34d399" stroke-width="2.4" class="transfer-arc-path" />
+          <circle cx="${x1}" cy="${y1}" r="4.5" fill="#34d399" />
+          <polygon points="${x2},${y2 - 3} ${x2 - 5},${y2 + 6} ${x2 + 5},${y2 + 6}" fill="#34d399" />
+        `;
+      }
+    }
+
+    // RENDER CURRENT STEP
+    function renderStep(idx, animateMovement = true) {
+      if (idx < 0 || idx >= steps.length) return;
+      const step = steps[idx];
+      const depth = step.mainStack.length;
+      const curMin = step.minStack.length > 0 ? step.minStack[step.minStack.length - 1] : null;
+      const curTop = step.mainStack.length > 0 ? step.mainStack[step.mainStack.length - 1] : null;
+
+      // Update Header Scrubber & Badges
+      stepCounterBadge.textContent = `Step: ${idx + 1} / ${steps.length}`;
+      phaseBadge.textContent = step.phase;
+      depthHeaderBadge.textContent = `Depth: ${depth}`;
+      minHeaderBadge.textContent = `Current Min: ${curMin !== null ? curMin : '-'}`;
+      stepScrubber.max = steps.length - 1;
+      stepScrubber.value = idx;
+
+      // Update Telemetry HUD Cards
+      const curOp = step.opsList[step.opIdx];
+      varActiveOp.textContent = formatOpLabel(curOp);
+      varOpIndexSub.textContent = `Call ${step.opIdx + 1} of ${step.opsList.length}`;
+
+      varStackPeek.textContent = curTop !== null ? curTop : 'empty';
+      varStackSizeSub.textContent = `stack.size(): ${depth}`;
+
+      varMinPeek.textContent = curMin !== null ? curMin : 'empty';
+      varMinCalc.textContent = step.minCalcText || '-';
+
+      varReturnVal.textContent = step.returnDisplay;
+      if (step.isReturnStep) {
+        varReturnVal.className = "code-font text-xl font-black text-emerald-400";
+        returnResultCard.classList.add('return-pulse-anim');
+        setTimeout(() => returnResultCard.classList.remove('return-pulse-anim'), 620);
+      } else if (step.returnDisplay === 'null') {
+        varReturnVal.className = "code-font text-xl font-bold text-slate-300";
+      } else {
+        varReturnVal.className = "code-font text-xl font-bold text-slate-400";
+      }
+      varReturnRole.textContent = (curOp.type === 'top' || curOp.type === 'getMin') ? 'int return' : 'void (null)';
+
+      // Narrative Description
+      stepDescription.innerHTML = step.desc;
+
+      // 1. Render Operation Call Pipeline & Output Preview
+      opsPipelineArena.innerHTML = '';
+      const completedOutputs = step.outputs.filter(o => o !== undefined).map(o => o === null ? 'null' : o);
+      outputArrayPreview.textContent = `Output: [${completedOutputs.join(', ')}]`;
+
+      step.opsList.forEach((op, oIdx) => {
+        const isCurrent = (oIdx === step.opIdx);
+        const isDone = (oIdx < step.opIdx) || (isCurrent && step.outputs[oIdx] !== undefined);
+        const outVal = step.outputs[oIdx];
+
+        const chip = document.createElement('div');
+        chip.dataset.opIdx = oIdx;
+
+        let cClass = 'op-chip px-2.5 py-1.5 rounded-xl flex flex-col items-center gap-0.5 select-none shrink-0 ';
+        if (isCurrent) cClass += 'op-active';
+        else if (isDone) cClass += 'op-done';
+        chip.className = cClass;
+
+        const outBadge = outVal !== undefined
+          ? `<span class="text-[9px] code-font px-1.5 py-0.2 rounded ${outVal === null ? 'bg-white/10 text-slate-300' : 'bg-emerald-500/25 text-emerald-200 font-bold'}">&rarr; ${outVal === null ? 'null' : outVal}</span>`
+          : `<span class="text-[9px] code-font text-slate-500">${isCurrent ? 'running' : 'queued'}</span>`;
+
+        chip.innerHTML = `
+          <span class="code-font text-[11px] font-bold ${isCurrent ? 'text-amber-200' : isDone ? 'text-emerald-200' : 'text-slate-300'}">${formatOpLabel(op)}</span>
+          ${outBadge}
+        `;
+        opsPipelineArena.appendChild(chip);
       });
-    }
 
-    function renderStackChambers(step) {
-      mainStackContainer.innerHTML = '';
-      minStackContainer.innerHTML = '';
+      // 2. Render Main LIFO Stack Vessel (stack)
+      mainStackVessel.innerHTML = '';
+      mainStackBadge.textContent = `size = ${step.mainStack.length}`;
 
-      // Render main stack (top of stack rendered at the top visually using flex-col-reverse or reversed iteration)
-      if (step.stack.length === 0) {
-        mainStackContainer.innerHTML = `
-          <div class="text-xs font-mono text-slate-500 italic my-auto">
-            stack is empty [ ]
-          </div>`;
+      if (step.mainStack.length === 0) {
+        mainStackVessel.innerHTML = `<span class="my-auto text-xs text-slate-500 italic code-font">empty stack</span>`;
       } else {
-        for (let i = step.stack.length - 1; i >= 0; i--) {
-          const val = step.stack[i];
-          const isTop = i === step.stack.length - 1;
-          const card = document.createElement('div');
+        step.mainStack.forEach((val, levelIdx) => {
+          const isTop = (levelIdx === step.mainStack.length - 1);
+          const node = document.createElement('div');
+          if (isTop) node.dataset.stackTop = "true";
 
-          let classes = "stack-card w-full max-w-[210px] px-3.5 py-2 rounded-xl glass-input border flex items-center justify-between font-mono select-none ";
-          if (isTop && step.highlightMainTop === 'push') {
-            classes += "card-active-cyan bg-cyan-950/80 border-cyan-400 text-white";
-          } else if (isTop && step.highlightMainTop === 'peek') {
-            classes += "card-active-amber bg-amber-950/80 border-amber-400 text-white";
-          } else if (isTop) {
-            classes += "bg-cyan-950/40 border-cyan-500/40 text-cyan-200";
-          } else {
-            classes += "bg-slate-900/70 border-white/10 text-slate-300";
-          }
+          let nClass = 'stack-node-box node-main w-full h-9 rounded-xl px-3 flex items-center justify-between select-none shrink-0 ';
+          if (isTop && step.justPushedMain) nClass += 'node-just-pushed ';
+          if (isTop && step.peekMainGlow) nClass += 'node-peek-glow ';
+          node.className = nClass;
 
-          card.className = classes;
-          card.innerHTML = `
-            <span class="text-[10px] text-slate-400">${isTop ? 'TOP (peek)' : `idx ${i}`}</span>
-            <span class="text-base font-extrabold">${val}</span>
-            <span class="text-[10px] ${isTop ? 'text-cyan-300 font-bold' : 'text-slate-500'}">${isTop ? '← head' : ''}</span>
+          const topTag = isTop
+            ? `<span class="px-1.5 py-0.2 rounded bg-cyan-400 text-slate-950 font-extrabold text-[8px] code-font shadow">TOP</span>`
+            : `<span class="text-[9px] code-font text-cyan-300/65">lvl ${levelIdx}</span>`;
+
+          node.innerHTML = `
+            <span class="text-[9px] code-font text-slate-300/75">[${levelIdx}]</span>
+            <span class="code-font text-sm font-black">${val}</span>
+            ${topTag}
           `;
-          mainStackContainer.appendChild(card);
-        }
+          mainStackVessel.appendChild(node);
+        });
       }
 
-      // Render minStack
+      if (step.poppedMainVal !== undefined) {
+        poppedMainDock.classList.remove('hidden');
+        poppedMainVal.textContent = step.poppedMainVal;
+      } else {
+        poppedMainDock.classList.add('hidden');
+      }
+
+      // 3. Render Auxiliary Min LIFO Stack Vessel (minStack)
+      minStackVessel.innerHTML = '';
+      minStackBadge.textContent = `size = ${step.minStack.length}`;
+
       if (step.minStack.length === 0) {
-        minStackContainer.innerHTML = `
-          <div class="text-xs font-mono text-slate-500 italic my-auto">
-            minStack is empty [ ]
-          </div>`;
+        minStackVessel.innerHTML = `<span class="my-auto text-xs text-slate-500 italic code-font">empty minStack</span>`;
       } else {
-        for (let i = step.minStack.length - 1; i >= 0; i--) {
-          const val = step.minStack[i];
-          const isTop = i === step.minStack.length - 1;
-          const card = document.createElement('div');
+        step.minStack.forEach((val, levelIdx) => {
+          const isTop = (levelIdx === step.minStack.length - 1);
+          const node = document.createElement('div');
+          if (isTop) node.dataset.stackTop = "true";
 
-          let classes = "stack-card w-full max-w-[210px] px-3.5 py-2 rounded-xl glass-input border flex items-center justify-between font-mono select-none ";
-          if (isTop && step.highlightMinTop === 'push') {
-            classes += "card-active-emerald bg-emerald-950/80 border-emerald-400 text-white";
-          } else if (isTop && step.highlightMinTop === 'peek') {
-            classes += "card-active-emerald bg-emerald-950/80 border-emerald-400 text-emerald-200";
-          } else if (isTop && step.highlightMinTop === 'skip') {
-            classes += "bg-slate-900/85 border-amber-400/50 text-amber-200";
-          } else if (isTop) {
-            classes += "bg-emerald-950/40 border-emerald-500/40 text-emerald-200";
-          } else {
-            classes += "bg-slate-900/70 border-white/10 text-slate-300";
-          }
+          let nClass = 'stack-node-box node-min w-full h-9 rounded-xl px-3 flex items-center justify-between select-none shrink-0 ';
+          if (isTop && step.justPushedMin) nClass += 'node-just-pushed ';
+          if (isTop && step.peekMinGlow) nClass += 'node-peek-glow ';
+          node.className = nClass;
 
-          card.className = classes;
-          card.innerHTML = `
-            <span class="text-[10px] text-slate-400">${isTop ? 'MIN (peek)' : `idx ${i}`}</span>
-            <span class="text-base font-extrabold">${val}</span>
-            <span class="text-[10px] ${isTop ? 'text-emerald-300 font-bold' : 'text-slate-500'}">${isTop ? '★ min' : ''}</span>
+          const topTag = isTop
+            ? `<span class="px-1.5 py-0.2 rounded bg-purple-400 text-slate-950 font-extrabold text-[8px] code-font shadow">MIN</span>`
+            : `<span class="text-[9px] code-font text-purple-300/65">lvl ${levelIdx}</span>`;
+
+          node.innerHTML = `
+            <span class="text-[9px] code-font text-slate-300/75">[${levelIdx}]</span>
+            <span class="code-font text-sm font-black">${val}</span>
+            ${topTag}
           `;
-          minStackContainer.appendChild(card);
+          minStackVessel.appendChild(node);
+        });
+      }
+
+      if (step.poppedMinVal !== undefined) {
+        poppedMinDock.classList.remove('hidden');
+        poppedMinVal.textContent = step.poppedMinVal;
+      } else {
+        poppedMinDock.classList.add('hidden');
+      }
+
+      // 4. Trigger Lift-and-Arc Stack Transfers
+      requestAnimationFrame(() => {
+        const activeChip = opsPipelineArena.querySelector(`[data-op-idx="${step.opIdx}"]`);
+        if (activeChip) {
+          const scrollTarget = activeChip.offsetLeft - opsPipelineArena.clientWidth / 2 + activeChip.offsetWidth / 2;
+          opsPipelineArena.scrollTo({ left: Math.max(0, scrollTarget), behavior: 'smooth' });
+        }
+        animateStackTransfer(step.transfer, animateMovement);
+      });
+
+      // 5. Update Action Pill & Decision Banner
+      if (step.actionText) {
+        actionPill.classList.remove('hidden');
+        actionPill.textContent = step.actionText;
+      } else {
+        actionPill.classList.add('hidden');
+      }
+
+      if (step.isReturnStep) {
+        decisionIcon.className = "fa-solid fa-trophy text-emerald-400 text-base";
+        decisionBanner.className = "p-3.5 rounded-xl bg-emerald-500/15 border border-emerald-400/35 text-xs flex flex-col sm:flex-row items-center justify-between gap-3 backdrop-blur-md";
+      } else if (step.poppedMainVal !== undefined) {
+        decisionIcon.className = "fa-solid fa-arrow-up-from-bracket text-rose-400 text-base";
+        decisionBanner.className = "p-3.5 rounded-xl bg-rose-500/12 border border-rose-400/30 text-xs flex flex-col sm:flex-row items-center justify-between gap-3 backdrop-blur-md";
+      } else {
+        decisionIcon.className = "fa-solid fa-circle-info text-cyan-400 text-base";
+        decisionBanner.className = "p-3.5 rounded-xl bg-white/[0.04] border border-white/10 text-xs flex flex-col sm:flex-row items-center justify-between gap-3 backdrop-blur-md";
+      }
+      decisionText.innerHTML = step.desc;
+
+      // 6. Highlight Active Java Line & Play Audio Tone
+      highlightCodeLine(step.line);
+      if (step.soundFreq) {
+        playTone(step.soundFreq, 'sine', 0.08, 0.035);
+      }
+    }
+
+    // PLAYBACK CONTROLLER
+    function setPlaying(playing) {
+      isPlaying = playing;
+      if (isPlaying) {
+        playIcon.className = "fa-solid fa-pause";
+        playText.textContent = "Stop";
+        btnPlay.classList.add('bg-rose-500/25', 'text-rose-200', 'border-rose-400/50');
+        btnPlay.classList.remove('bg-cyan-500/25', 'text-cyan-200', 'border-cyan-400/50');
+
+        playInterval = setInterval(() => {
+          if (currentStepIdx < steps.length - 1) {
+            currentStepIdx++;
+            renderStep(currentStepIdx, true);
+          } else {
+            setPlaying(false);
+          }
+        }, playSpeed);
+      } else {
+        playIcon.className = "fa-solid fa-play";
+        playText.textContent = "Start";
+        btnPlay.classList.remove('bg-rose-500/25', 'text-rose-200', 'border-rose-400/50');
+        btnPlay.classList.add('bg-cyan-500/25', 'text-cyan-200', 'border-cyan-400/50');
+        if (playInterval) {
+          clearInterval(playInterval);
+          playInterval = null;
         }
       }
     }
 
-    function goToStep(index) {
-      if (index < 0) index = 0;
-      if (index >= currentSteps.length) index = currentSteps.length - 1;
-      currentStepIndex = index;
-      renderStep(currentSteps[currentStepIndex]);
+    function initSimulation(opsArray, jumpToLastOp = false) {
+      setPlaying(false);
+      currentOps = JSON.parse(JSON.stringify(opsArray));
+      steps = generateSteps(currentOps);
+      currentStepIdx = jumpToLastOp ? Math.max(0, steps.length - 1) : 0;
+      stepScrubber.max = steps.length - 1;
+      stepScrubber.value = currentStepIdx;
+      renderStep(currentStepIdx, false);
+    }
 
-      if (currentStepIndex === currentSteps.length - 1 && isPlaying) {
-        stopAutoPlay();
+    // Helper: Compute current virtual stack depth at the end of currentOps so custom pop/top/getMin are always valid
+    function getFinalStackDepth(opsList) {
+      let d = 0;
+      opsList.forEach(op => {
+        if (op.type === 'push') d++;
+        else if (op.type === 'pop' && d > 0) d--;
+      });
+      return d;
+    }
+
+    // EVENT LISTENERS
+    btnPlay.addEventListener('click', () => {
+      if (currentStepIdx >= steps.length - 1) {
+        currentStepIdx = 0;
+        renderStep(0, false);
       }
-    }
-
-    function nextStep() {
-      if (currentStepIndex < currentSteps.length - 1) {
-        goToStep(currentStepIndex + 1);
-      } else {
-        stopAutoPlay();
-      }
-    }
-
-    function prevStep() {
-      if (currentStepIndex > 0) {
-        goToStep(currentStepIndex - 1);
-      }
-    }
-
-    function startAutoPlay() {
-      if (currentStepIndex >= currentSteps.length - 1) {
-        currentStepIndex = 0;
-      }
-      isPlaying = true;
-      playIcon.className = "fa-solid fa-pause text-xs";
-      playText.textContent = "Stop";
-      btnPlayPause.classList.replace('from-cyan-500', 'from-rose-500');
-      btnPlayPause.classList.replace('to-emerald-600', 'to-rose-600');
-
-      clearInterval(playIntervalId);
-      playIntervalId = setInterval(() => {
-        nextStep();
-      }, playSpeed);
-    }
-
-    function stopAutoPlay() {
-      isPlaying = false;
-      playIcon.className = "fa-solid fa-play text-xs";
-      playText.textContent = "Start";
-      btnPlayPause.classList.replace('from-rose-500', 'from-cyan-500');
-      btnPlayPause.classList.replace('to-rose-600', 'to-emerald-600');
-      clearInterval(playIntervalId);
-    }
-
-    function togglePlayPause() {
-      if (isPlaying) {
-        stopAutoPlay();
-      } else {
-        startAutoPlay();
-      }
-    }
-
-    function rebuildSimulation(jumpToEnd = false) {
-      stopAutoPlay();
-      currentSteps = generateExecutionSteps(activeOperations);
-      stepSlider.max = currentSteps.length - 1;
-      sliderTotal.textContent = currentSteps.length - 1;
-      currentStepIndex = jumpToEnd ? currentSteps.length - 1 : 0;
-      goToStep(currentStepIndex);
-    }
-
-    btnPlayPause.addEventListener('click', togglePlayPause);
-    btnNext.addEventListener('click', () => { stopAutoPlay(); nextStep(); });
-    btnPrev.addEventListener('click', () => { stopAutoPlay(); prevStep(); });
-    btnReset.addEventListener('click', () => { stopAutoPlay(); goToStep(0); });
-
-    btnAddPush.addEventListener('click', () => {
-      const parsed = parseInt(inputPushVal.value, 10);
-      const val = Number.isNaN(parsed) ? 0 : parsed;
-      activeOperations.push({ op: 'push', val });
-      const prevLen = currentSteps.length;
-      stopAutoPlay();
-      currentSteps = generateExecutionSteps(activeOperations);
-      stepSlider.max = currentSteps.length - 1;
-      sliderTotal.textContent = currentSteps.length - 1;
-      goToStep(prevLen);
+      setPlaying(!isPlaying);
     });
 
-    btnAddPop.addEventListener('click', () => {
-      activeOperations.push({ op: 'pop' });
-      const prevLen = currentSteps.length;
-      stopAutoPlay();
-      currentSteps = generateExecutionSteps(activeOperations);
-      stepSlider.max = currentSteps.length - 1;
-      sliderTotal.textContent = currentSteps.length - 1;
-      goToStep(prevLen);
+    btnNext.addEventListener('click', () => {
+      setPlaying(false);
+      if (currentStepIdx < steps.length - 1) {
+        currentStepIdx++;
+        renderStep(currentStepIdx, true);
+      }
     });
 
-    btnAddTop.addEventListener('click', () => {
-      activeOperations.push({ op: 'top' });
-      const prevLen = currentSteps.length;
-      stopAutoPlay();
-      currentSteps = generateExecutionSteps(activeOperations);
-      stepSlider.max = currentSteps.length - 1;
-      sliderTotal.textContent = currentSteps.length - 1;
-      goToStep(prevLen);
+    btnPrev.addEventListener('click', () => {
+      setPlaying(false);
+      if (currentStepIdx > 0) {
+        currentStepIdx--;
+        renderStep(currentStepIdx, true);
+      }
     });
 
-    btnAddGetMin.addEventListener('click', () => {
-      activeOperations.push({ op: 'getMin' });
-      const prevLen = currentSteps.length;
-      stopAutoPlay();
-      currentSteps = generateExecutionSteps(activeOperations);
-      stepSlider.max = currentSteps.length - 1;
-      sliderTotal.textContent = currentSteps.length - 1;
-      goToStep(prevLen);
+    btnReset.addEventListener('click', () => {
+      setPlaying(false);
+      currentStepIdx = 0;
+      renderStep(0, false);
     });
 
-    btnSampleNext.addEventListener('click', () => {
-      presetIndex = (presetIndex + 1) % presetSequences.length;
-      activeOperations = [...presetSequences[presetIndex]];
-      rebuildSimulation(false);
-    });
-
-    stepSlider.addEventListener('input', (e) => {
-      stopAutoPlay();
-      goToStep(parseInt(e.target.value, 10));
+    stepScrubber.addEventListener('input', (e) => {
+      setPlaying(false);
+      currentStepIdx = parseInt(e.target.value, 10);
+      renderStep(currentStepIdx, false);
     });
 
     document.querySelectorAll('.speed-btn').forEach(btn => {
       btn.addEventListener('click', () => {
         document.querySelectorAll('.speed-btn').forEach(b => {
-          b.className = "speed-btn px-2.5 py-1 rounded-lg text-slate-300 hover:text-white";
+          b.classList.remove('bg-cyan-500/30', 'text-cyan-200', 'font-semibold');
         });
-        btn.className = "speed-btn px-2.5 py-1 rounded-lg bg-cyan-600 text-white font-bold";
+        btn.classList.add('bg-cyan-500/30', 'text-cyan-200', 'font-semibold');
         playSpeed = parseInt(btn.dataset.speed, 10);
         if (isPlaying) {
-          startAutoPlay();
+          setPlaying(false);
+          setPlaying(true);
         }
       });
     });
 
-    btnSoundToggle.addEventListener('click', () => {
-      sound.enabled = !sound.enabled;
-      soundIcon.className = sound.enabled
-        ? "fa-solid fa-volume-high text-cyan-400"
-        : "fa-solid fa-volume-xmark text-slate-500";
+    btnAudio.addEventListener('click', () => {
+      audioEnabled = !audioEnabled;
+      if (audioEnabled) {
+        audioIcon.className = "fa-solid fa-volume-high";
+        btnAudio.classList.remove('text-slate-600');
+        btnAudio.classList.add('text-slate-300');
+      } else {
+        audioIcon.className = "fa-solid fa-volume-xmark";
+        btnAudio.classList.add('text-slate-600');
+        btnAudio.classList.remove('text-slate-300');
+      }
+    });
+
+    presetSelect.addEventListener('change', (e) => {
+      const idx = parseInt(e.target.value, 10);
+      initSimulation(PRESETS[idx].ops, false);
+    });
+
+    // Interactive Append Custom Operation Handlers
+    btnAddPush.addEventListener('click', () => {
+      const val = parseInt(customPushVal.value, 10);
+      if (isNaN(val)) return;
+      const updated = [...currentOps, { type: 'push', val }];
+      const prevLen = steps.length;
+      initSimulation(updated, false);
+      currentStepIdx = Math.min(steps.length - 1, prevLen);
+      renderStep(currentStepIdx, true);
+    });
+
+    btnAddPop.addEventListener('click', () => {
+      if (getFinalStackDepth(currentOps) === 0) return;
+      const updated = [...currentOps, { type: 'pop' }];
+      const prevLen = steps.length;
+      initSimulation(updated, false);
+      currentStepIdx = Math.min(steps.length - 1, prevLen);
+      renderStep(currentStepIdx, true);
+    });
+
+    btnAddTop.addEventListener('click', () => {
+      if (getFinalStackDepth(currentOps) === 0) return;
+      const updated = [...currentOps, { type: 'top' }];
+      const prevLen = steps.length;
+      initSimulation(updated, false);
+      currentStepIdx = Math.min(steps.length - 1, prevLen);
+      renderStep(currentStepIdx, true);
+    });
+
+    btnAddGetMin.addEventListener('click', () => {
+      if (getFinalStackDepth(currentOps) === 0) return;
+      const updated = [...currentOps, { type: 'getMin' }];
+      const prevLen = steps.length;
+      initSimulation(updated, false);
+      currentStepIdx = Math.min(steps.length - 1, prevLen);
+      renderStep(currentStepIdx, true);
+    });
+
+    window.addEventListener('resize', () => {
+      const step = steps[currentStepIdx];
+      if (step) {
+        animateStackTransfer(step.transfer, false);
+      }
     });
 
     window.addEventListener('keydown', (e) => {
-      if (['INPUT', 'TEXTAREA'].includes(document.activeElement.tagName)) return;
+      if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT') return;
       if (e.code === 'Space') {
         e.preventDefault();
-        togglePlayPause();
+        btnPlay.click();
       } else if (e.code === 'ArrowRight') {
         e.preventDefault();
-        stopAutoPlay();
-        nextStep();
+        btnNext.click();
       } else if (e.code === 'ArrowLeft') {
         e.preventDefault();
-        stopAutoPlay();
-        prevStep();
+        btnPrev.click();
       }
     });
 
     window.onload = function() {
-      rebuildSimulation(false);
+      initSimulation(PRESETS[0].ops, false);
     };
   </script>
 </body>
