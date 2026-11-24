@@ -1,0 +1,1622 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Evaluate Reverse Polish Notation (LeetCode 150) - Glassmorphic Visualizer</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: radial-gradient(circle at 14% 16%, #0c192c 0%, #030712 100%);
+      color: #e2e8f0;
+      min-height: 100vh;
+    }
+
+    .code-font {
+      font-family: 'Fira Code', monospace;
+    }
+
+    /* Glassmorphic Surface & Controls */
+    .glass-panel {
+      background: rgba(15, 23, 42, 0.56);
+      backdrop-filter: blur(22px);
+      -webkit-backdrop-filter: blur(22px);
+      border: 1px solid rgba(255, 255, 255, 0.11);
+      box-shadow: 0 20px 45px -15px rgba(0, 0, 0, 0.68), inset 0 1px 0 0 rgba(255, 255, 255, 0.09);
+    }
+
+    .glass-button {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .glass-button:hover:not(:disabled) {
+      background: rgba(255, 255, 255, 0.15);
+      border-color: rgba(255, 255, 255, 0.28);
+      transform: translateY(-1px);
+    }
+    .glass-button:active:not(:disabled) {
+      transform: translateY(1px);
+    }
+    .glass-button:disabled {
+      opacity: 0.35;
+      cursor: not-allowed;
+    }
+
+    /* Code Execution Line Highlight with Exact Preserved Indentation */
+    .code-line {
+      white-space: pre;
+      transition: all 0.2s ease;
+      border-left: 3px solid transparent;
+      padding: 2px 10px;
+    }
+    .code-line.active-line {
+      background: rgba(56, 189, 248, 0.18);
+      border-left: 3px solid #38bdf8;
+      color: #ffffff;
+      box-shadow: inset 0 0 16px rgba(56, 189, 248, 0.15);
+    }
+
+    /* Glassy RPN Token Tiles */
+    .token-card {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      transition: all 0.28s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    .token-card.token-consumed {
+      opacity: 0.4;
+      background: rgba(15, 23, 42, 0.35);
+      border-color: rgba(255, 255, 255, 0.06);
+    }
+
+    .token-card.token-num {
+      background: linear-gradient(180deg, rgba(34, 211, 238, 0.14) 0%, rgba(6, 182, 212, 0.05) 100%);
+      border-color: rgba(34, 211, 238, 0.42);
+    }
+
+    .token-card.token-op {
+      background: linear-gradient(180deg, rgba(168, 85, 247, 0.16) 0%, rgba(126, 34, 206, 0.06) 100%);
+      border-color: rgba(192, 132, 252, 0.45);
+    }
+
+    .token-card.token-active {
+      background: linear-gradient(180deg, rgba(251, 191, 36, 0.28) 0%, rgba(245, 158, 11, 0.12) 100%) !important;
+      border-color: rgba(251, 191, 36, 0.95) !important;
+      transform: translateY(-6px) scale(1.06);
+      box-shadow: 0 12px 26px -4px rgba(251, 191, 36, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.25) !important;
+      z-index: 20;
+    }
+
+    /* Vertical Open-Topped U-Shaped LIFO Operand Stack Vessel */
+    .lifo-stack-vessel {
+      background: linear-gradient(180deg, rgba(15, 23, 42, 0.25) 0%, rgba(14, 116, 144, 0.22) 100%);
+      border-left: 2.5px solid rgba(34, 211, 238, 0.78);
+      border-right: 2.5px solid rgba(34, 211, 238, 0.78);
+      border-bottom: 2.5px solid rgba(34, 211, 238, 0.85);
+      border-top: none;
+      border-bottom-left-radius: 18px;
+      border-bottom-right-radius: 18px;
+      box-shadow:
+        inset 0 -16px 32px rgba(34, 211, 238, 0.08),
+        0 14px 30px -10px rgba(0, 0, 0, 0.65);
+    }
+
+    /* Glassy Stacked Operand Box Inside LIFO Vessel */
+    .stack-operand-box {
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      transition: all 0.28s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    .stack-operand-box.op-from-token {
+      background: linear-gradient(90deg, rgba(34, 211, 238, 0.24) 0%, rgba(14, 165, 233, 0.12) 100%);
+      border: 1px solid rgba(56, 189, 248, 0.7);
+      color: #e0f2fe;
+    }
+
+    .stack-operand-box.op-from-alu {
+      background: linear-gradient(90deg, rgba(16, 185, 129, 0.26) 0%, rgba(5, 150, 105, 0.13) 100%);
+      border: 1px solid rgba(52, 211, 153, 0.78);
+      color: #d1fae5;
+    }
+
+    .stack-operand-box.just-pushed {
+      transform: scale(1.04);
+      border-color: rgba(251, 191, 36, 0.95) !important;
+      box-shadow: 0 0 22px rgba(251, 191, 36, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.35);
+    }
+
+    @keyframes arcDash {
+      to {
+        stroke-dashoffset: -24;
+      }
+    }
+    .transfer-arc-path {
+      stroke-dasharray: 6 6;
+      animation: arcDash 0.8s linear infinite;
+    }
+
+    @keyframes resultPulse {
+      0%, 100% { transform: scale(1); filter: drop-shadow(0 0 8px rgba(16, 185, 129, 0.45)); }
+      50% { transform: scale(1.05); filter: drop-shadow(0 0 22px rgba(16, 185, 129, 0.95)); }
+    }
+    .result-win-anim {
+      animation: resultPulse 0.65s ease-in-out;
+    }
+
+    /* Custom Scrollbars */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: rgba(15, 23, 42, 0.4);
+    }
+    ::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.18);
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(255, 255, 255, 0.3);
+    }
+  </style>
+</head>
+<body class="p-2.5 sm:p-4 lg:px-5 lg:py-4 flex flex-col items-center justify-start min-h-screen">
+
+  <!-- Ambient Glass Glow Orbs -->
+  <div class="fixed top-6 left-1/6 w-96 h-96 bg-cyan-500/14 rounded-full blur-3xl pointer-events-none -z-10"></div>
+  <div class="fixed top-1/3 right-1/6 w-96 h-96 bg-purple-500/14 rounded-full blur-3xl pointer-events-none -z-10"></div>
+  <div class="fixed bottom-12 left-1/2 w-80 h-80 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none -z-10"></div>
+
+  <!-- MAIN WRAPPER -->
+  <div class="w-full max-w-[1560px] flex flex-col gap-5">
+
+    <!-- TOP FROSTED-GLASS CONTROLS DECK -->
+    <header class="glass-panel rounded-2xl p-4 sm:p-5 flex flex-col gap-4 sticky top-3 z-50">
+      <div class="flex flex-wrap items-center justify-between gap-4">
+
+        <!-- Title & Algorithm Metadata -->
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-cyan-500 via-purple-500 to-emerald-400 flex items-center justify-center shadow-lg shadow-cyan-500/25 text-slate-950 font-bold text-lg">
+            <i class="fa-solid fa-calculator"></i>
+          </div>
+          <div>
+            <h1 class="text-lg sm:text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white via-cyan-100 to-purple-300">
+              Evaluate Reverse Polish Notation
+            </h1>
+            <p class="text-xs text-slate-400 flex items-center gap-2">
+              <span class="inline-block w-2 h-2 rounded-full bg-cyan-400 animate-pulse"></span>
+              LeetCode 150 • Postfix Expression Evaluation via LIFO Stack&lt;Integer&gt; • &Omicron;(n) Time • &Omicron;(n) Space
+            </p>
+          </div>
+        </div>
+
+        <!-- Center Playback Controls: Reset, Previous, Start/Stop, Next -->
+        <div class="flex items-center gap-2 sm:gap-3 bg-white/5 p-1.5 rounded-xl border border-white/10 backdrop-blur-md">
+          <button id="btnReset" class="glass-button text-slate-200 hover:text-white px-3 py-2 rounded-lg text-sm flex items-center gap-1.5" title="Reset to Initial State">
+            <i class="fa-solid fa-rotate-left"></i>
+            <span class="hidden sm:inline">Reset</span>
+          </button>
+          <button id="btnPrev" class="glass-button text-slate-200 hover:text-white px-3 py-2 rounded-lg text-sm flex items-center gap-1.5" title="Previous Step (Left Arrow)">
+            <i class="fa-solid fa-backward-step"></i>
+            <span class="hidden sm:inline">Previous</span>
+          </button>
+          <button id="btnPlay" class="glass-button bg-cyan-500/25 text-cyan-200 hover:bg-cyan-500/35 border-cyan-400/50 px-4 py-2 rounded-lg text-sm font-semibold flex items-center gap-2 shadow-lg shadow-cyan-500/15" title="Start / Stop (Spacebar)">
+            <i class="fa-solid fa-play" id="playIcon"></i>
+            <span id="playText">Start</span>
+          </button>
+          <button id="btnNext" class="glass-button text-slate-200 hover:text-white px-3 py-2 rounded-lg text-sm flex items-center gap-1.5" title="Next Step (Right Arrow)">
+            <span class="hidden sm:inline">Next</span>
+            <i class="fa-solid fa-forward-step"></i>
+          </button>
+        </div>
+
+        <!-- Speed & Audio Controls -->
+        <div class="flex items-center gap-2">
+          <div class="flex items-center bg-white/5 rounded-xl p-1 border border-white/10 text-xs text-slate-300 backdrop-blur-md">
+            <span class="px-2 py-1 text-slate-400"><i class="fa-solid fa-gauge-high mr-1"></i>Speed</span>
+            <button class="speed-btn px-2 py-1 rounded-lg hover:text-white transition" data-speed="1300">0.5x</button>
+            <button class="speed-btn px-2 py-1 rounded-lg bg-cyan-500/30 text-cyan-200 font-semibold transition" data-speed="650">1x</button>
+            <button class="speed-btn px-2 py-1 rounded-lg hover:text-white transition" data-speed="280">2x</button>
+            <button class="speed-btn px-2 py-1 rounded-lg hover:text-white transition" data-speed="110">4x</button>
+          </div>
+          <button id="btnAudio" class="glass-button p-2.5 rounded-xl text-slate-300 hover:text-cyan-300" title="Toggle Sound Effects">
+            <i class="fa-solid fa-volume-high" id="audioIcon"></i>
+          </button>
+        </div>
+
+      </div>
+
+      <!-- Scrubber Slider & Status Badges -->
+      <div class="flex flex-col sm:flex-row items-center gap-3 pt-2 border-t border-white/10">
+        <div class="flex flex-wrap items-center gap-2 text-xs text-slate-300 w-full sm:w-auto shrink-0">
+          <span id="stepCounterBadge" class="code-font px-2.5 py-1 rounded-md bg-white/5 border border-white/10 text-cyan-300">
+            Step: 0 / 0
+          </span>
+          <span id="phaseBadge" class="px-2.5 py-1 rounded-md bg-sky-500/20 border border-sky-400/30 text-sky-200 font-semibold">
+            Ready
+          </span>
+          <span id="stackSizeHeaderBadge" class="px-2.5 py-1 rounded-md bg-purple-500/20 border border-purple-400/30 text-purple-200 font-bold">
+            stack.size(): 0
+          </span>
+          <span id="resultHeaderBadge" class="px-2.5 py-1 rounded-md bg-white/5 border border-white/15 text-slate-300 font-bold">
+            Result: Pending
+          </span>
+        </div>
+        <div class="w-full flex items-center gap-3">
+          <input type="range" id="stepScrubber" min="0" max="0" value="0" class="w-full h-1.5 bg-slate-800/80 rounded-lg appearance-none cursor-pointer accent-cyan-400">
+        </div>
+      </div>
+    </header>
+
+    <!-- TEST CASES & CUSTOM RPN TOKENS BAR -->
+    <section class="glass-panel rounded-2xl p-4 flex flex-wrap items-center justify-between gap-4">
+      <div class="flex flex-wrap items-center gap-3">
+        <label for="presetSelect" class="text-xs uppercase font-semibold text-slate-300 tracking-wider flex items-center gap-1.5">
+          <i class="fa-solid fa-flask text-cyan-400"></i> Test Cases:
+        </label>
+        <select id="presetSelect" class="bg-slate-900/75 border border-white/15 text-xs sm:text-sm text-slate-200 rounded-xl px-3 py-2 outline-none focus:border-cyan-400 backdrop-blur-md">
+          <option value="0">1: LeetCode Ex 1 (["2","1","+","3","*"] &rarr; 9)</option>
+          <option value="1">2: LeetCode Ex 2 (["4","13","5","/","+"] &rarr; 6)</option>
+          <option value="2">3: LeetCode Ex 3 Complex (["10","6","9","3","+","-11","*","/","*","17","+","5","+"] &rarr; 22)</option>
+          <option value="3">4: Subtraction Operand Order (["10","3","-"] &rarr; 7)</option>
+          <option value="4">5: Negative Division Truncation (["-7","3","/"] &rarr; -2)</option>
+          <option value="5">6: Chained Additions &amp; Multiplications (["5","1","2","+","4","*","+","3","-"] &rarr; 14)</option>
+          <option value="6">7: Negative Operands Product (["-4","-5","*","2","/"] &rarr; 10)</option>
+          <option value="7">8: Zero Numerator &amp; Remainder (["0","8","/","15","+"] &rarr; 15)</option>
+          <option value="8">9: Deep Operand Stack (["2","3","4","5","+","*","-"] &rarr; -25)</option>
+          <option value="9">10: Single Integer Token (["42"] &rarr; 42)</option>
+        </select>
+      </div>
+
+      <div class="flex flex-wrap items-center gap-2 flex-grow max-w-lg">
+        <input type="text" id="customTokensInput" placeholder="RPN tokens: 2, 1, +, 3, *" class="flex-1 min-w-[160px] bg-white/5 border border-white/15 rounded-xl px-3 py-2 text-xs text-slate-200 code-font outline-none focus:border-cyan-400 backdrop-blur-md" title="Comma-separated integers and operators (+, -, *, /)">
+        <button id="btnApplyCustom" class="glass-button text-xs px-4 py-2 rounded-xl text-cyan-300 font-semibold shrink-0">
+          Load Tokens
+        </button>
+      </div>
+    </section>
+
+    <!-- MAIN VISUALIZATION & CODE SECTION -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-5">
+
+      <!-- LEFT: RPN TOKEN STREAM, VERTICAL LIFO STACK VESSEL & ALU ARITHMETIC CHAMBER -->
+      <section class="lg:col-span-7 xl:col-span-8 flex flex-col gap-5">
+
+        <!-- Live Variable Telemetry Cards -->
+        <div class="grid grid-cols-2 sm:grid-cols-5 gap-3">
+
+          <!-- Active Token -->
+          <div class="glass-panel rounded-xl p-3 flex flex-col justify-between border-amber-400/35">
+            <span class="text-[11px] text-slate-400 uppercase font-semibold flex items-center justify-between">
+              String token
+              <span class="w-2 h-2 rounded-full bg-amber-400"></span>
+            </span>
+            <div class="flex items-baseline gap-1.5 mt-1.5">
+              <span id="varCurToken" class="code-font text-xl font-bold text-amber-300">-</span>
+              <span id="varTokenIdx" class="text-[10px] text-slate-400 code-font"></span>
+            </div>
+            <span id="varTokenType" class="text-[10px] text-amber-200/75 mt-1 code-font">Number / Operator</span>
+          </div>
+
+          <!-- Popped Register: int first -->
+          <div class="glass-panel rounded-xl p-3 flex flex-col justify-between border-sky-400/35">
+            <span class="text-[11px] text-slate-400 uppercase font-semibold flex items-center justify-between">
+              int first (1st Pop)
+              <i class="fa-solid fa-1 text-sky-400 text-[10px]"></i>
+            </span>
+            <div class="flex items-baseline gap-1.5 mt-1.5">
+              <span id="varFirstOp" class="code-font text-xl font-bold text-sky-300">-</span>
+            </div>
+            <span class="text-[10px] text-sky-200/75 mt-1 code-font">Right-hand operand</span>
+          </div>
+
+          <!-- Popped Register: int second -->
+          <div class="glass-panel rounded-xl p-3 flex flex-col justify-between border-purple-400/35">
+            <span class="text-[11px] text-slate-400 uppercase font-semibold flex items-center justify-between">
+              int second (2nd Pop)
+              <i class="fa-solid fa-2 text-purple-400 text-[10px]"></i>
+            </span>
+            <div class="flex items-baseline gap-1.5 mt-1.5">
+              <span id="varSecondOp" class="code-font text-xl font-bold text-purple-300">-</span>
+            </div>
+            <span class="text-[10px] text-purple-200/75 mt-1 code-font">Left-hand operand</span>
+          </div>
+
+          <!-- Intermediate Computation: int result -->
+          <div class="glass-panel rounded-xl p-3 flex flex-col justify-between border-cyan-400/35">
+            <span class="text-[11px] text-slate-400 uppercase font-semibold flex items-center justify-between">
+              int result
+              <i class="fa-solid fa-equals text-cyan-400 text-[10px]"></i>
+            </span>
+            <div class="flex items-baseline gap-1.5 mt-1.5">
+              <span id="varStepResult" class="code-font text-xl font-bold text-cyan-300">-</span>
+            </div>
+            <span id="varExprMini" class="text-[10px] text-slate-400 mt-1 code-font">second op first</span>
+          </div>
+
+          <!-- Final Return Value -->
+          <div id="finalReturnCard" class="glass-panel rounded-xl p-3 flex flex-col justify-between border-emerald-400/35 col-span-2 sm:col-span-1">
+            <span class="text-[11px] text-slate-400 uppercase font-semibold flex items-center justify-between">
+              Return Value
+              <i class="fa-solid fa-trophy text-emerald-400 text-[10px]"></i>
+            </span>
+            <div class="flex items-baseline gap-1.5 mt-1.5">
+              <span id="varFinalAns" class="code-font text-xl font-black text-slate-400">pending</span>
+            </div>
+            <span class="text-[10px] text-slate-400 mt-1 code-font">return stack.pop()</span>
+          </div>
+
+        </div>
+
+        <!-- UNIFIED STAGE: RPN TOKEN STREAM, VERTICAL LIFO STACK & ALU ARITHMETIC CHAMBER -->
+        <div id="stageWrapper" class="glass-panel relative rounded-2xl p-4 sm:p-5 flex flex-col gap-5">
+          <!-- SVG Trajectory Arc Overlay Connecting Tokens, LIFO Stack & ALU Chamber -->
+          <svg id="transferArcSvg" class="absolute inset-0 w-full h-full pointer-events-none z-30 overflow-visible"></svg>
+
+          <!-- Floating Lift-and-Place Token Layer -->
+          <div id="flyingCloneLayer" class="absolute inset-0 pointer-events-none z-40"></div>
+
+          <!-- 1. INPUT RPN TOKEN STREAM: String[] tokens -->
+          <div class="flex flex-col gap-3">
+            <div class="flex flex-wrap items-center justify-between text-xs pb-2 border-b border-white/10 gap-2">
+              <span class="font-semibold text-slate-200 uppercase tracking-wider flex items-center gap-1.5">
+                <i class="fa-solid fa-tape text-cyan-400"></i>
+                Postfix Expression Stream: <span class="code-font text-white">String[] tokens</span>
+                <span id="tokensLenTag" class="code-font text-cyan-300">(len = 5)</span>
+              </span>
+
+              <div class="flex flex-wrap items-center gap-3 text-[11px]">
+                <span class="flex items-center gap-1.5">
+                  <span class="w-2.5 h-2.5 rounded-sm bg-cyan-400 inline-block"></span> Number (Push)
+                </span>
+                <span class="flex items-center gap-1.5">
+                  <span class="w-2.5 h-2.5 rounded-sm bg-purple-400 inline-block"></span> Operator (Pop 2 &amp; Eval)
+                </span>
+                <span class="flex items-center gap-1.5">
+                  <span class="w-2.5 h-2.5 rounded-sm bg-amber-400 inline-block"></span> Current Token
+                </span>
+              </div>
+            </div>
+
+            <div id="tokensScrollContainer" class="relative w-full py-3.5 px-3 rounded-xl bg-white/[0.02] border border-white/10 overflow-x-auto">
+              <div id="tokensStreamArena" class="relative z-20 flex items-center justify-center gap-2 sm:gap-2.5 min-h-[76px]">
+                <!-- Populated dynamically -->
+              </div>
+            </div>
+          </div>
+
+          <!-- 2. VERTICAL LIFO OPERAND STACK & ALU ARITHMETIC EVALUATION CHAMBER -->
+          <div class="grid grid-cols-1 md:grid-cols-12 gap-5 items-stretch pt-1">
+
+            <!-- Left (5 Cols): Open-Topped Vertical LIFO Stack<Integer> Vessel -->
+            <div class="md:col-span-5 flex flex-col gap-2.5">
+              <div class="flex items-center justify-between text-xs pb-1.5 border-b border-white/10">
+                <span class="font-semibold text-cyan-300 uppercase tracking-wider flex items-center gap-1.5">
+                  <i class="fa-solid fa-layer-group text-cyan-400"></i>
+                  LIFO <span class="code-font text-white">Stack&lt;Integer&gt;</span>
+                </span>
+                <span id="stackDepthPill" class="code-font text-[10px] px-2 py-0.5 rounded bg-white/5 border border-white/10 text-slate-300">
+                  size = 0
+                </span>
+              </div>
+
+              <div class="relative flex-1 min-h-[265px] p-4 rounded-xl bg-white/[0.015] border border-white/10 flex flex-col items-center justify-end">
+                <!-- Open Mouth Entry Indicator Above Stack -->
+                <div class="w-40 sm:w-44 flex items-center justify-between text-[9px] code-font text-slate-400 pb-1.5 px-1">
+                  <span class="text-cyan-300 font-bold"><i class="fa-solid fa-arrow-down mr-1"></i>push()</span>
+                  <span>OPEN TOP</span>
+                  <span class="text-amber-300 font-bold">pop()<i class="fa-solid fa-arrow-up ml-1"></i></span>
+                </div>
+
+                <!-- U-Shaped Glass Vessel (Stacks Bottom-to-Top via flex-col-reverse) -->
+                <div id="stackVessel" class="lifo-stack-vessel relative w-40 sm:w-44 h-[205px] p-2.5 flex flex-col-reverse items-center justify-start gap-2 overflow-y-auto">
+                  <span class="my-auto text-xs text-slate-500 italic code-font">empty stack</span>
+                </div>
+
+                <span class="text-[10px] code-font text-slate-400 mt-2">Top item pops first into <span class="text-sky-300">first</span></span>
+              </div>
+            </div>
+
+            <!-- Right (7 Cols): ALU Arithmetic Evaluation Chamber & Infix Reconstruction -->
+            <div class="md:col-span-7 flex flex-col gap-3">
+              <div class="flex items-center justify-between text-xs pb-1.5 border-b border-white/10">
+                <span class="font-semibold text-purple-300 uppercase tracking-wider flex items-center gap-1.5">
+                  <i class="fa-solid fa-microchip text-purple-400"></i>
+                  ALU Operation Chamber (<span class="code-font text-white">second [op] first</span>)
+                </span>
+                <span id="aluStatusPill" class="code-font text-[10px] px-2 py-0.5 rounded bg-white/5 border border-white/10 text-slate-400">
+                  Idle
+                </span>
+              </div>
+
+              <!-- ALU Operand Slots: second (Left) [op] first (Right) = result -->
+              <div id="aluChamber" class="p-4 rounded-xl bg-white/[0.02] border border-white/10 flex flex-col justify-between gap-3">
+                <div class="flex flex-wrap items-center justify-around gap-2 py-1">
+
+                  <!-- 2nd Popped -> Left-Hand Operand (second) -->
+                  <div class="flex flex-col items-center gap-1">
+                    <span class="text-[10px] code-font text-purple-300 font-bold">second (2nd pop)</span>
+                    <div id="aluSecondBox" class="w-16 h-16 rounded-2xl bg-white/[0.03] border border-dashed border-slate-500/40 flex flex-col items-center justify-center transition-all duration-300">
+                      <span id="aluSecondVal" class="code-font text-xl font-black text-slate-500">-</span>
+                      <span class="text-[8px] code-font text-slate-400">LEFT OP</span>
+                    </div>
+                  </div>
+
+                  <!-- Operator Circle -->
+                  <div class="flex flex-col items-center gap-1">
+                    <span class="text-[10px] code-font text-amber-300 font-bold">token</span>
+                    <div id="aluOpBox" class="w-12 h-12 rounded-full bg-white/5 border border-white/15 flex items-center justify-center code-font text-lg font-black text-slate-400 transition-all duration-300">
+                      ?
+                    </div>
+                  </div>
+
+                  <!-- 1st Popped -> Right-Hand Operand (first) -->
+                  <div class="flex flex-col items-center gap-1">
+                    <span class="text-[10px] code-font text-sky-300 font-bold">first (1st pop)</span>
+                    <div id="aluFirstBox" class="w-16 h-16 rounded-2xl bg-white/[0.03] border border-dashed border-slate-500/40 flex flex-col items-center justify-center transition-all duration-300">
+                      <span id="aluFirstVal" class="code-font text-xl font-black text-slate-500">-</span>
+                      <span class="text-[8px] code-font text-slate-400">RIGHT OP</span>
+                    </div>
+                  </div>
+
+                  <!-- Equals Symbol -->
+                  <div class="flex flex-col items-center justify-center pt-4">
+                    <span class="code-font text-lg font-black text-slate-400">=</span>
+                  </div>
+
+                  <!-- Computed Result Box -->
+                  <div class="flex flex-col items-center gap-1">
+                    <span class="text-[10px] code-font text-emerald-300 font-bold">result</span>
+                    <div id="aluResultBox" class="w-16 h-16 rounded-2xl bg-white/[0.03] border border-dashed border-slate-500/40 flex flex-col items-center justify-center transition-all duration-300">
+                      <span id="aluResultVal" class="code-font text-xl font-black text-slate-500">-</span>
+                      <span class="text-[8px] code-font text-slate-400">PUSH BACK</span>
+                    </div>
+                  </div>
+
+                </div>
+
+                <!-- Pop Order Warning / Truncation Note -->
+                <div id="aluOrderCaption" class="text-center text-[11px] code-font text-slate-400 bg-black/25 py-1.5 px-2.5 rounded-lg border border-white/[0.06]">
+                  Crucial RPN Rule: <span class="text-sky-300">first = stack.pop()</span> (right), <span class="text-purple-300">second = stack.pop()</span> (left) &rArr; <span class="text-emerald-300">second op first</span>
+                </div>
+              </div>
+
+              <!-- Live Reconstructed Infix Expression & Step History -->
+              <div class="flex-1 p-3.5 rounded-xl bg-white/[0.02] border border-white/10 flex flex-col justify-between gap-2">
+                <div class="flex items-center justify-between text-[11px]">
+                  <span class="font-semibold text-emerald-300 uppercase tracking-wider flex items-center gap-1.5">
+                    <i class="fa-solid fa-sitemap text-emerald-400"></i> Equivalent Infix Expression
+                  </span>
+                  <span id="evalCountBadge" class="code-font text-[10px] text-emerald-300 bg-emerald-500/15 px-2 py-0.5 rounded border border-emerald-400/30">
+                    0 ops evaluated
+                  </span>
+                </div>
+                <div id="infixPreviewBox" class="p-2.5 rounded-lg bg-black/30 border border-white/[0.08] code-font text-xs sm:text-sm text-center text-cyan-200 font-semibold min-h-[40px] flex items-center justify-center">
+                  Waiting for operands...
+                </div>
+              </div>
+
+            </div>
+
+          </div>
+
+          <!-- Live Decision Banner -->
+          <div id="decisionBanner" class="p-3.5 rounded-xl bg-white/[0.04] border border-white/10 text-xs flex flex-col sm:flex-row items-center justify-between gap-3 backdrop-blur-md">
+            <div class="flex items-center gap-2.5">
+              <i id="decisionIcon" class="fa-solid fa-circle-info text-cyan-400 text-base"></i>
+              <span id="decisionText" class="text-slate-200">Ready to evaluate Reverse Polish Notation tokens using Stack&lt;Integer&gt;.</span>
+            </div>
+            <div id="actionPill" class="hidden text-xs code-font px-3 py-1.5 rounded-lg bg-slate-950/70 border border-white/15 text-cyan-200 font-semibold shrink-0">
+              <!-- e.g. result = 2 + 1 = 3 -->
+            </div>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- RIGHT: SYNCHRONIZED & PROPERLY INDENTED JAVA CODE CONTAINER -->
+      <section class="lg:col-span-5 xl:col-span-4 flex flex-col gap-4">
+
+        <div class="glass-panel rounded-2xl p-4 flex flex-col h-full">
+          <div class="flex items-center justify-between pb-3 border-b border-white/10 text-xs">
+            <div class="flex items-center gap-2">
+              <div class="flex gap-1.5">
+                <span class="w-3 h-3 rounded-full bg-rose-500/80 inline-block"></span>
+                <span class="w-3 h-3 rounded-full bg-amber-500/80 inline-block"></span>
+                <span class="w-3 h-3 rounded-full bg-emerald-500/80 inline-block"></span>
+              </div>
+              <span class="code-font text-slate-200 font-semibold ml-2">Solution.java</span>
+            </div>
+            <span class="text-[11px] text-cyan-300 bg-cyan-500/15 px-2.5 py-0.5 rounded border border-cyan-400/25 code-font">
+              Postfix Stack Eval
+            </span>
+          </div>
+
+          <!-- Properly Indented Java Code Lines with Zero-Jump Localized Scroll -->
+          <div id="codeContainer" class="code-font text-xs sm:text-[13px] leading-relaxed text-slate-300 py-3 overflow-x-auto overflow-y-auto max-h-[630px] flex-grow select-none">
+            <div class="code-line" id="line1"><span class="text-slate-500 mr-2"> 1</span><span class="text-indigo-400 font-semibold">import</span> java.util.*;</div>
+            <div class="code-line" id="line2"><span class="text-slate-500 mr-2"> 2</span></div>
+            <div class="code-line" id="line3"><span class="text-slate-500 mr-2"> 3</span><span class="text-indigo-400 font-semibold">class</span> <span class="text-amber-300">Solution</span> {</div>
+            <div class="code-line" id="line4"><span class="text-slate-500 mr-2"> 4</span>    <span class="text-indigo-400 font-semibold">public int</span> <span class="text-cyan-300">evalRPN</span>(String[] tokens) {</div>
+            <div class="code-line" id="line5"><span class="text-slate-500 mr-2"> 5</span></div>
+            <div class="code-line" id="line6"><span class="text-slate-500 mr-2"> 6</span>        Stack&lt;Integer&gt; stack = <span class="text-indigo-400 font-semibold">new</span> Stack&lt;&gt;();</div>
+            <div class="code-line" id="line7"><span class="text-slate-500 mr-2"> 7</span></div>
+            <div class="code-line" id="line8"><span class="text-slate-500 mr-2"> 8</span>        <span class="text-indigo-400 font-semibold">for</span> (String token : tokens) {</div>
+            <div class="code-line" id="line9"><span class="text-slate-500 mr-2"> 9</span></div>
+            <div class="code-line" id="line10"><span class="text-slate-500 mr-2">10</span>            <span class="text-slate-500 italic">// If token is a number</span></div>
+            <div class="code-line" id="line11"><span class="text-slate-500 mr-2">11</span>            <span class="text-indigo-400 font-semibold">if</span> (!token.equals(<span class="text-emerald-300">"+"</span>) &amp;&amp;</div>
+            <div class="code-line" id="line12"><span class="text-slate-500 mr-2">12</span>                !token.equals(<span class="text-emerald-300">"-"</span>) &amp;&amp;</div>
+            <div class="code-line" id="line13"><span class="text-slate-500 mr-2">13</span>                !token.equals(<span class="text-emerald-300">"*"</span>) &amp;&amp;</div>
+            <div class="code-line" id="line14"><span class="text-slate-500 mr-2">14</span>                !token.equals(<span class="text-emerald-300">"/"</span>)) {</div>
+            <div class="code-line" id="line15"><span class="text-slate-500 mr-2">15</span></div>
+            <div class="code-line" id="line16"><span class="text-slate-500 mr-2">16</span>                stack.push(Integer.parseInt(token));</div>
+            <div class="code-line" id="line17"><span class="text-slate-500 mr-2">17</span>            }</div>
+            <div class="code-line" id="line18"><span class="text-slate-500 mr-2">18</span></div>
+            <div class="code-line" id="line19"><span class="text-slate-500 mr-2">19</span>            <span class="text-slate-500 italic">// If token is an operator</span></div>
+            <div class="code-line" id="line20"><span class="text-slate-500 mr-2">20</span>            <span class="text-indigo-400 font-semibold">else</span> {</div>
+            <div class="code-line" id="line21"><span class="text-slate-500 mr-2">21</span></div>
+            <div class="code-line" id="line22"><span class="text-slate-500 mr-2">22</span>                <span class="text-indigo-400 font-semibold">int</span> first = stack.pop();</div>
+            <div class="code-line" id="line23"><span class="text-slate-500 mr-2">23</span>                <span class="text-indigo-400 font-semibold">int</span> second = stack.pop();</div>
+            <div class="code-line" id="line24"><span class="text-slate-500 mr-2">24</span></div>
+            <div class="code-line" id="line25"><span class="text-slate-500 mr-2">25</span>                <span class="text-indigo-400 font-semibold">int</span> result = <span class="text-rose-400">0</span>;</div>
+            <div class="code-line" id="line26"><span class="text-slate-500 mr-2">26</span></div>
+            <div class="code-line" id="line27"><span class="text-slate-500 mr-2">27</span>                <span class="text-indigo-400 font-semibold">switch</span> (token) {</div>
+            <div class="code-line" id="line28"><span class="text-slate-500 mr-2">28</span>                    <span class="text-indigo-400 font-semibold">case</span> <span class="text-emerald-300">"+"</span>:</div>
+            <div class="code-line" id="line29"><span class="text-slate-500 mr-2">29</span>                        result = second + first;</div>
+            <div class="code-line" id="line30"><span class="text-slate-500 mr-2">30</span>                        <span class="text-indigo-400 font-semibold">break</span>;</div>
+            <div class="code-line" id="line31"><span class="text-slate-500 mr-2">31</span></div>
+            <div class="code-line" id="line32"><span class="text-slate-500 mr-2">32</span>                    <span class="text-indigo-400 font-semibold">case</span> <span class="text-emerald-300">"-"</span>:</div>
+            <div class="code-line" id="line33"><span class="text-slate-500 mr-2">33</span>                        result = second - first;</div>
+            <div class="code-line" id="line34"><span class="text-slate-500 mr-2">34</span>                        <span class="text-indigo-400 font-semibold">break</span>;</div>
+            <div class="code-line" id="line35"><span class="text-slate-500 mr-2">35</span></div>
+            <div class="code-line" id="line36"><span class="text-slate-500 mr-2">36</span>                    <span class="text-indigo-400 font-semibold">case</span> <span class="text-emerald-300">"*"</span>:</div>
+            <div class="code-line" id="line37"><span class="text-slate-500 mr-2">37</span>                        result = second * first;</div>
+            <div class="code-line" id="line38"><span class="text-slate-500 mr-2">38</span>                        <span class="text-indigo-400 font-semibold">break</span>;</div>
+            <div class="code-line" id="line39"><span class="text-slate-500 mr-2">39</span></div>
+            <div class="code-line" id="line40"><span class="text-slate-500 mr-2">40</span>                    <span class="text-indigo-400 font-semibold">case</span> <span class="text-emerald-300">"/"</span>:</div>
+            <div class="code-line" id="line41"><span class="text-slate-500 mr-2">41</span>                        result = second / first;</div>
+            <div class="code-line" id="line42"><span class="text-slate-500 mr-2">42</span>                        <span class="text-indigo-400 font-semibold">break</span>;</div>
+            <div class="code-line" id="line43"><span class="text-slate-500 mr-2">43</span>                }</div>
+            <div class="code-line" id="line44"><span class="text-slate-500 mr-2">44</span></div>
+            <div class="code-line" id="line45"><span class="text-slate-500 mr-2">45</span>                stack.push(result);</div>
+            <div class="code-line" id="line46"><span class="text-slate-500 mr-2">46</span>            }</div>
+            <div class="code-line" id="line47"><span class="text-slate-500 mr-2">47</span>        }</div>
+            <div class="code-line" id="line48"><span class="text-slate-500 mr-2">48</span></div>
+            <div class="code-line" id="line49"><span class="text-slate-500 mr-2">49</span>        <span class="text-indigo-400 font-semibold">return</span> stack.pop();</div>
+            <div class="code-line" id="line50"><span class="text-slate-500 mr-2">50</span>    }</div>
+            <div class="code-line" id="line51"><span class="text-slate-500 mr-2">51</span>}</div>
+          </div>
+
+          <!-- Live Step Narrative Box -->
+          <div class="mt-3 p-3 bg-white/[0.04] border border-white/10 rounded-xl flex items-start gap-2.5 backdrop-blur-md">
+            <i class="fa-solid fa-circle-info text-cyan-400 mt-0.5 text-xs"></i>
+            <div class="text-xs text-slate-200 leading-relaxed" id="stepDescription">
+              Ready to run Evaluate Reverse Polish Notation. Click <b>Start</b> or <b>Next</b> to step through.
+            </div>
+          </div>
+
+        </div>
+
+      </section>
+
+    </div>
+
+    <!-- BOTTOM SECTION: PROBLEM STATEMENT & ARCHITECTURAL SUMMARY -->
+    <footer class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-2">
+
+      <!-- Problem Statement Card -->
+      <div class="glass-panel rounded-2xl p-5 flex flex-col gap-3">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <span class="text-amber-400 font-bold"><i class="fa-solid fa-file-lines mr-1.5"></i>Problem Statement</span>
+            <span class="px-2 py-0.5 rounded text-[11px] font-semibold bg-amber-500/20 text-amber-300 border border-amber-400/30">Medium</span>
+          </div>
+          <span class="text-xs text-slate-400 font-mono">LeetCode 150</span>
+        </div>
+
+        <p class="text-xs text-slate-300 leading-relaxed">
+          You are given an array of strings <code class="font-mono text-cyan-300">tokens</code> that represents an arithmetic expression in a <b>Reverse Polish Notation</b>. Evaluate the expression and return an integer that represents its value.
+          <br>&bull; Valid operators are <code class="font-mono text-purple-300">'+'</code>, <code class="font-mono text-purple-300">'-'</code>, <code class="font-mono text-purple-300">'*'</code>, and <code class="font-mono text-purple-300">'/'</code>.
+          <br>&bull; Division between two integers always <b>truncates toward zero</b>.
+          <br>&bull; There will not be any division by zero, and all intermediate values fit in a 32-bit signed integer.
+        </p>
+
+        <div class="space-y-2 pt-2 border-t border-white/10 text-xs text-slate-300">
+          <div class="bg-white/[0.03] p-2.5 rounded-lg border border-white/10 font-mono">
+            <span class="text-slate-400">Example 1:</span>
+            <b>Input:</b> tokens = ["2","1","+","3","*"] &rarr; <b>Output:</b> <span class="text-emerald-400 font-bold">9</span> ((2 + 1) * 3 = 9)
+          </div>
+          <div class="bg-white/[0.03] p-2.5 rounded-lg border border-white/10 font-mono">
+            <span class="text-slate-400">Example 2:</span>
+            <b>Input:</b> tokens = ["4","13","5","/","+"] &rarr; <b>Output:</b> <span class="text-emerald-400 font-bold">6</span> (4 + (13 / 5) = 6)
+          </div>
+          <div class="bg-white/[0.03] p-2.5 rounded-lg border border-white/10 font-mono">
+            <span class="text-slate-400">Example 3:</span>
+            <b>Input:</b> tokens = ["10","6","9","3","+","-11","*","/","*","17","+","5","+"] &rarr; <b>Output:</b> <span class="text-emerald-400 font-bold">22</span>
+          </div>
+        </div>
+
+        <div class="text-[11px] text-slate-400">
+          <b>Constraints:</b> <code class="font-mono text-slate-300">1 &le; tokens.length &le; 10<sup>4</sup></code>, <code class="font-mono text-slate-300">tokens[i]</code> is <code class="font-mono">"+", "-", "*", "/"</code> or an integer in <code class="font-mono">[-200, 200]</code>.
+        </div>
+      </div>
+
+      <!-- Algorithm Summary & LIFO Operand Ordering Card -->
+      <div class="glass-panel rounded-2xl p-5 flex flex-col gap-3">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <span class="text-cyan-400 font-bold"><i class="fa-solid fa-brain mr-1.5"></i>Algorithm Summary &amp; Operand Pop Order</span>
+          </div>
+          <span class="px-2 py-0.5 rounded text-[11px] font-semibold bg-cyan-500/20 text-cyan-200 border border-cyan-400/30">O(N) Time • O(N) Space</span>
+        </div>
+
+        <div class="space-y-3 text-xs text-slate-300 leading-relaxed">
+          <div class="p-3 bg-cyan-950/30 border border-cyan-400/25 rounded-xl">
+            <b class="text-cyan-300 flex items-center gap-1.5 mb-1">
+              <i class="fa-solid fa-arrow-right-arrow-left"></i> Why <code class="font-mono">second</code> Is the Left Operand and <code class="font-mono">first</code> Is the Right Operand:
+            </b>
+            In postfix notation <code class="font-mono">A B -</code> (meaning <code class="font-mono">A - B</code>), <code class="font-mono">A</code> is pushed first and <code class="font-mono">B</code> is pushed second on top of <code class="font-mono">A</code>. Therefore, the first <code class="font-mono">stack.pop()</code> retrieves <code class="font-mono text-sky-300 font-semibold">first = B</code> (right operand), and the second <code class="font-mono">stack.pop()</code> retrieves <code class="font-mono text-purple-300 font-semibold">second = A</code> (left operand) — making <code class="font-mono text-emerald-300 font-bold">second - first</code> and <code class="font-mono text-emerald-300 font-bold">second / first</code> exact!
+          </div>
+
+          <div class="p-3 bg-purple-950/25 border border-purple-400/20 rounded-xl">
+            <b class="text-purple-300 flex items-center gap-1.5 mb-1">
+              <i class="fa-solid fa-divide"></i> Truncation Toward Zero &amp; No Parentheses Needed:
+            </b>
+            Reverse Polish Notation eliminates operator precedence ambiguity and parentheses because every operator immediately consumes the two most recent values on the stack and pushes its intermediate <code class="font-mono">result</code> back onto <code class="font-mono">stack</code>. Java's <code class="font-mono">/</code> operator natively truncates toward zero (e.g., <code class="font-mono">6 / -132 = 0</code>).
+          </div>
+
+          <div class="grid grid-cols-2 gap-3 pt-1">
+            <div class="p-2.5 bg-white/[0.03] rounded-lg border border-white/10">
+              <span class="text-[11px] text-slate-400 uppercase font-semibold">Time Complexity</span>
+              <div class="text-sm font-bold text-emerald-400 font-mono mt-0.5">&Omicron;(N)</div>
+              <p class="text-[10px] text-slate-400 mt-0.5">Single linear scan over <code class="font-mono">N</code> tokens; each token triggers <code class="font-mono">&Omicron;(1)</code> push/pop operations.</p>
+            </div>
+            <div class="p-2.5 bg-white/[0.03] rounded-lg border border-white/10">
+              <span class="text-[11px] text-slate-400 uppercase font-semibold">Space Complexity</span>
+              <div class="text-sm font-bold text-cyan-400 font-mono mt-0.5">&Omicron;(N)</div>
+              <p class="text-[10px] text-slate-400 mt-0.5">The operand stack holds at most <code class="font-mono">&lceil;N / 2&rceil;</code> numbers simultaneously.</p>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+    </footer>
+
+  </div>
+
+  <!-- JAVASCRIPT SIMULATION ENGINE WITH VERTICAL LIFO STACK, ALU CHAMBER & LIFT-AND-ARC TRANSFERS -->
+  <script>
+    // 10 COMPREHENSIVE RPN PRESETS
+    const PRESETS = [
+      { name: '1: LeetCode Ex 1 (["2","1","+","3","*"])', tokens: ["2", "1", "+", "3", "*"] },
+      { name: '2: LeetCode Ex 2 (["4","13","5","/","+"])', tokens: ["4", "13", "5", "/", "+"] },
+      { name: '3: LeetCode Ex 3 (["10","6","9","3","+","-11","*","/","*","17","+","5","+"])', tokens: ["10", "6", "9", "3", "+", "-11", "*", "/", "*", "17", "+", "5", "+"] },
+      { name: '4: Subtraction Operand Order (["10","3","-"])', tokens: ["10", "3", "-"] },
+      { name: '5: Negative Division Truncation (["-7","3","/"])', tokens: ["-7", "3", "/"] },
+      { name: '6: Chained Ops (["5","1","2","+","4","*","+","3","-"])', tokens: ["5", "1", "2", "+", "4", "*", "+", "3", "-"] },
+      { name: '7: Negative Operands Product (["-4","-5","*","2","/"])', tokens: ["-4", "-5", "*", "2", "/"] },
+      { name: '8: Zero Numerator (["0","8","/","15","+"])', tokens: ["0", "8", "/", "15", "+"] },
+      { name: '9: Deep Operand Stack (["2","3","4","5","+","*","-"])', tokens: ["2", "3", "4", "5", "+", "*", "-"] },
+      { name: '10: Single Integer Token (["42"])', tokens: ["42"] }
+    ];
+
+    const OPERATORS = new Set(["+", "-", "*", "/"]);
+
+    // APPLICATION STATE
+    let currentTokens = [...PRESETS[0].tokens];
+    let steps = [];
+    let currentStepIdx = 0;
+    let isPlaying = false;
+    let playInterval = null;
+    let playSpeed = 650;
+    let audioEnabled = true;
+
+    // WEB AUDIO SYNTHESIZER
+    let audioCtx = null;
+    function initAudio() {
+      if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      }
+    }
+    function playTone(freq = 440, type = 'sine', duration = 0.08, vol = 0.035) {
+      if (!audioEnabled) return;
+      try {
+        initAudio();
+        if (audioCtx.state === 'suspended') {
+          audioCtx.resume();
+        }
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = type;
+        osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+        gain.gain.setValueAtTime(vol, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + duration);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + duration);
+      } catch (e) {}
+    }
+
+    // DOM REFERENCES
+    const btnPlay = document.getElementById('btnPlay');
+    const playIcon = document.getElementById('playIcon');
+    const playText = document.getElementById('playText');
+    const btnPrev = document.getElementById('btnPrev');
+    const btnNext = document.getElementById('btnNext');
+    const btnReset = document.getElementById('btnReset');
+    const btnAudio = document.getElementById('btnAudio');
+    const audioIcon = document.getElementById('audioIcon');
+    const presetSelect = document.getElementById('presetSelect');
+    const customTokensInput = document.getElementById('customTokensInput');
+    const btnApplyCustom = document.getElementById('btnApplyCustom');
+    const stepScrubber = document.getElementById('stepScrubber');
+    const stepCounterBadge = document.getElementById('stepCounterBadge');
+    const phaseBadge = document.getElementById('phaseBadge');
+    const stackSizeHeaderBadge = document.getElementById('stackSizeHeaderBadge');
+    const resultHeaderBadge = document.getElementById('resultHeaderBadge');
+
+    const varCurToken = document.getElementById('varCurToken');
+    const varTokenIdx = document.getElementById('varTokenIdx');
+    const varTokenType = document.getElementById('varTokenType');
+    const varFirstOp = document.getElementById('varFirstOp');
+    const varSecondOp = document.getElementById('varSecondOp');
+    const varStepResult = document.getElementById('varStepResult');
+    const varExprMini = document.getElementById('varExprMini');
+    const finalReturnCard = document.getElementById('finalReturnCard');
+    const varFinalAns = document.getElementById('varFinalAns');
+
+    const stageWrapper = document.getElementById('stageWrapper');
+    const transferArcSvg = document.getElementById('transferArcSvg');
+    const flyingCloneLayer = document.getElementById('flyingCloneLayer');
+    const tokensLenTag = document.getElementById('tokensLenTag');
+    const tokensScrollContainer = document.getElementById('tokensScrollContainer');
+    const tokensStreamArena = document.getElementById('tokensStreamArena');
+
+    const stackDepthPill = document.getElementById('stackDepthPill');
+    const stackVessel = document.getElementById('stackVessel');
+    const aluStatusPill = document.getElementById('aluStatusPill');
+    const aluSecondBox = document.getElementById('aluSecondBox');
+    const aluSecondVal = document.getElementById('aluSecondVal');
+    const aluOpBox = document.getElementById('aluOpBox');
+    const aluFirstBox = document.getElementById('aluFirstBox');
+    const aluFirstVal = document.getElementById('aluFirstVal');
+    const aluResultBox = document.getElementById('aluResultBox');
+    const aluResultVal = document.getElementById('aluResultVal');
+    const evalCountBadge = document.getElementById('evalCountBadge');
+    const infixPreviewBox = document.getElementById('infixPreviewBox');
+
+    const decisionBanner = document.getElementById('decisionBanner');
+    const decisionIcon = document.getElementById('decisionIcon');
+    const decisionText = document.getElementById('decisionText');
+    const actionPill = document.getElementById('actionPill');
+    const codeContainer = document.getElementById('codeContainer');
+    const stepDescription = document.getElementById('stepDescription');
+
+    // STRICT LINE-BY-LINE EXECUTION TRACE GENERATOR
+    function generateSteps(tokensArr) {
+      const trace = [];
+      const tokens = [...tokensArr];
+      const n = tokens.length;
+      const stack = []; // Array of { val, source: 'token' | 'alu', expr }
+      let opsEvaluated = 0;
+
+      const snapStack = () => stack.map(item => ({ ...item }));
+
+      // Line 4: Method entry
+      trace.push({
+        line: 4,
+        phase: "Start",
+        tokens,
+        tokenIdx: -1,
+        curToken: null,
+        stack: snapStack(),
+        alu: { first: null, second: null, op: null, result: null },
+        opsEvaluated,
+        finalAns: null,
+        desc: `Entered <span class="code-font text-cyan-300 font-bold">evalRPN</span> with <span class="code-font text-slate-100">${n}</span> tokens: <span class="code-font text-amber-200">[${tokens.map(t => `"${t}"`).join(', ')}]</span>.`,
+        soundFreq: 330
+      });
+
+      // Line 6: Stack<Integer> stack = new Stack<>();
+      trace.push({
+        line: 6,
+        phase: "Init Stack",
+        tokens,
+        tokenIdx: -1,
+        curToken: null,
+        stack: snapStack(),
+        alu: { first: null, second: null, op: null, result: null },
+        opsEvaluated,
+        finalAns: null,
+        desc: `Allocated empty LIFO operand stack <span class="code-font text-cyan-300 font-bold">Stack&lt;Integer&gt; stack</span>.`,
+        soundFreq: 370
+      });
+
+      for (let tIdx = 0; tIdx < n; tIdx++) {
+        const token = tokens[tIdx];
+        const isOperator = OPERATORS.has(token);
+
+        // Line 8: for (String token : tokens)
+        trace.push({
+          line: 8,
+          phase: `Token [${tIdx}]: "${token}"`,
+          tokens,
+          tokenIdx: tIdx,
+          curToken: token,
+          stack: snapStack(),
+          alu: { first: null, second: null, op: null, result: null },
+          opsEvaluated,
+          finalAns: null,
+          desc: `Enhanced loop selected token <span class="code-font text-amber-300 font-bold">"${token}"</span> at index <span class="code-font">[${tIdx}]</span>.`,
+          soundFreq: 410
+        });
+
+        // Lines 11-14: if (!token.equals("+") && !token.equals("-") && !token.equals("*") && !token.equals("/"))
+        trace.push({
+          line: [11, 12, 13, 14],
+          phase: isOperator ? `Operator "${token}"` : `Number "${token}"`,
+          tokens,
+          tokenIdx: tIdx,
+          curToken: token,
+          stack: snapStack(),
+          alu: { first: null, second: null, op: isOperator ? token : null, result: null },
+          opsEvaluated,
+          finalAns: null,
+          desc: isOperator
+            ? `Condition is <b>false</b> because <span class="code-font text-purple-300 font-bold">"${token}"</span> is an arithmetic operator &rarr; entering <span class="code-font">else</span> branch.`
+            : `Condition is <b>true</b> because <span class="code-font text-cyan-300 font-bold">"${token}"</span> is an integer operand &rarr; parsing and pushing onto <span class="code-font">stack</span>.`,
+          soundFreq: isOperator ? 460 : 440
+        });
+
+        if (!isOperator) {
+          // Line 16: stack.push(Integer.parseInt(token));
+          const parsedVal = parseInt(token, 10);
+          stack.push({ val: parsedVal, source: 'token', expr: String(parsedVal) });
+          trace.push({
+            line: 16,
+            phase: `push(${parsedVal})`,
+            tokens,
+            tokenIdx: tIdx,
+            curToken: token,
+            stack: snapStack(),
+            justPushed: true,
+            transfer: { type: 'pushFromToken', tokenIdx: tIdx, val: parsedVal },
+            actionText: `stack.push(${parsedVal})`,
+            alu: { first: null, second: null, op: null, result: null },
+            opsEvaluated,
+            finalAns: null,
+            desc: `Parsed <span class="code-font text-cyan-300 font-bold">${parsedVal}</span> and pushed onto the top of <span class="code-font">stack</span> (size = ${stack.length}).`,
+            soundFreq: 560
+          });
+        } else {
+          // Line 20: else
+          trace.push({
+            line: 20,
+            phase: `Eval "${token}"`,
+            tokens,
+            tokenIdx: tIdx,
+            curToken: token,
+            stack: snapStack(),
+            alu: { first: null, second: null, op: token, result: null },
+            opsEvaluated,
+            finalAns: null,
+            desc: `Entered <span class="code-font text-purple-300 font-bold">else</span> block to pop top two operands and apply <span class="code-font text-amber-300 font-bold">'${token}'</span>.`,
+            soundFreq: 480
+          });
+
+          // Line 22: int first = stack.pop();
+          const firstItem = stack.pop();
+          trace.push({
+            line: 22,
+            phase: `first = ${firstItem.val}`,
+            tokens,
+            tokenIdx: tIdx,
+            curToken: token,
+            stack: snapStack(),
+            transfer: { type: 'popToFirst', val: firstItem.val },
+            actionText: `int first = stack.pop() → ${firstItem.val}`,
+            alu: { first: firstItem.val, second: null, op: token, result: null },
+            opsEvaluated,
+            finalAns: null,
+            desc: `Popped top element into <span class="code-font text-sky-300 font-bold">int first = ${firstItem.val}</span> (this becomes the <b>right-hand</b> operand).`,
+            soundFreq: 520
+          });
+
+          // Line 23: int second = stack.pop();
+          const secondItem = stack.pop();
+          trace.push({
+            line: 23,
+            phase: `second = ${secondItem.val}`,
+            tokens,
+            tokenIdx: tIdx,
+            curToken: token,
+            stack: snapStack(),
+            transfer: { type: 'popToSecond', val: secondItem.val },
+            actionText: `int second = stack.pop() → ${secondItem.val}`,
+            alu: { first: firstItem.val, second: secondItem.val, op: token, result: null },
+            opsEvaluated,
+            finalAns: null,
+            desc: `Popped next element into <span class="code-font text-purple-300 font-bold">int second = ${secondItem.val}</span> (this becomes the <b>left-hand</b> operand).`,
+            soundFreq: 540
+          });
+
+          // Line 25: int result = 0;
+          trace.push({
+            line: 25,
+            phase: "int result = 0",
+            tokens,
+            tokenIdx: tIdx,
+            curToken: token,
+            stack: snapStack(),
+            alu: { first: firstItem.val, second: secondItem.val, op: token, result: 0 },
+            opsEvaluated,
+            finalAns: null,
+            desc: `Initialized <span class="code-font text-cyan-300 font-bold">int result = 0</span> before entering <span class="code-font">switch ("${token}")</span>.`,
+            soundFreq: 555
+          });
+
+          // Lines 27-42: switch (token) -> compute result = second [op] first
+          let resVal = 0;
+          let caseLine = 29;
+          if (token === "+") {
+            resVal = secondItem.val + firstItem.val;
+            caseLine = 29;
+          } else if (token === "-") {
+            resVal = secondItem.val - firstItem.val;
+            caseLine = 33;
+          } else if (token === "*") {
+            resVal = secondItem.val * firstItem.val;
+            caseLine = 37;
+          } else if (token === "/") {
+            resVal = Math.trunc(secondItem.val / firstItem.val) || 0;
+            caseLine = 41;
+          }
+          opsEvaluated++;
+          const combinedExpr = `(${secondItem.expr} ${token} ${firstItem.expr})`;
+
+          trace.push({
+            line: caseLine,
+            phase: `${secondItem.val} ${token} ${firstItem.val} = ${resVal}`,
+            tokens,
+            tokenIdx: tIdx,
+            curToken: token,
+            stack: snapStack(),
+            alu: { first: firstItem.val, second: secondItem.val, op: token, result: resVal, computed: true },
+            actionText: `${secondItem.val} ${token} ${firstItem.val} = ${resVal}`,
+            opsEvaluated,
+            finalAns: null,
+            desc: `Executed <span class="code-font text-emerald-300 font-bold">result = ${secondItem.val} ${token} ${firstItem.val} = ${resVal}</span>${token === '/' ? ' (integer division truncated toward zero)' : ''}.`,
+            soundFreq: 680
+          });
+
+          // Line 45: stack.push(result);
+          stack.push({ val: resVal, source: 'alu', expr: combinedExpr });
+          trace.push({
+            line: 45,
+            phase: `push(${resVal})`,
+            tokens,
+            tokenIdx: tIdx,
+            curToken: token,
+            stack: snapStack(),
+            justPushed: true,
+            transfer: { type: 'pushFromAlu', val: resVal },
+            actionText: `stack.push(${resVal})`,
+            alu: { first: firstItem.val, second: secondItem.val, op: token, result: resVal, computed: true },
+            opsEvaluated,
+            finalAns: null,
+            desc: `Pushed computed <span class="code-font text-emerald-300 font-bold">result = ${resVal}</span> back onto the top of <span class="code-font">stack</span>.`,
+            soundFreq: 760
+          });
+        }
+      }
+
+      // Line 8: Enhanced for loop ends
+      trace.push({
+        line: 8,
+        phase: "Loop Complete",
+        tokens,
+        tokenIdx: -1,
+        curToken: null,
+        stack: snapStack(),
+        alu: { first: null, second: null, op: null, result: null },
+        opsEvaluated,
+        finalAns: null,
+        desc: `All <span class="code-font text-cyan-300">${n}</span> tokens processed. Only the final expression value remains on <span class="code-font">stack</span>.`,
+        soundFreq: 820
+      });
+
+      // Line 49: return stack.pop();
+      const finalItem = stack.pop();
+      const finalAns = finalItem ? finalItem.val : 0;
+      trace.push({
+        line: 49,
+        phase: `Return ${finalAns}`,
+        tokens,
+        tokenIdx: -1,
+        curToken: null,
+        stack: snapStack(),
+        transfer: { type: 'popFinal', val: finalAns },
+        actionText: `return stack.pop() → ${finalAns}`,
+        alu: { first: null, second: null, op: null, result: finalAns },
+        opsEvaluated,
+        finalAns,
+        finalExpr: finalItem ? finalItem.expr : String(finalAns),
+        isComplete: true,
+        desc: `<span class="text-emerald-400 font-bold text-sm"><i class="fa-solid fa-trophy mr-1.5"></i>Complete!</span> Popped and returned final expression value <span class="code-font text-emerald-300 font-bold text-sm">${finalAns}</span>.`,
+        soundFreq: 960
+      });
+
+      return trace;
+    }
+
+    // LOCALIZED ZERO-JUMP CODE LINE HIGHLIGHTER
+    function highlightCodeLine(lineSpec) {
+      document.querySelectorAll('.code-line').forEach(el => el.classList.remove('active-line'));
+      const lineNums = Array.isArray(lineSpec) ? lineSpec : [lineSpec];
+      let firstActiveEl = null;
+
+      lineNums.forEach(num => {
+        const el = document.getElementById(`line${num}`);
+        if (el) {
+          el.classList.add('active-line');
+          if (!firstActiveEl) firstActiveEl = el;
+        }
+      });
+
+      if (firstActiveEl) {
+        const containerTop = codeContainer.scrollTop;
+        const containerBottom = containerTop + codeContainer.clientHeight;
+        const elTop = firstActiveEl.offsetTop - codeContainer.offsetTop;
+        const elBottom = elTop + firstActiveEl.clientHeight;
+
+        if (elTop < containerTop + 24) {
+          codeContainer.scrollTo({ top: Math.max(0, elTop - 24), behavior: 'smooth' });
+        } else if (elBottom > containerBottom - 24) {
+          codeContainer.scrollTo({ top: elBottom - codeContainer.clientHeight + 24, behavior: 'smooth' });
+        }
+      }
+    }
+
+    // PHYSICAL LIFT-AND-ARC TRANSFERS FOR PUSH & POP BETWEEN TOKENS, STACK & ALU CHAMBER
+    function animateStageTransfer(transfer, animateFlight) {
+      transferArcSvg.innerHTML = '';
+      flyingCloneLayer.innerHTML = '';
+      if (!transfer) return;
+
+      const stageRect = stageWrapper.getBoundingClientRect();
+
+      if (transfer.type === 'pushFromToken') {
+        const tokEl = tokensStreamArena.querySelector(`[data-tok-idx="${transfer.tokenIdx}"]`);
+        const topStackEl = stackVessel.querySelector('[data-stack-top="true"]') || stackVessel;
+        if (!tokEl || !topStackEl) return;
+
+        const tokRect = tokEl.getBoundingClientRect();
+        const vesselRect = stackVessel.getBoundingClientRect();
+        const targetRect = topStackEl.getBoundingClientRect();
+
+        const x1 = (tokRect.left - stageRect.left) + tokRect.width / 2;
+        const y1 = (tokRect.bottom - stageRect.top) + 4;
+        const x2 = (vesselRect.left - stageRect.left) + vesselRect.width / 2;
+        const y2 = (vesselRect.top - stageRect.top) + 6;
+        const midX = (x1 + x2) / 2 - 20;
+        const midY = Math.min(y1, y2) - 18;
+
+        transferArcSvg.innerHTML = `
+          <path d="M ${x1} ${y1} Q ${midX} ${midY}, ${x2} ${y2}"
+                fill="none" stroke="#22d3ee" stroke-width="2.4" class="transfer-arc-path" />
+          <circle cx="${x1}" cy="${y1}" r="4" fill="#fbbf24" />
+          <polygon points="${x2},${y2 + 4} ${x2 - 5},${y2 - 5} ${x2 + 5},${y2 - 5}" fill="#22d3ee" />
+        `;
+
+        if (!animateFlight) return;
+        spawnFlyingBox(tokRect, targetRect, stageRect, `${transfer.val}`, 'op-from-token', vesselRect.top);
+
+      } else if (transfer.type === 'popToFirst' || transfer.type === 'popToSecond') {
+        const isFirst = transfer.type === 'popToFirst';
+        const dstBox = isFirst ? aluFirstBox : aluSecondBox;
+        const vesselRect = stackVessel.getBoundingClientRect();
+        const dstRect = dstBox.getBoundingClientRect();
+
+        const x1 = (vesselRect.left - stageRect.left) + vesselRect.width / 2;
+        const y1 = (vesselRect.top - stageRect.top) + 4;
+        const x2 = (dstRect.left - stageRect.left) + dstRect.width / 2;
+        const y2 = (dstRect.top - stageRect.top) - 6;
+        const midX = (x1 + x2) / 2;
+        const archY = Math.min(y1, y2) - 34;
+        const color = isFirst ? '#38bdf8' : '#c084fc';
+
+        transferArcSvg.innerHTML = `
+          <path d="M ${x1} ${y1} Q ${midX} ${archY}, ${x2} ${y2}"
+                fill="none" stroke="${color}" stroke-width="2.4" class="transfer-arc-path" />
+          <circle cx="${x1}" cy="${y1}" r="4" fill="${color}" />
+          <polygon points="${x2},${y2 + 3} ${x2 - 5},${y2 - 6} ${x2 + 5},${y2 - 6}" fill="${color}" />
+        `;
+
+        if (!animateFlight) return;
+        spawnFlyingBox(vesselRect, dstRect, stageRect, `${transfer.val}`, 'op-from-token', vesselRect.top);
+
+      } else if (transfer.type === 'pushFromAlu') {
+        const resRect = aluResultBox.getBoundingClientRect();
+        const vesselRect = stackVessel.getBoundingClientRect();
+        const topStackEl = stackVessel.querySelector('[data-stack-top="true"]') || stackVessel;
+        const targetRect = topStackEl.getBoundingClientRect();
+
+        const x1 = (resRect.left - stageRect.left) + resRect.width / 2;
+        const y1 = (resRect.top - stageRect.top) - 4;
+        const x2 = (vesselRect.left - stageRect.left) + vesselRect.width / 2;
+        const y2 = (vesselRect.top - stageRect.top) + 6;
+        const midX = (x1 + x2) / 2;
+        const archY = Math.min(y1, y2) - 36;
+
+        transferArcSvg.innerHTML = `
+          <path d="M ${x1} ${y1} Q ${midX} ${archY}, ${x2} ${y2}"
+                fill="none" stroke="#34d399" stroke-width="2.4" class="transfer-arc-path" />
+          <circle cx="${x1}" cy="${y1}" r="4.5" fill="#34d399" />
+          <polygon points="${x2},${y2 + 4} ${x2 - 5},${y2 - 5} ${x2 + 5},${y2 - 5}" fill="#34d399" />
+        `;
+
+        if (!animateFlight) return;
+        spawnFlyingBox(resRect, targetRect, stageRect, `${transfer.val}`, 'op-from-alu', vesselRect.top);
+
+      } else if (transfer.type === 'popFinal') {
+        const vesselRect = stackVessel.getBoundingClientRect();
+        const cardRect = finalReturnCard.getBoundingClientRect();
+
+        const x1 = (vesselRect.left - stageRect.left) + vesselRect.width / 2;
+        const y1 = (vesselRect.top - stageRect.top) + 4;
+        const x2 = (cardRect.left - stageRect.left) + cardRect.width / 2;
+        const y2 = (cardRect.bottom - stageRect.top) + 6;
+        const midX = (x1 + x2) / 2 + 24;
+        const midY = (y1 + y2) / 2;
+
+        transferArcSvg.innerHTML = `
+          <path d="M ${x1} ${y1} Q ${midX} ${midY}, ${x2} ${y2}"
+                fill="none" stroke="#34d399" stroke-width="2.4" class="transfer-arc-path" />
+          <circle cx="${x1}" cy="${y1}" r="4.5" fill="#34d399" />
+          <polygon points="${x2},${y2 - 3} ${x2 - 5},${y2 + 6} ${x2 + 5},${y2 + 6}" fill="#34d399" />
+        `;
+      }
+    }
+
+    function spawnFlyingBox(srcRect, dstRect, stageRect, label, styleClass, arcApexTop) {
+      const clone = document.createElement('div');
+      clone.className = `stack-operand-box ${styleClass} absolute w-24 h-9 rounded-xl flex items-center justify-center code-font text-sm font-extrabold shadow-xl pointer-events-none`;
+      clone.textContent = label;
+      clone.style.left = `${(srcRect.left - stageRect.left) + (srcRect.width - 96) / 2}px`;
+      clone.style.top = `${(srcRect.top - stageRect.top) + (srcRect.height - 36) / 2}px`;
+      flyingCloneLayer.appendChild(clone);
+
+      const dx = (dstRect.left + dstRect.width / 2) - (srcRect.left + srcRect.width / 2);
+      const dy = (dstRect.top + dstRect.height / 2) - (srcRect.top + srcRect.height / 2);
+      const liftY = Math.min(dy, (arcApexTop - srcRect.top)) - 26;
+      const duration = Math.min(540, Math.max(240, playSpeed * 0.78));
+
+      const anim = clone.animate([
+        { transform: 'translate(0px, 0px) scale(0.95)', opacity: 1 },
+        { transform: `translate(${dx * 0.55}px, ${liftY}px) scale(1.08)`, opacity: 1, offset: 0.48 },
+        { transform: `translate(${dx}px, ${dy}px) scale(1)`, opacity: 0.15 }
+      ], {
+        duration,
+        easing: 'cubic-bezier(0.22, 1, 0.36, 1)'
+      });
+      anim.onfinish = () => clone.remove();
+    }
+
+    // RENDER CURRENT STEP
+    function renderStep(idx, animateMovement = true) {
+      if (idx < 0 || idx >= steps.length) return;
+      const step = steps[idx];
+      const tokens = step.tokens;
+      const n = tokens.length;
+
+      // Update Header Scrubber & Badges
+      stepCounterBadge.textContent = `Step: ${idx + 1} / ${steps.length}`;
+      phaseBadge.textContent = step.phase;
+      stackSizeHeaderBadge.textContent = `stack.size(): ${step.stack.length}`;
+      stepScrubber.max = steps.length - 1;
+      stepScrubber.value = idx;
+      tokensLenTag.textContent = `(len = ${n})`;
+
+      if (step.finalAns !== null) {
+        resultHeaderBadge.textContent = `Result: ${step.finalAns} ✓`;
+        resultHeaderBadge.className = "px-2.5 py-1 rounded-md bg-emerald-500/25 border border-emerald-400/45 text-emerald-200 font-bold";
+      } else {
+        resultHeaderBadge.textContent = "Result: Pending";
+        resultHeaderBadge.className = "px-2.5 py-1 rounded-md bg-white/5 border border-white/15 text-slate-300 font-bold";
+      }
+
+      // Update Telemetry HUD Cards
+      if (step.curToken !== null) {
+        varCurToken.textContent = `"${step.curToken}"`;
+        varTokenIdx.textContent = `[${step.tokenIdx}]`;
+        varTokenType.textContent = OPERATORS.has(step.curToken) ? 'Arithmetic Operator' : 'Integer Operand';
+      } else {
+        varCurToken.textContent = '-';
+        varTokenIdx.textContent = '';
+        varTokenType.textContent = 'Number / Operator';
+      }
+
+      varFirstOp.textContent = step.alu.first !== null ? step.alu.first : '-';
+      varSecondOp.textContent = step.alu.second !== null ? step.alu.second : '-';
+
+      if (step.alu.result !== null) {
+        varStepResult.textContent = step.alu.result;
+        if (step.alu.second !== null && step.alu.first !== null && step.alu.op) {
+          varExprMini.textContent = `${step.alu.second} ${step.alu.op} ${step.alu.first} = ${step.alu.result}`;
+        } else {
+          varExprMini.textContent = 'Initialized to 0';
+        }
+      } else {
+        varStepResult.textContent = '-';
+        varExprMini.textContent = 'second op first';
+      }
+
+      if (step.finalAns !== null) {
+        varFinalAns.textContent = step.finalAns;
+        varFinalAns.className = "code-font text-xl font-black text-emerald-400";
+        finalReturnCard.classList.add('result-win-anim');
+        setTimeout(() => finalReturnCard.classList.remove('result-win-anim'), 650);
+      } else {
+        varFinalAns.textContent = "pending";
+        varFinalAns.className = "code-font text-lg sm:text-xl font-black text-slate-400";
+      }
+
+      // Narrative Description
+      stepDescription.innerHTML = step.desc;
+
+      // 1. Render RPN Token Stream
+      tokensStreamArena.innerHTML = '';
+      tokens.forEach((tok, idxTok) => {
+        const isOp = OPERATORS.has(tok);
+        const isActive = (step.tokenIdx === idxTok && !step.isComplete);
+        const isConsumed = (step.isComplete) || (step.tokenIdx > idxTok && step.tokenIdx !== -1);
+
+        const card = document.createElement('div');
+        card.dataset.tokIdx = idxTok;
+
+        let classes = 'token-card relative w-12 sm:w-14 h-16 rounded-xl py-1.5 px-1 flex flex-col items-center justify-between select-none shrink-0 ';
+        if (isActive) {
+          classes += 'token-active ';
+        } else if (isConsumed) {
+          classes += 'token-consumed ';
+        } else if (isOp) {
+          classes += 'token-op ';
+        } else {
+          classes += 'token-num ';
+        }
+        card.className = classes;
+
+        const topTag = isActive
+          ? `<span class="px-1.5 py-0.2 rounded bg-amber-400 text-slate-950 font-extrabold text-[8px] code-font shadow">[${idxTok}]</span>`
+          : `<span class="text-[9px] code-font text-slate-400">[${idxTok}]</span>`;
+
+        const glyphColor = isActive
+          ? 'text-amber-200'
+          : isOp
+            ? 'text-purple-200'
+            : 'text-cyan-200';
+
+        const roleLabel = isOp ? 'OP' : 'NUM';
+
+        card.innerHTML = `
+          ${topTag}
+          <span class="code-font text-base sm:text-lg font-extrabold ${glyphColor}">${tok}</span>
+          <span class="text-[8px] code-font ${isOp ? 'text-purple-300/75' : 'text-cyan-300/75'}">${roleLabel}</span>
+        `;
+        tokensStreamArena.appendChild(card);
+      });
+
+      // 2. Render Vertical Open-Topped LIFO Stack<Integer> Vessel
+      stackVessel.innerHTML = '';
+      stackDepthPill.textContent = `size = ${step.stack.length}`;
+      if (step.stack.length === 0) {
+        stackVessel.innerHTML = `<span class="my-auto text-xs text-slate-500 italic code-font">empty stack</span>`;
+      } else {
+        step.stack.forEach((item, sPos) => {
+          const isTop = (sPos === step.stack.length - 1);
+          const block = document.createElement('div');
+          if (isTop) block.dataset.stackTop = "true";
+
+          let bClass = `stack-operand-box ${item.source === 'alu' ? 'op-from-alu' : 'op-from-token'} w-full h-9 rounded-xl px-3 flex items-center justify-between select-none shrink-0 `;
+          if (isTop && step.justPushed) bClass += 'just-pushed ';
+          block.className = bClass;
+
+          const topPill = isTop
+            ? `<span class="px-1.5 py-0.2 rounded bg-amber-400 text-slate-950 font-extrabold text-[8px] code-font shadow">TOP</span>`
+            : `<span class="text-[9px] code-font text-slate-400">lvl ${sPos}</span>`;
+
+          block.innerHTML = `
+            <span class="text-[9px] code-font text-slate-300/75">[${sPos}]</span>
+            <span class="code-font text-sm font-black">${item.val}</span>
+            ${topPill}
+          `;
+          stackVessel.appendChild(block);
+        });
+      }
+
+      // 3. Render ALU Arithmetic Evaluation Chamber
+      if (step.alu.second !== null) {
+        aluSecondVal.textContent = step.alu.second;
+        aluSecondVal.className = "code-font text-lg font-black text-purple-200";
+        aluSecondBox.className = "w-16 h-16 rounded-2xl bg-purple-500/20 border border-purple-400 flex flex-col items-center justify-center transition-all duration-300 shadow-lg shadow-purple-500/20";
+      } else {
+        aluSecondVal.textContent = "-";
+        aluSecondVal.className = "code-font text-xl font-black text-slate-500";
+        aluSecondBox.className = "w-16 h-16 rounded-2xl bg-white/[0.03] border border-dashed border-slate-500/40 flex flex-col items-center justify-center transition-all duration-300";
+      }
+
+      if (step.alu.op) {
+        aluOpBox.textContent = step.alu.op;
+        aluOpBox.className = "w-12 h-12 rounded-full bg-amber-500/25 border border-amber-400 text-amber-200 flex items-center justify-center code-font text-lg font-black shadow-lg shadow-amber-500/20 transition-all duration-300";
+      } else {
+        aluOpBox.textContent = "?";
+        aluOpBox.className = "w-12 h-12 rounded-full bg-white/5 border border-white/15 flex items-center justify-center code-font text-lg font-black text-slate-400 transition-all duration-300";
+      }
+
+      if (step.alu.first !== null) {
+        aluFirstVal.textContent = step.alu.first;
+        aluFirstVal.className = "code-font text-lg font-black text-sky-200";
+        aluFirstBox.className = "w-16 h-16 rounded-2xl bg-sky-500/20 border border-sky-400 flex flex-col items-center justify-center transition-all duration-300 shadow-lg shadow-sky-500/20";
+      } else {
+        aluFirstVal.textContent = "-";
+        aluFirstVal.className = "code-font text-xl font-black text-slate-500";
+        aluFirstBox.className = "w-16 h-16 rounded-2xl bg-white/[0.03] border border-dashed border-slate-500/40 flex flex-col items-center justify-center transition-all duration-300";
+      }
+
+      if (step.alu.result !== null) {
+        aluResultVal.textContent = step.alu.result;
+        aluResultVal.className = step.alu.computed || step.isComplete
+          ? "code-font text-lg font-black text-emerald-200"
+          : "code-font text-lg font-black text-cyan-200";
+        aluResultBox.className = step.alu.computed || step.isComplete
+          ? "w-16 h-16 rounded-2xl bg-emerald-500/25 border border-emerald-400 flex flex-col items-center justify-center transition-all duration-300 shadow-lg shadow-emerald-500/25"
+          : "w-16 h-16 rounded-2xl bg-cyan-500/15 border border-cyan-400/60 flex flex-col items-center justify-center transition-all duration-300";
+      } else {
+        aluResultVal.textContent = "-";
+        aluResultVal.className = "code-font text-xl font-black text-slate-500";
+        aluResultBox.className = "w-16 h-16 rounded-2xl bg-white/[0.03] border border-dashed border-slate-500/40 flex flex-col items-center justify-center transition-all duration-300";
+      }
+
+      if (step.alu.computed) {
+        aluStatusPill.textContent = `${step.alu.second} ${step.alu.op} ${step.alu.first} = ${step.alu.result}`;
+        aluStatusPill.className = "code-font text-[10px] px-2 py-0.5 rounded bg-emerald-500/25 border border-emerald-400/45 text-emerald-200 font-bold";
+      } else if (step.alu.op) {
+        aluStatusPill.textContent = `Evaluating '${step.alu.op}'`;
+        aluStatusPill.className = "code-font text-[10px] px-2 py-0.5 rounded bg-amber-500/20 border border-amber-400/40 text-amber-200 font-bold";
+      } else {
+        aluStatusPill.textContent = "Idle";
+        aluStatusPill.className = "code-font text-[10px] px-2 py-0.5 rounded bg-white/5 border border-white/10 text-slate-400";
+      }
+
+      // 4. Render Live Reconstructed Infix Expression
+      evalCountBadge.textContent = `${step.opsEvaluated} op${step.opsEvaluated === 1 ? '' : 's'} evaluated`;
+      if (step.isComplete) {
+        infixPreviewBox.innerHTML = `<span class="text-slate-300">${step.finalExpr}</span> <span class="text-emerald-400 font-black ml-2">= ${step.finalAns}</span>`;
+      } else if (step.stack.length > 0) {
+        infixPreviewBox.textContent = step.stack.map(item => item.expr).join('  ,  ');
+      } else {
+        infixPreviewBox.innerHTML = `<span class="text-slate-500 italic text-xs">Waiting for operands...</span>`;
+      }
+
+      // 5. Trigger Lift-and-Arc Transfers & Scroll Active Token
+      requestAnimationFrame(() => {
+        if (step.tokenIdx >= 0 && step.tokenIdx < n) {
+          const activeTokEl = tokensStreamArena.querySelector(`[data-tok-idx="${step.tokenIdx}"]`);
+          if (activeTokEl) {
+            const targetScroll = activeTokEl.offsetLeft - tokensScrollContainer.clientWidth / 2 + activeTokEl.offsetWidth / 2;
+            tokensScrollContainer.scrollTo({ left: Math.max(0, targetScroll), behavior: 'smooth' });
+          }
+        }
+        animateStageTransfer(step.transfer, animateMovement);
+      });
+
+      // 6. Update Action Pill & Decision Banner
+      if (step.actionText) {
+        actionPill.classList.remove('hidden');
+        actionPill.textContent = step.actionText;
+      } else {
+        actionPill.classList.add('hidden');
+      }
+
+      if (step.isComplete || step.alu.computed) {
+        decisionIcon.className = "fa-solid fa-trophy text-emerald-400 text-base";
+        decisionBanner.className = "p-3.5 rounded-xl bg-emerald-500/15 border border-emerald-400/35 text-xs flex flex-col sm:flex-row items-center justify-between gap-3 backdrop-blur-md";
+      } else if (step.alu.op) {
+        decisionIcon.className = "fa-solid fa-calculator text-purple-400 text-base";
+        decisionBanner.className = "p-3.5 rounded-xl bg-purple-500/12 border border-purple-400/30 text-xs flex flex-col sm:flex-row items-center justify-between gap-3 backdrop-blur-md";
+      } else {
+        decisionIcon.className = "fa-solid fa-circle-info text-cyan-400 text-base";
+        decisionBanner.className = "p-3.5 rounded-xl bg-white/[0.04] border border-white/10 text-xs flex flex-col sm:flex-row items-center justify-between gap-3 backdrop-blur-md";
+      }
+      decisionText.innerHTML = step.desc;
+
+      // 7. Highlight Active Java Line & Play Audio Tone
+      highlightCodeLine(step.line);
+      if (step.soundFreq) {
+        playTone(step.soundFreq, 'sine', 0.08, 0.035);
+      }
+    }
+
+    // PLAYBACK CONTROLLER
+    function setPlaying(playing) {
+      isPlaying = playing;
+      if (isPlaying) {
+        playIcon.className = "fa-solid fa-pause";
+        playText.textContent = "Stop";
+        btnPlay.classList.add('bg-rose-500/25', 'text-rose-200', 'border-rose-400/50');
+        btnPlay.classList.remove('bg-cyan-500/25', 'text-cyan-200', 'border-cyan-400/50');
+
+        playInterval = setInterval(() => {
+          if (currentStepIdx < steps.length - 1) {
+            currentStepIdx++;
+            renderStep(currentStepIdx, true);
+          } else {
+            setPlaying(false);
+          }
+        }, playSpeed);
+      } else {
+        playIcon.className = "fa-solid fa-play";
+        playText.textContent = "Start";
+        btnPlay.classList.remove('bg-rose-500/25', 'text-rose-200', 'border-rose-400/50');
+        btnPlay.classList.add('bg-cyan-500/25', 'text-cyan-200', 'border-cyan-400/50');
+        if (playInterval) {
+          clearInterval(playInterval);
+          playInterval = null;
+        }
+      }
+    }
+
+    function initSimulation(tokensArr) {
+      setPlaying(false);
+      currentTokens = [...tokensArr];
+      steps = generateSteps(currentTokens);
+      currentStepIdx = 0;
+      stepScrubber.max = steps.length - 1;
+      stepScrubber.value = 0;
+      renderStep(0, false);
+    }
+
+    // Validate custom RPN expression before loading
+    function isValidRPNTokens(toks) {
+      if (toks.length === 0) return false;
+      let depth = 0;
+      for (const t of toks) {
+        if (OPERATORS.has(t)) {
+          if (depth < 2) return false;
+          depth--;
+        } else if (/^-?\d+$/.test(t)) {
+          depth++;
+        } else {
+          return false;
+        }
+      }
+      return depth === 1;
+    }
+
+    // EVENT LISTENERS
+    btnPlay.addEventListener('click', () => {
+      if (currentStepIdx >= steps.length - 1) {
+        currentStepIdx = 0;
+        renderStep(0, false);
+      }
+      setPlaying(!isPlaying);
+    });
+
+    btnNext.addEventListener('click', () => {
+      setPlaying(false);
+      if (currentStepIdx < steps.length - 1) {
+        currentStepIdx++;
+        renderStep(currentStepIdx, true);
+      }
+    });
+
+    btnPrev.addEventListener('click', () => {
+      setPlaying(false);
+      if (currentStepIdx > 0) {
+        currentStepIdx--;
+        renderStep(currentStepIdx, true);
+      }
+    });
+
+    btnReset.addEventListener('click', () => {
+      setPlaying(false);
+      currentStepIdx = 0;
+      renderStep(0, false);
+    });
+
+    stepScrubber.addEventListener('input', (e) => {
+      setPlaying(false);
+      currentStepIdx = parseInt(e.target.value, 10);
+      renderStep(currentStepIdx, false);
+    });
+
+    document.querySelectorAll('.speed-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.speed-btn').forEach(b => {
+          b.classList.remove('bg-cyan-500/30', 'text-cyan-200', 'font-semibold');
+        });
+        btn.classList.add('bg-cyan-500/30', 'text-cyan-200', 'font-semibold');
+        playSpeed = parseInt(btn.dataset.speed, 10);
+        if (isPlaying) {
+          setPlaying(false);
+          setPlaying(true);
+        }
+      });
+    });
+
+    btnAudio.addEventListener('click', () => {
+      audioEnabled = !audioEnabled;
+      if (audioEnabled) {
+        audioIcon.className = "fa-solid fa-volume-high";
+        btnAudio.classList.remove('text-slate-600');
+        btnAudio.classList.add('text-slate-300');
+      } else {
+        audioIcon.className = "fa-solid fa-volume-xmark";
+        btnAudio.classList.add('text-slate-600');
+        btnAudio.classList.remove('text-slate-300');
+      }
+    });
+
+    presetSelect.addEventListener('change', (e) => {
+      const idx = parseInt(e.target.value, 10);
+      customTokensInput.value = PRESETS[idx].tokens.join(', ');
+      initSimulation(PRESETS[idx].tokens);
+    });
+
+    btnApplyCustom.addEventListener('click', () => {
+      const raw = customTokensInput.value.trim();
+      if (!raw) return;
+      const parsed = raw.split(/[\s,]+/)
+        .map(s => s.trim())
+        .filter(Boolean);
+
+      if (isValidRPNTokens(parsed)) {
+        customTokensInput.value = parsed.join(', ');
+        initSimulation(parsed);
+      } else {
+        decisionIcon.className = "fa-solid fa-triangle-exclamation text-rose-400 text-base";
+        decisionBanner.className = "p-3.5 rounded-xl bg-rose-500/15 border border-rose-400/35 text-xs flex flex-col sm:flex-row items-center justify-between gap-3 backdrop-blur-md";
+        decisionText.innerHTML = `<span class="text-rose-300 font-bold">Invalid RPN Sequence:</span> Ensure every operator (<span class="code-font">+, -, *, /</span>) has at least 2 preceding operands and leaves 1 final result (e.g., <span class="code-font">2, 1, +, 3, *</span>).`;
+      }
+    });
+
+    window.addEventListener('resize', () => {
+      const step = steps[currentStepIdx];
+      if (step) {
+        animateStageTransfer(step.transfer, false);
+      }
+    });
+
+    window.addEventListener('keydown', (e) => {
+      if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT') return;
+      if (e.code === 'Space') {
+        e.preventDefault();
+        btnPlay.click();
+      } else if (e.code === 'ArrowRight') {
+        e.preventDefault();
+        btnNext.click();
+      } else if (e.code === 'ArrowLeft') {
+        e.preventDefault();
+        btnPrev.click();
+      }
+    });
+
+    window.onload = function() {
+      customTokensInput.value = PRESETS[0].tokens.join(', ');
+      initSimulation(PRESETS[0].tokens);
+    };
+  </script>
+</body>
+</html>

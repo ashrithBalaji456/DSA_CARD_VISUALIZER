@@ -1623,6 +1623,11 @@ const problems = [
         "difficulty": "Easy"
       },
       {
+        "number": 150,
+        "title": "Evaluate Reverse Polish Notation",
+        "difficulty": "Medium"
+      },
+      {
         "number": 496,
         "title": "Next Greater Element I",
         "difficulty": "Easy"
@@ -2258,6 +2263,11 @@ const problems = [
       {
         "number": 155,
         "title": "Min Stack (Dual Stack O(1) Minimum)",
+        "difficulty": "Medium"
+      },
+      {
+        "number": 150,
+        "title": "Evaluate Reverse Polish Notation",
         "difficulty": "Medium"
       },
       {
@@ -5353,6 +5363,111 @@ const problems = [
       }
     ],
     "leetcodeUrl": "https://leetcode.com/problems/count-number-of-nice-subarrays/"
+  },
+  {
+    "id": "evaluate-reverse-polish-notation",
+    "number": 150,
+    "title": "Evaluate Reverse Polish Notation",
+    "slug": "evaluate-reverse-polish-notation",
+    "difficulty": "Medium",
+    "categories": [
+      "Stacks",
+      "Arrays",
+      "Math"
+    ],
+    "description": "You are given an array of strings tokens that represents an arithmetic expression in a Reverse Polish Notation. Evaluate the expression and return an integer that represents its value.",
+    "inputFormat": "tokens = string[]",
+    "outputFormat": "int (evaluated expression value)",
+    "constraints": [
+      "1 <= tokens.length <= 10^4",
+      "tokens[i] is an operator ('+', '-', '*', '/') or an integer in [-200, 200]"
+    ],
+    "examples": [
+      {
+        "exampleNumber": 1,
+        "input": "tokens = [\"2\",\"1\",\"+\",\"3\",\"*\"]",
+        "output": "9",
+        "explanation": "((2 + 1) * 3) = 9",
+        "type": "official"
+      },
+      {
+        "exampleNumber": 2,
+        "input": "tokens = [\"4\",\"13\",\"5\",\"/\",\"+\"]",
+        "output": "6",
+        "explanation": "(4 + (13 / 5)) = 6",
+        "type": "official"
+      },
+      {
+        "exampleNumber": 3,
+        "input": "tokens = [\"10\",\"6\",\"9\",\"3\",\"+\",\"-11\",\"*\",\"/\",\"*\",\"17\",\"+\",\"5\",\"+\"]",
+        "output": "22",
+        "explanation": "((10 * (6 / ((9 + 3) * -11))) + 17) + 5 = 22",
+        "type": "official"
+      }
+    ],
+    "approach": "LIFO Operand Stack: Scan tokens left to right. Push integer operands onto Stack<Integer>. When an operator (+, -, *, /) appears, pop first (right-hand operand) then pop second (left-hand operand), evaluate (second op first) with integer division truncating toward zero, and push the result back onto the stack.",
+    "flowSteps": [
+      {
+        "step": 1,
+        "title": "Push Number Operands",
+        "description": "If token is not +, -, *, or /, parse Integer.parseInt(token) and push onto stack.",
+        "stateSnapshot": "stack.push(Integer.parseInt(token))",
+        "highlight": "Push"
+      },
+      {
+        "step": 2,
+        "title": "Pop Two Operands in LIFO Order",
+        "description": "Pop int first = stack.pop() (right operand) and int second = stack.pop() (left operand).",
+        "stateSnapshot": "first = stack.pop(); second = stack.pop();",
+        "highlight": "Pop Order"
+      },
+      {
+        "step": 3,
+        "title": "Evaluate & Push Intermediate Result",
+        "description": "Compute result = second [op] first (division truncates toward zero) and push result back onto stack.",
+        "stateSnapshot": "stack.push(result)",
+        "highlight": "ALU Eval"
+      }
+    ],
+    "timeComplexity": "O(n)",
+    "timeComplexityExplanation": "Single linear pass over n tokens; each token performs O(1) stack push/pop operations.",
+    "spaceComplexity": "O(n)",
+    "spaceComplexityExplanation": "The operand stack holds at most ceil(n / 2) integer operands.",
+    "visualizerUrl": "/visualizers/evaluate_reverse_polish_notation_visualizer.html",
+    "addedDate": "2026-11-25",
+    "keyObservations": [
+      "The first popped value is the RIGHT operand (first) and the second popped value is the LEFT operand (second), which is critical for subtraction and division.",
+      "Postfix notation eliminates parentheses and operator precedence ambiguity because every operator immediately consumes its two most recent operands."
+    ],
+    "importantPattern": "LIFO Operand Evaluation Stack",
+    "commonMistakes": [
+      "Reversing subtraction or division operand order (doing first - second instead of second - first).",
+      "Using floor division instead of truncation toward zero for negative integers (e.g., -7 / 3 should be -2, not -3)."
+    ],
+    "optimalApproach": "Single-Pass LIFO Stack<Integer> Postfix Evaluator",
+    "relatedProblems": [
+      {
+        "number": 20,
+        "title": "Valid Parentheses (Balanced Stack)",
+        "difficulty": "Easy"
+      },
+      {
+        "number": 155,
+        "title": "Min Stack (Dual Stack O(1) Minimum)",
+        "difficulty": "Medium"
+      },
+      {
+        "number": 232,
+        "title": "Implement Queue using Stacks",
+        "difficulty": "Easy"
+      },
+      {
+        "number": 496,
+        "title": "Next Greater Element I",
+        "difficulty": "Easy"
+      }
+    ],
+    "leetcodeUrl": "https://leetcode.com/problems/evaluate-reverse-polish-notation/"
   }
 ];
 
