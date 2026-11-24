@@ -12,6 +12,7 @@ interface Props {
   onExplore: (problem: DSAProblem) => void;
   onSelectCategory?: (category: string) => void;
   onResetFilters?: () => void;
+  onSelectRelatedProblem?: (title: string, number?: number) => void;
 }
 
 export const ProblemGrid: React.FC<Props> = ({
@@ -23,6 +24,7 @@ export const ProblemGrid: React.FC<Props> = ({
   onExplore,
   onSelectCategory,
   onResetFilters,
+  onSelectRelatedProblem,
 }) => {
   if (problems.length === 0) {
     return (
@@ -60,6 +62,7 @@ export const ProblemGrid: React.FC<Props> = ({
           onToggleBookmark={onToggleBookmark}
           onExplore={onExplore}
           onSelectCategory={onSelectCategory}
+          onSelectRelatedProblem={onSelectRelatedProblem}
         />
       ))}
     </div>

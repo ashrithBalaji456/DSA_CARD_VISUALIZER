@@ -18,6 +18,7 @@ interface Props {
   onSelectCategory?: (category: string) => void;
   onSortByDate?: () => void;
   onViewAll?: () => void;
+  onSelectRelatedProblem?: (title: string, number?: number) => void;
 }
 
 export const LatestAdditionsNotification: React.FC<Props> = ({
@@ -30,6 +31,7 @@ export const LatestAdditionsNotification: React.FC<Props> = ({
   onSelectCategory,
   onSortByDate,
   onViewAll,
+  onSelectRelatedProblem,
 }) => {
   if (!latestProblems || latestProblems.length === 0) return null;
 
@@ -103,6 +105,7 @@ export const LatestAdditionsNotification: React.FC<Props> = ({
               onToggleBookmark={onToggleBookmark}
               onExplore={onExplore}
               onSelectCategory={onSelectCategory}
+              onSelectRelatedProblem={onSelectRelatedProblem}
             />
           ))}
         </div>

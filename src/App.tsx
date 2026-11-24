@@ -157,6 +157,26 @@ export function App() {
     }
   };
 
+  // Handle navigating directly to related problems from cards or modals
+  const handleSelectRelatedProblem = (title: string, number?: number) => {
+    let found = PROBLEMS.find(
+      (p) => p.title.toLowerCase() === title.toLowerCase()
+    );
+    if (!found && number) {
+      found = PROBLEMS.find((p) => p.number === number);
+    }
+    if (!found) {
+      found = PROBLEMS.find(
+        (p) =>
+          p.title.toLowerCase().includes(title.toLowerCase()) ||
+          title.toLowerCase().includes(p.title.toLowerCase())
+      );
+    }
+    if (found) {
+      setSelectedProblem(found);
+    }
+  };
+
   // Find category display name for active filter banner
   const activeCategoryObj = CATEGORIES.find((c) => c.id === selectedCategory);
 
@@ -219,6 +239,7 @@ export function App() {
                 setActiveTab('problems');
               }}
               onViewAll={() => setActiveTab('problems')}
+              onSelectRelatedProblem={handleSelectRelatedProblem}
             />
 
             {/* Category Quick Overview */}
@@ -261,6 +282,7 @@ export function App() {
                   setSelectedCategory(cat.toLowerCase().replace(/ /g, '-'));
                   setActiveTab('problems');
                 }}
+                onSelectRelatedProblem={handleSelectRelatedProblem}
               />
             </section>
           </div>
@@ -331,6 +353,7 @@ export function App() {
                 setSelectedCategory(cat.toLowerCase().replace(/ /g, '-'));
               }}
               onResetFilters={handleClearFilters}
+              onSelectRelatedProblem={handleSelectRelatedProblem}
             />
           </div>
         )}
@@ -395,6 +418,7 @@ export function App() {
                   setSelectedCategory(cat.toLowerCase().replace(/ /g, '-'));
                   setActiveTab('problems');
                 }}
+                onSelectRelatedProblem={handleSelectRelatedProblem}
               />
             )}
           </div>
@@ -431,24 +455,7 @@ export function App() {
           onToggleSolved={toggleSolved}
           onToggleBookmark={toggleBookmark}
           onClose={() => setSelectedProblem(null)}
-          onSelectRelatedProblem={(title, number) => {
-            let found = PROBLEMS.find(
-              (p) => p.title.toLowerCase() === title.toLowerCase()
-            );
-            if (!found && number) {
-              found = PROBLEMS.find((p) => p.number === number);
-            }
-            if (!found) {
-              found = PROBLEMS.find(
-                (p) =>
-                  p.title.toLowerCase().includes(title.toLowerCase()) ||
-                  title.toLowerCase().includes(p.title.toLowerCase())
-              );
-            }
-            if (found) {
-              setSelectedProblem(found);
-            }
-          }}
+          onSelectRelatedProblem={handleSelectRelatedProblem}
         />
       )}
 

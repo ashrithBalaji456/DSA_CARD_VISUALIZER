@@ -5187,6 +5187,11 @@ export const PROBLEMS: DSAProblem[] = [
     "optimalApproach": "Two-Pass Sliding Window via atMost(goal) - atMost(goal - 1) with O(1) Auxiliary Space",
     "relatedProblems": [
       {
+        "number": 1248,
+        "title": "Count Number of Nice Subarrays",
+        "difficulty": "Medium"
+      },
+      {
         "number": 560,
         "title": "Subarray Sum Equals K",
         "difficulty": "Medium"
@@ -5213,5 +5218,132 @@ export const PROBLEMS: DSAProblem[] = [
       }
     ],
     "leetcodeUrl": "https://leetcode.com/problems/binary-subarrays-with-sum/"
+  },
+  {
+    "id": "count-number-of-nice-subarrays",
+    "number": 1248,
+    "title": "Count Number of Nice Subarrays",
+    "slug": "count-number-of-nice-subarrays",
+    "difficulty": "Medium",
+    "categories": [
+      "Arrays",
+      "Two Pointers",
+      "Sliding Window"
+    ],
+    "description": "Given an array of integers nums and an integer k. A continuous subarray is called nice if there are k odd numbers on it.\n\nReturn the number of nice sub-arrays.",
+    "inputFormat": "nums = [int], k = int",
+    "outputFormat": "int (count of nice subarrays)",
+    "constraints": [
+      "1 <= nums.length <= 50000",
+      "1 <= nums[i] <= 10^5",
+      "1 <= k <= nums.length"
+    ],
+    "examples": [
+      {
+        "exampleNumber": 1,
+        "input": "nums = [1,1,2,1,1], k = 3",
+        "output": "2",
+        "explanation": "The only sub-arrays with 3 odd numbers are [1,1,2,1] and [1,2,1,1].",
+        "type": "official"
+      },
+      {
+        "exampleNumber": 2,
+        "input": "nums = [2,4,6], k = 1",
+        "output": "0",
+        "explanation": "There are no odd numbers in the array, so 0 subarrays have 1 odd number.",
+        "type": "official"
+      },
+      {
+        "exampleNumber": 3,
+        "input": "nums = [2,2,2,1,2,2,1,2,2,2], k = 2",
+        "output": "16",
+        "explanation": "There are 16 continuous subarrays containing exactly 2 odd numbers.",
+        "type": "official"
+      }
+    ],
+    "approach": "Parity Reduction to Binary Subarrays via atMost(nums, k) - atMost(nums, k - 1): Since each odd number contributes 1 to oddCount (nums[i] % 2 != 0) and each even number contributes 0, this problem maps directly to Binary Subarrays With Sum (LeetCode 930). Because the count of odd numbers in a window is monotonic with respect to expanding and shrinking, we can count all subarrays with at most k odds in O(n) time and O(1) space. The number of subarrays with exactly k odd numbers is exact(k) = atMost(nums, k) - atMost(nums, k - 1).",
+    "flowSteps": [
+      {
+        "step": 1,
+        "title": "Formulate Parity Reduction",
+        "description": "Express exact(k) as atMost(nums, k) - atMost(nums, k - 1) using inclusion-exclusion.",
+        "stateSnapshot": "return atMost(nums, k) - atMost(nums, k - 1);",
+        "highlight": "Identity"
+      },
+      {
+        "step": 2,
+        "title": "Initialize Pointers & Parity Counters",
+        "description": "In atMost(nums, k): initialize left = 0, oddCount = 0, count = 0.",
+        "stateSnapshot": "int left = 0, oddCount = 0, count = 0;",
+        "highlight": "Init"
+      },
+      {
+        "step": 3,
+        "title": "Expand Window & Check Parity",
+        "description": "For right from 0 to n-1: if nums[right] % 2 != 0, increment oddCount++.",
+        "stateSnapshot": "if (nums[right] % 2 != 0) oddCount++;",
+        "highlight": "Expand"
+      },
+      {
+        "step": 4,
+        "title": "Shrink from Left when oddCount > k",
+        "description": "While oddCount > k: if nums[left] % 2 != 0, decrement oddCount--, then left++.",
+        "stateSnapshot": "while (oddCount > k) { if (nums[left++] % 2 != 0) oddCount--; }",
+        "highlight": "Shrink"
+      },
+      {
+        "step": 5,
+        "title": "Tally Valid Subarrays Ending at Right",
+        "description": "All (right - left + 1) subarrays ending at right have at most k odds: count += right - left + 1.",
+        "stateSnapshot": "count += right - left + 1;",
+        "highlight": "Count"
+      }
+    ],
+    "timeComplexity": "O(n)",
+    "timeComplexityExplanation": "Two linear sliding-window passes (atMost(k) and atMost(k - 1)), each advancing right and left at most n times, resulting in 2 * 2n = O(n) total operations.",
+    "spaceComplexity": "O(1)",
+    "spaceComplexityExplanation": "Operates purely in-place with scalar pointers and counters (left, right, oddCount, count) without auxiliary data structures.",
+    "visualizerUrl": "/visualizers/count_number_of_nice_subarrays_visualizer.html",
+    "addedDate": "2026-11-24",
+    "keyObservations": [
+      "Binary Parity Equivalence: Every odd number is effectively 1 and every even number is 0, making this identical to LeetCode 930.",
+      "Direct sliding window fails for exact k because even numbers can pad both sides of valid subarrays without changing oddCount.",
+      "Computing exact(k) = atMost(k) - atMost(k - 1) cleanly handles even padding in O(1) auxiliary space without hashing."
+    ],
+    "importantPattern": "atMost(K) - atMost(K - 1) Sliding Window Reduction (Binary Parity Mapping)",
+    "commonMistakes": [
+      "Trying to use a single three-pointer sliding window, which leads to tricky edge cases with even number prefixes.",
+      "Using HashMap prefix sums with O(n) extra space when an O(1) space two-pass sliding window is optimal.",
+      "Checking nums[i] % 2 == 1 which can fail for negative numbers if present; use nums[i] % 2 != 0 or nums[i] & 1."
+    ],
+    "optimalApproach": "Two-Pass Sliding Window via atMost(nums, k) - atMost(nums, k - 1) with O(1) Space",
+    "relatedProblems": [
+      {
+        "number": 930,
+        "title": "Binary Subarrays With Sum",
+        "difficulty": "Medium"
+      },
+      {
+        "number": 560,
+        "title": "Subarray Sum Equals K",
+        "difficulty": "Medium"
+      },
+      {
+        "number": 1004,
+        "title": "Max Consecutive Ones III",
+        "difficulty": "Medium"
+      },
+      {
+        "number": 1358,
+        "title": "Number of Substrings Containing All Three Characters",
+        "difficulty": "Medium"
+      },
+      {
+        "number": 3,
+        "title": "Longest Substring Without Repeating Characters",
+        "difficulty": "Medium"
+      }
+    ],
+    "leetcodeUrl": "https://leetcode.com/problems/count-number-of-nice-subarrays/"
   }
 ];

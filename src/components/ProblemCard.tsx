@@ -10,6 +10,7 @@ import {
   Sparkles,
   Info,
   Calendar,
+  GitBranch,
 } from 'lucide-react';
 import type { DSAProblem } from '../types/problem';
 import { DifficultyBadge } from './DifficultyBadge';
@@ -32,6 +33,7 @@ interface Props {
   onToggleBookmark: (id: string) => void;
   onExplore: (problem: DSAProblem) => void;
   onSelectCategory?: (category: string) => void;
+  onSelectRelatedProblem?: (title: string, number?: number) => void;
 }
 
 export const ProblemCard: React.FC<Props> = ({
@@ -42,6 +44,7 @@ export const ProblemCard: React.FC<Props> = ({
   onToggleBookmark,
   onExplore,
   onSelectCategory,
+  onSelectRelatedProblem,
 }) => {
   return (
     <div className="glass-card rounded-2xl p-5 flex flex-col justify-between group relative overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:border-indigo-500/30">
@@ -202,6 +205,41 @@ export const ProblemCard: React.FC<Props> = ({
             </button>
           )}
         </div>
+
+        {/* Bottom Navigation: Related / Same Type Problems */}
+        {problem.relatedProblems && problem.relatedProblems.length > 0 && (
+          <div className="mt-3 pt-2.5 border-t border-white/[0.06] flex flex-col gap-1.5">
+            <div className="flex items-center justify-between text-[10px] text-slate-400 font-medium">
+              <span className="flex items-center gap-1 font-mono text-slate-400">
+                <GitBranch className="w-3 h-3 text-indigo-400/80 shrink-0" />
+                <span>Related Problems:</span>
+              </span>
+              <span className="text-[9px] text-slate-500 font-mono">
+                {problem.relatedProblems.length} similar
+              </span>
+            </div>
+            <div className="flex flex-wrap items-center gap-1.5">
+              {problem.relatedProblems.slice(0, 3).map((rel) => (
+                <button
+                  key={rel.number || rel.title}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onSelectRelatedProblem?.(rel.title, rel.number);
+                  }}
+                  className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-white/[0.03] hover:bg-indigo-500/15 border border-white/5 hover:border-indigo-500/30 text-[10px] text-slate-300 hover:text-indigo-200 transition-all cursor-pointer active:scale-95 group/rel"
+                  title={`Explore related problem: ${rel.title} (${rel.difficulty})`}
+                >
+                  {rel.number && (
+                    <span className="font-mono text-indigo-400/90 font-bold group-hover/rel:text-indigo-300">
+                      #{rel.number}
+                    </span>
+                  )}
+                  <span className="truncate max-w-[110px] sm:max-w-[130px]">{rel.title}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
