@@ -2215,21 +2215,28 @@ export const PROBLEMS: DSAProblem[] = [
         "type": "official"
       }
     ],
-    "approach": "LIFO Stack: Push closing bracket corresponding to open bracket. When closing bracket is seen, pop from stack and check match.",
+    "approach": "LIFO Stack: Push each opening bracket ('(', '{', '[') onto the stack. When a closing bracket is encountered, check that the stack is not empty, pop the top opening bracket, and verify that the types match.",
     "flowSteps": [
       {
         "step": 1,
-        "title": "Push Matching Bracket",
-        "description": "if char == '(' push ')', etc.",
-        "stateSnapshot": "stack.push(match)",
+        "title": "Push Opening Bracket",
+        "description": "If ch is '(', '{', or '[', push ch onto the LIFO stack.",
+        "stateSnapshot": "stack.push(ch)",
         "highlight": "Push"
       },
       {
         "step": 2,
-        "title": "Validate Match",
-        "description": "if stack.pop() !== char return false.",
-        "stateSnapshot": "check match",
+        "title": "Guard & Pop Top",
+        "description": "If ch is a closing bracket and stack.isEmpty(), return false; otherwise pop char top = stack.pop().",
+        "stateSnapshot": "char top = stack.pop()",
         "highlight": "Pop"
+      },
+      {
+        "step": 3,
+        "title": "Verify Pair & Empty End",
+        "description": "Check that top matches ch's opening type; at the end of the string, return stack.isEmpty().",
+        "stateSnapshot": "return stack.isEmpty()",
+        "highlight": "Validate"
       }
     ],
     "timeComplexity": "O(n)",
@@ -2237,7 +2244,7 @@ export const PROBLEMS: DSAProblem[] = [
     "spaceComplexity": "O(n)",
     "spaceComplexityExplanation": "Stack holds up to n characters.",
     "visualizerUrl": "/visualizers/balanced_parentheses_stack_visualizer.html",
-    "addedDate": "2026-11-09",
+    "addedDate": "2026-11-25",
     "keyObservations": [
       "Last opened bracket must be the first closed bracket (LIFO)."
     ],
