@@ -220,6 +220,14 @@ export function App() {
                 if (q) setActiveTab('problems');
               }}
               onSelectFilter={handleHeroFilterClick}
+              onBrowseProblems={() => setActiveTab('problems')}
+              onTryVisualizer={(url) => {
+                if (url) {
+                  window.location.href = url;
+                } else if (latestThreeProblems[0]?.visualizerUrl) {
+                  window.location.href = latestThreeProblems[0].visualizerUrl;
+                }
+              }}
             />
 
             {/* Notification Section: Latest 3 Added Problem Cards */}
