@@ -59,7 +59,7 @@ export const Hero: React.FC<Props> = ({
   const stepInfo = searchSteps[currentStep];
 
   return (
-    <section className="relative pt-6 sm:pt-10 pb-8 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto overflow-hidden">
+    <section className="relative pt-6 sm:pt-10 pb-8 px-4 sm:px-6 lg:px-8 xl:px-12 max-w-[1720px] mx-auto overflow-hidden">
       {/* Dynamic Background Neon Waves & Lighting */}
       <div className="absolute top-10 left-10 w-[550px] h-[350px] bg-gradient-to-tr from-blue-600/15 via-indigo-600/15 to-transparent blur-[140px] rounded-full pointer-events-none -z-10" />
       <div className="absolute top-1/4 right-5 w-[500px] h-[380px] bg-gradient-to-bl from-purple-600/18 via-fuchsia-600/12 to-transparent blur-[140px] rounded-full pointer-events-none -z-10" />
@@ -113,7 +113,7 @@ export const Hero: React.FC<Props> = ({
           <div className="absolute inset-0 bg-gradient-to-r from-blue-500/20 via-indigo-500/20 to-purple-500/20 rounded-3xl blur-2xl transform -rotate-2 scale-95 pointer-events-none" />
 
           {/* Laptop Container with gentle perspective styling */}
-          <div className="relative w-full max-w-[490px] group select-none">
+          <div className="relative w-full max-w-[540px] group select-none">
             
             {/* Laptop Screen Bezel */}
             <div className="relative rounded-2xl bg-gradient-to-b from-[#161d31] via-[#0d1424] to-[#0a0f1d] p-3 sm:p-3.5 border border-indigo-400/30 shadow-[0_15px_45px_-10px_rgba(99,102,241,0.35)] backdrop-blur-2xl">
@@ -356,7 +356,7 @@ export const Hero: React.FC<Props> = ({
       </div>
 
       {/* GLOBAL SEARCH BAR */}
-      <div className="max-w-2xl mx-auto mb-10">
+      <div className="w-full max-w-4xl lg:max-w-5xl mx-auto mb-10">
         <div className="relative group">
           <div className="absolute -inset-0.5 bg-gradient-to-r from-indigo-500/30 to-violet-500/30 rounded-2xl blur-sm opacity-60 group-hover:opacity-100 transition duration-300" />
           <div className="relative flex items-center bg-[#101727]/90 border border-white/15 rounded-xl shadow-2xl backdrop-blur-xl px-4 py-3.5 transition-all focus-within:border-indigo-400/80">
@@ -381,7 +381,7 @@ export const Hero: React.FC<Props> = ({
       </div>
 
       {/* STATS CARDS ROW */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3.5 max-w-5xl mx-auto">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3.5 sm:gap-4 w-full mx-auto">
         {/* Total Problems */}
         <div
           onClick={() => onSelectFilter && onSelectFilter('all')}

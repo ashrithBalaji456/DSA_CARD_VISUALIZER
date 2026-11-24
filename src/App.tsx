@@ -258,7 +258,7 @@ export function App() {
             />
 
             {/* Featured Problems Section */}
-            <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+            <section className="max-w-[1720px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-12 py-6">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
                 <div>
                   <h2 className="text-xl sm:text-2xl font-bold text-white tracking-tight flex items-center gap-2">
@@ -298,7 +298,7 @@ export function App() {
 
         {/* TAB: PROBLEMS (Complete Library with Full Filters) */}
         {activeTab === 'problems' && (
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 space-y-6">
+          <div className="max-w-[1720px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-12 pt-8 space-y-6">
             {/* Page Title & Breadcrumb */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div>
@@ -379,7 +379,7 @@ export function App() {
 
         {/* TAB: BOOKMARKS */}
         {activeTab === 'bookmarks' && (
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 space-y-6">
+          <div className="max-w-[1720px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-12 pt-8 space-y-6">
             <div className="flex items-center justify-between gap-4">
               <div>
                 <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight flex items-center gap-2.5">
@@ -477,7 +477,7 @@ export function App() {
 
       {/* Footer */}
       <footer className="border-t border-white/5 bg-[#080B14]/90 py-8 px-4 sm:px-6 lg:px-8 text-center text-xs text-slate-500 font-mono">
-        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div className="max-w-[1720px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-12 flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-2">
             <Compass className="w-4 h-4 text-indigo-400" />
             <span className="text-slate-300 font-bold">DSA Atlas</span>

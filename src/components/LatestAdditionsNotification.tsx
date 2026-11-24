@@ -36,7 +36,7 @@ export const LatestAdditionsNotification: React.FC<Props> = ({
   if (!latestProblems || latestProblems.length === 0) return null;
 
   return (
-    <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+    <section className="max-w-[1720px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-12 py-4">
       {/* Outer notification glass card wrapper */}
       <div className="relative rounded-3xl border border-indigo-500/20 bg-gradient-to-b from-[#0e1628]/90 via-[#0a0f1d]/90 to-[#080B14]/90 p-5 sm:p-7 backdrop-blur-xl shadow-2xl overflow-hidden group">
         {/* Ambient background glow accents */}

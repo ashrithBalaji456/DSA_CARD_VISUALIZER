@@ -91,7 +91,7 @@ export const Header: React.FC<Props> = ({
 
   return (
     <header className="sticky top-0 z-40 w-full border-b border-white/10 bg-[#080B14]/85 backdrop-blur-xl">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
+      <div className="max-w-[1720px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-12 h-16 flex items-center justify-between gap-4">
         {/* Logo */}
         <button
           onClick={() => handleNavClick('dashboard')}
