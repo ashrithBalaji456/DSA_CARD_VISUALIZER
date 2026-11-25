@@ -1,9 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Min Stack (LeetCode 155) - Glassmorphic Visualizer</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2064%2064%22%3E%3Cdefs%3E%3ClinearGradient%20id%3D%22bg%22%20x1%3D%220%22%20y1%3D%220%22%20x2%3D%221%22%20y2%3D%221%22%3E%3Cstop%20offset%3D%220%25%22%20stop-color%3D%22%230f172a%22%2F%3E%3Cstop%20offset%3D%22100%25%22%20stop-color%3D%22%23060913%22%2F%3E%3C%2FlinearGradient%3E%3ClinearGradient%20id%3D%22g%22%20x1%3D%220%22%20y1%3D%220%22%20x2%3D%221%22%20y2%3D%221%22%3E%3Cstop%20offset%3D%220%25%22%20stop-color%3D%22%2322d3ee%22%2F%3E%3Cstop%20offset%3D%2255%25%22%20stop-color%3D%22%236366f1%22%2F%3E%3Cstop%20offset%3D%22100%25%22%20stop-color%3D%22%23a855f7%22%2F%3E%3C%2FlinearGradient%3E%3C%2Fdefs%3E%3Crect%20x%3D%222%22%20y%3D%222%22%20width%3D%2260%22%20height%3D%2260%22%20rx%3D%2216%22%20fill%3D%22url(%23bg)%22%20stroke%3D%22url(%23g)%22%20stroke-width%3D%223.5%22%2F%3E%3Cpath%20d%3D%22M20%2042%20L32%2018%20L44%2042%22%20fill%3D%22none%22%20stroke%3D%22url(%23g)%22%20stroke-width%3D%224%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3Cline%20x1%3D%2220%22%20y1%3D%2242%22%20x2%3D%2244%22%20y2%3D%2242%22%20stroke%3D%22%2338bdf8%22%20stroke-width%3D%223%22%20stroke-linecap%3D%22round%22%20opacity%3D%220.55%22%2F%3E%3Ccircle%20cx%3D%2232%22%20cy%3D%2218%22%20r%3D%225.5%22%20fill%3D%22%2322d3ee%22%2F%3E%3Ccircle%20cx%3D%2220%22%20cy%3D%2242%22%20r%3D%225.5%22%20fill%3D%22%236366f1%22%2F%3E%3Ccircle%20cx%3D%2244%22%20cy%3D%2242%22%20r%3D%225.5%22%20fill%3D%22%23a855f7%22%2F%3E%3C%2Fsvg%3E" />
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
@@ -36,14 +38,17 @@
       -webkit-backdrop-filter: blur(14px);
       transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
     }
+
     .glass-button:hover:not(:disabled) {
       background: rgba(255, 255, 255, 0.15);
       border-color: rgba(255, 255, 255, 0.28);
       transform: translateY(-1px);
     }
+
     .glass-button:active:not(:disabled) {
       transform: translateY(1px);
     }
+
     .glass-button:disabled {
       opacity: 0.35;
       cursor: not-allowed;
@@ -56,6 +61,7 @@
       border-left: 3px solid transparent;
       padding: 2px 10px;
     }
+
     .code-line.active-line {
       background: rgba(56, 189, 248, 0.18);
       border-left: 3px solid #38bdf8;
@@ -70,10 +76,12 @@
       backdrop-filter: blur(10px);
       transition: all 0.28s cubic-bezier(0.34, 1.56, 0.64, 1);
     }
+
     .op-chip.op-done {
       background: rgba(16, 185, 129, 0.12);
       border-color: rgba(52, 211, 153, 0.42);
     }
+
     .op-chip.op-active {
       background: linear-gradient(180deg, rgba(251, 191, 36, 0.24) 0%, rgba(245, 158, 11, 0.10) 100%);
       border-color: rgba(251, 191, 36, 0.95);
@@ -115,21 +123,25 @@
       -webkit-backdrop-filter: blur(12px);
       transition: all 0.28s cubic-bezier(0.34, 1.56, 0.64, 1);
     }
+
     .stack-node-box.node-main {
       background: linear-gradient(90deg, rgba(34, 211, 238, 0.22) 0%, rgba(14, 165, 233, 0.12) 100%);
       border: 1px solid rgba(56, 189, 248, 0.65);
       color: #e0f2fe;
     }
+
     .stack-node-box.node-min {
       background: linear-gradient(90deg, rgba(168, 85, 247, 0.24) 0%, rgba(126, 34, 206, 0.12) 100%);
       border: 1px solid rgba(192, 132, 252, 0.68);
       color: #f3e8ff;
     }
+
     .stack-node-box.node-just-pushed {
       transform: scale(1.03);
       border-color: rgba(251, 191, 36, 0.95) !important;
       box-shadow: 0 0 22px rgba(251, 191, 36, 0.48), inset 0 1px 0 rgba(255, 255, 255, 0.35);
     }
+
     .stack-node-box.node-peek-glow {
       background: linear-gradient(90deg, rgba(16, 185, 129, 0.32) 0%, rgba(5, 150, 105, 0.16) 100%) !important;
       border-color: rgba(52, 211, 153, 0.95) !important;
@@ -142,15 +154,26 @@
         stroke-dashoffset: -24;
       }
     }
+
     .transfer-arc-path {
       stroke-dasharray: 6 6;
       animation: arcDash 0.8s linear infinite;
     }
 
     @keyframes returnPulse {
-      0%, 100% { transform: scale(1); filter: drop-shadow(0 0 8px rgba(16, 185, 129, 0.45)); }
-      50% { transform: scale(1.04); filter: drop-shadow(0 0 20px rgba(16, 185, 129, 0.95)); }
+
+      0%,
+      100% {
+        transform: scale(1);
+        filter: drop-shadow(0 0 8px rgba(16, 185, 129, 0.45));
+      }
+
+      50% {
+        transform: scale(1.04);
+        filter: drop-shadow(0 0 20px rgba(16, 185, 129, 0.95));
+      }
     }
+
     .return-pulse-anim {
       animation: returnPulse 0.6s ease-in-out;
     }
@@ -160,24 +183,29 @@
       width: 6px;
       height: 6px;
     }
+
     ::-webkit-scrollbar-track {
       background: rgba(15, 23, 42, 0.4);
     }
+
     ::-webkit-scrollbar-thumb {
       background: rgba(255, 255, 255, 0.18);
       border-radius: 4px;
     }
+
     ::-webkit-scrollbar-thumb:hover {
       background: rgba(255, 255, 255, 0.3);
     }
   </style>
 </head>
+
 <body class="p-2.5 sm:p-4 lg:px-5 lg:py-4 flex flex-col items-center justify-start min-h-screen">
 
   <!-- Ambient Glass Glow Orbs -->
   <div class="fixed top-6 left-1/6 w-96 h-96 bg-cyan-500/14 rounded-full blur-3xl pointer-events-none -z-10"></div>
   <div class="fixed top-1/3 right-1/6 w-96 h-96 bg-purple-500/14 rounded-full blur-3xl pointer-events-none -z-10"></div>
-  <div class="fixed bottom-12 left-1/2 w-80 h-80 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none -z-10"></div>
+  <div class="fixed bottom-12 left-1/2 w-80 h-80 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none -z-10">
+  </div>
 
   <!-- MAIN WRAPPER -->
   <div class="w-full max-w-[1560px] flex flex-col gap-5">
@@ -188,35 +216,47 @@
 
         <!-- Title & Algorithm Metadata -->
         <div class="flex items-center gap-3">
-          <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-cyan-500 via-purple-500 to-emerald-400 flex items-center justify-center shadow-lg shadow-cyan-500/25 text-slate-950 font-bold text-lg">
+          <div
+            class="w-10 h-10 rounded-xl bg-gradient-to-tr from-cyan-500 via-purple-500 to-emerald-400 flex items-center justify-center shadow-lg shadow-cyan-500/25 text-slate-950 font-bold text-lg">
             <i class="fa-solid fa-layer-group"></i>
           </div>
           <div>
-            <h1 class="text-lg sm:text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white via-cyan-100 to-purple-300">
+            <h1
+              class="text-lg sm:text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white via-cyan-100 to-purple-300">
               Min Stack
             </h1>
             <p class="text-xs text-slate-400 flex items-center gap-2">
               <span class="inline-block w-2 h-2 rounded-full bg-cyan-400 animate-pulse"></span>
-              LeetCode 155 • Dual Synchronized LIFO Stacks (stack &amp; minStack) • &Omicron;(1) Time • &Omicron;(n) Space
+              LeetCode 155 • Dual Synchronized LIFO Stacks (stack &amp; minStack) • &Omicron;(1) Time • &Omicron;(n)
+              Space
             </p>
           </div>
         </div>
 
         <!-- Center Playback Controls: Reset, Previous, Start/Stop, Next -->
-        <div class="flex items-center gap-2 sm:gap-3 bg-white/5 p-1.5 rounded-xl border border-white/10 backdrop-blur-md">
-          <button id="btnReset" class="glass-button text-slate-200 hover:text-white px-3 py-2 rounded-lg text-sm flex items-center gap-1.5" title="Reset to Initial State">
+        <div
+          class="flex items-center gap-2 sm:gap-3 bg-white/5 p-1.5 rounded-xl border border-white/10 backdrop-blur-md">
+          <button id="btnReset"
+            class="glass-button text-slate-200 hover:text-white px-3 py-2 rounded-lg text-sm flex items-center gap-1.5"
+            title="Reset to Initial State">
             <i class="fa-solid fa-rotate-left"></i>
             <span class="hidden sm:inline">Reset</span>
           </button>
-          <button id="btnPrev" class="glass-button text-slate-200 hover:text-white px-3 py-2 rounded-lg text-sm flex items-center gap-1.5" title="Previous Step (Left Arrow)">
+          <button id="btnPrev"
+            class="glass-button text-slate-200 hover:text-white px-3 py-2 rounded-lg text-sm flex items-center gap-1.5"
+            title="Previous Step (Left Arrow)">
             <i class="fa-solid fa-backward-step"></i>
             <span class="hidden sm:inline">Previous</span>
           </button>
-          <button id="btnPlay" class="glass-button bg-cyan-500/25 text-cyan-200 hover:bg-cyan-500/35 border-cyan-400/50 px-4 py-2 rounded-lg text-sm font-semibold flex items-center gap-2 shadow-lg shadow-cyan-500/15" title="Start / Stop (Spacebar)">
+          <button id="btnPlay"
+            class="glass-button bg-cyan-500/25 text-cyan-200 hover:bg-cyan-500/35 border-cyan-400/50 px-4 py-2 rounded-lg text-sm font-semibold flex items-center gap-2 shadow-lg shadow-cyan-500/15"
+            title="Start / Stop (Spacebar)">
             <i class="fa-solid fa-play" id="playIcon"></i>
             <span id="playText">Start</span>
           </button>
-          <button id="btnNext" class="glass-button text-slate-200 hover:text-white px-3 py-2 rounded-lg text-sm flex items-center gap-1.5" title="Next Step (Right Arrow)">
+          <button id="btnNext"
+            class="glass-button text-slate-200 hover:text-white px-3 py-2 rounded-lg text-sm flex items-center gap-1.5"
+            title="Next Step (Right Arrow)">
             <span class="hidden sm:inline">Next</span>
             <i class="fa-solid fa-forward-step"></i>
           </button>
@@ -224,14 +264,17 @@
 
         <!-- Speed & Audio Controls -->
         <div class="flex items-center gap-2">
-          <div class="flex items-center bg-white/5 rounded-xl p-1 border border-white/10 text-xs text-slate-300 backdrop-blur-md">
+          <div
+            class="flex items-center bg-white/5 rounded-xl p-1 border border-white/10 text-xs text-slate-300 backdrop-blur-md">
             <span class="px-2 py-1 text-slate-400"><i class="fa-solid fa-gauge-high mr-1"></i>Speed</span>
             <button class="speed-btn px-2 py-1 rounded-lg hover:text-white transition" data-speed="1300">0.5x</button>
-            <button class="speed-btn px-2 py-1 rounded-lg bg-cyan-500/30 text-cyan-200 font-semibold transition" data-speed="650">1x</button>
+            <button class="speed-btn px-2 py-1 rounded-lg bg-cyan-500/30 text-cyan-200 font-semibold transition"
+              data-speed="650">1x</button>
             <button class="speed-btn px-2 py-1 rounded-lg hover:text-white transition" data-speed="280">2x</button>
             <button class="speed-btn px-2 py-1 rounded-lg hover:text-white transition" data-speed="110">4x</button>
           </div>
-          <button id="btnAudio" class="glass-button p-2.5 rounded-xl text-slate-300 hover:text-cyan-300" title="Toggle Sound Effects">
+          <button id="btnAudio" class="glass-button p-2.5 rounded-xl text-slate-300 hover:text-cyan-300"
+            title="Toggle Sound Effects">
             <i class="fa-solid fa-volume-high" id="audioIcon"></i>
           </button>
         </div>
@@ -241,21 +284,26 @@
       <!-- Scrubber Slider & Status Badges -->
       <div class="flex flex-col sm:flex-row items-center gap-3 pt-2 border-t border-white/10">
         <div class="flex flex-wrap items-center gap-2 text-xs text-slate-300 w-full sm:w-auto shrink-0">
-          <span id="stepCounterBadge" class="code-font px-2.5 py-1 rounded-md bg-white/5 border border-white/10 text-cyan-300">
+          <span id="stepCounterBadge"
+            class="code-font px-2.5 py-1 rounded-md bg-white/5 border border-white/10 text-cyan-300">
             Step: 0 / 0
           </span>
-          <span id="phaseBadge" class="px-2.5 py-1 rounded-md bg-sky-500/20 border border-sky-400/30 text-sky-200 font-semibold">
+          <span id="phaseBadge"
+            class="px-2.5 py-1 rounded-md bg-sky-500/20 border border-sky-400/30 text-sky-200 font-semibold">
             Ready
           </span>
-          <span id="depthHeaderBadge" class="px-2.5 py-1 rounded-md bg-cyan-500/20 border border-cyan-400/30 text-cyan-200 font-bold">
+          <span id="depthHeaderBadge"
+            class="px-2.5 py-1 rounded-md bg-cyan-500/20 border border-cyan-400/30 text-cyan-200 font-bold">
             Depth: 0
           </span>
-          <span id="minHeaderBadge" class="px-2.5 py-1 rounded-md bg-purple-500/20 border border-purple-400/30 text-purple-200 font-bold">
+          <span id="minHeaderBadge"
+            class="px-2.5 py-1 rounded-md bg-purple-500/20 border border-purple-400/30 text-purple-200 font-bold">
             Current Min: -
           </span>
         </div>
         <div class="w-full flex items-center gap-3">
-          <input type="range" id="stepScrubber" min="0" max="0" value="0" class="w-full h-1.5 bg-slate-800/80 rounded-lg appearance-none cursor-pointer accent-cyan-400">
+          <input type="range" id="stepScrubber" min="0" max="0" value="0"
+            class="w-full h-1.5 bg-slate-800/80 rounded-lg appearance-none cursor-pointer accent-cyan-400">
         </div>
       </div>
     </header>
@@ -263,10 +311,12 @@
     <!-- TEST CASES & CUSTOM OPERATION BUILDER BAR -->
     <section class="glass-panel rounded-2xl p-4 flex flex-wrap items-center justify-between gap-4">
       <div class="flex flex-wrap items-center gap-3">
-        <label for="presetSelect" class="text-xs uppercase font-semibold text-slate-300 tracking-wider flex items-center gap-1.5">
+        <label for="presetSelect"
+          class="text-xs uppercase font-semibold text-slate-300 tracking-wider flex items-center gap-1.5">
           <i class="fa-solid fa-flask text-cyan-400"></i> Operation Scenarios:
         </label>
-        <select id="presetSelect" class="bg-slate-900/75 border border-white/15 text-xs sm:text-sm text-slate-200 rounded-xl px-3 py-2 outline-none focus:border-cyan-400 backdrop-blur-md">
+        <select id="presetSelect"
+          class="bg-slate-900/75 border border-white/15 text-xs sm:text-sm text-slate-200 rounded-xl px-3 py-2 outline-none focus:border-cyan-400 backdrop-blur-md">
           <option value="0">1: LeetCode Ex 1 (push -2, 0, -3 &rarr; getMin, pop, top, getMin)</option>
           <option value="1">2: Duplicate Minimums Trap (push 0, 1, 0 &rarr; getMin, pop, getMin)</option>
           <option value="2">3: Strictly Decreasing Pushes (push 10, 7, 4, 1 &rarr; pop &amp; getMin)</option>
@@ -283,7 +333,9 @@
       <!-- Quick Append Custom Operation Controls -->
       <div class="flex flex-wrap items-center gap-2">
         <span class="text-[11px] uppercase font-semibold text-slate-400 tracking-wider">Append Call:</span>
-        <input type="number" id="customPushVal" value="-4" class="w-20 bg-white/5 border border-white/15 rounded-xl px-2.5 py-1.5 text-xs text-slate-200 code-font outline-none focus:border-cyan-400 backdrop-blur-md" title="Integer value to push">
+        <input type="number" id="customPushVal" value="-4"
+          class="w-20 bg-white/5 border border-white/15 rounded-xl px-2.5 py-1.5 text-xs text-slate-200 code-font outline-none focus:border-cyan-400 backdrop-blur-md"
+          title="Integer value to push">
         <button id="btnAddPush" class="glass-button text-xs px-3 py-1.5 rounded-xl text-cyan-300 font-semibold">
           + push(val)
         </button>
@@ -315,7 +367,8 @@
               <span class="w-2 h-2 rounded-full bg-amber-400"></span>
             </span>
             <div class="flex items-baseline gap-1.5 mt-1.5">
-              <span id="varActiveOp" class="code-font text-base sm:text-lg font-bold text-amber-300 truncate">MinStack()</span>
+              <span id="varActiveOp"
+                class="code-font text-base sm:text-lg font-bold text-amber-300 truncate">MinStack()</span>
             </div>
             <span id="varOpIndexSub" class="text-[10px] text-amber-200/75 mt-1 code-font">Call 1 of 8</span>
           </div>
@@ -357,7 +410,8 @@
           </div>
 
           <!-- Method Return Value -->
-          <div id="returnResultCard" class="glass-panel rounded-xl p-3 flex flex-col justify-between border-emerald-400/35 col-span-2 sm:col-span-1">
+          <div id="returnResultCard"
+            class="glass-panel rounded-xl p-3 flex flex-col justify-between border-emerald-400/35 col-span-2 sm:col-span-1">
             <span class="text-[11px] text-slate-400 uppercase font-semibold flex items-center justify-between">
               Return Output
               <i class="fa-solid fa-reply text-emerald-400 text-[10px]"></i>
@@ -373,7 +427,8 @@
         <!-- UNIFIED STAGE: OPERATION CALL PIPELINE & DUAL VERTICAL LIFO STACK VESSELS -->
         <div id="stageWrapper" class="glass-panel relative rounded-2xl p-4 sm:p-5 flex flex-col gap-5">
           <!-- SVG Trajectory Arc Overlay Connecting Operation Calls, stack & minStack -->
-          <svg id="transferArcSvg" class="absolute inset-0 w-full h-full pointer-events-none z-30 overflow-visible"></svg>
+          <svg id="transferArcSvg"
+            class="absolute inset-0 w-full h-full pointer-events-none z-30 overflow-visible"></svg>
 
           <!-- Floating Lift-and-Place Token Layer -->
           <div id="flyingCloneLayer" class="absolute inset-0 pointer-events-none z-40"></div>
@@ -385,12 +440,14 @@
                 <i class="fa-solid fa-terminal text-amber-400"></i>
                 Method Call Sequence &amp; Outputs
               </span>
-              <span id="outputArrayPreview" class="code-font text-[11px] text-emerald-300 bg-emerald-500/15 px-2.5 py-0.5 rounded border border-emerald-400/30">
+              <span id="outputArrayPreview"
+                class="code-font text-[11px] text-emerald-300 bg-emerald-500/15 px-2.5 py-0.5 rounded border border-emerald-400/30">
                 Output: [null]
               </span>
             </div>
 
-            <div id="opsPipelineArena" class="w-full py-2.5 px-2 rounded-xl bg-white/[0.02] border border-white/10 flex items-center gap-2 overflow-x-auto">
+            <div id="opsPipelineArena"
+              class="w-full py-2.5 px-2 rounded-xl bg-white/[0.02] border border-white/10 flex items-center gap-2 overflow-x-auto">
               <!-- Populated dynamically with operation chips + return values -->
             </div>
           </div>
@@ -405,26 +462,31 @@
                   <i class="fa-solid fa-layer-group text-cyan-400"></i>
                   Main Stack: <span class="code-font text-white">Stack&lt;Integer&gt; stack</span>
                 </span>
-                <span id="mainStackBadge" class="code-font text-[10px] px-2 py-0.5 rounded bg-cyan-500/15 border border-cyan-400/30 text-cyan-200">
+                <span id="mainStackBadge"
+                  class="code-font text-[10px] px-2 py-0.5 rounded bg-cyan-500/15 border border-cyan-400/30 text-cyan-200">
                   size = 0
                 </span>
               </div>
 
-              <div class="relative flex-1 min-h-[270px] p-4 rounded-xl bg-white/[0.015] border border-white/10 flex flex-col items-center justify-end">
+              <div
+                class="relative flex-1 min-h-[270px] p-4 rounded-xl bg-white/[0.015] border border-white/10 flex flex-col items-center justify-end">
                 <!-- Open Mouth Entry Header -->
-                <div class="w-44 sm:w-48 flex items-center justify-between text-[9px] code-font text-slate-400 pb-1.5 px-1">
+                <div
+                  class="w-44 sm:w-48 flex items-center justify-between text-[9px] code-font text-slate-400 pb-1.5 px-1">
                   <span class="text-cyan-300 font-bold"><i class="fa-solid fa-arrow-down mr-1"></i>push(val)</span>
                   <span>OPEN TOP</span>
                   <span class="text-rose-300 font-bold">pop()<i class="fa-solid fa-arrow-up ml-1"></i></span>
                 </div>
 
                 <!-- U-Shaped Glass Vessel for Main stack -->
-                <div id="mainStackVessel" class="lifo-vessel-main relative w-44 sm:w-48 h-[212px] p-2.5 flex flex-col-reverse items-center justify-start gap-2 overflow-y-auto">
+                <div id="mainStackVessel"
+                  class="lifo-vessel-main relative w-44 sm:w-48 h-[212px] p-2.5 flex flex-col-reverse items-center justify-start gap-2 overflow-y-auto">
                   <span class="my-auto text-xs text-slate-500 italic code-font">empty stack</span>
                 </div>
 
                 <!-- External Ejected Dock on stack.pop() -->
-                <div id="poppedMainDock" class="hidden absolute top-3 right-3 px-2.5 py-1.5 rounded-xl border border-dashed border-rose-400/80 bg-rose-500/15 flex flex-col items-center select-none">
+                <div id="poppedMainDock"
+                  class="hidden absolute top-3 right-3 px-2.5 py-1.5 rounded-xl border border-dashed border-rose-400/80 bg-rose-500/15 flex flex-col items-center select-none">
                   <span class="text-[8px] code-font text-rose-400 font-bold uppercase">stack.pop()</span>
                   <span id="poppedMainVal" class="code-font text-sm font-extrabold text-rose-200 line-through">-3</span>
                 </div>
@@ -440,43 +502,52 @@
                   <i class="fa-solid fa-crown text-purple-400"></i>
                   Min Stack: <span class="code-font text-white">Stack&lt;Integer&gt; minStack</span>
                 </span>
-                <span id="minStackBadge" class="code-font text-[10px] px-2 py-0.5 rounded bg-purple-500/15 border border-purple-400/30 text-purple-200">
+                <span id="minStackBadge"
+                  class="code-font text-[10px] px-2 py-0.5 rounded bg-purple-500/15 border border-purple-400/30 text-purple-200">
                   size = 0
                 </span>
               </div>
 
-              <div class="relative flex-1 min-h-[270px] p-4 rounded-xl bg-white/[0.015] border border-white/10 flex flex-col items-center justify-end">
+              <div
+                class="relative flex-1 min-h-[270px] p-4 rounded-xl bg-white/[0.015] border border-white/10 flex flex-col items-center justify-end">
                 <!-- Open Mouth Entry Header -->
-                <div class="w-44 sm:w-48 flex items-center justify-between text-[9px] code-font text-slate-400 pb-1.5 px-1">
+                <div
+                  class="w-44 sm:w-48 flex items-center justify-between text-[9px] code-font text-slate-400 pb-1.5 px-1">
                   <span class="text-purple-300 font-bold"><i class="fa-solid fa-arrow-down mr-1"></i>push(min)</span>
                   <span>OPEN TOP</span>
                   <span class="text-rose-300 font-bold">pop()<i class="fa-solid fa-arrow-up ml-1"></i></span>
                 </div>
 
                 <!-- U-Shaped Glass Vessel for minStack -->
-                <div id="minStackVessel" class="lifo-vessel-min relative w-44 sm:w-48 h-[212px] p-2.5 flex flex-col-reverse items-center justify-start gap-2 overflow-y-auto">
+                <div id="minStackVessel"
+                  class="lifo-vessel-min relative w-44 sm:w-48 h-[212px] p-2.5 flex flex-col-reverse items-center justify-start gap-2 overflow-y-auto">
                   <span class="my-auto text-xs text-slate-500 italic code-font">empty minStack</span>
                 </div>
 
                 <!-- External Ejected Dock on minStack.pop() -->
-                <div id="poppedMinDock" class="hidden absolute top-3 right-3 px-2.5 py-1.5 rounded-xl border border-dashed border-rose-400/80 bg-rose-500/15 flex flex-col items-center select-none">
+                <div id="poppedMinDock"
+                  class="hidden absolute top-3 right-3 px-2.5 py-1.5 rounded-xl border border-dashed border-rose-400/80 bg-rose-500/15 flex flex-col items-center select-none">
                   <span class="text-[8px] code-font text-rose-400 font-bold uppercase">minStack.pop()</span>
                   <span id="poppedMinVal" class="code-font text-sm font-extrabold text-rose-200 line-through">-3</span>
                 </div>
 
-                <span class="text-[10px] code-font text-slate-400 mt-2">Level d stores min(stack[0..d]) in &Omicron;(1)</span>
+                <span class="text-[10px] code-font text-slate-400 mt-2">Level d stores min(stack[0..d]) in
+                  &Omicron;(1)</span>
               </div>
             </div>
 
           </div>
 
           <!-- Live Decision & Invariant Banner -->
-          <div id="decisionBanner" class="p-3.5 rounded-xl bg-white/[0.04] border border-white/10 text-xs flex flex-col sm:flex-row items-center justify-between gap-3 backdrop-blur-md">
+          <div id="decisionBanner"
+            class="p-3.5 rounded-xl bg-white/[0.04] border border-white/10 text-xs flex flex-col sm:flex-row items-center justify-between gap-3 backdrop-blur-md">
             <div class="flex items-center gap-2.5">
               <i id="decisionIcon" class="fa-solid fa-circle-info text-cyan-400 text-base"></i>
-              <span id="decisionText" class="text-slate-200">Ready to execute MinStack operations in O(1) time per call.</span>
+              <span id="decisionText" class="text-slate-200">Ready to execute MinStack operations in O(1) time per
+                call.</span>
             </div>
-            <div id="actionPill" class="hidden text-xs code-font px-3 py-1.5 rounded-lg bg-slate-950/70 border border-white/15 text-cyan-200 font-semibold shrink-0">
+            <div id="actionPill"
+              class="hidden text-xs code-font px-3 py-1.5 rounded-lg bg-slate-950/70 border border-white/15 text-cyan-200 font-semibold shrink-0">
               <!-- e.g. Math.min(-3, -2) = -3 -->
             </div>
           </div>
@@ -497,57 +568,80 @@
               </div>
               <span class="code-font text-slate-200 font-semibold ml-2">MinStack.java</span>
             </div>
-            <span class="text-[11px] text-cyan-300 bg-cyan-500/15 px-2.5 py-0.5 rounded border border-cyan-400/25 code-font">
+            <span
+              class="text-[11px] text-cyan-300 bg-cyan-500/15 px-2.5 py-0.5 rounded border border-cyan-400/25 code-font">
               O(1) All Operations
             </span>
           </div>
 
           <!-- Properly Indented Java Code Lines with Zero-Jump Localized Scroll -->
-          <div id="codeContainer" class="code-font text-xs sm:text-[13px] leading-relaxed text-slate-300 py-3 overflow-x-auto overflow-y-auto max-h-[620px] flex-grow select-none">
-            <div class="code-line" id="line1"><span class="text-slate-500 mr-2"> 1</span><span class="text-indigo-400 font-semibold">import</span> java.util.*;</div>
+          <div id="codeContainer"
+            class="code-font text-xs sm:text-[13px] leading-relaxed text-slate-300 py-3 overflow-x-auto overflow-y-auto max-h-[620px] flex-grow select-none">
+            <div class="code-line" id="line1"><span class="text-slate-500 mr-2"> 1</span><span
+                class="text-indigo-400 font-semibold">import</span> java.util.*;</div>
             <div class="code-line" id="line2"><span class="text-slate-500 mr-2"> 2</span></div>
-            <div class="code-line" id="line3"><span class="text-slate-500 mr-2"> 3</span><span class="text-indigo-400 font-semibold">class</span> <span class="text-amber-300">MinStack</span> {</div>
+            <div class="code-line" id="line3"><span class="text-slate-500 mr-2"> 3</span><span
+                class="text-indigo-400 font-semibold">class</span> <span class="text-amber-300">MinStack</span> {</div>
             <div class="code-line" id="line4"><span class="text-slate-500 mr-2"> 4</span></div>
-            <div class="code-line" id="line5"><span class="text-slate-500 mr-2"> 5</span>    Stack&lt;Integer&gt; stack;</div>
-            <div class="code-line" id="line6"><span class="text-slate-500 mr-2"> 6</span>    Stack&lt;Integer&gt; minStack;</div>
+            <div class="code-line" id="line5"><span class="text-slate-500 mr-2"> 5</span> Stack&lt;Integer&gt; stack;
+            </div>
+            <div class="code-line" id="line6"><span class="text-slate-500 mr-2"> 6</span> Stack&lt;Integer&gt; minStack;
+            </div>
             <div class="code-line" id="line7"><span class="text-slate-500 mr-2"> 7</span></div>
-            <div class="code-line" id="line8"><span class="text-slate-500 mr-2"> 8</span>    <span class="text-indigo-400 font-semibold">public</span> <span class="text-cyan-300">MinStack</span>() {</div>
+            <div class="code-line" id="line8"><span class="text-slate-500 mr-2"> 8</span> <span
+                class="text-indigo-400 font-semibold">public</span> <span class="text-cyan-300">MinStack</span>() {
+            </div>
             <div class="code-line" id="line9"><span class="text-slate-500 mr-2"> 9</span></div>
-            <div class="code-line" id="line10"><span class="text-slate-500 mr-2">10</span>        stack = <span class="text-indigo-400 font-semibold">new</span> Stack&lt;&gt;();</div>
-            <div class="code-line" id="line11"><span class="text-slate-500 mr-2">11</span>        minStack = <span class="text-indigo-400 font-semibold">new</span> Stack&lt;&gt;();</div>
-            <div class="code-line" id="line12"><span class="text-slate-500 mr-2">12</span>    }</div>
+            <div class="code-line" id="line10"><span class="text-slate-500 mr-2">10</span> stack = <span
+                class="text-indigo-400 font-semibold">new</span> Stack&lt;&gt;();</div>
+            <div class="code-line" id="line11"><span class="text-slate-500 mr-2">11</span> minStack = <span
+                class="text-indigo-400 font-semibold">new</span> Stack&lt;&gt;();</div>
+            <div class="code-line" id="line12"><span class="text-slate-500 mr-2">12</span> }</div>
             <div class="code-line" id="line13"><span class="text-slate-500 mr-2">13</span></div>
-            <div class="code-line" id="line14"><span class="text-slate-500 mr-2">14</span>    <span class="text-indigo-400 font-semibold">public void</span> <span class="text-cyan-300">push</span>(<span class="text-indigo-400">int</span> val) {</div>
+            <div class="code-line" id="line14"><span class="text-slate-500 mr-2">14</span> <span
+                class="text-indigo-400 font-semibold">public void</span> <span class="text-cyan-300">push</span>(<span
+                class="text-indigo-400">int</span> val) {</div>
             <div class="code-line" id="line15"><span class="text-slate-500 mr-2">15</span></div>
-            <div class="code-line" id="line16"><span class="text-slate-500 mr-2">16</span>        stack.push(val);</div>
+            <div class="code-line" id="line16"><span class="text-slate-500 mr-2">16</span> stack.push(val);</div>
             <div class="code-line" id="line17"><span class="text-slate-500 mr-2">17</span></div>
-            <div class="code-line" id="line18"><span class="text-slate-500 mr-2">18</span>        <span class="text-indigo-400 font-semibold">if</span> (minStack.isEmpty()) {</div>
-            <div class="code-line" id="line19"><span class="text-slate-500 mr-2">19</span>            minStack.push(val);</div>
-            <div class="code-line" id="line20"><span class="text-slate-500 mr-2">20</span>        } <span class="text-indigo-400 font-semibold">else</span> {</div>
-            <div class="code-line" id="line21"><span class="text-slate-500 mr-2">21</span>            minStack.push(Math.min(val, minStack.peek()));</div>
-            <div class="code-line" id="line22"><span class="text-slate-500 mr-2">22</span>        }</div>
-            <div class="code-line" id="line23"><span class="text-slate-500 mr-2">23</span>    }</div>
+            <div class="code-line" id="line18"><span class="text-slate-500 mr-2">18</span> <span
+                class="text-indigo-400 font-semibold">if</span> (minStack.isEmpty()) {</div>
+            <div class="code-line" id="line19"><span class="text-slate-500 mr-2">19</span> minStack.push(val);</div>
+            <div class="code-line" id="line20"><span class="text-slate-500 mr-2">20</span> } <span
+                class="text-indigo-400 font-semibold">else</span> {</div>
+            <div class="code-line" id="line21"><span class="text-slate-500 mr-2">21</span> minStack.push(Math.min(val,
+              minStack.peek()));</div>
+            <div class="code-line" id="line22"><span class="text-slate-500 mr-2">22</span> }</div>
+            <div class="code-line" id="line23"><span class="text-slate-500 mr-2">23</span> }</div>
             <div class="code-line" id="line24"><span class="text-slate-500 mr-2">24</span></div>
-            <div class="code-line" id="line25"><span class="text-slate-500 mr-2">25</span>    <span class="text-indigo-400 font-semibold">public void</span> <span class="text-cyan-300">pop</span>() {</div>
+            <div class="code-line" id="line25"><span class="text-slate-500 mr-2">25</span> <span
+                class="text-indigo-400 font-semibold">public void</span> <span class="text-cyan-300">pop</span>() {
+            </div>
             <div class="code-line" id="line26"><span class="text-slate-500 mr-2">26</span></div>
-            <div class="code-line" id="line27"><span class="text-slate-500 mr-2">27</span>        stack.pop();</div>
-            <div class="code-line" id="line28"><span class="text-slate-500 mr-2">28</span>        minStack.pop();</div>
-            <div class="code-line" id="line29"><span class="text-slate-500 mr-2">29</span>    }</div>
+            <div class="code-line" id="line27"><span class="text-slate-500 mr-2">27</span> stack.pop();</div>
+            <div class="code-line" id="line28"><span class="text-slate-500 mr-2">28</span> minStack.pop();</div>
+            <div class="code-line" id="line29"><span class="text-slate-500 mr-2">29</span> }</div>
             <div class="code-line" id="line30"><span class="text-slate-500 mr-2">30</span></div>
-            <div class="code-line" id="line31"><span class="text-slate-500 mr-2">31</span>    <span class="text-indigo-400 font-semibold">public int</span> <span class="text-cyan-300">top</span>() {</div>
+            <div class="code-line" id="line31"><span class="text-slate-500 mr-2">31</span> <span
+                class="text-indigo-400 font-semibold">public int</span> <span class="text-cyan-300">top</span>() {</div>
             <div class="code-line" id="line32"><span class="text-slate-500 mr-2">32</span></div>
-            <div class="code-line" id="line33"><span class="text-slate-500 mr-2">33</span>        <span class="text-indigo-400 font-semibold">return</span> stack.peek();</div>
-            <div class="code-line" id="line34"><span class="text-slate-500 mr-2">34</span>    }</div>
+            <div class="code-line" id="line33"><span class="text-slate-500 mr-2">33</span> <span
+                class="text-indigo-400 font-semibold">return</span> stack.peek();</div>
+            <div class="code-line" id="line34"><span class="text-slate-500 mr-2">34</span> }</div>
             <div class="code-line" id="line35"><span class="text-slate-500 mr-2">35</span></div>
-            <div class="code-line" id="line36"><span class="text-slate-500 mr-2">36</span>    <span class="text-indigo-400 font-semibold">public int</span> <span class="text-cyan-300">getMin</span>() {</div>
+            <div class="code-line" id="line36"><span class="text-slate-500 mr-2">36</span> <span
+                class="text-indigo-400 font-semibold">public int</span> <span class="text-cyan-300">getMin</span>() {
+            </div>
             <div class="code-line" id="line37"><span class="text-slate-500 mr-2">37</span></div>
-            <div class="code-line" id="line38"><span class="text-slate-500 mr-2">38</span>        <span class="text-indigo-400 font-semibold">return</span> minStack.peek();</div>
-            <div class="code-line" id="line39"><span class="text-slate-500 mr-2">39</span>    }</div>
+            <div class="code-line" id="line38"><span class="text-slate-500 mr-2">38</span> <span
+                class="text-indigo-400 font-semibold">return</span> minStack.peek();</div>
+            <div class="code-line" id="line39"><span class="text-slate-500 mr-2">39</span> }</div>
             <div class="code-line" id="line40"><span class="text-slate-500 mr-2">40</span>}</div>
           </div>
 
           <!-- Live Step Narrative Box -->
-          <div class="mt-3 p-3 bg-white/[0.04] border border-white/10 rounded-xl flex items-start gap-2.5 backdrop-blur-md">
+          <div
+            class="mt-3 p-3 bg-white/[0.04] border border-white/10 rounded-xl flex items-start gap-2.5 backdrop-blur-md">
             <i class="fa-solid fa-circle-info text-cyan-400 mt-0.5 text-xs"></i>
             <div class="text-xs text-slate-200 leading-relaxed" id="stepDescription">
               Ready to run Min Stack. Click <b>Start</b> or <b>Next</b> to step through.
@@ -568,15 +662,19 @@
         <div class="flex items-center justify-between">
           <div class="flex items-center gap-2">
             <span class="text-amber-400 font-bold"><i class="fa-solid fa-file-lines mr-1.5"></i>Problem Statement</span>
-            <span class="px-2 py-0.5 rounded text-[11px] font-semibold bg-amber-500/20 text-amber-300 border border-amber-400/30">Medium</span>
+            <span
+              class="px-2 py-0.5 rounded text-[11px] font-semibold bg-amber-500/20 text-amber-300 border border-amber-400/30">Medium</span>
           </div>
           <span class="text-xs text-slate-400 font-mono">LeetCode 155</span>
         </div>
 
         <p class="text-xs text-slate-300 leading-relaxed">
-          Design a stack that supports <code class="font-mono text-cyan-300">push</code>, <code class="font-mono text-rose-300">pop</code>, <code class="font-mono text-sky-300">top</code>, and retrieving the minimum element in <b>constant <code class="font-mono">&Omicron;(1)</code> time</b>:
+          Design a stack that supports <code class="font-mono text-cyan-300">push</code>, <code
+            class="font-mono text-rose-300">pop</code>, <code class="font-mono text-sky-300">top</code>, and retrieving
+          the minimum element in <b>constant <code class="font-mono">&Omicron;(1)</code> time</b>:
           <br>&bull; <code class="font-mono">MinStack()</code> initializes the stack object.
-          <br>&bull; <code class="font-mono">void push(int val)</code> pushes the element <code class="font-mono">val</code> onto the stack.
+          <br>&bull; <code class="font-mono">void push(int val)</code> pushes the element <code
+            class="font-mono">val</code> onto the stack.
           <br>&bull; <code class="font-mono">void pop()</code> removes the element on the top of the stack.
           <br>&bull; <code class="font-mono">int top()</code> gets the top element of the stack.
           <br>&bull; <code class="font-mono">int getMin()</code> retrieves the minimum element in the stack.
@@ -592,7 +690,11 @@
         </div>
 
         <div class="text-[11px] text-slate-400">
-          <b>Constraints:</b> <code class="font-mono text-slate-300">-2<sup>31</sup> &le; val &le; 2<sup>31</sup> - 1</code>; <code class="font-mono text-slate-300">pop</code>, <code class="font-mono text-slate-300">top</code>, and <code class="font-mono text-slate-300">getMin</code> are always called on non-empty stacks; at most <code class="font-mono text-slate-300">3 &times; 10<sup>4</sup></code> calls.
+          <b>Constraints:</b> <code
+            class="font-mono text-slate-300">-2<sup>31</sup> &le; val &le; 2<sup>31</sup> - 1</code>; <code
+            class="font-mono text-slate-300">pop</code>, <code class="font-mono text-slate-300">top</code>, and <code
+            class="font-mono text-slate-300">getMin</code> are always called on non-empty stacks; at most <code
+            class="font-mono text-slate-300">3 &times; 10<sup>4</sup></code> calls.
         </div>
       </div>
 
@@ -600,9 +702,12 @@
       <div class="glass-panel rounded-2xl p-5 flex flex-col gap-3">
         <div class="flex items-center justify-between">
           <div class="flex items-center gap-2">
-            <span class="text-cyan-400 font-bold"><i class="fa-solid fa-brain mr-1.5"></i>Algorithm Summary &amp; Dual-Stack Invariant</span>
+            <span class="text-cyan-400 font-bold"><i class="fa-solid fa-brain mr-1.5"></i>Algorithm Summary &amp;
+              Dual-Stack Invariant</span>
           </div>
-          <span class="px-2 py-0.5 rounded text-[11px] font-semibold bg-cyan-500/20 text-cyan-200 border border-cyan-400/30">O(1) Time • O(N) Space</span>
+          <span
+            class="px-2 py-0.5 rounded text-[11px] font-semibold bg-cyan-500/20 text-cyan-200 border border-cyan-400/30">O(1)
+            Time • O(N) Space</span>
         </div>
 
         <div class="space-y-3 text-xs text-slate-300 leading-relaxed">
@@ -610,27 +715,38 @@
             <b class="text-purple-300 flex items-center gap-1.5 mb-1">
               <i class="fa-solid fa-layer-group"></i> Prefix-Minimum Synchronization Invariant:
             </b>
-            Every depth level <code class="font-mono">d</code> in <code class="font-mono text-purple-300 font-semibold">minStack</code> stores the exact minimum of all elements from index <code class="font-mono">0</code> up to <code class="font-mono">d</code> in <code class="font-mono text-cyan-300">stack</code>:
-            <br><code class="font-mono text-emerald-300 font-semibold">minStack[d] = Math.min(stack[d], minStack[d - 1])</code>
+            Every depth level <code class="font-mono">d</code> in <code
+              class="font-mono text-purple-300 font-semibold">minStack</code> stores the exact minimum of all elements
+            from index <code class="font-mono">0</code> up to <code class="font-mono">d</code> in <code
+              class="font-mono text-cyan-300">stack</code>:
+            <br><code
+              class="font-mono text-emerald-300 font-semibold">minStack[d] = Math.min(stack[d], minStack[d - 1])</code>
           </div>
 
           <div class="p-3 bg-cyan-950/25 border border-cyan-400/20 rounded-xl">
             <b class="text-cyan-300 flex items-center gap-1.5 mb-1">
               <i class="fa-solid fa-shield-halved"></i> Why Duplicate Minimums Are Pushed:
             </b>
-            Because <code class="font-mono">minStack</code> always has the <b>exact same height</b> as <code class="font-mono">stack</code>, popping the top element (<code class="font-mono">stack.pop()</code> and <code class="font-mono">minStack.pop()</code>) automatically restores the previous minimum in <code class="font-mono">&Omicron;(1)</code> time without needing any comparison or branching during <code class="font-mono">pop()</code>.
+            Because <code class="font-mono">minStack</code> always has the <b>exact same height</b> as <code
+              class="font-mono">stack</code>, popping the top element (<code class="font-mono">stack.pop()</code> and
+            <code class="font-mono">minStack.pop()</code>) automatically restores the previous minimum in <code
+              class="font-mono">&Omicron;(1)</code> time without needing any comparison or branching during <code
+              class="font-mono">pop()</code>.
           </div>
 
           <div class="grid grid-cols-2 gap-3 pt-1">
             <div class="p-2.5 bg-white/[0.03] rounded-lg border border-white/10">
               <span class="text-[11px] text-slate-400 uppercase font-semibold">Time Complexity</span>
               <div class="text-sm font-bold text-emerald-400 font-mono mt-0.5">&Omicron;(1)</div>
-              <p class="text-[10px] text-slate-400 mt-0.5">Worst-case constant time for <code class="font-mono">push</code>, <code class="font-mono">pop</code>, <code class="font-mono">top</code>, and <code class="font-mono">getMin</code>.</p>
+              <p class="text-[10px] text-slate-400 mt-0.5">Worst-case constant time for <code
+                  class="font-mono">push</code>, <code class="font-mono">pop</code>, <code class="font-mono">top</code>,
+                and <code class="font-mono">getMin</code>.</p>
             </div>
             <div class="p-2.5 bg-white/[0.03] rounded-lg border border-white/10">
               <span class="text-[11px] text-slate-400 uppercase font-semibold">Space Complexity</span>
               <div class="text-sm font-bold text-cyan-400 font-mono mt-0.5">&Omicron;(N)</div>
-              <p class="text-[10px] text-slate-400 mt-0.5">Two parallel stacks storing <code class="font-mono">N</code> elements each (<code class="font-mono">2N = &Omicron;(N)</code>).</p>
+              <p class="text-[10px] text-slate-400 mt-0.5">Two parallel stacks storing <code class="font-mono">N</code>
+                elements each (<code class="font-mono">2N = &Omicron;(N)</code>).</p>
             </div>
           </div>
         </div>
@@ -801,7 +917,7 @@
         gain.connect(audioCtx.destination);
         osc.start();
         osc.stop(audioCtx.currentTime + duration);
-      } catch (e) {}
+      } catch (e) { }
     }
 
     // DOM REFERENCES
@@ -1646,9 +1762,10 @@
       }
     });
 
-    window.onload = function() {
+    window.onload = function () {
       initSimulation(PRESETS[0].ops, false);
     };
   </script>
 </body>
+
 </html>
