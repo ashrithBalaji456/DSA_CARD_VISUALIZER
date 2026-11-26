@@ -1,0 +1,2032 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Car Fleet (LeetCode 853) - Glassmorphic Visualizer</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2064%2064%22%3E%3Cdefs%3E%3ClinearGradient%20id%3D%22bg%22%20x1%3D%220%22%20y1%3D%220%22%20x2%3D%221%22%20y2%3D%221%22%3E%3Cstop%20offset%3D%220%25%22%20stop-color%3D%22%230f172a%22%2F%3E%3Cstop%20offset%3D%22100%25%22%20stop-color%3D%22%23060913%22%2F%3E%3C%2FlinearGradient%3E%3ClinearGradient%20id%3D%22g%22%20x1%3D%220%22%20y1%3D%220%22%20x2%3D%221%22%20y2%3D%221%22%3E%3Cstop%20offset%3D%220%25%22%20stop-color%3D%22%2322d3ee%22%2F%3E%3Cstop%20offset%3D%2255%25%22%20stop-color%3D%22%236366f1%22%2F%3E%3Cstop%20offset%3D%22100%25%22%20stop-color%3D%22%23a855f7%22%2F%3E%3C%2FlinearGradient%3E%3C%2Fdefs%3E%3Crect%20x%3D%222%22%20y%3D%222%22%20width%3D%2260%22%20height%3D%2260%22%20rx%3D%2216%22%20fill%3D%22url(%23bg)%22%20stroke%3D%22url(%23g)%22%20stroke-width%3D%223.5%22%2F%3E%3Cpath%20d%3D%22M20%2042%20L32%2018%20L44%2042%22%20fill%3D%22none%22%20stroke%3D%22url(%23g)%22%20stroke-width%3D%224%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3Cline%20x1%3D%2220%22%20y1%3D%2242%22%20x2%3D%2244%22%20y2%3D%2242%22%20stroke%3D%22%2338bdf8%22%20stroke-width%3D%223%22%20stroke-linecap%3D%22round%22%20opacity%3D%220.55%22%2F%3E%3Ccircle%20cx%3D%2232%22%20cy%3D%2218%22%20r%3D%225.5%22%20fill%3D%22%2322d3ee%22%2F%3E%3Ccircle%20cx%3D%2220%22%20cy%3D%2242%22%20r%3D%225.5%22%20fill%3D%22%236366f1%22%2F%3E%3Ccircle%20cx%3D%2244%22%20cy%3D%2242%22%20r%3D%225.5%22%20fill%3D%22%23a855f7%22%2F%3E%3C%2Fsvg%3E" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: radial-gradient(circle at 14% 16%, #0c192c 0%, #030712 100%);
+      color: #e2e8f0;
+      min-height: 100vh;
+    }
+
+    .code-font {
+      font-family: 'Fira Code', monospace;
+    }
+
+    /* Glassmorphic Surface & Controls */
+    .glass-panel {
+      background: rgba(15, 23, 42, 0.56);
+      backdrop-filter: blur(22px);
+      -webkit-backdrop-filter: blur(22px);
+      border: 1px solid rgba(255, 255, 255, 0.11);
+      box-shadow: 0 20px 45px -15px rgba(0, 0, 0, 0.68), inset 0 1px 0 0 rgba(255, 255, 255, 0.09);
+    }
+
+    .glass-button {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .glass-button:hover:not(:disabled) {
+      background: rgba(255, 255, 255, 0.15);
+      border-color: rgba(255, 255, 255, 0.28);
+      transform: translateY(-1px);
+    }
+    .glass-button:active:not(:disabled) {
+      transform: translateY(1px);
+    }
+    .glass-button:disabled {
+      opacity: 0.35;
+      cursor: not-allowed;
+    }
+
+    /* Code Execution Line Highlight with Exact Preserved Indentation */
+    .code-line {
+      white-space: pre;
+      transition: all 0.2s ease;
+      border-left: 3px solid transparent;
+      padding: 2px 10px;
+    }
+    .code-line.active-line {
+      background: rgba(56, 189, 248, 0.18);
+      border-left: 3px solid #38bdf8;
+      color: #ffffff;
+      box-shadow: inset 0 0 16px rgba(56, 189, 248, 0.15);
+    }
+
+    /* Highway Asphalt & Animated Dashed Lane Divider */
+    .highway-asphalt {
+      background:
+        radial-gradient(ellipse at 50% 0%, rgba(56, 189, 248, 0.10) 0%, transparent 65%),
+        linear-gradient(180deg, rgba(10, 17, 32, 0.92) 0%, rgba(23, 35, 56, 0.78) 50%, rgba(10, 17, 32, 0.95) 100%);
+      border-top: 1.5px solid rgba(255, 255, 255, 0.22);
+      border-bottom: 2px solid rgba(251, 191, 36, 0.48);
+      box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.14),
+        inset 0 -14px 28px rgba(0, 0, 0, 0.6);
+    }
+
+    @keyframes roadScroll {
+      from { background-position: 0 0; }
+      to { background-position: -48px 0; }
+    }
+    .highway-lane-line {
+      background-image: linear-gradient(90deg, rgba(255, 255, 255, 0.32) 50%, transparent 50%);
+      background-size: 48px 2px;
+      background-repeat: repeat-x;
+    }
+    .highway-lane-line.running-road {
+      animation: roadScroll 0.55s linear infinite;
+    }
+
+    /* Crisp Liquid-Glass Car Vehicle Chassis (No transform scale blur) */
+    .car-vehicle {
+      will-change: left, top;
+      transition: top 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .liquid-car-tag {
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.38),
+        0 6px 14px rgba(0, 0, 0, 0.45);
+      transition: background-color 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+    }
+
+    .liquid-car-tag.active-car-tag {
+      background: linear-gradient(180deg, rgba(254, 240, 138, 0.96) 0%, rgba(251, 191, 36, 0.92) 100%);
+      color: #090d16;
+      border-color: #ffffff;
+      box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.8),
+        0 0 18px rgba(251, 191, 36, 0.65);
+    }
+
+    @keyframes wheelSpin {
+      to { transform: rotate(360deg); }
+    }
+    .wheel-spinning {
+      transform-origin: center;
+      transform-box: fill-box;
+      animation: wheelSpin 0.28s linear infinite;
+    }
+
+    @keyframes exhaustPuff {
+      0% { transform: translateX(0) scale(0.65); opacity: 0.75; }
+      100% { transform: translateX(-18px) scale(1.45); opacity: 0; }
+    }
+    .exhaust-puff {
+      animation: exhaustPuff 0.52s ease-out infinite;
+    }
+
+    /* Glassy 2D Matrix Row Card: int[][] cars */
+    .car-matrix-card {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.13);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      transition: border-color 0.25s ease, background 0.25s ease, box-shadow 0.25s ease;
+      will-change: transform;
+    }
+
+    .car-matrix-card.active-car-row {
+      background: linear-gradient(180deg, rgba(251, 191, 36, 0.24) 0%, rgba(245, 158, 11, 0.09) 100%);
+      border-color: rgba(251, 191, 36, 0.95) !important;
+      box-shadow: 0 12px 28px -4px rgba(251, 191, 36, 0.42), inset 0 1px 0 rgba(255, 255, 255, 0.28);
+      z-index: 20;
+    }
+
+    .car-matrix-card.fleet-leader-row {
+      background: linear-gradient(180deg, rgba(16, 185, 129, 0.18) 0%, rgba(5, 150, 105, 0.06) 100%);
+      border-color: rgba(52, 211, 153, 0.65);
+    }
+
+    .car-matrix-card.fleet-merged-row {
+      background: linear-gradient(180deg, rgba(168, 85, 247, 0.16) 0%, rgba(126, 34, 206, 0.05) 100%);
+      border-color: rgba(192, 132, 252, 0.55);
+      border-style: dashed;
+    }
+
+    /* Vertical Open-Topped U-Shaped LIFO Stack<Double> Vessel */
+    .lifo-stack-vessel {
+      background: linear-gradient(180deg, rgba(15, 23, 42, 0.24) 0%, rgba(14, 116, 144, 0.20) 100%);
+      border-left: 2.5px solid rgba(34, 211, 238, 0.78);
+      border-right: 2.5px solid rgba(34, 211, 238, 0.78);
+      border-bottom: 2.5px solid rgba(34, 211, 238, 0.85);
+      border-top: none;
+      border-bottom-left-radius: 18px;
+      border-bottom-right-radius: 18px;
+      box-shadow:
+        inset 0 -16px 32px rgba(34, 211, 238, 0.08),
+        0 14px 30px -10px rgba(0, 0, 0, 0.65);
+    }
+
+    /* Glassy Stacked Fleet Arrival Time Item Inside LIFO Vessel */
+    .stack-time-box {
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      background: linear-gradient(90deg, rgba(16, 185, 129, 0.22) 0%, rgba(34, 211, 238, 0.14) 100%);
+      border: 1px solid rgba(52, 211, 153, 0.72);
+      color: #ecfdf5;
+      transition: all 0.28s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    .stack-time-box.just-pushed {
+      transform: scale(1.04);
+      border-color: rgba(251, 191, 36, 0.95) !important;
+      box-shadow: 0 0 22px rgba(251, 191, 36, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.35);
+    }
+
+    .stack-time-box.merged-peek-glow {
+      background: linear-gradient(90deg, rgba(168, 85, 247, 0.32) 0%, rgba(236, 72, 153, 0.16) 100%) !important;
+      border-color: rgba(192, 132, 252, 0.95) !important;
+      transform: scale(1.04);
+      box-shadow: 0 0 22px rgba(168, 85, 247, 0.55);
+    }
+
+    @keyframes arcDash {
+      to {
+        stroke-dashoffset: -24;
+      }
+    }
+    .transfer-arc-path {
+      stroke-dasharray: 6 6;
+      animation: arcDash 0.8s linear infinite;
+    }
+
+    @keyframes completePulse {
+      0%, 100% { transform: scale(1); filter: drop-shadow(0 0 8px rgba(16, 185, 129, 0.45)); }
+      50% { transform: scale(1.04); filter: drop-shadow(0 0 20px rgba(16, 185, 129, 0.95)); }
+    }
+    .complete-badge-anim {
+      animation: completePulse 0.65s ease-in-out;
+    }
+
+    /* Custom Scrollbars */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: rgba(15, 23, 42, 0.4);
+    }
+    ::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.18);
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(255, 255, 255, 0.3);
+    }
+  </style>
+</head>
+<body class="p-2.5 sm:p-4 lg:px-5 lg:py-4 flex flex-col items-center justify-start min-h-screen">
+
+  <!-- Ambient Glass Glow Orbs -->
+  <div class="fixed top-6 left-1/6 w-96 h-96 bg-cyan-500/14 rounded-full blur-3xl pointer-events-none -z-10"></div>
+  <div class="fixed top-1/3 right-1/6 w-96 h-96 bg-purple-500/14 rounded-full blur-3xl pointer-events-none -z-10"></div>
+  <div class="fixed bottom-12 left-1/2 w-80 h-80 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none -z-10"></div>
+
+  <!-- MAIN WRAPPER -->
+  <div class="w-full max-w-[1560px] flex flex-col gap-5">
+
+    <!-- TOP FROSTED-GLASS CONTROLS DECK -->
+    <header class="glass-panel rounded-2xl p-4 sm:p-5 flex flex-col gap-4 sticky top-3 z-50">
+      <div class="flex flex-wrap items-center justify-between gap-4">
+
+        <!-- Title & Algorithm Metadata -->
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-cyan-500 via-amber-400 to-emerald-400 flex items-center justify-center shadow-lg shadow-cyan-500/25 text-slate-950 font-bold text-lg">
+            <i class="fa-solid fa-car-side"></i>
+          </div>
+          <div>
+            <h1 class="text-lg sm:text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white via-cyan-100 to-emerald-300">
+              Car Fleet
+            </h1>
+            <p class="text-xs text-slate-400 flex items-center gap-2">
+              <span class="inline-block w-2 h-2 rounded-full bg-cyan-400 animate-pulse"></span>
+              LeetCode 853 • Sort by Position + Monotonic Arrival-Time Stack&lt;Double&gt; • &Omicron;(n log n) Time • &Omicron;(n) Space
+            </p>
+          </div>
+        </div>
+
+        <!-- Center Playback Controls: Reset, Previous, Start/Stop, Next -->
+        <div class="flex items-center gap-2 sm:gap-3 bg-white/5 p-1.5 rounded-xl border border-white/10 backdrop-blur-md">
+          <button id="btnReset" class="glass-button text-slate-200 hover:text-white px-3 py-2 rounded-lg text-sm flex items-center gap-1.5" title="Reset to Initial State">
+            <i class="fa-solid fa-rotate-left"></i>
+            <span class="hidden sm:inline">Reset</span>
+          </button>
+          <button id="btnPrev" class="glass-button text-slate-200 hover:text-white px-3 py-2 rounded-lg text-sm flex items-center gap-1.5" title="Previous Step (Left Arrow)">
+            <i class="fa-solid fa-backward-step"></i>
+            <span class="hidden sm:inline">Previous</span>
+          </button>
+          <button id="btnPlay" class="glass-button bg-cyan-500/25 text-cyan-200 hover:bg-cyan-500/35 border-cyan-400/50 px-4 py-2 rounded-lg text-sm font-semibold flex items-center gap-2 shadow-lg shadow-cyan-500/15" title="Start / Stop (Spacebar)">
+            <i class="fa-solid fa-play" id="playIcon"></i>
+            <span id="playText">Start</span>
+          </button>
+          <button id="btnNext" class="glass-button text-slate-200 hover:text-white px-3 py-2 rounded-lg text-sm flex items-center gap-1.5" title="Next Step (Right Arrow)">
+            <span class="hidden sm:inline">Next</span>
+            <i class="fa-solid fa-forward-step"></i>
+          </button>
+        </div>
+
+        <!-- Speed & Audio Controls -->
+        <div class="flex items-center gap-2">
+          <div class="flex items-center bg-white/5 rounded-xl p-1 border border-white/10 text-xs text-slate-300 backdrop-blur-md">
+            <span class="px-2 py-1 text-slate-400"><i class="fa-solid fa-gauge-high mr-1"></i>Speed</span>
+            <button class="speed-btn px-2 py-1 rounded-lg hover:text-white transition" data-speed="1300">0.5x</button>
+            <button class="speed-btn px-2 py-1 rounded-lg bg-cyan-500/30 text-cyan-200 font-semibold transition" data-speed="650">1x</button>
+            <button class="speed-btn px-2 py-1 rounded-lg hover:text-white transition" data-speed="280">2x</button>
+            <button class="speed-btn px-2 py-1 rounded-lg hover:text-white transition" data-speed="110">4x</button>
+          </div>
+          <button id="btnAudio" class="glass-button p-2.5 rounded-xl text-slate-300 hover:text-cyan-300" title="Toggle Sound Effects">
+            <i class="fa-solid fa-volume-high" id="audioIcon"></i>
+          </button>
+        </div>
+
+      </div>
+
+      <!-- Scrubber Slider & Status Badges -->
+      <div class="flex flex-col sm:flex-row items-center gap-3 pt-2 border-t border-white/10">
+        <div class="flex flex-wrap items-center gap-2 text-xs text-slate-300 w-full sm:w-auto shrink-0">
+          <span id="stepCounterBadge" class="code-font px-2.5 py-1 rounded-md bg-white/5 border border-white/10 text-cyan-300">
+            Step: 0 / 0
+          </span>
+          <span id="phaseBadge" class="px-2.5 py-1 rounded-md bg-sky-500/20 border border-sky-400/30 text-sky-200 font-semibold">
+            Ready
+          </span>
+          <span id="targetHeaderBadge" class="px-2.5 py-1 rounded-md bg-amber-500/20 border border-amber-400/30 text-amber-200 font-bold">
+            Target: Mile 12
+          </span>
+          <span id="fleetsHeaderBadge" class="px-2.5 py-1 rounded-md bg-emerald-500/20 border border-emerald-400/30 text-emerald-200 font-bold">
+            Fleets (stack.size): 0
+          </span>
+        </div>
+        <div class="w-full flex items-center gap-3">
+          <input type="range" id="stepScrubber" min="0" max="0" value="0" class="w-full h-1.5 bg-slate-800/80 rounded-lg appearance-none cursor-pointer accent-cyan-400">
+        </div>
+      </div>
+    </header>
+
+    <!-- TEST CASES & CUSTOM (TARGET, POSITION, SPEED) BAR -->
+    <section class="glass-panel rounded-2xl p-4 flex flex-wrap items-center justify-between gap-4">
+      <div class="flex flex-wrap items-center gap-3">
+        <label for="presetSelect" class="text-xs uppercase font-semibold text-slate-300 tracking-wider flex items-center gap-1.5">
+          <i class="fa-solid fa-flask text-cyan-400"></i> Traffic Scenarios:
+        </label>
+        <select id="presetSelect" class="bg-slate-900/75 border border-white/15 text-xs sm:text-sm text-slate-200 rounded-xl px-3 py-2 outline-none focus:border-cyan-400 backdrop-blur-md">
+          <option value="0">1: Example 1 (target=12, pos=[10,8,0,5,3], spd=[2,4,1,1,3] &rarr; 3 fleets)</option>
+          <option value="1">2: Example 2 Single Car (target=10, pos=[3], spd=[3] &rarr; 1 fleet)</option>
+          <option value="2">3: Example 3 Chain Merge (target=100, pos=[0,2,4], spd=[4,2,1] &rarr; 1 fleet)</option>
+          <option value="3">4: Exact Tie at Finish Line (target=10, pos=[6,8], spd=[3,2] &rarr; 1 fleet)</option>
+          <option value="4">5: No Car Catches Up (target=15, pos=[12,9,6,3], spd=[4,3,2,1] &rarr; 4 fleets)</option>
+          <option value="5">6: 5-Car Mega Convoy (target=20, pos=[16,12,8,4,0], spd=[1,2,3,4,5] &rarr; 1 fleet)</option>
+          <option value="6">7: Two Distinct Convoys (target=24, pos=[20,18,10,4], spd=[1,3,2,6] &rarr; 2 fleets)</option>
+          <option value="7">8: Fast Trailer Blocked Early (target=16, pos=[14,2], spd=[1,10] &rarr; 1 fleet)</option>
+          <option value="8">9: Just Misses Catching Up (target=10, pos=[8,0], spd=[1,4] &rarr; 2 fleets)</option>
+          <option value="9">10: Starting Line Zero (target=10, pos=[0,5], spd=[2,1] &rarr; 1 fleet)</option>
+        </select>
+      </div>
+
+      <div class="flex flex-wrap items-center gap-2 flex-grow max-w-2xl">
+        <input type="number" id="customTargetInput" min="1" max="10000" value="12" class="w-20 bg-white/5 border border-white/15 rounded-xl px-2.5 py-2 text-xs text-slate-200 code-font outline-none focus:border-amber-400 backdrop-blur-md" title="Target destination mile">
+        <input type="text" id="customPosInput" placeholder="Positions: 10,8,0,5,3" class="flex-1 min-w-[120px] bg-white/5 border border-white/15 rounded-xl px-3 py-2 text-xs text-slate-200 code-font outline-none focus:border-cyan-400 backdrop-blur-md" title="Unique starting positions">
+        <input type="text" id="customSpdInput" placeholder="Speeds: 2,4,1,1,3" class="flex-1 min-w-[110px] bg-white/5 border border-white/15 rounded-xl px-3 py-2 text-xs text-slate-200 code-font outline-none focus:border-purple-400 backdrop-blur-md" title="Speeds in mph">
+        <button id="btnApplyCustom" class="glass-button text-xs px-4 py-2 rounded-xl text-cyan-300 font-semibold shrink-0">
+          Load Highway
+        </button>
+      </div>
+    </section>
+
+    <!-- MAIN VISUALIZATION & CODE SECTION -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-5">
+
+      <!-- LEFT: LIVE ANIMATED HIGHWAY TRACK, INT[][] CARS MATRIX & LIFO ARRIVAL STACK -->
+      <section class="lg:col-span-7 xl:col-span-8 flex flex-col gap-5">
+
+        <!-- Live Variable Telemetry Cards -->
+        <div class="grid grid-cols-2 sm:grid-cols-5 gap-3">
+
+          <!-- Active Car [position, speed] -->
+          <div class="glass-panel rounded-xl p-3 flex flex-col justify-between border-amber-400/35">
+            <span class="text-[11px] text-slate-400 uppercase font-semibold flex items-center justify-between">
+              Active car[]
+              <i class="fa-solid fa-car text-amber-400 text-[10px]"></i>
+            </span>
+            <div class="flex items-baseline gap-1.5 mt-1.5">
+              <span id="varActiveCar" class="code-font text-base sm:text-lg font-bold text-amber-300">-</span>
+            </div>
+            <span id="varActiveCarSub" class="text-[10px] text-amber-200/75 mt-1 code-font">[pos, speed]</span>
+          </div>
+
+          <!-- Arrival Time Formula: (target - car[0]) / car[1] -->
+          <div class="glass-panel rounded-xl p-3 flex flex-col justify-between border-cyan-400/35">
+            <span class="text-[11px] text-slate-400 uppercase font-semibold flex items-center justify-between">
+              double time
+              <i class="fa-solid fa-stopwatch text-cyan-400 text-[10px]"></i>
+            </span>
+            <div class="flex items-baseline gap-1.5 mt-1.5">
+              <span id="varCarTime" class="code-font text-xl font-bold text-cyan-300">-</span>
+            </div>
+            <span id="varTimeFormula" class="text-[10px] text-cyan-200/75 mt-1 code-font">(target - pos) / spd</span>
+          </div>
+
+          <!-- stack.peek() (Fleet Leader Time Ahead) -->
+          <div class="glass-panel rounded-xl p-3 flex flex-col justify-between border-purple-400/35">
+            <span class="text-[11px] text-slate-400 uppercase font-semibold flex items-center justify-between">
+              stack.peek()
+              <i class="fa-solid fa-eye text-purple-400 text-[10px]"></i>
+            </span>
+            <div class="flex items-baseline gap-1.5 mt-1.5">
+              <span id="varStackPeek" class="code-font text-lg sm:text-xl font-bold text-purple-300">empty</span>
+            </div>
+            <span class="text-[10px] text-purple-200/75 mt-1 code-font">Fleet ahead arrival</span>
+          </div>
+
+          <!-- Condition Check: time > stack.peek() -->
+          <div class="glass-panel rounded-xl p-3 flex flex-col justify-between border-sky-400/35">
+            <span class="text-[11px] text-slate-400 uppercase font-semibold flex items-center justify-between">
+              Catch-Up Check
+              <i class="fa-solid fa-code-branch text-sky-400 text-[10px]"></i>
+            </span>
+            <div class="flex items-baseline gap-1.5 mt-1.5">
+              <span id="varCatchDecision" class="code-font text-sm sm:text-base font-bold text-sky-300">-</span>
+            </div>
+            <span id="varCatchSub" class="text-[10px] text-slate-400 mt-1 code-font">time &gt; stack.peek()</span>
+          </div>
+
+          <!-- Total Car Fleets (stack.size()) -->
+          <div id="fleetsResultCard" class="glass-panel rounded-xl p-3 flex flex-col justify-between border-emerald-400/35 col-span-2 sm:col-span-1">
+            <span class="text-[11px] text-slate-400 uppercase font-semibold flex items-center justify-between">
+              Car Fleets
+              <i class="fa-solid fa-trophy text-emerald-400 text-[10px]"></i>
+            </span>
+            <div class="flex items-baseline gap-1.5 mt-1.5">
+              <span id="varFleetCount" class="code-font text-2xl font-black text-emerald-400">0</span>
+            </div>
+            <span class="text-[10px] text-emerald-300/80 mt-1 code-font">stack.size()</span>
+          </div>
+
+        </div>
+
+        <!-- UNIFIED STAGE: ANIMATED HIGHWAY TRACK, INT[][] CARS MATRIX & LIFO ARRIVAL STACK -->
+        <div id="stageWrapper" class="glass-panel relative rounded-2xl p-4 sm:p-5 flex flex-col gap-5">
+          <!-- SVG Trajectory Arc Overlay for Matrix Sorting & Stack Push/Merge Transfers -->
+          <svg id="transferArcSvg" class="absolute inset-0 w-full h-full pointer-events-none z-30 overflow-visible"></svg>
+
+          <!-- Floating Lift-and-Place Clone Layer -->
+          <div id="flyingCloneLayer" class="absolute inset-0 pointer-events-none z-40"></div>
+
+          <!-- 1. LIVE ANIMATED HIGHWAY RACE TRACK (MILE 0 -> MILE TARGET) -->
+          <div class="flex flex-col gap-2.5">
+            <div class="flex flex-wrap items-center justify-between text-xs pb-2 border-b border-white/10 gap-2">
+              <div class="flex flex-wrap items-center gap-2">
+                <span class="font-semibold text-slate-200 uppercase tracking-wider flex items-center gap-1.5">
+                  <i class="fa-solid fa-road text-amber-400"></i>
+                  Live Highway Track (<span class="code-font text-cyan-300">0</span> &rarr; <span id="highwayTargetLabel" class="code-font text-emerald-300">target = 12</span>)
+                </span>
+                <span id="raceClockBadge" class="code-font text-[11px] px-2.5 py-0.5 rounded-full bg-amber-500/20 border border-amber-400/40 text-amber-200 font-bold">
+                  t = 0.00 hrs
+                </span>
+                <span class="text-[10px] px-2 py-0.5 rounded-full bg-cyan-500/15 border border-cyan-400/30 text-cyan-200 hidden sm:inline-flex items-center gap-1" title="In reality all cars move simultaneously; the Java loop inspects one car's arrival time at a time">
+                  <i class="fa-solid fa-circle-info text-cyan-400"></i> All cars move together in time • Code checks 1 car/step
+                </span>
+              </div>
+
+              <!-- Interactive Car Running Animation Controls -->
+              <div class="flex items-center gap-2">
+                <input type="range" id="raceTimeSlider" min="0" max="100" value="0" class="w-24 sm:w-32 h-1.5 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-amber-400" title="Scrub Highway Race Time">
+                <button id="btnRunCars" class="glass-button bg-emerald-500/20 text-emerald-200 hover:bg-emerald-500/35 border-emerald-400/50 px-3 py-1 rounded-lg text-xs font-bold flex items-center gap-1.5 shadow shadow-emerald-500/15">
+                  <i class="fa-solid fa-flag-checkered" id="raceBtnIcon"></i>
+                  <span id="raceBtnText">Run All Cars</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Highway Asphalt Track Container -->
+            <div id="highwayContainer" class="relative w-full h-[156px] highway-asphalt rounded-xl px-6 sm:px-10 py-3 select-none overflow-hidden">
+              <!-- Start Line (Mile 0) -->
+              <div class="absolute left-6 sm:left-10 top-0 bottom-0 border-l-2 border-dashed border-slate-400/45 flex flex-col justify-between py-1 pointer-events-none">
+                <span class="text-[9px] code-font text-slate-400 -ml-2 bg-slate-950/80 px-1 rounded">0 mi</span>
+              </div>
+
+              <!-- Quarter / Mid / Three-Quarter Mile Markers -->
+              <div id="mileMarkersLayer" class="absolute inset-y-0 left-6 right-6 sm:left-10 sm:right-10 pointer-events-none">
+                <!-- Populated dynamically -->
+              </div>
+
+              <!-- Checkered Finish Line Gate at Target Mile -->
+              <div class="absolute right-6 sm:right-10 top-0 bottom-0 border-r-2 border-emerald-400/85 bg-gradient-to-l from-emerald-500/15 to-transparent w-8 flex flex-col items-end justify-between py-1 pr-1 pointer-events-none">
+                <span class="text-[9px] code-font text-emerald-300 font-extrabold bg-slate-950/90 px-1.5 py-0.2 rounded border border-emerald-400/50 whitespace-nowrap">
+                  <i class="fa-solid fa-flag-checkered mr-1"></i><span id="finishMileTag">12</span> mi
+                </span>
+                <span class="text-[8px] code-font text-emerald-300/80 uppercase font-bold">TARGET</span>
+              </div>
+
+              <!-- Animated Road Center Dashed Line -->
+              <div id="roadLaneDivider" class="highway-lane-line absolute left-6 right-6 sm:left-10 sm:right-10 top-1/2 -translate-y-1/2 h-[2px] pointer-events-none"></div>
+
+              <!-- Fleet Convoy Merge Halo Layer -->
+              <div id="fleetConvoysLayer" class="absolute inset-y-0 left-6 right-6 sm:left-10 sm:right-10 pointer-events-none z-10"></div>
+
+              <!-- Running Cars Layer -->
+              <div id="carsTrackLayer" class="relative w-full h-full z-20">
+                <!-- Populated dynamically with glassy vector cars -->
+              </div>
+            </div>
+          </div>
+
+          <!-- 2. 2D MATRIX INT[][] CARS & VERTICAL LIFO STACK<DOUBLE> VESSEL -->
+          <div class="grid grid-cols-1 md:grid-cols-12 gap-5 items-stretch pt-1">
+
+            <!-- Left (7 Cols): 2D Array int[][] cars = new int[n][2] -->
+            <div class="md:col-span-7 flex flex-col gap-2.5">
+              <div class="flex flex-wrap items-center justify-between text-xs pb-1.5 border-b border-white/10 gap-1">
+                <span class="font-semibold text-slate-200 uppercase tracking-wider flex items-center gap-1.5">
+                  <i class="fa-solid fa-table-cells text-cyan-400"></i>
+                  2D Pairs Matrix: <span class="code-font text-white">int[][] cars</span>
+                </span>
+                <span id="carsOrderTag" class="code-font text-[10px] px-2 py-0.5 rounded bg-amber-500/15 border border-amber-400/35 text-amber-200">
+                  Unsorted Input Order
+                </span>
+              </div>
+
+              <div id="matrixScrollContainer" class="relative flex-1 min-h-[245px] p-3.5 rounded-xl bg-white/[0.02] border border-white/10 flex flex-col justify-center overflow-x-auto">
+                <div id="carsMatrixArena" class="w-full flex items-center justify-center gap-2 sm:gap-2.5 min-h-[188px]">
+                  <!-- Populated dynamically with glassy [pos, speed] matrix column cards & speed bars -->
+                </div>
+              </div>
+            </div>
+
+            <!-- Right (5 Cols): Open-Topped Vertical LIFO Stack<Double> Vessel -->
+            <div class="md:col-span-5 flex flex-col gap-2.5">
+              <div class="flex items-center justify-between text-xs pb-1.5 border-b border-white/10">
+                <span class="font-semibold text-emerald-300 uppercase tracking-wider flex items-center gap-1.5">
+                  <i class="fa-solid fa-layer-group text-emerald-400"></i>
+                  Fleet Stack: <span class="code-font text-white">Stack&lt;Double&gt;</span>
+                </span>
+                <span id="stackBadgePill" class="code-font text-[10px] px-2 py-0.5 rounded bg-emerald-500/15 border border-emerald-400/35 text-emerald-200">
+                  0 fleets
+                </span>
+              </div>
+
+              <div class="relative flex-1 min-h-[245px] p-3.5 rounded-xl bg-white/[0.015] border border-white/10 flex flex-col items-center justify-end">
+                <!-- Open Mouth Entry Header -->
+                <div class="w-44 sm:w-48 flex items-center justify-between text-[9px] code-font text-slate-400 pb-1.5 px-1">
+                  <span class="text-emerald-300 font-bold"><i class="fa-solid fa-arrow-down mr-1"></i>push(time)</span>
+                  <span>OPEN TOP</span>
+                  <span class="text-purple-300 font-bold">peek()</span>
+                </div>
+
+                <!-- U-Shaped Glass Vessel for Fleet Arrival Times -->
+                <div id="stackVessel" class="lifo-stack-vessel relative w-44 sm:w-48 h-[186px] p-2.5 flex flex-col-reverse items-center justify-start gap-2 overflow-y-auto">
+                  <span class="my-auto text-xs text-slate-500 italic code-font">empty stack</span>
+                </div>
+
+                <span class="text-[10px] code-font text-slate-400 mt-2">Stores leader arrival time of each fleet</span>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Live Decision & Formula Banner -->
+          <div id="decisionBanner" class="p-3.5 rounded-xl bg-white/[0.04] border border-white/10 text-xs flex flex-col sm:flex-row items-center justify-between gap-3 backdrop-blur-md">
+            <div class="flex items-center gap-2.5">
+              <i id="decisionIcon" class="fa-solid fa-circle-info text-cyan-400 text-base"></i>
+              <span id="decisionText" class="text-slate-200">Ready to pair positions with speeds, sort closest-to-target first, and count distinct car fleets.</span>
+            </div>
+            <div id="actionPill" class="hidden text-xs code-font px-3 py-1.5 rounded-lg bg-slate-950/70 border border-white/15 text-emerald-200 font-semibold shrink-0">
+              <!-- e.g. time = (12 - 10) / 2 = 1.00 -->
+            </div>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- RIGHT: SYNCHRONIZED & PROPERLY INDENTED JAVA CODE CONTAINER -->
+      <section class="lg:col-span-5 xl:col-span-4 flex flex-col gap-4">
+
+        <div class="glass-panel rounded-2xl p-4 flex flex-col h-full">
+          <div class="flex items-center justify-between pb-3 border-b border-white/10 text-xs">
+            <div class="flex items-center gap-2">
+              <div class="flex gap-1.5">
+                <span class="w-3 h-3 rounded-full bg-rose-500/80 inline-block"></span>
+                <span class="w-3 h-3 rounded-full bg-amber-500/80 inline-block"></span>
+                <span class="w-3 h-3 rounded-full bg-emerald-500/80 inline-block"></span>
+              </div>
+              <span class="code-font text-slate-200 font-semibold ml-2">Solution.java</span>
+            </div>
+            <span class="text-[11px] text-cyan-300 bg-cyan-500/15 px-2.5 py-0.5 rounded border border-cyan-400/25 code-font">
+              Sort + Monotonic Stack
+            </span>
+          </div>
+
+          <!-- Properly Indented Java Code Lines with Zero-Jump Localized Scroll -->
+          <div id="codeContainer" class="code-font text-xs sm:text-[13px] leading-relaxed text-slate-300 py-3 overflow-x-auto overflow-y-auto max-h-[640px] flex-grow select-none">
+            <div class="code-line" id="line1"><span class="text-slate-500 mr-2"> 1</span><span class="text-indigo-400 font-semibold">import</span> java.util.*;</div>
+            <div class="code-line" id="line2"><span class="text-slate-500 mr-2"> 2</span></div>
+            <div class="code-line" id="line3"><span class="text-slate-500 mr-2"> 3</span><span class="text-indigo-400 font-semibold">class</span> <span class="text-amber-300">Solution</span> {</div>
+            <div class="code-line" id="line4"><span class="text-slate-500 mr-2"> 4</span>    <span class="text-indigo-400 font-semibold">public int</span> <span class="text-cyan-300">carFleet</span>(<span class="text-indigo-400">int</span> target, <span class="text-indigo-400">int</span>[] position, <span class="text-indigo-400">int</span>[] speed) {</div>
+            <div class="code-line" id="line5"><span class="text-slate-500 mr-2"> 5</span></div>
+            <div class="code-line" id="line6"><span class="text-slate-500 mr-2"> 6</span>        <span class="text-indigo-400 font-semibold">int</span> n = position.length;</div>
+            <div class="code-line" id="line7"><span class="text-slate-500 mr-2"> 7</span></div>
+            <div class="code-line" id="line8"><span class="text-slate-500 mr-2"> 8</span>        <span class="text-slate-500 italic">// Each row stores: [position, speed]</span></div>
+            <div class="code-line" id="line9"><span class="text-slate-500 mr-2"> 9</span>        <span class="text-indigo-400 font-semibold">int</span>[][] cars = <span class="text-indigo-400 font-semibold">new int</span>[n][<span class="text-rose-400">2</span>];</div>
+            <div class="code-line" id="line10"><span class="text-slate-500 mr-2">10</span></div>
+            <div class="code-line" id="line11"><span class="text-slate-500 mr-2">11</span>        <span class="text-indigo-400 font-semibold">for</span> (<span class="text-indigo-400">int</span> i = <span class="text-rose-400">0</span>; i &lt; n; i++) {</div>
+            <div class="code-line" id="line12"><span class="text-slate-500 mr-2">12</span>            cars[i][<span class="text-rose-400">0</span>] = position[i];</div>
+            <div class="code-line" id="line13"><span class="text-slate-500 mr-2">13</span>            cars[i][<span class="text-rose-400">1</span>] = speed[i];</div>
+            <div class="code-line" id="line14"><span class="text-slate-500 mr-2">14</span>        }</div>
+            <div class="code-line" id="line15"><span class="text-slate-500 mr-2">15</span></div>
+            <div class="code-line" id="line16"><span class="text-slate-500 mr-2">16</span>        <span class="text-slate-500 italic">// Sort by position, closest to target first</span></div>
+            <div class="code-line" id="line17"><span class="text-slate-500 mr-2">17</span>        Arrays.sort(cars, (a, b) -&gt; Integer.compare(b[<span class="text-rose-400">0</span>], a[<span class="text-rose-400">0</span>]));</div>
+            <div class="code-line" id="line18"><span class="text-slate-500 mr-2">18</span></div>
+            <div class="code-line" id="line19"><span class="text-slate-500 mr-2">19</span>        Stack&lt;Double&gt; stack = <span class="text-indigo-400 font-semibold">new</span> Stack&lt;&gt;();</div>
+            <div class="code-line" id="line20"><span class="text-slate-500 mr-2">20</span></div>
+            <div class="code-line" id="line21"><span class="text-slate-500 mr-2">21</span>        <span class="text-indigo-400 font-semibold">for</span> (<span class="text-indigo-400">int</span>[] car : cars) {</div>
+            <div class="code-line" id="line22"><span class="text-slate-500 mr-2">22</span></div>
+            <div class="code-line" id="line23"><span class="text-slate-500 mr-2">23</span>            <span class="text-indigo-400 font-semibold">double</span> time = (<span class="text-indigo-400">double</span>) (target - car[<span class="text-rose-400">0</span>]) / car[<span class="text-rose-400">1</span>];</div>
+            <div class="code-line" id="line24"><span class="text-slate-500 mr-2">24</span></div>
+            <div class="code-line" id="line25"><span class="text-slate-500 mr-2">25</span>            <span class="text-slate-500 italic">// This car cannot catch the fleet ahead</span></div>
+            <div class="code-line" id="line26"><span class="text-slate-500 mr-2">26</span>            <span class="text-indigo-400 font-semibold">if</span> (stack.isEmpty() || time &gt; stack.peek()) {</div>
+            <div class="code-line" id="line27"><span class="text-slate-500 mr-2">27</span>                stack.push(time);</div>
+            <div class="code-line" id="line28"><span class="text-slate-500 mr-2">28</span>            }</div>
+            <div class="code-line" id="line29"><span class="text-slate-500 mr-2">29</span></div>
+            <div class="code-line" id="line30"><span class="text-slate-500 mr-2">30</span>            <span class="text-slate-500 italic">// Otherwise, it joins the fleet ahead</span></div>
+            <div class="code-line" id="line31"><span class="text-slate-500 mr-2">31</span>        }</div>
+            <div class="code-line" id="line32"><span class="text-slate-500 mr-2">32</span></div>
+            <div class="code-line" id="line33"><span class="text-slate-500 mr-2">33</span>        <span class="text-indigo-400 font-semibold">return</span> stack.size();</div>
+            <div class="code-line" id="line34"><span class="text-slate-500 mr-2">34</span>    }</div>
+            <div class="code-line" id="line35"><span class="text-slate-500 mr-2">35</span>}</div>
+          </div>
+
+          <!-- Live Step Narrative Box -->
+          <div class="mt-3 p-3 bg-white/[0.04] border border-white/10 rounded-xl flex items-start gap-2.5 backdrop-blur-md">
+            <i class="fa-solid fa-circle-info text-cyan-400 mt-0.5 text-xs"></i>
+            <div class="text-xs text-slate-200 leading-relaxed" id="stepDescription">
+              Ready to run Car Fleet. Click <b>Start</b> or <b>Next</b> to step through.
+            </div>
+          </div>
+
+        </div>
+
+      </section>
+
+    </div>
+
+    <!-- BOTTOM SECTION: PROBLEM STATEMENT & ARCHITECTURAL SUMMARY -->
+    <footer class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-2">
+
+      <!-- Problem Statement Card -->
+      <div class="glass-panel rounded-2xl p-5 flex flex-col gap-3">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <span class="text-amber-400 font-bold"><i class="fa-solid fa-file-lines mr-1.5"></i>Problem Statement</span>
+            <span class="px-2 py-0.5 rounded text-[11px] font-semibold bg-amber-500/20 text-amber-300 border border-amber-400/30">Medium</span>
+          </div>
+          <span class="text-xs text-slate-400 font-mono">LeetCode 853</span>
+        </div>
+
+        <p class="text-xs text-slate-300 leading-relaxed">
+          There are <code class="font-mono text-cyan-300">n</code> cars at given miles away from the starting mile <code class="font-mono">0</code>, traveling to reach the mile <code class="font-mono text-emerald-300">target</code>. You are given two integer arrays <code class="font-mono text-cyan-300">position</code> and <code class="font-mono text-purple-300">speed</code>, both of length <code class="font-mono">n</code>.
+          <br><br>
+          A car <b>cannot pass</b> another car, but it can catch up and then travel next to it at the speed of the slower car. A <b>car fleet</b> is a single car or a group of cars driving next to each other (speed = minimum speed in the fleet). If a car catches up to a fleet right at <code class="font-mono">target</code>, it is still considered part of that fleet. Return the <b>number of car fleets</b> that will arrive at the destination.
+        </p>
+
+        <div class="space-y-2 pt-2 border-t border-white/10 text-xs text-slate-300">
+          <div class="bg-white/[0.03] p-2.5 rounded-lg border border-white/10 font-mono">
+            <span class="text-slate-400">Example 1:</span>
+            <b>Input:</b> target = 12, position = [10,8,0,5,3], speed = [2,4,1,1,3] &rarr; <b>Output:</b> <span class="text-emerald-400 font-bold">3</span>
+            <div class="text-[11px] text-slate-400 font-sans mt-0.5">[10,2] &amp; [8,4] meet at 12; [0,1] travels alone; [5,1] &amp; [3,3] meet at 6.</div>
+          </div>
+          <div class="bg-white/[0.03] p-2.5 rounded-lg border border-white/10 font-mono grid grid-cols-1 sm:grid-cols-2 gap-1.5">
+            <div><span class="text-slate-400">Example 2:</span> target=10, [3], [3] &rarr; <span class="text-emerald-400 font-bold">1</span></div>
+            <div><span class="text-slate-400">Example 3:</span> target=100, [0,2,4], [4,2,1] &rarr; <span class="text-emerald-400 font-bold">1</span></div>
+          </div>
+        </div>
+
+        <div class="text-[11px] text-slate-400">
+          <b>Constraints:</b> <code class="font-mono text-slate-300">1 &le; n &le; 10<sup>5</sup></code>, <code class="font-mono text-slate-300">0 &lt; target &le; 10<sup>6</sup></code>, <code class="font-mono text-slate-300">0 &le; position[i] &lt; target</code> (unique), <code class="font-mono text-slate-300">0 &lt; speed[i] &le; 10<sup>6</sup></code>.
+        </div>
+      </div>
+
+      <!-- Algorithm Summary & Monotonic Arrival-Time Stack Proof Card -->
+      <div class="glass-panel rounded-2xl p-5 flex flex-col gap-3">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <span class="text-cyan-400 font-bold"><i class="fa-solid fa-brain mr-1.5"></i>Algorithm Summary &amp; Fleet Catch-Up Proof</span>
+          </div>
+          <span class="px-2 py-0.5 rounded text-[11px] font-semibold bg-cyan-500/20 text-cyan-200 border border-cyan-400/30">O(N log N) Time • O(N) Space</span>
+        </div>
+
+        <div class="space-y-3 text-xs text-slate-300 leading-relaxed">
+          <div class="p-3 bg-cyan-950/30 border border-cyan-400/25 rounded-xl">
+            <b class="text-cyan-300 flex items-center gap-1.5 mb-1">
+              <i class="fa-solid fa-arrow-down-9-1"></i> Why Sort Cars Descending by Starting Position?
+            </b>
+            Because cars cannot pass one another, a trailing car's behavior is determined <b>strictly by the fleet immediately ahead of it</b>. Sorting by <code class="font-mono">position</code> descending (<code class="font-mono">Integer.compare(b[0], a[0])</code>) lets us process cars from front to back.
+          </div>
+
+          <div class="p-3 bg-purple-950/25 border border-purple-400/20 rounded-xl">
+            <b class="text-purple-300 flex items-center gap-1.5 mb-1">
+              <i class="fa-solid fa-stopwatch"></i> Arrival-Time Comparison Rule (<code class="font-mono">time &gt; stack.peek()</code>):
+            </b>
+            Each car's unhindered arrival time is <code class="font-mono text-cyan-300">time = (double)(target - pos) / speed</code>:
+            <ul class="list-disc list-inside mt-1 space-y-0.5 text-slate-300">
+              <li>If <code class="font-mono text-amber-300">time &le; stack.peek()</code>: The trailing car reaches <code class="font-mono">target</code> earlier or simultaneously, so it <b>catches up and merges</b> into the fleet ahead (no push).</li>
+              <li>If <code class="font-mono text-emerald-300">time &gt; stack.peek()</code>: It is too slow to catch the fleet ahead, so it forms a <b>new independent fleet</b> (<code class="font-mono">stack.push(time)</code>).</li>
+            </ul>
+          </div>
+
+          <div class="grid grid-cols-2 gap-3 pt-1">
+            <div class="p-2.5 bg-white/[0.03] rounded-lg border border-white/10">
+              <span class="text-[11px] text-slate-400 uppercase font-semibold">Time Complexity</span>
+              <div class="text-sm font-bold text-emerald-400 font-mono mt-0.5">&Omicron;(N log N)</div>
+              <p class="text-[10px] text-slate-400 mt-0.5">Dominated by sorting <code class="font-mono">N</code> pairs in <code class="font-mono">Arrays.sort()</code>, followed by a single <code class="font-mono">&Omicron;(N)</code> scan.</p>
+            </div>
+            <div class="p-2.5 bg-white/[0.03] rounded-lg border border-white/10">
+              <span class="text-[11px] text-slate-400 uppercase font-semibold">Space Complexity</span>
+              <div class="text-sm font-bold text-cyan-400 font-mono mt-0.5">&Omicron;(N)</div>
+              <p class="text-[10px] text-slate-400 mt-0.5">To store the <code class="font-mono">int[n][2]</code> pairs matrix and up to <code class="font-mono">N</code> fleet times in <code class="font-mono">stack</code>.</p>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+    </footer>
+
+  </div>
+
+  <!-- JAVASCRIPT SIMULATION ENGINE WITH LIVE HIGHWAY CAR RACE, FLIP SORTING & MONOTONIC STACK -->
+  <script>
+    // 10 COMPREHENSIVE TRAFFIC SCENARIOS
+    const PRESETS = [
+      { name: "1: Example 1 (target=12, pos=[10,8,0,5,3], spd=[2,4,1,1,3])", target: 12, position: [10, 8, 0, 5, 3], speed: [2, 4, 1, 1, 3] },
+      { name: "2: Example 2 Single Car (target=10, pos=[3], spd=[3])", target: 10, position: [3], speed: [3] },
+      { name: "3: Example 3 Chain Merge (target=100, pos=[0,2,4], spd=[4,2,1])", target: 100, position: [0, 2, 4], speed: [4, 2, 1] },
+      { name: "4: Exact Tie at Finish Line (target=10, pos=[6,8], spd=[3,2])", target: 10, position: [6, 8], speed: [3, 2] },
+      { name: "5: No Car Catches Up (target=15, pos=[12,9,6,3], spd=[4,3,2,1])", target: 15, position: [12, 9, 6, 3], speed: [4, 3, 2, 1] },
+      { name: "6: 5-Car Mega Convoy (target=20, pos=[16,12,8,4,0], spd=[1,2,3,4,5])", target: 20, position: [16, 12, 8, 4, 0], speed: [1, 2, 3, 4, 5] },
+      { name: "7: Two Distinct Convoys (target=24, pos=[20,18,10,4], spd=[1,3,2,6])", target: 24, position: [20, 18, 10, 4], speed: [1, 3, 2, 6] },
+      { name: "8: Fast Trailer Blocked Early (target=16, pos=[14,2], spd=[1,10])", target: 16, position: [14, 2], speed: [1, 10] },
+      { name: "9: Just Misses Catching Up (target=10, pos=[8,0], spd=[1,4])", target: 10, position: [8, 0], speed: [1, 4] },
+      { name: "10: Starting Line Zero (target=10, pos=[0,5], spd=[2,1])", target: 10, position: [0, 5], speed: [2, 1] }
+    ];
+
+    // DISTINCT CAR VEHICLE COLOR PALETTE
+    const CAR_THEMES = [
+      { id: 'cyan', topHex: '#a5f3fc', midHex: '#06b6d4', botHex: '#0e7490', glow: 'rgba(34, 211, 238, 0.55)', pill: 'bg-cyan-500/25 border-cyan-300/70 text-cyan-100', bar: 'from-cyan-600 to-cyan-400 border-cyan-100' },
+      { id: 'purple', topHex: '#f3e8ff', midHex: '#a855f7', botHex: '#6b21a8', glow: 'rgba(192, 132, 252, 0.55)', pill: 'bg-purple-500/25 border-purple-300/70 text-purple-100', bar: 'from-purple-600 to-purple-400 border-purple-100' },
+      { id: 'amber', topHex: '#fef3c7', midHex: '#f59e0b', botHex: '#b45309', glow: 'rgba(251, 191, 36, 0.55)', pill: 'bg-amber-500/25 border-amber-300/70 text-amber-100', bar: 'from-amber-600 to-amber-400 border-amber-100' },
+      { id: 'emerald', topHex: '#d1fae5', midHex: '#10b981', botHex: '#047857', glow: 'rgba(52, 211, 153, 0.55)', pill: 'bg-emerald-500/25 border-emerald-300/70 text-emerald-100', bar: 'from-emerald-600 to-emerald-400 border-emerald-100' },
+      { id: 'pink', topHex: '#fce7f3', midHex: '#ec4899', botHex: '#9d174d', glow: 'rgba(244, 114, 182, 0.55)', pill: 'bg-pink-500/25 border-pink-300/70 text-pink-100', bar: 'from-pink-600 to-pink-400 border-pink-100' },
+      { id: 'blue', topHex: '#dbeafe', midHex: '#3b82f6', botHex: '#1d4ed8', glow: 'rgba(96, 165, 250, 0.55)', pill: 'bg-blue-500/25 border-blue-300/70 text-blue-100', bar: 'from-blue-600 to-blue-400 border-blue-100' }
+    ];
+
+    function getCarTheme(origIdx) {
+      return CAR_THEMES[origIdx % CAR_THEMES.length];
+    }
+
+    // UNIFIED EMERALD-GREEN LIQUID GLASS THEME FOR MERGED FLEET CONVOYS
+    const FLEET_MERGED_THEME = {
+      id: 'fleet_emerald',
+      topHex: '#d1fae5',
+      midHex: '#10b981',
+      botHex: '#047857',
+      glow: 'rgba(52, 211, 153, 0.65)',
+      pill: 'bg-emerald-500/30 border-emerald-300/85 text-emerald-100',
+      bar: 'from-emerald-600 to-emerald-400 border-emerald-100'
+    };
+
+    // APPLICATION STATE
+    let currentTarget = PRESETS[0].target;
+    let currentPos = [...PRESETS[0].position];
+    let currentSpd = [...PRESETS[0].speed];
+    let steps = [];
+    let currentStepIdx = 0;
+    let isPlaying = false;
+    let playInterval = null;
+    let playSpeed = 650;
+    let audioEnabled = true;
+
+    // HIGHWAY RACE & STEP MOMENTUM TWEEN STATE
+    let isRaceRunning = false;
+    let raceRafId = null;
+    let stepTweenRafId = null;
+    let raceCurrentTime = 0;
+    let raceMaxTime = 1;
+    let lastRaceFrameTs = null;
+    let highwayDomSignature = '';
+
+    // WEB AUDIO SYNTHESIZER
+    let audioCtx = null;
+    function initAudio() {
+      if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      }
+    }
+    function playTone(freq = 440, type = 'sine', duration = 0.08, vol = 0.035) {
+      if (!audioEnabled) return;
+      try {
+        initAudio();
+        if (audioCtx.state === 'suspended') {
+          audioCtx.resume();
+        }
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = type;
+        osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+        gain.gain.setValueAtTime(vol, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + duration);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + duration);
+      } catch (e) {}
+    }
+
+    // DOM REFERENCES
+    const btnPlay = document.getElementById('btnPlay');
+    const playIcon = document.getElementById('playIcon');
+    const playText = document.getElementById('playText');
+    const btnPrev = document.getElementById('btnPrev');
+    const btnNext = document.getElementById('btnNext');
+    const btnReset = document.getElementById('btnReset');
+    const btnAudio = document.getElementById('btnAudio');
+    const audioIcon = document.getElementById('audioIcon');
+    const presetSelect = document.getElementById('presetSelect');
+    const customTargetInput = document.getElementById('customTargetInput');
+    const customPosInput = document.getElementById('customPosInput');
+    const customSpdInput = document.getElementById('customSpdInput');
+    const btnApplyCustom = document.getElementById('btnApplyCustom');
+    const stepScrubber = document.getElementById('stepScrubber');
+    const stepCounterBadge = document.getElementById('stepCounterBadge');
+    const phaseBadge = document.getElementById('phaseBadge');
+    const targetHeaderBadge = document.getElementById('targetHeaderBadge');
+    const fleetsHeaderBadge = document.getElementById('fleetsHeaderBadge');
+
+    const varActiveCar = document.getElementById('varActiveCar');
+    const varActiveCarSub = document.getElementById('varActiveCarSub');
+    const varCarTime = document.getElementById('varCarTime');
+    const varTimeFormula = document.getElementById('varTimeFormula');
+    const varStackPeek = document.getElementById('varStackPeek');
+    const varCatchDecision = document.getElementById('varCatchDecision');
+    const varCatchSub = document.getElementById('varCatchSub');
+    const fleetsResultCard = document.getElementById('fleetsResultCard');
+    const varFleetCount = document.getElementById('varFleetCount');
+
+    const stageWrapper = document.getElementById('stageWrapper');
+    const transferArcSvg = document.getElementById('transferArcSvg');
+    const flyingCloneLayer = document.getElementById('flyingCloneLayer');
+    const highwayTargetLabel = document.getElementById('highwayTargetLabel');
+    const raceClockBadge = document.getElementById('raceClockBadge');
+    const raceTimeSlider = document.getElementById('raceTimeSlider');
+    const btnRunCars = document.getElementById('btnRunCars');
+    const raceBtnIcon = document.getElementById('raceBtnIcon');
+    const raceBtnText = document.getElementById('raceBtnText');
+    const highwayContainer = document.getElementById('highwayContainer');
+    const mileMarkersLayer = document.getElementById('mileMarkersLayer');
+    const finishMileTag = document.getElementById('finishMileTag');
+    const roadLaneDivider = document.getElementById('roadLaneDivider');
+    const fleetConvoysLayer = document.getElementById('fleetConvoysLayer');
+    const carsTrackLayer = document.getElementById('carsTrackLayer');
+
+    const carsOrderTag = document.getElementById('carsOrderTag');
+    const matrixScrollContainer = document.getElementById('matrixScrollContainer');
+    const carsMatrixArena = document.getElementById('carsMatrixArena');
+    const stackBadgePill = document.getElementById('stackBadgePill');
+    const stackVessel = document.getElementById('stackVessel');
+
+    const decisionBanner = document.getElementById('decisionBanner');
+    const decisionIcon = document.getElementById('decisionIcon');
+    const decisionText = document.getElementById('decisionText');
+    const actionPill = document.getElementById('actionPill');
+    const codeContainer = document.getElementById('codeContainer');
+    const stepDescription = document.getElementById('stepDescription');
+
+    // FORMAT ARRIVAL TIME CLEANLY
+    function formatTime(t) {
+      if (Number.isInteger(t)) return t.toFixed(1);
+      return parseFloat(t.toFixed(2)).toString();
+    }
+
+    // COMPUTE NO-PASSING HIGHWAY POSITIONS & FLEET MERGES AT TIMESTAMP elapsedT
+    function computeHighwayStateAtTime(target, posArr, spdArr, elapsedT) {
+      const sortedCars = posArr
+        .map((pos, origIdx) => ({
+          origIdx,
+          pos,
+          spd: spdArr[origIdx],
+          arrivalTime: (target - pos) / spdArr[origIdx]
+        }))
+        .sort((a, b) => b.pos - a.pos);
+
+      const maxTime = Math.max(0.5, ...sortedCars.map(c => c.arrivalTime));
+      const states = [];
+
+      sortedCars.forEach((car, idx) => {
+        const unhinderedX = car.pos + car.spd * elapsedT;
+        let currentX = Math.min(target, unhinderedX);
+        let fleetId = 1;
+        let convoyOffset = 0;
+        let isMergedWithAhead = false;
+
+        if (idx > 0) {
+          const ahead = states[idx - 1];
+          if (unhinderedX >= ahead.currentX - 1e-6) {
+            currentX = ahead.currentX;
+            fleetId = ahead.fleetId;
+            convoyOffset = ahead.convoyOffset + 1;
+            isMergedWithAhead = true;
+          } else {
+            fleetId = ahead.fleetId + 1;
+            convoyOffset = 0;
+          }
+        }
+
+        states.push({
+          origIdx: car.origIdx,
+          pos: car.pos,
+          spd: car.spd,
+          arrivalTime: car.arrivalTime,
+          currentX,
+          fleetId,
+          convoyOffset,
+          isMergedWithAhead,
+          arrived: currentX >= target - 1e-6
+        });
+      });
+
+      return { states, maxTime };
+    }
+
+    // RENDER CRISP LIQUID-GLASS VECTOR CAR SVG (High-DPI geometricPrecision, specular sheen & glass canopy)
+    function buildLiquidGlassCarSvg(theme, isHighlighted, spinning) {
+      const uid = `${theme.id}_${isHighlighted ? 'hi' : 'std'}_${Math.random().toString(36).slice(2, 6)}`;
+      const topStop = isHighlighted ? '#fef9c3' : theme.topHex;
+      const midStop = isHighlighted ? '#fbbf24' : theme.midHex;
+      const botStop = isHighlighted ? '#b45309' : theme.botHex;
+      const rimStroke = isHighlighted ? '#ffffff' : 'rgba(255, 255, 255, 0.85)';
+
+      return `
+        <svg width="58" height="28" viewBox="0 0 116 56" fill="none" xmlns="http://www.w3.org/2000/svg" shape-rendering="geometricPrecision">
+          <defs>
+            <!-- Liquid Glass Body Gradient -->
+            <linearGradient id="bodyGrad_${uid}" x1="58" y1="12" x2="58" y2="44" gradientUnits="userSpaceOnUse">
+              <stop offset="0%" stop-color="${topStop}" stop-opacity="0.92" />
+              <stop offset="42%" stop-color="${midStop}" stop-opacity="0.62" />
+              <stop offset="100%" stop-color="${botStop}" stop-opacity="0.88" />
+            </linearGradient>
+
+            <!-- Tinted Glass Canopy Gradient -->
+            <linearGradient id="glassGrad_${uid}" x1="56" y1="15" x2="56" y2="26" gradientUnits="userSpaceOnUse">
+              <stop offset="0%" stop-color="#ffffff" stop-opacity="0.65" />
+              <stop offset="45%" stop-color="#0f172a" stop-opacity="0.72" />
+              <stop offset="100%" stop-color="#020617" stop-opacity="0.92" />
+            </linearGradient>
+
+            <!-- Headlight Beam Cone -->
+            <linearGradient id="beamGrad_${uid}" x1="106" y1="31" x2="116" y2="31" gradientUnits="userSpaceOnUse">
+              <stop offset="0%" stop-color="#fef08a" stop-opacity="0.85" />
+              <stop offset="100%" stop-color="#fef08a" stop-opacity="0" />
+            </linearGradient>
+          </defs>
+
+          <!-- Subtle Ground Contact Shadow -->
+          <ellipse cx="56" cy="48" rx="46" ry="4" fill="rgba(0, 0, 0, 0.55)" />
+
+          <!-- Headlight Illumination Cone -->
+          <polygon points="104,30 116,23 116,39" fill="url(#beamGrad_${uid})" />
+
+          <!-- Liquid Glass Aerodynamic Chassis -->
+          <path d="M12 37 L18 22 C21 16 28 13 38 13 L68 13 C77 13 84 17 90 24 L102 26 C106 27 108 30 108 34 L108 40 C108 42 106 43 103 43 L13 43 C10 43 9 41 9 39 Z"
+                fill="url(#bodyGrad_${uid})" stroke="${rimStroke}" stroke-width="2" stroke-linejoin="round" />
+
+          <!-- Inner Liquid Glass Rim Highlight -->
+          <path d="M19 23 C22 17.5 28 15 38 15 L67 15 C75 15 82 18.5 87 24.5"
+                stroke="rgba(255, 255, 255, 0.72)" stroke-width="1.4" stroke-linecap="round" />
+
+          <!-- Liquid Glass Cabin Windshield & Side Window -->
+          <path d="M32 24 L38 16.5 L67 16.5 L78 24 Z"
+                fill="url(#glassGrad_${uid})" stroke="rgba(255, 255, 255, 0.65)" stroke-width="1.3" stroke-linejoin="round" />
+
+          <!-- Diagonal Glass Specular Reflection Streak -->
+          <path d="M44 17.5 L39 23 M51 17.5 L46 23"
+                stroke="rgba(255, 255, 255, 0.6)" stroke-width="1.5" stroke-linecap="round" />
+
+          <!-- Lower Liquid Specular Waistline -->
+          <line x1="20" y1="33" x2="96" y2="33" stroke="rgba(255, 255, 255, 0.45)" stroke-width="1.2" stroke-linecap="round" />
+
+          <!-- Crisp Rear Crimson Taillight -->
+          <rect x="9" y="29" width="3.5" height="7" rx="1.5" fill="#fb7185" />
+
+          <!-- Crisp Front LED Headlight -->
+          <rect x="103" y="29" width="4" height="6" rx="1.5" fill="#fef08a" />
+
+          <!-- Rear Alloy Wheel -->
+          <g class="${spinning ? 'wheel-spinning' : ''}">
+            <circle cx="31" cy="43" r="9.5" fill="#090d16" stroke="#f8fafc" stroke-width="2.2" />
+            <circle cx="31" cy="43" r="4.5" fill="rgba(255, 255, 255, 0.16)" stroke="${topStop}" stroke-width="1.4" />
+            <line x1="31" y1="38.5" x2="31" y2="47.5" stroke="#e2e8f0" stroke-width="1.3" />
+            <line x1="26.5" y1="43" x2="35.5" y2="43" stroke="#e2e8f0" stroke-width="1.3" />
+          </g>
+
+          <!-- Front Alloy Wheel -->
+          <g class="${spinning ? 'wheel-spinning' : ''}">
+            <circle cx="85" cy="43" r="9.5" fill="#090d16" stroke="#f8fafc" stroke-width="2.2" />
+            <circle cx="85" cy="43" r="4.5" fill="rgba(255, 255, 255, 0.16)" stroke="${topStop}" stroke-width="1.4" />
+            <line x1="85" y1="38.5" x2="85" y2="47.5" stroke="#e2e8f0" stroke-width="1.3" />
+            <line x1="80.5" y1="43" x2="89.5" y2="43" stroke="#e2e8f0" stroke-width="1.3" />
+          </g>
+        </svg>
+      `;
+    }
+
+    // RENDER PERSISTENT LIQUID-GLASS CARS ON HIGHWAY TRACK (Zero DOM recreation -> fluid momentum!)
+    function renderHighway(target, posArr, spdArr, elapsedT, highlightOrigIdx = -1, isMovingNow = false) {
+      highwayTargetLabel.textContent = `target = ${target}`;
+      finishMileTag.textContent = target;
+
+      const { states, maxTime } = computeHighwayStateAtTime(target, posArr, spdArr, elapsedT);
+      raceMaxTime = maxTime;
+      raceClockBadge.textContent = `t = ${elapsedT.toFixed(2)} hrs`;
+      raceTimeSlider.value = Math.min(100, Math.round((elapsedT / maxTime) * 100));
+
+      const activeMotion = isRaceRunning || isMovingNow;
+      if (activeMotion) {
+        roadLaneDivider.classList.add('running-road');
+      } else {
+        roadLaneDivider.classList.remove('running-road');
+      }
+
+      // Rebuild static mile markers and persistent car nodes only when scenario changes
+      const sig = `${target}|${posArr.join(',')}|${spdArr.join(',')}`;
+      if (highwayDomSignature !== sig) {
+        highwayDomSignature = sig;
+
+        mileMarkersLayer.innerHTML = '';
+        [0.25, 0.5, 0.75].forEach(frac => {
+          const mileVal = Math.round(target * frac);
+          const marker = document.createElement('div');
+          marker.className = 'absolute top-0 bottom-0 border-l border-white/[0.08] flex flex-col justify-end pb-1';
+          marker.style.left = `${frac * 100}%`;
+          marker.innerHTML = `<span class="text-[8px] code-font text-slate-500 -ml-2">${mileVal}m</span>`;
+          mileMarkersLayer.appendChild(marker);
+        });
+
+        carsTrackLayer.innerHTML = '';
+        states.forEach((st) => {
+          const theme = getCarTheme(st.origIdx);
+          const carEl = document.createElement('div');
+          carEl.dataset.carOrigIdx = st.origIdx;
+          carEl.className = 'car-vehicle absolute -translate-x-1/2 flex flex-col items-center select-none z-20';
+          carEl.innerHTML = `
+            <div data-car-badge class="liquid-car-tag px-2 py-0.5 rounded-full border text-[9px] code-font font-extrabold mb-0.5 whitespace-nowrap ${theme.pill}"></div>
+            <div class="relative flex items-center">
+              <span data-car-exhaust class="hidden exhaust-puff absolute -left-2.5 bottom-2 w-2.5 h-2.5 rounded-full bg-cyan-100/55 blur-[1px]"></span>
+              <div data-car-svg-slot></div>
+            </div>
+          `;
+          carsTrackLayer.appendChild(carEl);
+        });
+      }
+
+      // Render Fleet Convoy Merge Halos when cars catch up bumper-to-bumper
+      fleetConvoysLayer.innerHTML = '';
+      const fleetGroups = new Map();
+      states.forEach(st => {
+        if (!fleetGroups.has(st.fleetId)) fleetGroups.set(st.fleetId, []);
+        fleetGroups.get(st.fleetId).push(st);
+      });
+
+      const activeMergedFleetIds = new Set();
+      const laneOffsets = [16, 58, 100];
+      fleetGroups.forEach((members, fId) => {
+        if (members.length > 1) {
+          const leader = members[0];
+          const caughtUpMembers = members.filter(m => m.currentX >= leader.currentX - target * 0.04);
+          if (caughtUpMembers.length > 1) {
+            activeMergedFleetIds.add(fId);
+            const lastCaught = caughtUpMembers[caughtUpMembers.length - 1];
+            const leftPct = (leader.currentX / target) * 100;
+            const convoySpanPx = lastCaught.convoyOffset * 46;
+            const laneTopPx = laneOffsets[(fId - 1) % laneOffsets.length];
+            const halo = document.createElement('div');
+            halo.className = 'absolute h-11 rounded-full border border-emerald-400/85 bg-emerald-400/14 backdrop-blur-sm shadow-[0_0_22px_rgba(16,185,129,0.38),inset_0_1px_0_rgba(255,255,255,0.28)] flex items-end justify-start pl-2';
+            halo.style.top = `${laneTopPx + 5}px`;
+            halo.style.left = `max(8px, calc(${leftPct}% - ${convoySpanPx + 30}px))`;
+            halo.style.width = `${convoySpanPx + 60}px`;
+            halo.innerHTML = `<span class="-mb-3.5 px-1.5 py-0.2 rounded-full bg-emerald-950/95 border border-emerald-400/85 text-emerald-200 code-font text-[8px] font-bold shadow whitespace-nowrap z-30">Fleet #${fId} (${caughtUpMembers.length})</span>`;
+            fleetConvoysLayer.appendChild(halo);
+          }
+        }
+      });
+
+      // Update each persistent car node's exact position, wheel spin & liquid glass highlight
+      states.forEach((st) => {
+        const carEl = carsTrackLayer.querySelector(`[data-car-orig-idx="${st.origIdx}"]`);
+        if (!carEl) return;
+
+        const groupMembers = fleetGroups.get(st.fleetId) || [st];
+        const leaderX = groupMembers[0].currentX;
+        const isPhysicallyMerged = activeMergedFleetIds.has(st.fleetId) && (st.currentX >= leaderX - target * 0.04);
+        const theme = isPhysicallyMerged ? FLEET_MERGED_THEME : getCarTheme(st.origIdx);
+
+        const pct = Math.min(100, Math.max(0, (st.currentX / target) * 100));
+        const isHighlighted = (st.origIdx === highlightOrigIdx);
+        const topPx = laneOffsets[(st.fleetId - 1) % laneOffsets.length];
+        const bumperShiftPx = st.convoyOffset * 46;
+
+        carEl.style.left = `max(34px, calc(30px + (100% - 60px) * ${(pct / 100).toFixed(4)} - ${bumperShiftPx}px))`;
+        carEl.style.top = `${topPx}px`;
+        carEl.style.zIndex = isHighlighted ? '30' : `${25 - st.convoyOffset}`;
+
+        const badgeEl = carEl.querySelector('[data-car-badge]');
+        if (isPhysicallyMerged && st.convoyOffset > 0) {
+          badgeEl.textContent = st.arrived ? `C${st.origIdx} ✓` : `C${st.origIdx}`;
+        } else {
+          badgeEl.textContent = st.arrived
+            ? `C${st.origIdx} ✓ (${formatTime(st.arrivalTime)}h)`
+            : `C${st.origIdx}: ${st.currentX.toFixed(1)}m • ${st.spd}mph`;
+        }
+        badgeEl.className = isHighlighted
+          ? 'liquid-car-tag active-car-tag px-2 py-0.5 rounded-full border text-[9px] code-font font-extrabold mb-0.5 whitespace-nowrap'
+          : `liquid-car-tag px-2 py-0.5 rounded-full border text-[9px] code-font font-extrabold mb-0.5 whitespace-nowrap ${theme.pill}`;
+
+        const spinning = activeMotion && !st.arrived;
+        const exhaustEl = carEl.querySelector('[data-car-exhaust]');
+        if (spinning) {
+          exhaustEl.classList.remove('hidden');
+        } else {
+          exhaustEl.classList.add('hidden');
+        }
+
+        const svgSlot = carEl.querySelector('[data-car-svg-slot]');
+        const renderKey = `${isPhysicallyMerged ? '1' : '0'}_${isHighlighted ? '1' : '0'}_${spinning ? '1' : '0'}`;
+        if (svgSlot.dataset.renderKey !== renderKey) {
+          svgSlot.dataset.renderKey = renderKey;
+          svgSlot.innerHTML = buildLiquidGlassCarSvg(theme, isHighlighted, spinning);
+        }
+      });
+    }
+
+    // SMOOTH MOMENTUM INTERPOLATION BETWEEN STEP TIMESTAMPS
+    function stopStepTween() {
+      if (stepTweenRafId) {
+        cancelAnimationFrame(stepTweenRafId);
+        stepTweenRafId = null;
+      }
+    }
+
+    function animateHighwayToTime(targetTime, highlightOrigIdx = -1, animateMotion = true) {
+      stopStepTween();
+      const startTime = raceCurrentTime;
+      const deltaT = targetTime - startTime;
+
+      if (!animateMotion || Math.abs(deltaT) < 0.005) {
+        raceCurrentTime = targetTime;
+        renderHighway(currentTarget, currentPos, currentSpd, raceCurrentTime, highlightOrigIdx, false);
+        return;
+      }
+
+      const durationMs = Math.min(540, Math.max(240, playSpeed * 0.78));
+      let t0 = null;
+
+      function stepFrame(now) {
+        if (isRaceRunning) return;
+        if (t0 === null) t0 = now;
+        const rawProgress = Math.min(1, (now - t0) / durationMs);
+        // Smooth ease-in-out momentum curve
+        const eased = rawProgress < 0.5
+          ? 2 * rawProgress * rawProgress
+          : 1 - Math.pow(-2 * rawProgress + 2, 2) / 2;
+
+        raceCurrentTime = startTime + deltaT * eased;
+        const stillMoving = rawProgress < 1;
+        renderHighway(currentTarget, currentPos, currentSpd, raceCurrentTime, highlightOrigIdx, stillMoving);
+
+        if (stillMoving) {
+          stepTweenRafId = requestAnimationFrame(stepFrame);
+        } else {
+          stepTweenRafId = null;
+        }
+      }
+
+      stepTweenRafId = requestAnimationFrame(stepFrame);
+    }
+
+    // CONTINUOUS HIGHWAY RACE ANIMATION LOOP
+    function startHighwayRace(restartFromZero = false) {
+      stopStepTween();
+      if (restartFromZero || raceCurrentTime >= raceMaxTime) {
+        raceCurrentTime = 0;
+      }
+      isRaceRunning = true;
+      raceBtnIcon.className = "fa-solid fa-pause";
+      raceBtnText.textContent = "Pause Cars";
+      btnRunCars.classList.add('bg-amber-500/25', 'text-amber-200', 'border-amber-400/50');
+      btnRunCars.classList.remove('bg-emerald-500/20', 'text-emerald-200', 'border-emerald-400/50');
+      lastRaceFrameTs = null;
+
+      function tickRace(ts) {
+        if (!isRaceRunning) return;
+        if (lastRaceFrameTs !== null) {
+          const dtSec = (ts - lastRaceFrameTs) / 1000;
+          // Scale simulation speed so the entire race completes in ~3.6 seconds
+          const timeScale = Math.max(0.4, raceMaxTime / 3.6);
+          raceCurrentTime = Math.min(raceMaxTime, raceCurrentTime + dtSec * timeScale);
+        }
+        lastRaceFrameTs = ts;
+
+        const step = steps[currentStepIdx];
+        renderHighway(currentTarget, currentPos, currentSpd, raceCurrentTime, step ? step.activeOrigIdx : -1, false);
+
+        if (raceCurrentTime >= raceMaxTime) {
+          stopHighwayRace();
+          return;
+        }
+        raceRafId = requestAnimationFrame(tickRace);
+      }
+
+      raceRafId = requestAnimationFrame(tickRace);
+    }
+
+    function stopHighwayRace() {
+      isRaceRunning = false;
+      if (raceRafId) {
+        cancelAnimationFrame(raceRafId);
+        raceRafId = null;
+      }
+      raceBtnIcon.className = "fa-solid fa-flag-checkered";
+      raceBtnText.textContent = "Run All Cars";
+      btnRunCars.classList.remove('bg-amber-500/25', 'text-amber-200', 'border-amber-400/50');
+      btnRunCars.classList.add('bg-emerald-500/20', 'text-emerald-200', 'border-emerald-400/50');
+      roadLaneDivider.classList.remove('running-road');
+    }
+
+    // STRICT LINE-BY-LINE EXECUTION TRACE GENERATOR
+    function generateSteps(target, posArr, spdArr) {
+      const trace = [];
+      const n = posArr.length;
+      // Track each car row with stable origIdx for physical FLIP lift-and-arc sorting!
+      const cars = Array.from({ length: n }, (_, idx) => ({
+        origIdx: idx,
+        pos: null,
+        spd: null,
+        time: null,
+        role: 'uninitialized' // 'uninitialized' | 'populated' | 'leader' | 'merged'
+      }));
+      const stack = []; // Array of { time, origIdx, pos, spd }
+      let maxObservedTime = 0;
+
+      const snapCars = () => cars.map(c => ({ ...c }));
+      const snapStack = () => stack.map(s => ({ ...s }));
+
+      // Line 4: Method entry
+      trace.push({
+        line: 4,
+        phase: "Start",
+        target,
+        cars: snapCars(),
+        isSorted: false,
+        stack: snapStack(),
+        raceTime: 0,
+        desc: `Entered <span class="code-font text-cyan-300 font-bold">carFleet</span> with <span class="code-font text-amber-300 font-bold">target = ${target}</span>, <span class="code-font">position = [${posArr.join(', ')}]</span>, <span class="code-font">speed = [${spdArr.join(', ')}]</span>.`,
+        soundFreq: 330
+      });
+
+      // Line 6: int n = position.length;
+      trace.push({
+        line: 6,
+        phase: `n = ${n}`,
+        target,
+        cars: snapCars(),
+        isSorted: false,
+        stack: snapStack(),
+        raceTime: 0,
+        desc: `Stored number of cars <span class="code-font text-cyan-300 font-bold">int n = position.length = ${n}</span>.`,
+        soundFreq: 360
+      });
+
+      // Line 9: int[][] cars = new int[n][2];
+      trace.push({
+        line: 9,
+        phase: `Alloc cars[${n}][2]`,
+        target,
+        cars: snapCars(),
+        isSorted: false,
+        stack: snapStack(),
+        raceTime: 0,
+        desc: `Allocated 2D matrix <span class="code-font text-purple-300 font-bold">int[][] cars = new int[${n}][2]</span> to pair each car's <span class="code-font">[position, speed]</span>.`,
+        soundFreq: 390
+      });
+
+      // Lines 11-14: Populate cars[i][0] and cars[i][1]
+      for (let i = 0; i < n; i++) {
+        cars[i].pos = posArr[i];
+        cars[i].spd = spdArr[i];
+        cars[i].role = 'populated';
+        trace.push({
+          line: [11, 12, 13],
+          phase: `Fill cars[${i}]`,
+          target,
+          cars: snapCars(),
+          activeMatrixIdx: i,
+          activeOrigIdx: i,
+          isSorted: false,
+          stack: snapStack(),
+          raceTime: 0,
+          desc: `Populated row <span class="code-font text-cyan-300 font-bold">cars[${i}] = [${posArr[i]}, ${spdArr[i]}]</span> (mile ${posArr[i]}, ${spdArr[i]} mph).`,
+          soundFreq: 420 + i * 20
+        });
+      }
+
+      // Line 17: Arrays.sort(cars, (a, b) -> Integer.compare(b[0], a[0]));
+      const beforeOrder = cars.map((c, idx) => ({ origIdx: c.origIdx, fromIdx: idx }));
+      cars.sort((a, b) => b.pos - a.pos);
+      const sortMoves = [];
+      cars.forEach((c, toIdx) => {
+        const prev = beforeOrder.find(b => b.origIdx === c.origIdx);
+        if (prev && prev.fromIdx !== toIdx) {
+          sortMoves.push({ from: prev.fromIdx, to: toIdx });
+        }
+      });
+
+      trace.push({
+        line: 17,
+        phase: "Arrays.sort(cars)",
+        target,
+        cars: snapCars(),
+        isSorted: true,
+        sortMoves,
+        stack: snapStack(),
+        raceTime: 0,
+        desc: `Sorted <span class="code-font text-amber-300 font-bold">cars</span> descending by position (closest to <span class="code-font">target = ${target}</span> first): <span class="code-font text-slate-100">[${cars.map(c => `[${c.pos},${c.spd}]`).join(', ')}]</span>.`,
+        soundFreq: 520
+      });
+
+      // Line 19: Stack<Double> stack = new Stack<>();
+      trace.push({
+        line: 19,
+        phase: "Init Stack<Double>",
+        target,
+        cars: snapCars(),
+        isSorted: true,
+        stack: snapStack(),
+        raceTime: 0,
+        desc: `Initialized empty <span class="code-font text-emerald-300 font-bold">Stack&lt;Double&gt; stack</span> to record each fleet's arrival time at mile <span class="code-font">${target}</span>.`,
+        soundFreq: 540
+      });
+
+      // Lines 21-31: for (int[] car : cars)
+      for (let idx = 0; idx < n; idx++) {
+        const car = cars[idx];
+
+        // Line 21: for (int[] car : cars)
+        trace.push({
+          line: 21,
+          phase: `Inspect Car [${car.pos}, ${car.spd}]`,
+          target,
+          cars: snapCars(),
+          activeMatrixIdx: idx,
+          activeOrigIdx: car.origIdx,
+          isSorted: true,
+          stack: snapStack(),
+          raceTime: maxObservedTime,
+          desc: `Selected car <span class="code-font text-amber-300 font-bold">[${car.pos}, ${car.spd}]</span> (starting at mile <span class="code-font">${car.pos}</span> with speed <span class="code-font">${car.spd}</span> mph).`,
+          soundFreq: 560
+        });
+
+        // Line 23: double time = (double) (target - car[0]) / car[1];
+        const arrivalTime = (target - car.pos) / car.spd;
+        car.time = arrivalTime;
+        const timeStr = formatTime(arrivalTime);
+        maxObservedTime = Math.max(maxObservedTime, arrivalTime * 0.6);
+
+        trace.push({
+          line: 23,
+          phase: `time = ${timeStr}h`,
+          target,
+          cars: snapCars(),
+          activeMatrixIdx: idx,
+          activeOrigIdx: car.origIdx,
+          curCar: { ...car },
+          curTime: arrivalTime,
+          actionText: `time = (${target} - ${car.pos}) / ${car.spd} = ${timeStr}`,
+          isSorted: true,
+          stack: snapStack(),
+          raceTime: maxObservedTime,
+          desc: `Computed unhindered arrival time <span class="code-font text-cyan-300 font-bold">time = (${target} - ${car.pos}) / ${car.spd} = ${timeStr} hrs</span>.`,
+          soundFreq: 600
+        });
+
+        // Line 26: if (stack.isEmpty() || time > stack.peek())
+        const isNewFleet = stack.length === 0 || arrivalTime > stack[stack.length - 1].time;
+        const peekTimeStr = stack.length > 0 ? formatTime(stack[stack.length - 1].time) : 'empty';
+        maxObservedTime = Math.max(maxObservedTime, arrivalTime * 0.85);
+
+        trace.push({
+          line: 26,
+          phase: isNewFleet ? "New Fleet (True)" : `Joins Fleet (${timeStr} ≤ ${peekTimeStr})`,
+          target,
+          cars: snapCars(),
+          activeMatrixIdx: idx,
+          activeOrigIdx: car.origIdx,
+          curCar: { ...car },
+          curTime: arrivalTime,
+          catchDecision: isNewFleet
+            ? (stack.length === 0 ? "stack.isEmpty() (True)" : `${timeStr} > ${peekTimeStr} (True)`)
+            : `${timeStr} ≤ ${peekTimeStr} (False)`,
+          isSorted: true,
+          stack: snapStack(),
+          raceTime: maxObservedTime,
+          desc: stack.length === 0
+            ? `Condition <span class="code-font text-emerald-300 font-bold">stack.isEmpty()</span> is <b>true</b> &rarr; frontmost car establishes Fleet #1.`
+            : isNewFleet
+              ? `Condition <span class="code-font text-emerald-300 font-bold">time (${timeStr}) &gt; stack.peek() (${peekTimeStr})</span> is <b>true</b> &rarr; slower car cannot catch fleet ahead, forming a new fleet!`
+              : `Condition <span class="code-font text-purple-300 font-bold">time (${timeStr}) &gt; stack.peek() (${peekTimeStr})</span> is <b>false</b> (<span class="code-font">${timeStr} &le; ${peekTimeStr}</span>) &rarr; catches up and joins the fleet ahead!`,
+          soundFreq: isNewFleet ? 660 : 480
+        });
+
+        if (isNewFleet) {
+          // Line 27: stack.push(time);
+          car.role = 'leader';
+          stack.push({ time: arrivalTime, origIdx: car.origIdx, pos: car.pos, spd: car.spd });
+          maxObservedTime = Math.max(maxObservedTime, arrivalTime);
+          trace.push({
+            line: 27,
+            phase: `stack.push(${timeStr})`,
+            target,
+            cars: snapCars(),
+            activeMatrixIdx: idx,
+            activeOrigIdx: car.origIdx,
+            curCar: { ...car },
+            curTime: arrivalTime,
+            justPushedStack: true,
+            transfer: { type: 'pushFleet', matrixIdx: idx, timeStr },
+            actionText: `stack.push(${timeStr}) → Fleet #${stack.length}`,
+            isSorted: true,
+            stack: snapStack(),
+            raceTime: maxObservedTime,
+            desc: `<span class="text-emerald-400 font-bold"><i class="fa-solid fa-plus-circle mr-1"></i>New Car Fleet #${stack.length}!</span> Pushed <span class="code-font text-emerald-300 font-bold">${timeStr}</span> onto <span class="code-font">stack</span>.`,
+            soundFreq: 760
+          });
+        } else {
+          // Line 30: // Otherwise, it joins the fleet ahead
+          car.role = 'merged';
+          maxObservedTime = Math.max(maxObservedTime, stack[stack.length - 1].time);
+          trace.push({
+            line: 30,
+            phase: "Joins Fleet Ahead",
+            target,
+            cars: snapCars(),
+            activeMatrixIdx: idx,
+            activeOrigIdx: car.origIdx,
+            curCar: { ...car },
+            curTime: arrivalTime,
+            mergedPeekGlow: true,
+            transfer: { type: 'mergeFleet', matrixIdx: idx, timeStr, leaderTimeStr: peekTimeStr },
+            actionText: `Merged into Fleet #${stack.length} (${peekTimeStr}h)`,
+            isSorted: true,
+            stack: snapStack(),
+            raceTime: maxObservedTime,
+            desc: `<span class="text-purple-300 font-bold"><i class="fa-solid fa-link mr-1"></i>Merged Into Fleet #${stack.length}!</span> Car <span class="code-font">[${car.pos}, ${car.spd}]</span> catches up to the fleet ahead and matches its <span class="code-font text-emerald-300">${peekTimeStr}h</span> arrival time (no push).`,
+            soundFreq: 520
+          });
+        }
+      }
+
+      // Line 33: return stack.size();
+      const maxArrival = Math.max(0.5, ...stack.map(s => s.time));
+      trace.push({
+        line: 33,
+        phase: "Complete",
+        target,
+        cars: snapCars(),
+        isSorted: true,
+        stack: snapStack(),
+        isComplete: true,
+        raceTime: maxArrival,
+        desc: `<span class="text-emerald-400 font-bold text-sm"><i class="fa-solid fa-trophy mr-1.5"></i>Complete!</span> Returned <span class="code-font text-emerald-300 font-bold text-sm">stack.size() = ${stack.length}</span> car fleet${stack.length === 1 ? '' : 's'} arriving at mile <span class="code-font">${target}</span>.`,
+        soundFreq: 960
+      });
+
+      return trace;
+    }
+
+    // LOCALIZED ZERO-JUMP CODE LINE HIGHLIGHTER
+    function highlightCodeLine(lineSpec) {
+      document.querySelectorAll('.code-line').forEach(el => el.classList.remove('active-line'));
+      const lineNums = Array.isArray(lineSpec) ? lineSpec : [lineSpec];
+      let firstActiveEl = null;
+
+      lineNums.forEach(num => {
+        const el = document.getElementById(`line${num}`);
+        if (el) {
+          el.classList.add('active-line');
+          if (!firstActiveEl) firstActiveEl = el;
+        }
+      });
+
+      if (firstActiveEl) {
+        const containerTop = codeContainer.scrollTop;
+        const containerBottom = containerTop + codeContainer.clientHeight;
+        const elTop = firstActiveEl.offsetTop - codeContainer.offsetTop;
+        const elBottom = elTop + firstActiveEl.clientHeight;
+
+        if (elTop < containerTop + 24) {
+          codeContainer.scrollTo({ top: Math.max(0, elTop - 24), behavior: 'smooth' });
+        } else if (elBottom > containerBottom - 24) {
+          codeContainer.scrollTo({ top: elBottom - codeContainer.clientHeight + 24, behavior: 'smooth' });
+        }
+      }
+    }
+
+    // PHYSICAL LIFT-AND-ARC OVERLAYS FOR MATRIX SORTING & STACK PUSH / MERGE
+    function animateStageOverlays(step, animateFlight) {
+      transferArcSvg.innerHTML = '';
+      flyingCloneLayer.innerHTML = '';
+      const stageRect = stageWrapper.getBoundingClientRect();
+      let svgHtml = '';
+
+      // A. Overhead Curved Trajectory Arcs when Arrays.sort(cars) moves rows
+      if (step.sortMoves && step.sortMoves.length > 0) {
+        step.sortMoves.forEach((mv, idx) => {
+          const fromEl = carsMatrixArena.querySelector(`[data-matrix-idx="${mv.from}"]`);
+          const toEl = carsMatrixArena.querySelector(`[data-matrix-idx="${mv.to}"]`);
+          if (!fromEl || !toEl) return;
+
+          const fRect = fromEl.getBoundingClientRect();
+          const tRect = toEl.getBoundingClientRect();
+          const x1 = (fRect.left - stageRect.left) + fRect.width / 2;
+          const y1 = (fRect.top - stageRect.top) - 4;
+          const x2 = (tRect.left - stageRect.left) + tRect.width / 2;
+          const y2 = (tRect.top - stageRect.top) - 4;
+          const midX = (x1 + x2) / 2;
+          const archY = Math.min(y1, y2) - 24 - (idx % 2) * 8;
+          const color = mv.to < mv.from ? '#38bdf8' : '#c084fc';
+
+          svgHtml += `
+            <path d="M ${x1} ${y1} Q ${midX} ${archY}, ${x2} ${y2}"
+                  fill="none" stroke="${color}" stroke-width="2" class="transfer-arc-path" opacity="0.88" />
+            <polygon points="${x2},${y2 + 2} ${x2 - 4},${y2 - 6} ${x2 + 4},${y2 - 6}" fill="${color}" />
+          `;
+        });
+      }
+
+      // B. Lift-and-Arc Transfer from cars[idx] to Stack<Double> (pushFleet or mergeFleet)
+      if (step.transfer) {
+        const tr = step.transfer;
+        const srcEl = carsMatrixArena.querySelector(`[data-matrix-idx="${tr.matrixIdx}"]`);
+        const topStackEl = stackVessel.querySelector('[data-stack-top="true"]') || stackVessel;
+        if (srcEl && topStackEl) {
+          const srcRect = srcEl.getBoundingClientRect();
+          const vesselRect = stackVessel.getBoundingClientRect();
+          const targetRect = topStackEl.getBoundingClientRect();
+
+          const x1 = (srcRect.right - stageRect.left) - 10;
+          const y1 = (srcRect.top - stageRect.top) + srcRect.height / 2;
+          const x2 = (vesselRect.left - stageRect.left) + vesselRect.width / 2;
+          const y2 = (vesselRect.top - stageRect.top) + 6;
+          const midX = (x1 + x2) / 2;
+          const archY = Math.min(y1, y2) - 34;
+
+          if (tr.type === 'pushFleet') {
+            svgHtml += `
+              <path d="M ${x1} ${y1} Q ${midX} ${archY}, ${x2} ${y2}"
+                    fill="none" stroke="#34d399" stroke-width="2.4" class="transfer-arc-path" />
+              <circle cx="${x1}" cy="${y1}" r="4" fill="#fbbf24" />
+              <polygon points="${x2},${y2 + 4} ${x2 - 5},${y2 - 5} ${x2 + 5},${y2 - 5}" fill="#34d399" />
+            `;
+
+            if (animateFlight) {
+              spawnFlyingTimeBox(srcRect, targetRect, stageRect, `${tr.timeStr}h`, 'stack-time-box', vesselRect.top);
+            }
+          } else if (tr.type === 'mergeFleet') {
+            const xTarget = (targetRect.left - stageRect.left) + 8;
+            const yTarget = (targetRect.top - stageRect.top) + targetRect.height / 2;
+            svgHtml += `
+              <path d="M ${x1} ${y1} Q ${midX} ${archY}, ${xTarget} ${yTarget}"
+                    fill="none" stroke="#c084fc" stroke-width="2.4" class="transfer-arc-path" />
+              <circle cx="${x1}" cy="${y1}" r="4" fill="#c084fc" />
+              <polygon points="${xTarget + 3},${yTarget} ${xTarget - 6},${yTarget - 5} ${xTarget - 6},${yTarget + 5}" fill="#c084fc" />
+            `;
+
+            if (animateFlight) {
+              spawnFlyingTimeBox(srcRect, targetRect, stageRect, `${tr.timeStr}h → ${tr.leaderTimeStr}h`, 'stack-time-box merged-peek-glow', vesselRect.top);
+            }
+          }
+        }
+      }
+
+      transferArcSvg.innerHTML = svgHtml;
+    }
+
+    function spawnFlyingTimeBox(srcRect, dstRect, stageRect, label, styleClasses, arcApexTop) {
+      const clone = document.createElement('div');
+      clone.className = `${styleClasses} absolute px-3 h-9 rounded-xl flex items-center justify-center code-font text-xs font-extrabold shadow-xl pointer-events-none whitespace-nowrap`;
+      clone.textContent = label;
+      clone.style.left = `${(srcRect.left - stageRect.left) + (srcRect.width - 88) / 2}px`;
+      clone.style.top = `${(srcRect.top - stageRect.top) + (srcRect.height - 36) / 2}px`;
+      flyingCloneLayer.appendChild(clone);
+
+      const dx = (dstRect.left + dstRect.width / 2) - (srcRect.left + srcRect.width / 2);
+      const dy = (dstRect.top + dstRect.height / 2) - (srcRect.top + srcRect.height / 2);
+      const liftY = Math.min(dy, (arcApexTop - srcRect.top)) - 26;
+      const duration = Math.min(540, Math.max(240, playSpeed * 0.78));
+
+      const anim = clone.animate([
+        { transform: 'translate(0px, 0px) scale(0.95)', opacity: 1 },
+        { transform: `translate(${dx * 0.55}px, ${liftY}px) scale(1.08)`, opacity: 1, offset: 0.48 },
+        { transform: `translate(${dx}px, ${dy}px) scale(1)`, opacity: 0.15 }
+      ], {
+        duration,
+        easing: 'cubic-bezier(0.22, 1, 0.36, 1)'
+      });
+      anim.onfinish = () => clone.remove();
+    }
+
+    // RENDER CURRENT STEP WITH FLIP LIFT-AND-GLIDE MATRIX SORTING
+    function renderStep(idx, animateMovement = true) {
+      if (idx < 0 || idx >= steps.length) return;
+      const step = steps[idx];
+      const cars = step.cars;
+      const n = cars.length;
+      const maxSpd = Math.max(1, ...currentSpd);
+
+      // Capture previous screen positions of matrix cards by origIdx (FLIP: First)
+      const prevLeftMap = new Map();
+      if (animateMovement) {
+        carsMatrixArena.querySelectorAll('[data-orig-idx]').forEach(el => {
+          const origId = parseInt(el.dataset.origIdx, 10);
+          prevLeftMap.set(origId, el.getBoundingClientRect().left);
+        });
+      }
+
+      // Update Header Scrubber & Badges
+      stepCounterBadge.textContent = `Step: ${idx + 1} / ${steps.length}`;
+      phaseBadge.textContent = step.phase;
+      targetHeaderBadge.textContent = `Target: Mile ${step.target}`;
+      fleetsHeaderBadge.textContent = `Fleets (stack.size): ${step.stack.length}`;
+      stepScrubber.max = steps.length - 1;
+      stepScrubber.value = idx;
+
+      // Update Telemetry HUD Cards
+      if (step.curCar) {
+        varActiveCar.textContent = `[${step.curCar.pos}, ${step.curCar.spd}]`;
+        varActiveCarSub.textContent = `Car C${step.curCar.origIdx} (mile ${step.curCar.pos})`;
+      } else {
+        varActiveCar.textContent = '-';
+        varActiveCarSub.textContent = '[pos, speed]';
+      }
+
+      if (step.curTime !== undefined && step.curTime !== null) {
+        varCarTime.textContent = `${formatTime(step.curTime)}h`;
+        varTimeFormula.textContent = `(${step.target} - ${step.curCar.pos}) / ${step.curCar.spd}`;
+      } else {
+        varCarTime.textContent = '-';
+        varTimeFormula.textContent = '(target - pos) / spd';
+      }
+
+      if (step.stack.length > 0) {
+        const topFleet = step.stack[step.stack.length - 1];
+        varStackPeek.textContent = `${formatTime(topFleet.time)}h`;
+      } else {
+        varStackPeek.textContent = 'empty';
+      }
+
+      varCatchDecision.textContent = step.catchDecision || '-';
+      varCatchSub.textContent = step.catchDecision ? 'Evaluated branch' : 'time > stack.peek()';
+
+      varFleetCount.textContent = step.stack.length;
+      if (step.isComplete) {
+        fleetsResultCard.classList.add('complete-badge-anim');
+        setTimeout(() => fleetsResultCard.classList.remove('complete-badge-anim'), 650);
+      }
+
+      // Narrative Description
+      stepDescription.innerHTML = step.desc;
+
+      // 1. Smoothly glide Highway Cars from current timestamp to step.raceTime (so user feels car momentum!)
+      if (!isRaceRunning) {
+        const targetRaceT = step.raceTime || 0;
+        animateHighwayToTime(targetRaceT, step.activeOrigIdx ?? -1, animateMovement);
+      }
+
+      // 2. Render 2D Matrix int[][] cars = new int[n][2]
+      carsOrderTag.textContent = step.isSorted ? "Sorted Descending by Position ✓" : "Unsorted Input Order";
+      carsOrderTag.className = step.isSorted
+        ? "code-font text-[10px] px-2 py-0.5 rounded bg-emerald-500/15 border border-emerald-400/35 text-emerald-200"
+        : "code-font text-[10px] px-2 py-0.5 rounded bg-amber-500/15 border border-amber-400/35 text-amber-200";
+
+      carsMatrixArena.innerHTML = '';
+      const compactFit = n <= 8;
+      carsMatrixArena.className = compactFit
+        ? 'w-full flex items-center justify-center gap-2 sm:gap-2.5 min-h-[188px]'
+        : 'w-max mx-auto flex items-center gap-2 min-h-[188px]';
+
+      cars.forEach((car, mIdx) => {
+        const theme = getCarTheme(car.origIdx);
+        const isActive = (step.activeMatrixIdx === mIdx);
+        const isLeader = car.role === 'leader';
+        const isMerged = car.role === 'merged';
+
+        const card = document.createElement('div');
+        card.dataset.matrixIdx = mIdx;
+        card.dataset.origIdx = car.origIdx;
+
+        const widthClass = compactFit ? 'flex-1 min-w-[66px] max-w-[92px] ' : 'w-20 shrink-0 ';
+        let classes = `car-matrix-card relative ${widthClass} h-46 rounded-2xl p-2 flex flex-col items-center justify-between select-none `;
+        if (isActive) classes += 'active-car-row ';
+        else if (isLeader) classes += 'fleet-leader-row ';
+        else if (isMerged) classes += 'fleet-merged-row ';
+        card.className = classes;
+
+        const speedBarPct = car.spd !== null ? Math.max(20, (car.spd / maxSpd) * 100) : 10;
+        const posDisp = car.pos !== null ? car.pos : '?';
+        const spdDisp = car.spd !== null ? car.spd : '?';
+        const timeDisp = car.time !== null ? `${formatTime(car.time)}h` : 't: ?';
+
+        let rolePill = `<span class="text-[8px] code-font text-slate-400">C${car.origIdx}</span>`;
+        if (isLeader) {
+          rolePill = `<span class="text-[8px] code-font px-1.5 py-0.2 rounded bg-emerald-500/25 text-emerald-200 font-bold">LEADER</span>`;
+        } else if (isMerged) {
+          rolePill = `<span class="text-[8px] code-font px-1.5 py-0.2 rounded bg-purple-500/25 text-purple-200 font-bold">JOINED</span>`;
+        }
+
+        card.innerHTML = `
+          <div class="w-full flex items-center justify-between text-[9px] code-font">
+            <span class="text-slate-400">cars[${mIdx}]</span>
+            <span class="px-1 rounded border text-[8px] font-bold ${theme.pill}">C${car.origIdx}</span>
+          </div>
+
+          <!-- [0]: Position & [1]: Speed Matrix Cells -->
+          <div class="w-full flex flex-col gap-1 my-1">
+            <div class="w-full px-1.5 py-1 rounded-lg bg-black/30 border border-white/10 flex items-center justify-between text-[10px] code-font">
+              <span class="text-slate-400">pos:</span>
+              <span class="font-extrabold text-cyan-200">${posDisp}</span>
+            </div>
+            <div class="w-full px-1.5 py-1 rounded-lg bg-black/30 border border-white/10 flex items-center justify-between text-[10px] code-font">
+              <span class="text-slate-400">spd:</span>
+              <span class="font-extrabold text-purple-200">${spdDisp}</span>
+            </div>
+          </div>
+
+          <!-- Proportional Speed Bar -->
+          <div class="w-full h-7 flex items-end justify-center bg-black/20 rounded-md p-0.5 border border-white/[0.05]">
+            <div class="w-full rounded-t-sm transition-all duration-300 bg-gradient-to-t ${theme.bar} border-t" style="height: ${speedBarPct}%;"></div>
+          </div>
+
+          <div class="w-full flex items-center justify-between mt-1">
+            <span class="text-[9px] code-font font-bold ${car.time !== null ? 'text-amber-300' : 'text-slate-500'}">${timeDisp}</span>
+            ${rolePill}
+          </div>
+        `;
+        carsMatrixArena.appendChild(card);
+      });
+
+      // Execute FLIP Lift-and-Arc Glide when Arrays.sort(cars) reorders the matrix!
+      if (animateMovement && prevLeftMap.size > 0) {
+        carsMatrixArena.querySelectorAll('[data-orig-idx]').forEach(el => {
+          const origId = parseInt(el.dataset.origIdx, 10);
+          const oldLeft = prevLeftMap.get(origId);
+          if (oldLeft !== undefined) {
+            const newLeft = el.getBoundingClientRect().left;
+            const deltaX = oldLeft - newLeft;
+            if (Math.abs(deltaX) > 2) {
+              const animDuration = Math.min(560, Math.max(250, playSpeed * 0.8));
+              el.style.zIndex = '50';
+              const anim = el.animate([
+                { transform: `translate(${deltaX}px, 0px) scale(1)` },
+                { transform: `translate(${deltaX * 0.72}px, -40px) scale(1.06)`, offset: 0.3 },
+                { transform: `translate(${deltaX * 0.28}px, -40px) scale(1.06)`, offset: 0.7 },
+                { transform: `translate(0px, 0px) scale(1)` }
+              ], {
+                duration: animDuration,
+                easing: 'cubic-bezier(0.22, 1, 0.36, 1)'
+              });
+              anim.onfinish = () => { el.style.zIndex = ''; };
+            }
+          }
+        });
+      }
+
+      // 3. Render Open-Topped Vertical LIFO Stack<Double> Vessel
+      stackVessel.innerHTML = '';
+      stackBadgePill.textContent = `${step.stack.length} fleet${step.stack.length === 1 ? '' : 's'}`;
+
+      if (step.stack.length === 0) {
+        stackVessel.innerHTML = `<span class="my-auto text-xs text-slate-500 italic code-font">empty stack</span>`;
+      } else {
+        step.stack.forEach((fItem, sPos) => {
+          const isTop = (sPos === step.stack.length - 1);
+          const theme = getCarTheme(fItem.origIdx);
+
+          const block = document.createElement('div');
+          if (isTop) block.dataset.stackTop = "true";
+
+          let bClass = 'stack-time-box w-full h-9 rounded-xl px-2.5 flex items-center justify-between select-none shrink-0 ';
+          if (isTop && step.justPushedStack) bClass += 'just-pushed ';
+          if (isTop && step.mergedPeekGlow) bClass += 'merged-peek-glow ';
+          block.className = bClass;
+
+          const topBadge = isTop
+            ? `<span class="px-1.5 py-0.2 rounded bg-amber-400 text-slate-950 font-extrabold text-[8px] code-font shadow">PEEK</span>`
+            : `<span class="text-[9px] code-font text-emerald-300/75">F${sPos + 1}</span>`;
+
+          block.innerHTML = `
+            <span class="px-1 py-0.2 rounded border text-[8px] code-font font-bold ${theme.pill}">C${fItem.origIdx}</span>
+            <span class="code-font text-xs sm:text-sm font-black text-white">${formatTime(fItem.time)}h</span>
+            ${topBadge}
+          `;
+          stackVessel.appendChild(block);
+        });
+      }
+
+      // 4. Trigger SVG Arcs & Flying Clones
+      requestAnimationFrame(() => {
+        animateStageOverlays(step, animateMovement);
+      });
+
+      // 5. Update Action Pill & Decision Banner
+      if (step.actionText) {
+        actionPill.classList.remove('hidden');
+        actionPill.textContent = step.actionText;
+      } else {
+        actionPill.classList.add('hidden');
+      }
+
+      if (step.isComplete || step.justPushedStack) {
+        decisionIcon.className = "fa-solid fa-trophy text-emerald-400 text-base";
+        decisionBanner.className = "p-3.5 rounded-xl bg-emerald-500/15 border border-emerald-400/35 text-xs flex flex-col sm:flex-row items-center justify-between gap-3 backdrop-blur-md";
+      } else if (step.mergedPeekGlow) {
+        decisionIcon.className = "fa-solid fa-link text-purple-400 text-base";
+        decisionBanner.className = "p-3.5 rounded-xl bg-purple-500/15 border border-purple-400/35 text-xs flex flex-col sm:flex-row items-center justify-between gap-3 backdrop-blur-md";
+      } else {
+        decisionIcon.className = "fa-solid fa-circle-info text-cyan-400 text-base";
+        decisionBanner.className = "p-3.5 rounded-xl bg-white/[0.04] border border-white/10 text-xs flex flex-col sm:flex-row items-center justify-between gap-3 backdrop-blur-md";
+      }
+      decisionText.innerHTML = step.desc;
+
+      // 6. Highlight Active Java Line & Play Audio Tone
+      highlightCodeLine(step.line);
+      if (step.soundFreq) {
+        playTone(step.soundFreq, 'sine', 0.08, 0.035);
+      }
+
+      // Automatically trigger the full Highway Car Running Animation upon reaching Complete!
+      if (step.isComplete && animateMovement) {
+        startHighwayRace(true);
+      }
+    }
+
+    // PLAYBACK CONTROLLER
+    function setPlaying(playing) {
+      isPlaying = playing;
+      if (isPlaying) {
+        stopHighwayRace();
+        playIcon.className = "fa-solid fa-pause";
+        playText.textContent = "Stop";
+        btnPlay.classList.add('bg-rose-500/25', 'text-rose-200', 'border-rose-400/50');
+        btnPlay.classList.remove('bg-cyan-500/25', 'text-cyan-200', 'border-cyan-400/50');
+
+        playInterval = setInterval(() => {
+          if (currentStepIdx < steps.length - 1) {
+            currentStepIdx++;
+            renderStep(currentStepIdx, true);
+          } else {
+            setPlaying(false);
+          }
+        }, playSpeed);
+      } else {
+        playIcon.className = "fa-solid fa-play";
+        playText.textContent = "Start";
+        btnPlay.classList.remove('bg-rose-500/25', 'text-rose-200', 'border-rose-400/50');
+        btnPlay.classList.add('bg-cyan-500/25', 'text-cyan-200', 'border-cyan-400/50');
+        if (playInterval) {
+          clearInterval(playInterval);
+          playInterval = null;
+        }
+      }
+    }
+
+    function initSimulation(targetVal, posArr, spdArr) {
+      setPlaying(false);
+      stopHighwayRace();
+      stopStepTween();
+      highwayDomSignature = '';
+      currentTarget = targetVal;
+      currentPos = [...posArr];
+      currentSpd = [...spdArr];
+      steps = generateSteps(currentTarget, currentPos, currentSpd);
+      currentStepIdx = 0;
+      raceCurrentTime = 0;
+      stepScrubber.max = steps.length - 1;
+      stepScrubber.value = 0;
+      renderStep(0, false);
+    }
+
+    // EVENT LISTENERS
+    btnPlay.addEventListener('click', () => {
+      if (currentStepIdx >= steps.length - 1) {
+        currentStepIdx = 0;
+        renderStep(0, false);
+      }
+      setPlaying(!isPlaying);
+    });
+
+    btnNext.addEventListener('click', () => {
+      setPlaying(false);
+      stopHighwayRace();
+      if (currentStepIdx < steps.length - 1) {
+        currentStepIdx++;
+        renderStep(currentStepIdx, true);
+      }
+    });
+
+    btnPrev.addEventListener('click', () => {
+      setPlaying(false);
+      stopHighwayRace();
+      if (currentStepIdx > 0) {
+        currentStepIdx--;
+        renderStep(currentStepIdx, true);
+      }
+    });
+
+    btnReset.addEventListener('click', () => {
+      setPlaying(false);
+      stopHighwayRace();
+      currentStepIdx = 0;
+      raceCurrentTime = 0;
+      renderStep(0, false);
+    });
+
+    stepScrubber.addEventListener('input', (e) => {
+      setPlaying(false);
+      stopHighwayRace();
+      currentStepIdx = parseInt(e.target.value, 10);
+      renderStep(currentStepIdx, false);
+    });
+
+    // Highway Race Controls
+    btnRunCars.addEventListener('click', () => {
+      if (isRaceRunning) {
+        stopHighwayRace();
+      } else {
+        startHighwayRace(false);
+      }
+    });
+
+    raceTimeSlider.addEventListener('input', (e) => {
+      stopHighwayRace();
+      stopStepTween();
+      const pct = parseInt(e.target.value, 10) / 100;
+      raceCurrentTime = pct * raceMaxTime;
+      const step = steps[currentStepIdx];
+      renderHighway(currentTarget, currentPos, currentSpd, raceCurrentTime, step ? step.activeOrigIdx : -1, false);
+    });
+
+    document.querySelectorAll('.speed-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.speed-btn').forEach(b => {
+          b.classList.remove('bg-cyan-500/30', 'text-cyan-200', 'font-semibold');
+        });
+        btn.classList.add('bg-cyan-500/30', 'text-cyan-200', 'font-semibold');
+        playSpeed = parseInt(btn.dataset.speed, 10);
+        if (isPlaying) {
+          setPlaying(false);
+          setPlaying(true);
+        }
+      });
+    });
+
+    btnAudio.addEventListener('click', () => {
+      audioEnabled = !audioEnabled;
+      if (audioEnabled) {
+        audioIcon.className = "fa-solid fa-volume-high";
+        btnAudio.classList.remove('text-slate-600');
+        btnAudio.classList.add('text-slate-300');
+      } else {
+        audioIcon.className = "fa-solid fa-volume-xmark";
+        btnAudio.classList.add('text-slate-600');
+        btnAudio.classList.remove('text-slate-300');
+      }
+    });
+
+    presetSelect.addEventListener('change', (e) => {
+      const idx = parseInt(e.target.value, 10);
+      customTargetInput.value = PRESETS[idx].target;
+      customPosInput.value = PRESETS[idx].position.join(',');
+      customSpdInput.value = PRESETS[idx].speed.join(',');
+      initSimulation(PRESETS[idx].target, PRESETS[idx].position, PRESETS[idx].speed);
+    });
+
+    btnApplyCustom.addEventListener('click', () => {
+      const parsedTarget = parseInt(customTargetInput.value, 10);
+      const parsedPos = customPosInput.value.split(',')
+        .map(s => parseInt(s.trim(), 10))
+        .filter(n => !isNaN(n) && n >= 0 && n < parsedTarget);
+      const parsedSpd = customSpdInput.value.split(',')
+        .map(s => parseInt(s.trim(), 10))
+        .filter(n => !isNaN(n) && n >= 1);
+
+      // Ensure unique positions matching LeetCode 853 constraint
+      const uniquePos = Array.from(new Set(parsedPos));
+      const count = Math.min(uniquePos.length, parsedSpd.length);
+
+      if (!isNaN(parsedTarget) && parsedTarget > 0 && count >= 1) {
+        const finalPos = uniquePos.slice(0, count);
+        const finalSpd = parsedSpd.slice(0, count);
+        customTargetInput.value = parsedTarget;
+        customPosInput.value = finalPos.join(',');
+        customSpdInput.value = finalSpd.join(',');
+        initSimulation(parsedTarget, finalPos, finalSpd);
+      } else {
+        decisionIcon.className = "fa-solid fa-triangle-exclamation text-rose-400 text-base";
+        decisionBanner.className = "p-3.5 rounded-xl bg-rose-500/15 border border-rose-400/35 text-xs flex flex-col sm:flex-row items-center justify-between gap-3 backdrop-blur-md";
+        decisionText.innerHTML = `<span class="text-rose-300 font-bold">Invalid Highway Input:</span> Provide <span class="code-font">target &gt; 0</span>, unique starting positions <span class="code-font">0 &le; pos[i] &lt; target</span>, and matching positive speeds.`;
+      }
+    });
+
+    window.addEventListener('resize', () => {
+      const step = steps[currentStepIdx];
+      if (step) {
+        animateStageOverlays(step, false);
+      }
+    });
+
+    window.addEventListener('keydown', (e) => {
+      if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT') return;
+      if (e.code === 'Space') {
+        e.preventDefault();
+        btnPlay.click();
+      } else if (e.code === 'ArrowRight') {
+        e.preventDefault();
+        btnNext.click();
+      } else if (e.code === 'ArrowLeft') {
+        e.preventDefault();
+        btnPrev.click();
+      }
+    });
+
+    window.onload = function() {
+      customTargetInput.value = PRESETS[0].target;
+      customPosInput.value = PRESETS[0].position.join(',');
+      customSpdInput.value = PRESETS[0].speed.join(',');
+      initSimulation(PRESETS[0].target, PRESETS[0].position, PRESETS[0].speed);
+    };
+  </script>
+</body>
+</html>

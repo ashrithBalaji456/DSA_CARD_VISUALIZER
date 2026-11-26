@@ -5556,6 +5556,11 @@ const problems = [
     "optimalApproach": "Single-Pass Monotonic Decreasing Stack<Integer> of Indices",
     "relatedProblems": [
       {
+        "number": 853,
+        "title": "Car Fleet",
+        "difficulty": "Medium"
+      },
+      {
         "number": 496,
         "title": "Next Greater Element I",
         "difficulty": "Easy"
@@ -5582,6 +5587,113 @@ const problems = [
       }
     ],
     "leetcodeUrl": "https://leetcode.com/problems/daily-temperatures/"
+  },
+  {
+    "id": "car-fleet",
+    "number": 853,
+    "title": "Car Fleet",
+    "slug": "car-fleet",
+    "difficulty": "Medium",
+    "categories": [
+      "Stacks",
+      "Sorting",
+      "Arrays"
+    ],
+    "description": "There are n cars at given miles away from the starting mile 0, traveling to reach the mile target. A car cannot pass another car, but it can catch up and then travel next to it at the speed of the slower car. Return the number of car fleets that will arrive at the destination.",
+    "inputFormat": "target = int, position = int[], speed = int[]",
+    "outputFormat": "int (number of car fleets)",
+    "constraints": [
+      "1 <= n <= 10^5",
+      "0 < target <= 10^6",
+      "0 <= position[i] < target (all unique)",
+      "0 < speed[i] <= 10^6"
+    ],
+    "examples": [
+      {
+        "exampleNumber": 1,
+        "input": "target = 12, position = [10,8,0,5,3], speed = [2,4,1,1,3]",
+        "output": "3",
+        "explanation": "[10,2] & [8,4] meet at mile 12; [0,1] travels alone; [5,1] & [3,3] meet at mile 6.",
+        "type": "official"
+      },
+      {
+        "exampleNumber": 2,
+        "input": "target = 10, position = [3], speed = [3]",
+        "output": "1",
+        "explanation": "Only one car, so there is 1 fleet.",
+        "type": "official"
+      },
+      {
+        "exampleNumber": 3,
+        "input": "target = 100, position = [0,2,4], speed = [4,2,1]",
+        "output": "1",
+        "explanation": "All three cars catch up and merge into a single fleet.",
+        "type": "official"
+      }
+    ],
+    "approach": "Sort by Position Descending + Monotonic Arrival-Time Stack: Pair each car's [position, speed] and sort descending by position (closest to target first). Compute each car's arrival time (double)(target - pos) / speed. If stack.isEmpty() or time > stack.peek(), the car cannot catch the fleet ahead and forms a new fleet (stack.push(time)); otherwise it merges into the fleet ahead.",
+    "flowSteps": [
+      {
+        "step": 1,
+        "title": "Pair & Sort Descending",
+        "description": "Build int[n][2] of [position, speed] and sort descending by position (closest to target first).",
+        "stateSnapshot": "Arrays.sort(cars, (a, b) -> Integer.compare(b[0], a[0]))",
+        "highlight": "Sort"
+      },
+      {
+        "step": 2,
+        "title": "Compute Arrival Time",
+        "description": "Calculate double time = (double)(target - car[0]) / car[1] for each car from front to back.",
+        "stateSnapshot": "time = (double)(target - car[0]) / car[1]",
+        "highlight": "Time"
+      },
+      {
+        "step": 3,
+        "title": "Monotonic Stack Merge Check",
+        "description": "If stack.isEmpty() || time > stack.peek(), push time as a new fleet; otherwise it catches up and merges.",
+        "stateSnapshot": "return stack.size()",
+        "highlight": "Fleet Stack"
+      }
+    ],
+    "timeComplexity": "O(n log n)",
+    "timeComplexityExplanation": "Dominated by sorting n [position, speed] pairs, followed by a single O(n) pass.",
+    "spaceComplexity": "O(n)",
+    "spaceComplexityExplanation": "Stores the n x 2 pairs array and up to n fleet arrival times in the stack.",
+    "visualizerUrl": "/visualizers/car_fleet_monotonic_stack_visualizer.html",
+    "addedDate": "2026-11-27",
+    "keyObservations": [
+      "Because cars cannot pass one another, a trailing car's fate depends only on the fleet directly ahead of it.",
+      "Using floating-point double division (target - pos) / speed avoids integer truncation bugs when comparing exact arrival times."
+    ],
+    "importantPattern": "Position Sort + Monotonic Stack",
+    "commonMistakes": [
+      "Using integer division instead of (double) when computing arrival time, causing false ties.",
+      "Sorting ascending by position instead of descending (front-most car must be processed first)."
+    ],
+    "optimalApproach": "Descending Position Sort + Monotonic Arrival-Time Stack<Double>",
+    "relatedProblems": [
+      {
+        "number": 739,
+        "title": "Daily Temperatures",
+        "difficulty": "Medium"
+      },
+      {
+        "number": 496,
+        "title": "Next Greater Element I",
+        "difficulty": "Easy"
+      },
+      {
+        "number": 155,
+        "title": "Min Stack (Dual Stack O(1) Minimum)",
+        "difficulty": "Medium"
+      },
+      {
+        "number": 20,
+        "title": "Valid Parentheses (Balanced Stack)",
+        "difficulty": "Easy"
+      }
+    ],
+    "leetcodeUrl": "https://leetcode.com/problems/car-fleet/"
   }
 ];
 
