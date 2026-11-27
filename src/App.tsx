@@ -16,7 +16,7 @@ import { ProgressDashboard } from './components/ProgressDashboard';
 import { SearchModal } from './components/SearchModal';
 import { LatestAdditionsNotification } from './components/LatestAdditionsNotification';
 import { InfosysDashboard } from './components/InfosysDashboard';
-import { buildInfosysProblemList } from './data/infosysProblems';
+import { INFOSYS_QUESTIONS } from './data/infosysBank';
 import {
   Sparkles,
   BookOpen,
@@ -30,8 +30,6 @@ export function App() {
   const [activeTab, setActiveTab] = useState<
     'dashboard' | 'problems' | 'categories' | 'bookmarks' | 'progress' | 'infosys'
   >('dashboard');
-
-  const infosysProblems = useMemo(() => buildInfosysProblemList(PROBLEMS), []);
 
   // Filter & Search states
   const [searchQuery, setSearchQuery] = useState('');
@@ -197,7 +195,7 @@ export function App() {
         solvedCount={solvedCount}
         totalCount={totalCount}
         bookmarkedCount={bookmarkedCount}
-        infosysCount={infosysProblems.length}
+        infosysCount={INFOSYS_QUESTIONS.length}
         onOpenSearch={() => setIsSearchModalOpen(true)}
         latestProblems={latestThreeProblems}
         onSelectProblem={setSelectedProblem}
@@ -440,13 +438,12 @@ export function App() {
         {/* TAB: INFOSYS PREP DASHBOARD */}
         {activeTab === 'infosys' && (
           <InfosysDashboard
-            problems={infosysProblems}
+            problems={PROBLEMS}
             solvedIds={solvedIds}
             bookmarkedIds={bookmarkedIds}
             onToggleSolved={toggleSolved}
             onToggleBookmark={toggleBookmark}
             onExplore={setSelectedProblem}
-            onSelectRelatedProblem={handleSelectRelatedProblem}
           />
         )}
 
