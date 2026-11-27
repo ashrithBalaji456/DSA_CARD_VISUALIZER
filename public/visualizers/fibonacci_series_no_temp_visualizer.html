@@ -1,0 +1,1641 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Fibonacci Series Without Temporary Variable (Infosys DSE 2025 / LeetCode 509) - Glassmorphic Visualizer</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2064%2064%22%3E%3Cdefs%3E%3ClinearGradient%20id%3D%22bg%22%20x1%3D%220%22%20y1%3D%220%22%20x2%3D%221%22%20y2%3D%221%22%3E%3Cstop%20offset%3D%220%25%22%20stop-color%3D%22%230f172a%22%2F%3E%3Cstop%20offset%3D%22100%25%22%20stop-color%3D%22%23060913%22%2F%3E%3C%2FlinearGradient%3E%3ClinearGradient%20id%3D%22g%22%20x1%3D%220%22%20y1%3D%220%22%20x2%3D%221%22%20y2%3D%221%22%3E%3Cstop%20offset%3D%220%25%22%20stop-color%3D%22%2322d3ee%22%2F%3E%3Cstop%20offset%3D%2255%25%22%20stop-color%3D%22%236366f1%22%2F%3E%3Cstop%20offset%3D%22100%25%22%20stop-color%3D%22%23a855f7%22%2F%3E%3C%2FlinearGradient%3E%3C%2Fdefs%3E%3Crect%20x%3D%222%22%20y%3D%222%22%20width%3D%2260%22%20height%3D%2260%22%20rx%3D%2216%22%20fill%3D%22url(%23bg)%22%20stroke%3D%22url(%23g)%22%20stroke-width%3D%223.5%22%2F%3E%3Cpath%20d%3D%22M20%2042%20L32%2018%20L44%2042%22%20fill%3D%22none%22%20stroke%3D%22url(%23g)%22%20stroke-width%3D%224%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3Cline%20x1%3D%2220%22%20y1%3D%2242%22%20x2%3D%2244%22%20y2%3D%2242%22%20stroke%3D%22%2338bdf8%22%20stroke-width%3D%223%22%20stroke-linecap%3D%22round%22%20opacity%3D%220.55%22%2F%3E%3Ccircle%20cx%3D%2232%22%20cy%3D%2218%22%20r%3D%225.5%22%20fill%3D%22%2322d3ee%22%2F%3E%3Ccircle%20cx%3D%2220%22%20cy%3D%2242%22%20r%3D%225.5%22%20fill%3D%22%236366f1%22%2F%3E%3Ccircle%20cx%3D%2244%22%20cy%3D%2242%22%20r%3D%225.5%22%20fill%3D%22%23a855f7%22%2F%3E%3C%2Fsvg%3E" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: radial-gradient(circle at 14% 16%, #0c192c 0%, #030712 100%);
+      color: #e2e8f0;
+      min-height: 100vh;
+    }
+
+    .code-font {
+      font-family: 'Fira Code', monospace;
+    }
+
+    /* Glassmorphic Surface & Controls */
+    .glass-panel {
+      background: rgba(15, 23, 42, 0.56);
+      backdrop-filter: blur(22px);
+      -webkit-backdrop-filter: blur(22px);
+      border: 1px solid rgba(255, 255, 255, 0.11);
+      box-shadow: 0 20px 45px -15px rgba(0, 0, 0, 0.68), inset 0 1px 0 0 rgba(255, 255, 255, 0.09);
+    }
+
+    .glass-button {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .glass-button:hover:not(:disabled) {
+      background: rgba(255, 255, 255, 0.15);
+      border-color: rgba(255, 255, 255, 0.28);
+      transform: translateY(-1px);
+    }
+    .glass-button:active:not(:disabled) {
+      transform: translateY(1px);
+    }
+    .glass-button:disabled {
+      opacity: 0.35;
+      cursor: not-allowed;
+    }
+
+    /* Code Execution Line Highlight with Exact Preserved Indentation */
+    .code-line {
+      white-space: pre;
+      transition: all 0.2s ease;
+      border-left: 3px solid transparent;
+      padding: 2px 10px;
+    }
+    .code-line.active-line {
+      background: rgba(56, 189, 248, 0.18);
+      border-left: 3px solid #38bdf8;
+      color: #ffffff;
+      box-shadow: inset 0 0 16px rgba(56, 189, 248, 0.15);
+    }
+
+    /* Glassy Scalar Register Box + Proportional Bar Card (int a & int b) */
+    .scalar-slot-card {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1.5px solid rgba(255, 255, 255, 0.14);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    .scalar-slot-card.reg-a-style {
+      background: linear-gradient(180deg, rgba(34, 211, 238, 0.16) 0%, rgba(6, 182, 212, 0.05) 100%);
+      border-color: rgba(34, 211, 238, 0.68);
+      box-shadow: 0 10px 26px -6px rgba(34, 211, 238, 0.32), inset 0 1px 0 rgba(255, 255, 255, 0.22);
+    }
+
+    .scalar-slot-card.reg-b-style {
+      background: linear-gradient(180deg, rgba(168, 85, 247, 0.18) 0%, rgba(126, 34, 206, 0.06) 100%);
+      border-color: rgba(192, 132, 252, 0.72);
+      box-shadow: 0 10px 26px -6px rgba(168, 85, 247, 0.34), inset 0 1px 0 rgba(255, 255, 255, 0.22);
+    }
+
+    .scalar-slot-card.reg-updated-glow {
+      border-color: rgba(52, 211, 153, 0.98) !important;
+      transform: translateY(-5px) scale(1.04);
+      box-shadow: 0 14px 32px -4px rgba(16, 185, 129, 0.52), inset 0 1px 0 rgba(255, 255, 255, 0.35) !important;
+      z-index: 20;
+    }
+
+    .scalar-slot-card.reg-printing-glow {
+      border-color: rgba(251, 191, 36, 0.98) !important;
+      transform: translateY(-4px) scale(1.03);
+      box-shadow: 0 14px 30px -4px rgba(251, 191, 36, 0.48), inset 0 1px 0 rgba(255, 255, 255, 0.35) !important;
+      z-index: 20;
+    }
+
+    /* Printed Fibonacci Series Card (Box + Proportional Bar) */
+    .series-term-card {
+      background: rgba(255, 255, 255, 0.035);
+      border: 1px solid rgba(255, 255, 255, 0.11);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      transition: all 0.28s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    .series-term-card.term-pending {
+      border-style: dashed;
+      border-color: rgba(148, 163, 184, 0.28);
+      opacity: 0.52;
+    }
+
+    .series-term-card.term-printed {
+      background: linear-gradient(180deg, rgba(34, 211, 238, 0.18) 0%, rgba(14, 165, 233, 0.06) 100%);
+      border-color: rgba(56, 189, 248, 0.68);
+      box-shadow: 0 8px 20px -4px rgba(56, 189, 248, 0.26);
+    }
+
+    .series-term-card.term-just-printed {
+      background: linear-gradient(180deg, rgba(16, 185, 129, 0.30) 0%, rgba(5, 150, 105, 0.12) 100%) !important;
+      border-color: rgba(52, 211, 153, 0.96) !important;
+      transform: translateY(-6px) scale(1.05);
+      box-shadow: 0 12px 28px -4px rgba(16, 185, 129, 0.5) !important;
+      z-index: 20;
+    }
+
+    @keyframes arcDash {
+      to {
+        stroke-dashoffset: -24;
+      }
+    }
+    .transfer-arc-path {
+      stroke-dasharray: 6 6;
+      animation: arcDash 0.8s linear infinite;
+    }
+
+    @keyframes resultPulse {
+      0%, 100% { transform: scale(1); filter: drop-shadow(0 0 8px rgba(16, 185, 129, 0.45)); }
+      50% { transform: scale(1.04); filter: drop-shadow(0 0 22px rgba(16, 185, 129, 0.95)); }
+    }
+    .result-win-anim {
+      animation: resultPulse 0.65s ease-in-out;
+    }
+
+    /* Custom Scrollbars */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: rgba(15, 23, 42, 0.4);
+    }
+    ::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.18);
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(255, 255, 255, 0.3);
+    }
+  </style>
+</head>
+<body class="p-2.5 sm:p-4 lg:px-5 lg:py-4 flex flex-col items-center justify-start min-h-screen">
+
+  <!-- Ambient Glass Glow Orbs -->
+  <div class="fixed top-6 left-1/6 w-96 h-96 bg-cyan-500/14 rounded-full blur-3xl pointer-events-none -z-10"></div>
+  <div class="fixed top-1/3 right-1/6 w-96 h-96 bg-purple-500/14 rounded-full blur-3xl pointer-events-none -z-10"></div>
+  <div class="fixed bottom-12 left-1/2 w-80 h-80 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none -z-10"></div>
+
+  <!-- MAIN WRAPPER -->
+  <div class="w-full max-w-[1560px] flex flex-col gap-5">
+
+    <!-- TOP FROSTED-GLASS CONTROLS DECK -->
+    <header class="glass-panel rounded-2xl p-4 sm:p-5 flex flex-col gap-4 sticky top-3 z-50">
+      <div class="flex flex-wrap items-center justify-between gap-4">
+
+        <!-- Title & Algorithm Metadata -->
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-cyan-500 via-purple-500 to-emerald-400 flex items-center justify-center shadow-lg shadow-cyan-500/25 text-slate-950 font-bold text-lg">
+            <i class="fa-solid fa-arrows-rotate"></i>
+          </div>
+          <div>
+            <h1 class="text-lg sm:text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white via-cyan-100 to-emerald-300">
+              Fibonacci Series (Without Temporary Variable)
+            </h1>
+            <p class="text-xs text-slate-400 flex items-center gap-2">
+              <span class="inline-block w-2 h-2 rounded-full bg-cyan-400 animate-pulse"></span>
+              Infosys DSE 2025 Variant / LeetCode 509 • In-Place (a, b) Arithmetic Shift • &Omicron;(n) Time • &Omicron;(1) Space
+            </p>
+          </div>
+        </div>
+
+        <!-- Center Playback Controls: Reset, Previous, Start/Stop, Next -->
+        <div class="flex items-center gap-2 sm:gap-3 bg-white/5 p-1.5 rounded-xl border border-white/10 backdrop-blur-md">
+          <button id="btnReset" class="glass-button text-slate-200 hover:text-white px-3 py-2 rounded-lg text-sm flex items-center gap-1.5" title="Reset to Initial State">
+            <i class="fa-solid fa-rotate-left"></i>
+            <span class="hidden sm:inline">Reset</span>
+          </button>
+          <button id="btnPrev" class="glass-button text-slate-200 hover:text-white px-3 py-2 rounded-lg text-sm flex items-center gap-1.5" title="Previous Step (Left Arrow)">
+            <i class="fa-solid fa-backward-step"></i>
+            <span class="hidden sm:inline">Previous</span>
+          </button>
+          <button id="btnPlay" class="glass-button bg-cyan-500/25 text-cyan-200 hover:bg-cyan-500/35 border-cyan-400/50 px-4 py-2 rounded-lg text-sm font-semibold flex items-center gap-2 shadow-lg shadow-cyan-500/15" title="Start / Stop (Spacebar)">
+            <i class="fa-solid fa-play" id="playIcon"></i>
+            <span id="playText">Start</span>
+          </button>
+          <button id="btnNext" class="glass-button text-slate-200 hover:text-white px-3 py-2 rounded-lg text-sm flex items-center gap-1.5" title="Next Step (Right Arrow)">
+            <span class="hidden sm:inline">Next</span>
+            <i class="fa-solid fa-forward-step"></i>
+          </button>
+        </div>
+
+        <!-- Speed & Audio Controls -->
+        <div class="flex items-center gap-2">
+          <div class="flex items-center bg-white/5 rounded-xl p-1 border border-white/10 text-xs text-slate-300 backdrop-blur-md">
+            <span class="px-2 py-1 text-slate-400"><i class="fa-solid fa-gauge-high mr-1"></i>Speed</span>
+            <button class="speed-btn px-2 py-1 rounded-lg hover:text-white transition" data-speed="1300">0.5x</button>
+            <button class="speed-btn px-2 py-1 rounded-lg bg-cyan-500/30 text-cyan-200 font-semibold transition" data-speed="650">1x</button>
+            <button class="speed-btn px-2 py-1 rounded-lg hover:text-white transition" data-speed="280">2x</button>
+            <button class="speed-btn px-2 py-1 rounded-lg hover:text-white transition" data-speed="110">4x</button>
+          </div>
+          <button id="btnAudio" class="glass-button p-2.5 rounded-xl text-slate-300 hover:text-cyan-300" title="Toggle Sound Effects">
+            <i class="fa-solid fa-volume-high" id="audioIcon"></i>
+          </button>
+        </div>
+
+      </div>
+
+      <!-- Scrubber Slider & Status Badges -->
+      <div class="flex flex-col sm:flex-row items-center gap-3 pt-2 border-t border-white/10">
+        <div class="flex flex-wrap items-center gap-2 text-xs text-slate-300 w-full sm:w-auto shrink-0">
+          <span id="stepCounterBadge" class="code-font px-2.5 py-1 rounded-md bg-white/5 border border-white/10 text-cyan-300">
+            Step: 0 / 0
+          </span>
+          <span id="phaseBadge" class="px-2.5 py-1 rounded-md bg-sky-500/20 border border-sky-400/30 text-sky-200 font-semibold">
+            Ready
+          </span>
+          <span id="varsHeaderBadge" class="px-2.5 py-1 rounded-md bg-purple-500/20 border border-purple-400/30 text-purple-200 font-bold">
+            a = -, b = -
+          </span>
+          <span id="printedCountBadge" class="px-2.5 py-1 rounded-md bg-emerald-500/20 border border-emerald-400/30 text-emerald-200 font-bold">
+            Printed: 0 / 6
+          </span>
+        </div>
+        <div class="w-full flex items-center gap-3">
+          <input type="range" id="stepScrubber" min="0" max="0" value="0" class="w-full h-1.5 bg-slate-800/80 rounded-lg appearance-none cursor-pointer accent-cyan-400">
+        </div>
+      </div>
+    </header>
+
+    <!-- TEST CASES & CUSTOM N INPUT BAR -->
+    <section class="glass-panel rounded-2xl p-4 flex flex-wrap items-center justify-between gap-4">
+      <div class="flex flex-wrap items-center gap-3">
+        <label for="presetSelect" class="text-xs uppercase font-semibold text-slate-300 tracking-wider flex items-center gap-1.5">
+          <i class="fa-solid fa-flask text-cyan-400"></i> Test Cases:
+        </label>
+        <select id="presetSelect" class="bg-slate-900/75 border border-white/15 text-xs sm:text-sm text-slate-200 rounded-xl px-3 py-2 outline-none focus:border-cyan-400 backdrop-blur-md">
+          <option value="0">1: Classic 6-Term Series (n = 6 &rarr; "0 1 1 2 3 5")</option>
+          <option value="1">2: Standard 5-Term Series (n = 5 &rarr; "0 1 1 2 3")</option>
+          <option value="2">3: Extended 8-Term Series (n = 8 &rarr; "0 1 1 2 3 5 8 13")</option>
+          <option value="3">4: 4-Term Series (n = 4 &rarr; "0 1 1 2")</option>
+          <option value="4">5: 3-Term Series (n = 3 &rarr; "0 1 1")</option>
+          <option value="5">6: 2-Term Base Pair (n = 2 &rarr; "0 1")</option>
+          <option value="6">7: Single Term n = 1 (n = 1 &rarr; "0")</option>
+          <option value="7">8: Zero Terms Edge Case n = 0 (n = 0 &rarr; "")</option>
+          <option value="8">9: 10-Term Series (n = 10 &rarr; "0 1 1 2 3 5 8 13 21 34")</option>
+          <option value="9">10: 12-Term Series (n = 12 &rarr; "0 1 1 ... 89")</option>
+        </select>
+      </div>
+
+      <div class="flex flex-wrap items-center gap-2">
+        <span class="text-xs text-slate-400 code-font">Input n (0..15):</span>
+        <input type="number" id="customNInput" min="0" max="15" value="6" class="w-20 bg-white/5 border border-white/15 rounded-xl px-3 py-2 text-xs text-slate-200 code-font outline-none focus:border-cyan-400 backdrop-blur-md" title="Number of Fibonacci terms to print (0 to 15)">
+        <button id="btnApplyCustom" class="glass-button text-xs px-4 py-2 rounded-xl text-cyan-300 font-semibold shrink-0">
+          Print n Terms
+        </button>
+      </div>
+    </section>
+
+    <!-- MAIN VISUALIZATION & CODE SECTION -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-5">
+
+      <!-- LEFT: SCALAR REGISTERS (a, b), ARITHMETIC ALU, PRINTED SERIES RIBBON & CONSOLE -->
+      <section class="lg:col-span-7 xl:col-span-8 flex flex-col gap-5">
+
+        <!-- Live Variable Telemetry Cards -->
+        <div class="grid grid-cols-2 sm:grid-cols-5 gap-3">
+
+          <!-- Input Count n -->
+          <div class="glass-panel rounded-xl p-3 flex flex-col justify-between border-sky-400/35">
+            <span class="text-[11px] text-slate-400 uppercase font-semibold flex items-center justify-between">
+              Input n
+              <i class="fa-solid fa-bullseye text-sky-400 text-[10px]"></i>
+            </span>
+            <div class="flex items-baseline gap-1.5 mt-1.5">
+              <span id="varTargetN" class="code-font text-xl font-bold text-sky-300">6</span>
+            </div>
+            <span class="text-[10px] text-sky-200/75 mt-1 code-font">Terms to print</span>
+          </div>
+
+          <!-- Loop Counter i -->
+          <div class="glass-panel rounded-xl p-3 flex flex-col justify-between border-amber-400/35">
+            <span class="text-[11px] text-slate-400 uppercase font-semibold flex items-center justify-between">
+              Loop Ptr (i)
+              <span class="w-2 h-2 rounded-full bg-amber-400"></span>
+            </span>
+            <div class="flex items-baseline gap-1.5 mt-1.5">
+              <span id="varPtrI" class="code-font text-xl font-bold text-amber-300">-</span>
+              <span id="varLoopBound" class="text-[10px] text-slate-400 code-font">of 6</span>
+            </div>
+            <span id="varSpaceCheck" class="text-[10px] text-amber-200/75 mt-1 code-font">i &lt; n - 1</span>
+          </div>
+
+          <!-- Scalar Variable int a -->
+          <div class="glass-panel rounded-xl p-3 flex flex-col justify-between border-cyan-400/35">
+            <span class="text-[11px] text-slate-400 uppercase font-semibold flex items-center justify-between">
+              int a (Current)
+              <span class="w-2 h-2 rounded-full bg-cyan-400"></span>
+            </span>
+            <div class="flex items-baseline gap-1.5 mt-1.5">
+              <span id="varRegA" class="code-font text-xl font-bold text-cyan-300">-</span>
+            </div>
+            <span id="varRegASub" class="text-[10px] text-cyan-200/75 mt-1 code-font">Printed via print(a)</span>
+          </div>
+
+          <!-- Scalar Variable int b -->
+          <div class="glass-panel rounded-xl p-3 flex flex-col justify-between border-purple-400/35">
+            <span class="text-[11px] text-slate-400 uppercase font-semibold flex items-center justify-between">
+              int b (Next)
+              <span class="w-2 h-2 rounded-full bg-purple-400"></span>
+            </span>
+            <div class="flex items-baseline gap-1.5 mt-1.5">
+              <span id="varRegB" class="code-font text-xl font-bold text-purple-300">-</span>
+            </div>
+            <span id="varRegBSub" class="text-[10px] text-purple-200/75 mt-1 code-font">Lookahead term</span>
+          </div>
+
+          <!-- Printed Terms Count -->
+          <div id="finalOutputCard" class="glass-panel rounded-xl p-3 flex flex-col justify-between border-emerald-400/35 col-span-2 sm:col-span-1">
+            <span class="text-[11px] text-slate-400 uppercase font-semibold flex items-center justify-between">
+              Printed Terms
+              <i class="fa-solid fa-terminal text-emerald-400 text-[10px]"></i>
+            </span>
+            <div class="flex items-baseline gap-1.5 mt-1.5">
+              <span id="varPrintedCount" class="code-font text-xl font-black text-emerald-400">0 / 6</span>
+            </div>
+            <span class="text-[10px] text-emerald-300/80 mt-1 code-font">0 temp variables</span>
+          </div>
+
+        </div>
+
+        <!-- UNIFIED STAGE: SCALAR REGISTERS (a, b), ARITHMETIC ALU & PRINTED FIBONACCI SERIES RIBBON -->
+        <div id="stageWrapper" class="glass-panel relative rounded-2xl p-4 sm:p-5 flex flex-col gap-5">
+          <!-- SVG Trajectory Arc Overlay for Lift-and-Place Box/Bar Transfers -->
+          <svg id="transferArcSvg" class="absolute inset-0 w-full h-full pointer-events-none z-30 overflow-visible"></svg>
+
+          <!-- Floating Lift-and-Place Box/Bar Clone Layer -->
+          <div id="flyingCloneLayer" class="absolute inset-0 pointer-events-none z-40"></div>
+
+          <!-- 1. IN-PLACE SCALAR REGISTERS (int a, int b) & TEMP-FREE ARITHMETIC ALU -->
+          <div class="flex flex-col gap-3">
+            <div class="flex flex-wrap items-center justify-between text-xs pb-2 border-b border-white/10 gap-2">
+              <span class="font-semibold text-slate-200 uppercase tracking-wider flex items-center gap-1.5">
+                <i class="fa-solid fa-microchip text-cyan-400"></i>
+                In-Place Scalar Registers: <span class="code-font text-cyan-300">int a = 0</span>, <span class="code-font text-purple-300">int b = 1</span>
+                <span class="text-[10px] px-2 py-0.5 rounded bg-emerald-500/15 border border-emerald-400/30 text-emerald-200 code-font">No Temp Variable</span>
+              </span>
+
+              <div class="flex flex-wrap items-center gap-3 text-[11px]">
+                <span class="flex items-center gap-1.5">
+                  <span class="w-2.5 h-2.5 rounded-sm bg-cyan-400 inline-block"></span> int a
+                </span>
+                <span class="flex items-center gap-1.5">
+                  <span class="w-2.5 h-2.5 rounded-sm bg-purple-400 inline-block"></span> int b
+                </span>
+                <span class="flex items-center gap-1.5">
+                  <span class="w-2.5 h-2.5 rounded-sm bg-emerald-400 inline-block"></span> Updated Slot
+                </span>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-12 gap-4 items-stretch">
+
+              <!-- Left (7 Cols): Glassy Boxes + Proportional Bars for int a and int b -->
+              <div class="md:col-span-7 p-4 rounded-xl bg-white/[0.02] border border-white/10 flex items-center justify-around gap-4 min-h-[205px]">
+                <!-- int a Box + Proportional Bar -->
+                <div id="regACard" class="scalar-slot-card reg-a-style flex-1 max-w-[165px] h-44 rounded-2xl p-3 flex flex-col items-center justify-between select-none">
+                  <div class="w-full flex items-center justify-between text-[11px] code-font">
+                    <span class="font-extrabold text-cyan-300">int a</span>
+                    <span id="regATag" class="px-1.5 py-0.2 rounded bg-cyan-500/20 text-cyan-200 text-[9px]">F(0)</span>
+                  </div>
+
+                  <!-- Proportional Magnitude Bar -->
+                  <div class="w-full h-20 flex items-end justify-center bg-black/25 rounded-xl p-1.5 border border-white/[0.06] my-1">
+                    <div id="regABar" class="w-12 rounded-t-md bg-gradient-to-t from-cyan-600 via-cyan-500 to-cyan-300 border-t border-cyan-100 shadow-[0_0_14px_rgba(34,211,238,0.5)] transition-all duration-300 flex items-center justify-center" style="height: 12%;">
+                      <span id="regABarText" class="code-font text-[10px] font-black text-white drop-shadow">0</span>
+                    </div>
+                  </div>
+
+                  <div class="w-full flex flex-col items-center">
+                    <span id="regABigVal" class="code-font text-xl font-black text-white">0</span>
+                    <span id="regASubCaption" class="text-[9px] code-font text-cyan-300/80">current term</span>
+                  </div>
+                </div>
+
+                <!-- Center Bidirectional Operator Bridge -->
+                <div class="flex flex-col items-center justify-center gap-1.5 shrink-0">
+                  <div id="regBridgeBadge" class="w-11 h-11 rounded-full bg-white/5 border border-white/15 flex items-center justify-center code-font text-sm font-black text-slate-300 transition-all duration-300">
+                    &harr;
+                  </div>
+                  <span id="regBridgeLabel" class="text-[9px] code-font text-slate-400 uppercase tracking-wider">a, b</span>
+                </div>
+
+                <!-- int b Box + Proportional Bar -->
+                <div id="regBCard" class="scalar-slot-card reg-b-style flex-1 max-w-[165px] h-44 rounded-2xl p-3 flex flex-col items-center justify-between select-none">
+                  <div class="w-full flex items-center justify-between text-[11px] code-font">
+                    <span class="font-extrabold text-purple-300">int b</span>
+                    <span id="regBTag" class="px-1.5 py-0.2 rounded bg-purple-500/20 text-purple-200 text-[9px]">F(1)</span>
+                  </div>
+
+                  <!-- Proportional Magnitude Bar -->
+                  <div class="w-full h-20 flex items-end justify-center bg-black/25 rounded-xl p-1.5 border border-white/[0.06] my-1">
+                    <div id="regBBar" class="w-12 rounded-t-md bg-gradient-to-t from-purple-600 via-purple-500 to-purple-300 border-t border-purple-100 shadow-[0_0_14px_rgba(168,85,247,0.5)] transition-all duration-300 flex items-center justify-center" style="height: 22%;">
+                      <span id="regBBarText" class="code-font text-[10px] font-black text-white drop-shadow">1</span>
+                    </div>
+                  </div>
+
+                  <div class="w-full flex flex-col items-center">
+                    <span id="regBBigVal" class="code-font text-xl font-black text-white">1</span>
+                    <span id="regBSubCaption" class="text-[9px] code-font text-purple-300/80">next term</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Right (5 Cols): Temp-Free In-Place Arithmetic ALU Chamber -->
+              <div class="md:col-span-5 p-4 rounded-xl bg-white/[0.02] border border-white/10 flex flex-col justify-between gap-2.5">
+                <div class="flex items-center justify-between text-[11px] pb-1.5 border-b border-white/10">
+                  <span class="font-semibold text-amber-300 uppercase tracking-wider flex items-center gap-1.5">
+                    <i class="fa-solid fa-calculator text-amber-400"></i> No-Temp Arithmetic ALU
+                  </span>
+                  <span id="aluStepTag" class="code-font text-[10px] px-2 py-0.5 rounded bg-white/5 border border-white/10 text-slate-400">
+                    Idle
+                  </span>
+                </div>
+
+                <div class="flex flex-col gap-2 my-auto">
+                  <div id="aluLine1Box" class="p-2.5 rounded-xl bg-white/[0.03] border border-white/10 code-font text-xs transition-all duration-300">
+                    <div class="text-[10px] text-slate-400 mb-0.5">Step A (Line 22): Advance sum into b</div>
+                    <div id="aluLine1Expr" class="font-bold text-slate-200">b = a + b</div>
+                  </div>
+
+                  <div id="aluLine2Box" class="p-2.5 rounded-xl bg-white/[0.03] border border-white/10 code-font text-xs transition-all duration-300">
+                    <div class="text-[10px] text-slate-400 mb-0.5">Step B (Line 23): Recover old b into a</div>
+                    <div id="aluLine2Expr" class="font-bold text-slate-200">a = b &minus; a</div>
+                  </div>
+                </div>
+
+                <div class="text-[10px] code-font text-slate-400 text-center bg-black/25 py-1 px-2 rounded-lg border border-white/[0.05]">
+                  (F<sub>i</sub> + F<sub>i+1</sub>) &minus; F<sub>i</sub> = F<sub>i+1</sub> without <span class="text-rose-300">temp</span>
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+          <!-- 2. PRINTED FIBONACCI SERIES RIBBON: F(0) .. F(n - 1) -->
+          <div class="flex flex-col gap-2.5 pt-1">
+            <div class="flex flex-wrap items-center justify-between text-xs pb-2 border-b border-white/10 gap-2">
+              <span class="font-semibold text-slate-200 uppercase tracking-wider flex items-center gap-1.5">
+                <i class="fa-solid fa-chart-column text-emerald-400"></i>
+                Printed Fibonacci Series (<span id="seriesRangeLabel" class="code-font text-cyan-300">F(0) .. F(5)</span>)
+              </span>
+              <span class="code-font text-[10px] text-slate-400">
+                Each iteration prints <span class="text-cyan-300 font-bold">a</span> + space <span class="text-amber-300">" "</span> if <span class="code-font">i &lt; n - 1</span>
+              </span>
+            </div>
+
+            <div id="seriesRibbonArena" class="min-h-[126px] p-3.5 rounded-xl bg-white/[0.02] border border-white/10 flex items-end justify-center gap-1.5 sm:gap-2 overflow-x-auto">
+              <!-- Populated dynamically with glassy boxes + proportional bars + space separators -->
+            </div>
+          </div>
+
+          <!-- 3. STANDARD I/O CONSOLE & LIVE DECISION BANNER -->
+          <div class="grid grid-cols-1 md:grid-cols-12 gap-3 items-stretch">
+            <div class="md:col-span-5 p-3 rounded-xl bg-slate-950/75 border border-white/10 code-font text-[11px] flex flex-col justify-between gap-1.5">
+              <div class="flex items-center justify-between text-[10px] text-slate-400 border-b border-white/10 pb-1">
+                <span><i class="fa-solid fa-terminal text-emerald-400 mr-1"></i>Standard I/O (Scanner)</span>
+                <span>System.out</span>
+              </div>
+              <div id="consoleLinesBox" class="flex flex-col gap-0.5 text-slate-300 overflow-x-auto">
+                <span class="text-slate-500 italic">Waiting for Scanner input...</span>
+              </div>
+            </div>
+
+            <div id="decisionBanner" class="md:col-span-7 p-3.5 rounded-xl bg-white/[0.04] border border-white/10 text-xs flex flex-col sm:flex-row items-center justify-between gap-3 backdrop-blur-md">
+              <div class="flex items-center gap-2.5">
+                <i id="decisionIcon" class="fa-solid fa-circle-info text-cyan-400 text-base"></i>
+                <span id="decisionText" class="text-slate-200">Ready to read n and print the first n Fibonacci numbers without a temporary variable.</span>
+              </div>
+              <div id="actionPill" class="hidden text-xs code-font px-3 py-1.5 rounded-lg bg-slate-950/70 border border-white/15 text-emerald-200 font-semibold shrink-0">
+                <!-- e.g. System.out.print(0) -->
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+      </section>
+
+      <!-- RIGHT: SYNCHRONIZED & PROPERLY INDENTED JAVA CODE CONTAINER -->
+      <section class="lg:col-span-5 xl:col-span-4 flex flex-col gap-4">
+
+        <div class="glass-panel rounded-2xl p-4 flex flex-col h-full">
+          <div class="flex items-center justify-between pb-3 border-b border-white/10 text-xs">
+            <div class="flex items-center gap-2">
+              <div class="flex gap-1.5">
+                <span class="w-3 h-3 rounded-full bg-rose-500/80 inline-block"></span>
+                <span class="w-3 h-3 rounded-full bg-amber-500/80 inline-block"></span>
+                <span class="w-3 h-3 rounded-full bg-emerald-500/80 inline-block"></span>
+              </div>
+              <span class="code-font text-slate-200 font-semibold ml-2">Main.java</span>
+            </div>
+            <span class="text-[11px] text-cyan-300 bg-cyan-500/15 px-2.5 py-0.5 rounded border border-cyan-400/25 code-font">
+              O(1) Space • No Temp
+            </span>
+          </div>
+
+          <!-- Properly Indented Java Code Lines with Zero-Jump Localized Scroll -->
+          <div id="codeContainer" class="code-font text-xs sm:text-[13px] leading-relaxed text-slate-300 py-3 overflow-x-auto overflow-y-auto max-h-[640px] flex-grow select-none">
+            <div class="code-line" id="line1"><span class="text-slate-500 mr-2"> 1</span><span class="text-indigo-400 font-semibold">import</span> java.util.*;</div>
+            <div class="code-line" id="line2"><span class="text-slate-500 mr-2"> 2</span></div>
+            <div class="code-line" id="line3"><span class="text-slate-500 mr-2"> 3</span><span class="text-indigo-400 font-semibold">public class</span> <span class="text-amber-300">Main</span> {</div>
+            <div class="code-line" id="line4"><span class="text-slate-500 mr-2"> 4</span></div>
+            <div class="code-line" id="line5"><span class="text-slate-500 mr-2"> 5</span>    <span class="text-indigo-400 font-semibold">public static void</span> <span class="text-cyan-300">main</span>(String[] args) {</div>
+            <div class="code-line" id="line6"><span class="text-slate-500 mr-2"> 6</span></div>
+            <div class="code-line" id="line7"><span class="text-slate-500 mr-2"> 7</span>        Scanner sc = <span class="text-indigo-400 font-semibold">new</span> Scanner(System.in);</div>
+            <div class="code-line" id="line8"><span class="text-slate-500 mr-2"> 8</span></div>
+            <div class="code-line" id="line9"><span class="text-slate-500 mr-2"> 9</span>        <span class="text-indigo-400 font-semibold">int</span> n = sc.nextInt();</div>
+            <div class="code-line" id="line10"><span class="text-slate-500 mr-2">10</span></div>
+            <div class="code-line" id="line11"><span class="text-slate-500 mr-2">11</span>        <span class="text-indigo-400 font-semibold">int</span> a = <span class="text-rose-400">0</span>;</div>
+            <div class="code-line" id="line12"><span class="text-slate-500 mr-2">12</span>        <span class="text-indigo-400 font-semibold">int</span> b = <span class="text-rose-400">1</span>;</div>
+            <div class="code-line" id="line13"><span class="text-slate-500 mr-2">13</span></div>
+            <div class="code-line" id="line14"><span class="text-slate-500 mr-2">14</span>        <span class="text-indigo-400 font-semibold">for</span> (<span class="text-indigo-400">int</span> i = <span class="text-rose-400">0</span>; i &lt; n; i++) {</div>
+            <div class="code-line" id="line15"><span class="text-slate-500 mr-2">15</span></div>
+            <div class="code-line" id="line16"><span class="text-slate-500 mr-2">16</span>            System.out.print(a);</div>
+            <div class="code-line" id="line17"><span class="text-slate-500 mr-2">17</span></div>
+            <div class="code-line" id="line18"><span class="text-slate-500 mr-2">18</span>            <span class="text-indigo-400 font-semibold">if</span> (i &lt; n - <span class="text-rose-400">1</span>) {</div>
+            <div class="code-line" id="line19"><span class="text-slate-500 mr-2">19</span>                System.out.print(<span class="text-emerald-300">" "</span>);</div>
+            <div class="code-line" id="line20"><span class="text-slate-500 mr-2">20</span>            }</div>
+            <div class="code-line" id="line21"><span class="text-slate-500 mr-2">21</span></div>
+            <div class="code-line" id="line22"><span class="text-slate-500 mr-2">22</span>            b = a + b;</div>
+            <div class="code-line" id="line23"><span class="text-slate-500 mr-2">23</span>            a = b - a;</div>
+            <div class="code-line" id="line24"><span class="text-slate-500 mr-2">24</span>        }</div>
+            <div class="code-line" id="line25"><span class="text-slate-500 mr-2">25</span></div>
+            <div class="code-line" id="line26"><span class="text-slate-500 mr-2">26</span>        System.out.println();</div>
+            <div class="code-line" id="line27"><span class="text-slate-500 mr-2">27</span></div>
+            <div class="code-line" id="line28"><span class="text-slate-500 mr-2">28</span>        sc.close();</div>
+            <div class="code-line" id="line29"><span class="text-slate-500 mr-2">29</span>    }</div>
+            <div class="code-line" id="line30"><span class="text-slate-500 mr-2">30</span>}</div>
+          </div>
+
+          <!-- Live Step Narrative Box -->
+          <div class="mt-3 p-3 bg-white/[0.04] border border-white/10 rounded-xl flex items-start gap-2.5 backdrop-blur-md">
+            <i class="fa-solid fa-circle-info text-cyan-400 mt-0.5 text-xs"></i>
+            <div class="text-xs text-slate-200 leading-relaxed" id="stepDescription">
+              Ready to run Fibonacci Series Without Temporary Variable. Click <b>Start</b> or <b>Next</b> to step through.
+            </div>
+          </div>
+
+        </div>
+
+      </section>
+
+    </div>
+
+    <!-- BOTTOM SECTION: PROBLEM STATEMENT & ARCHITECTURAL SUMMARY -->
+    <footer class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-2">
+
+      <!-- Problem Statement Card -->
+      <div class="glass-panel rounded-2xl p-5 flex flex-col gap-3">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <span class="text-amber-400 font-bold"><i class="fa-solid fa-file-lines mr-1.5"></i>Problem Statement</span>
+            <span class="px-2 py-0.5 rounded text-[11px] font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-400/30">Easy / DP</span>
+          </div>
+          <span class="text-xs text-slate-400 font-mono">Infosys DSE 2025 • LeetCode 509 • GFG</span>
+        </div>
+
+        <p class="text-xs text-slate-300 leading-relaxed">
+          Generate and print the first <code class="font-mono text-cyan-300">n</code> terms of the <b>Fibonacci Series</b> (<code class="font-mono">F(0), F(1), ..., F(n - 1)</code>), where <code class="font-mono">F(0) = 0</code>, <code class="font-mono">F(1) = 1</code>, and <code class="font-mono">F(i) = F(i - 1) + F(i - 2)</code>.
+          <br><br>
+          <b>DSE 2025 Variant Requirement:</b> Compute and advance the Fibonacci sequence in <code class="font-mono">&Omicron;(n)</code> time and <code class="font-mono">&Omicron;(1)</code> auxiliary space <b>without using a third temporary swap variable</b>.
+          <br><span class="text-[11px] text-slate-400 italic">Related Variants: Fibonacci Number (Recursive + Complexity), Nth Fibonacci (DP) • Also asked at: Accenture, TCS.</span>
+        </p>
+
+        <div class="space-y-2 pt-2 border-t border-white/10 text-xs text-slate-300">
+          <div class="bg-white/[0.03] p-2.5 rounded-lg border border-white/10 font-mono grid grid-cols-1 sm:grid-cols-2 gap-1.5">
+            <div><span class="text-slate-400">Ex 1:</span> n = 1 &rarr; <span class="text-emerald-400 font-bold">"0"</span></div>
+            <div><span class="text-slate-400">Ex 2:</span> n = 2 &rarr; <span class="text-emerald-400 font-bold">"0 1"</span></div>
+            <div><span class="text-slate-400">Ex 3:</span> n = 5 &rarr; <span class="text-emerald-400 font-bold">"0 1 1 2 3"</span></div>
+            <div><span class="text-slate-400">Ex 4:</span> n = 6 &rarr; <span class="text-emerald-400 font-bold">"0 1 1 2 3 5"</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Algorithm Summary & In-Place Arithmetic Proof Card -->
+      <div class="glass-panel rounded-2xl p-5 flex flex-col gap-3">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <span class="text-cyan-400 font-bold"><i class="fa-solid fa-brain mr-1.5"></i>Algorithm Summary &amp; No-Temp Arithmetic Proof</span>
+          </div>
+          <span class="px-2 py-0.5 rounded text-[11px] font-semibold bg-cyan-500/20 text-cyan-200 border border-cyan-400/30">O(N) Time • O(1) Space</span>
+        </div>
+
+        <div class="space-y-3 text-xs text-slate-300 leading-relaxed">
+          <div class="p-3 bg-cyan-950/30 border border-cyan-400/25 rounded-xl">
+            <b class="text-cyan-300 flex items-center gap-1.5 mb-1">
+              <i class="fa-solid fa-arrows-rotate"></i> Advancing <code class="font-mono">(a, b)</code> Without a Temporary Variable:
+            </b>
+            At the start of iteration <code class="font-mono">i</code>, <code class="font-mono text-cyan-300">a = F(i)</code> and <code class="font-mono text-purple-300">b = F(i + 1)</code>:
+            <ol class="list-decimal list-inside mt-1 space-y-0.5 text-slate-300">
+              <li><code class="font-mono text-emerald-300 font-semibold">System.out.print(a);</code> outputs <code class="font-mono">F(i)</code> (followed by <code class="font-mono">" "</code> if <code class="font-mono">i &lt; n - 1</code>).</li>
+              <li><code class="font-mono text-purple-300 font-semibold">b = a + b;</code> stores <code class="font-mono">F(i) + F(i + 1) = F(i + 2)</code> inside <code class="font-mono">b</code>.</li>
+              <li><code class="font-mono text-cyan-300 font-semibold">a = b - a;</code> computes <code class="font-mono">(F(i) + F(i + 1)) - F(i) = F(i + 1)</code> and places it into <code class="font-mono">a</code>.</li>
+            </ol>
+          </div>
+
+          <div class="grid grid-cols-2 gap-3 pt-1">
+            <div class="p-2.5 bg-white/[0.03] rounded-lg border border-white/10">
+              <span class="text-[11px] text-slate-400 uppercase font-semibold">Time Complexity</span>
+              <div class="text-sm font-bold text-emerald-400 font-mono mt-0.5">&Omicron;(N)</div>
+              <p class="text-[10px] text-slate-400 mt-0.5">Single linear loop of <code class="font-mono">N</code> iterations (vs. <code class="font-mono">&Omicron;(2<sup>N</sup>)</code> pure recursion).</p>
+            </div>
+            <div class="p-2.5 bg-white/[0.03] rounded-lg border border-white/10">
+              <span class="text-[11px] text-slate-400 uppercase font-semibold">Space Complexity</span>
+              <div class="text-sm font-bold text-cyan-400 font-mono mt-0.5">&Omicron;(1)</div>
+              <p class="text-[10px] text-slate-400 mt-0.5">Only scalar variables (<code class="font-mono">n, a, b, i</code>) — zero arrays, DP tables, or recursion stack.</p>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+    </footer>
+
+  </div>
+
+  <!-- JAVASCRIPT SIMULATION ENGINE WITH SCALAR REGISTERS (a, b) & LIFT-AND-PLACE ANIMATIONS -->
+  <script>
+    // 10 COMPREHENSIVE PRESETS
+    const PRESETS = [
+      { name: '1: Classic 6-Term Series (n = 6 -> "0 1 1 2 3 5")', n: 6 },
+      { name: '2: Standard 5-Term Series (n = 5 -> "0 1 1 2 3")', n: 5 },
+      { name: '3: Extended 8-Term Series (n = 8 -> "0 1 1 2 3 5 8 13")', n: 8 },
+      { name: '4: 4-Term Series (n = 4 -> "0 1 1 2")', n: 4 },
+      { name: '5: 3-Term Series (n = 3 -> "0 1 1")', n: 3 },
+      { name: '6: 2-Term Base Pair (n = 2 -> "0 1")', n: 2 },
+      { name: '7: Single Term n = 1 (n = 1 -> "0")', n: 1 },
+      { name: '8: Zero Terms Edge Case n = 0 (n = 0 -> "")', n: 0 },
+      { name: '9: 10-Term Series (n = 10 -> "0 1 1 2 3 5 8 13 21 34")', n: 10 },
+      { name: '10: 12-Term Series (n = 12 -> "0 1 1 ... 89")', n: 12 }
+    ];
+
+    // APPLICATION STATE
+    let currentN = PRESETS[0].n;
+    let steps = [];
+    let currentStepIdx = 0;
+    let isPlaying = false;
+    let playInterval = null;
+    let playSpeed = 650;
+    let audioEnabled = true;
+
+    // WEB AUDIO SYNTHESIZER
+    let audioCtx = null;
+    function initAudio() {
+      if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      }
+    }
+    function playTone(freq = 440, type = 'sine', duration = 0.08, vol = 0.035) {
+      if (!audioEnabled) return;
+      try {
+        initAudio();
+        if (audioCtx.state === 'suspended') {
+          audioCtx.resume();
+        }
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = type;
+        osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+        gain.gain.setValueAtTime(vol, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + duration);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + duration);
+      } catch (e) {}
+    }
+
+    // DOM REFERENCES
+    const btnPlay = document.getElementById('btnPlay');
+    const playIcon = document.getElementById('playIcon');
+    const playText = document.getElementById('playText');
+    const btnPrev = document.getElementById('btnPrev');
+    const btnNext = document.getElementById('btnNext');
+    const btnReset = document.getElementById('btnReset');
+    const btnAudio = document.getElementById('btnAudio');
+    const audioIcon = document.getElementById('audioIcon');
+    const presetSelect = document.getElementById('presetSelect');
+    const customNInput = document.getElementById('customNInput');
+    const btnApplyCustom = document.getElementById('btnApplyCustom');
+    const stepScrubber = document.getElementById('stepScrubber');
+    const stepCounterBadge = document.getElementById('stepCounterBadge');
+    const phaseBadge = document.getElementById('phaseBadge');
+    const varsHeaderBadge = document.getElementById('varsHeaderBadge');
+    const printedCountBadge = document.getElementById('printedCountBadge');
+
+    const varTargetN = document.getElementById('varTargetN');
+    const varPtrI = document.getElementById('varPtrI');
+    const varLoopBound = document.getElementById('varLoopBound');
+    const varSpaceCheck = document.getElementById('varSpaceCheck');
+    const varRegA = document.getElementById('varRegA');
+    const varRegASub = document.getElementById('varRegASub');
+    const varRegB = document.getElementById('varRegB');
+    const varRegBSub = document.getElementById('varRegBSub');
+    const finalOutputCard = document.getElementById('finalOutputCard');
+    const varPrintedCount = document.getElementById('varPrintedCount');
+
+    const stageWrapper = document.getElementById('stageWrapper');
+    const transferArcSvg = document.getElementById('transferArcSvg');
+    const flyingCloneLayer = document.getElementById('flyingCloneLayer');
+    const regACard = document.getElementById('regACard');
+    const regATag = document.getElementById('regATag');
+    const regABar = document.getElementById('regABar');
+    const regABarText = document.getElementById('regABarText');
+    const regABigVal = document.getElementById('regABigVal');
+    const regASubCaption = document.getElementById('regASubCaption');
+
+    const regBridgeBadge = document.getElementById('regBridgeBadge');
+    const regBridgeLabel = document.getElementById('regBridgeLabel');
+
+    const regBCard = document.getElementById('regBCard');
+    const regBTag = document.getElementById('regBTag');
+    const regBBar = document.getElementById('regBBar');
+    const regBBarText = document.getElementById('regBBarText');
+    const regBBigVal = document.getElementById('regBBigVal');
+    const regBSubCaption = document.getElementById('regBSubCaption');
+
+    const aluStepTag = document.getElementById('aluStepTag');
+    const aluLine1Box = document.getElementById('aluLine1Box');
+    const aluLine1Expr = document.getElementById('aluLine1Expr');
+    const aluLine2Box = document.getElementById('aluLine2Box');
+    const aluLine2Expr = document.getElementById('aluLine2Expr');
+
+    const seriesRangeLabel = document.getElementById('seriesRangeLabel');
+    const seriesRibbonArena = document.getElementById('seriesRibbonArena');
+    const consoleLinesBox = document.getElementById('consoleLinesBox');
+    const decisionBanner = document.getElementById('decisionBanner');
+    const decisionIcon = document.getElementById('decisionIcon');
+    const decisionText = document.getElementById('decisionText');
+    const actionPill = document.getElementById('actionPill');
+    const codeContainer = document.getElementById('codeContainer');
+    const stepDescription = document.getElementById('stepDescription');
+
+    // HELPER: Precompute max Fibonacci value up to F(n + 1) for proportional bar scaling
+    function computeMaxFibScale(n) {
+      let a = 0, b = 1;
+      let maxVal = 1;
+      for (let i = 0; i < n; i++) {
+        maxVal = Math.max(maxVal, a, b);
+        b = a + b;
+        a = b - a;
+      }
+      return Math.max(maxVal, a, b);
+    }
+
+    // STRICT LINE-BY-LINE EXECUTION TRACE GENERATOR
+    function generateSteps(targetN) {
+      const trace = [];
+      const maxScaleVal = computeMaxFibScale(targetN);
+      const printedTerms = new Array(targetN).fill(null);
+      const printedSpaces = new Array(Math.max(0, targetN - 1)).fill(false);
+      let stdoutBuffer = "";
+      let newlinePrinted = false;
+
+      const snapTerms = () => [...printedTerms];
+      const snapSpaces = () => [...printedSpaces];
+      const countPrinted = () => printedTerms.filter(v => v !== null).length;
+
+      // Line 5: public static void main(String[] args)
+      trace.push({
+        line: 5,
+        phase: "main() Start",
+        targetN,
+        maxScaleVal,
+        readN: false,
+        aInit: false,
+        bInit: false,
+        a: 0,
+        b: 1,
+        aTermIdx: 0,
+        bTermIdx: 1,
+        loopI: -1,
+        printedTerms: snapTerms(),
+        printedSpaces: snapSpaces(),
+        printedCount: 0,
+        stdoutBuffer,
+        newlinePrinted,
+        desc: `Entered <span class="code-font text-cyan-300 font-bold">public static void main(String[] args)</span>.`,
+        soundFreq: 330
+      });
+
+      // Line 7: Scanner sc = new Scanner(System.in);
+      trace.push({
+        line: 7,
+        phase: "Init Scanner",
+        targetN,
+        maxScaleVal,
+        readN: false,
+        aInit: false,
+        bInit: false,
+        a: 0,
+        b: 1,
+        aTermIdx: 0,
+        bTermIdx: 1,
+        loopI: -1,
+        printedTerms: snapTerms(),
+        printedSpaces: snapSpaces(),
+        printedCount: 0,
+        stdoutBuffer,
+        newlinePrinted,
+        desc: `Initialized <span class="code-font text-sky-300 font-bold">Scanner sc = new Scanner(System.in)</span>.`,
+        soundFreq: 355
+      });
+
+      // Line 9: int n = sc.nextInt();
+      trace.push({
+        line: 9,
+        phase: `Read n = ${targetN}`,
+        targetN,
+        maxScaleVal,
+        readN: true,
+        aInit: false,
+        bInit: false,
+        a: 0,
+        b: 1,
+        aTermIdx: 0,
+        bTermIdx: 1,
+        loopI: -1,
+        printedTerms: snapTerms(),
+        printedSpaces: snapSpaces(),
+        printedCount: 0,
+        stdoutBuffer,
+        newlinePrinted,
+        desc: `Read input integer <span class="code-font text-amber-300 font-bold">int n = ${targetN}</span> from standard input.`,
+        soundFreq: 385
+      });
+
+      // Line 11: int a = 0;
+      let a = 0;
+      trace.push({
+        line: 11,
+        phase: "Init a = 0",
+        targetN,
+        maxScaleVal,
+        readN: true,
+        aInit: true,
+        bInit: false,
+        a,
+        b: 1,
+        aTermIdx: 0,
+        bTermIdx: 1,
+        loopI: -1,
+        updatedReg: 'a',
+        printedTerms: snapTerms(),
+        printedSpaces: snapSpaces(),
+        printedCount: 0,
+        stdoutBuffer,
+        newlinePrinted,
+        desc: `Initialized first Fibonacci term <span class="code-font text-cyan-300 font-bold">int a = 0</span> (<span class="code-font">F(0)</span>).`,
+        soundFreq: 415
+      });
+
+      // Line 12: int b = 1;
+      let b = 1;
+      trace.push({
+        line: 12,
+        phase: "Init b = 1",
+        targetN,
+        maxScaleVal,
+        readN: true,
+        aInit: true,
+        bInit: true,
+        a,
+        b,
+        aTermIdx: 0,
+        bTermIdx: 1,
+        loopI: -1,
+        updatedReg: 'b',
+        printedTerms: snapTerms(),
+        printedSpaces: snapSpaces(),
+        printedCount: 0,
+        stdoutBuffer,
+        newlinePrinted,
+        desc: `Initialized second Fibonacci term <span class="code-font text-purple-300 font-bold">int b = 1</span> (<span class="code-font">F(1)</span>).`,
+        soundFreq: 445
+      });
+
+      // Loop: for (int i = 0; i < n; i++)
+      for (let i = 0; i < targetN; i++) {
+        // Line 14: for (int i = 0; i < n; i++)
+        trace.push({
+          line: 14,
+          phase: `Iteration i = ${i}`,
+          targetN,
+          maxScaleVal,
+          readN: true,
+          aInit: true,
+          bInit: true,
+          a,
+          b,
+          aTermIdx: i,
+          bTermIdx: i + 1,
+          loopI: i,
+          printedTerms: snapTerms(),
+          printedSpaces: snapSpaces(),
+          printedCount: countPrinted(),
+          stdoutBuffer,
+          newlinePrinted,
+          desc: `Loop check <span class="code-font text-amber-300 font-bold">i (${i}) &lt; n (${targetN})</span> is <b>true</b>. Ready to print <span class="code-font text-cyan-300">F(${i}) = ${a}</span>.`,
+          soundFreq: 475
+        });
+
+        // Line 16: System.out.print(a);
+        printedTerms[i] = a;
+        stdoutBuffer += String(a);
+        trace.push({
+          line: 16,
+          phase: `Print ${a} (F(${i}))`,
+          targetN,
+          maxScaleVal,
+          readN: true,
+          aInit: true,
+          bInit: true,
+          a,
+          b,
+          aTermIdx: i,
+          bTermIdx: i + 1,
+          loopI: i,
+          printingRegA: true,
+          justPrintedTermIdx: i,
+          transfer: { type: 'printA', val: a, termIdx: i },
+          actionText: `System.out.print(${a})`,
+          printedTerms: snapTerms(),
+          printedSpaces: snapSpaces(),
+          printedCount: countPrinted(),
+          stdoutBuffer,
+          newlinePrinted,
+          desc: `Printed current term <span class="code-font text-emerald-300 font-bold">System.out.print(${a})</span> (<span class="code-font">F(${i})</span>).`,
+          soundFreq: 560 + i * 25
+        });
+
+        // Line 18: if (i < n - 1)
+        const needsSpace = i < targetN - 1;
+        trace.push({
+          line: 18,
+          phase: needsSpace ? `i < n - 1 (True)` : `i < n - 1 (False)`,
+          targetN,
+          maxScaleVal,
+          readN: true,
+          aInit: true,
+          bInit: true,
+          a,
+          b,
+          aTermIdx: i,
+          bTermIdx: i + 1,
+          loopI: i,
+          spaceCheckResult: needsSpace,
+          printedTerms: snapTerms(),
+          printedSpaces: snapSpaces(),
+          printedCount: countPrinted(),
+          stdoutBuffer,
+          newlinePrinted,
+          desc: needsSpace
+            ? `Space separator check <span class="code-font text-amber-300 font-bold">i (${i}) &lt; n - 1 (${targetN - 1})</span> is <b>true</b> &rarr; printing <span class="code-font">" "</span>.`
+            : `Space separator check <span class="code-font text-slate-300">i (${i}) &lt; n - 1 (${targetN - 1})</span> is <b>false</b> (last term printed, no trailing space).`,
+          soundFreq: needsSpace ? 510 : 485
+        });
+
+        if (needsSpace) {
+          // Line 19: System.out.print(" ");
+          printedSpaces[i] = true;
+          stdoutBuffer += " ";
+          trace.push({
+            line: 19,
+            phase: `Print " "`,
+            targetN,
+            maxScaleVal,
+            readN: true,
+            aInit: true,
+            bInit: true,
+            a,
+            b,
+            aTermIdx: i,
+            bTermIdx: i + 1,
+            loopI: i,
+            justPrintedSpaceIdx: i,
+            actionText: `System.out.print(" ")`,
+            printedTerms: snapTerms(),
+            printedSpaces: snapSpaces(),
+            printedCount: countPrinted(),
+            stdoutBuffer,
+            newlinePrinted,
+            desc: `Appended delimiter space <span class="code-font text-amber-300 font-bold">" "</span> after <span class="code-font">${a}</span>.`,
+            soundFreq: 530
+          });
+        }
+
+        // Line 22: b = a + b;
+        const oldA = a;
+        const oldB = b;
+        const nextSum = oldA + oldB;
+        b = nextSum;
+        trace.push({
+          line: 22,
+          phase: `b = ${oldA} + ${oldB} = ${nextSum}`,
+          targetN,
+          maxScaleVal,
+          readN: true,
+          aInit: true,
+          bInit: true,
+          a,
+          b,
+          aTermIdx: i,
+          bTermIdx: i + 2,
+          loopI: i,
+          updatedReg: 'b',
+          aluStage: 1,
+          aluExpr1: `b = ${oldA} + ${oldB} = ${nextSum}`,
+          aluExpr2: `a = b - a (next)`,
+          transfer: { type: 'aToB', aVal: oldA, bVal: oldB, sum: nextSum },
+          actionText: `b = ${oldA} + ${oldB} = ${nextSum}`,
+          printedTerms: snapTerms(),
+          printedSpaces: snapSpaces(),
+          printedCount: countPrinted(),
+          stdoutBuffer,
+          newlinePrinted,
+          desc: `Step A (No Temp): Computed <span class="code-font text-purple-300 font-bold">b = ${oldA} + ${oldB} = ${nextSum}</span> (<span class="code-font">F(${i + 2})</span>). Register <span class="code-font text-cyan-300">a</span> still holds <span class="code-font">${oldA}</span>.`,
+          soundFreq: 640
+        });
+
+        // Line 23: a = b - a;
+        const nextA = b - a;
+        a = nextA;
+        trace.push({
+          line: 23,
+          phase: `a = ${b} - ${oldA} = ${nextA}`,
+          targetN,
+          maxScaleVal,
+          readN: true,
+          aInit: true,
+          bInit: true,
+          a,
+          b,
+          aTermIdx: i + 1,
+          bTermIdx: i + 2,
+          loopI: i,
+          updatedReg: 'a',
+          aluStage: 2,
+          aluExpr1: `b = ${oldA} + ${oldB} = ${nextSum}`,
+          aluExpr2: `a = ${b} - ${oldA} = ${nextA}`,
+          transfer: { type: 'bToA', bVal: b, oldAVal: oldA, recovered: nextA },
+          actionText: `a = ${b} - ${oldA} = ${nextA}`,
+          printedTerms: snapTerms(),
+          printedSpaces: snapSpaces(),
+          printedCount: countPrinted(),
+          stdoutBuffer,
+          newlinePrinted,
+          desc: `Step B (No Temp): Recovered old <span class="code-font">b</span> via <span class="code-font text-cyan-300 font-bold">a = ${b} - ${oldA} = ${nextA}</span> (<span class="code-font">F(${i + 1})</span>). Registers advanced to <span class="code-font text-emerald-300">(a=${a}, b=${b})</span>!`,
+          soundFreq: 720
+        });
+      }
+
+      // Line 14: Loop exit when i == n
+      trace.push({
+        line: 14,
+        phase: "Loop Complete",
+        targetN,
+        maxScaleVal,
+        readN: true,
+        aInit: true,
+        bInit: true,
+        a,
+        b,
+        aTermIdx: targetN,
+        bTermIdx: targetN + 1,
+        loopI: targetN,
+        printedTerms: snapTerms(),
+        printedSpaces: snapSpaces(),
+        printedCount: countPrinted(),
+        stdoutBuffer,
+        newlinePrinted,
+        desc: `Loop condition <span class="code-font text-amber-300">i (${targetN}) &lt; n (${targetN})</span> is <b>false</b>. Printed all <span class="code-font text-emerald-300 font-bold">${targetN}</span> Fibonacci terms.`,
+        soundFreq: 760
+      });
+
+      // Line 26: System.out.println();
+      newlinePrinted = true;
+      trace.push({
+        line: 26,
+        phase: "Print Newline",
+        targetN,
+        maxScaleVal,
+        readN: true,
+        aInit: true,
+        bInit: true,
+        a,
+        b,
+        aTermIdx: targetN,
+        bTermIdx: targetN + 1,
+        loopI: -1,
+        printedTerms: snapTerms(),
+        printedSpaces: snapSpaces(),
+        printedCount: countPrinted(),
+        stdoutBuffer,
+        newlinePrinted,
+        actionText: `System.out.println()`,
+        desc: `Executed <span class="code-font text-sky-300 font-bold">System.out.println()</span> to finish the console output line.`,
+        soundFreq: 840
+      });
+
+      // Line 28: sc.close();
+      trace.push({
+        line: 28,
+        phase: "Complete",
+        targetN,
+        maxScaleVal,
+        readN: true,
+        aInit: true,
+        bInit: true,
+        a,
+        b,
+        aTermIdx: targetN,
+        bTermIdx: targetN + 1,
+        loopI: -1,
+        printedTerms: snapTerms(),
+        printedSpaces: snapSpaces(),
+        printedCount: countPrinted(),
+        stdoutBuffer,
+        newlinePrinted,
+        isComplete: true,
+        desc: `<span class="text-emerald-400 font-bold text-sm"><i class="fa-solid fa-trophy mr-1.5"></i>Complete!</span> Closed <span class="code-font">Scanner</span>. Output: <span class="code-font text-emerald-300 font-bold">"${stdoutBuffer}"</span> in <span class="code-font text-cyan-300">&Omicron;(n)</span> time &amp; <span class="code-font text-purple-300">&Omicron;(1)</span> space.`,
+        soundFreq: 960
+      });
+
+      return trace;
+    }
+
+    // LOCALIZED ZERO-JUMP CODE LINE HIGHLIGHTER
+    function highlightCodeLine(lineNum) {
+      document.querySelectorAll('.code-line').forEach(el => el.classList.remove('active-line'));
+      const activeEl = document.getElementById(`line${lineNum}`);
+      if (activeEl) {
+        activeEl.classList.add('active-line');
+
+        const containerTop = codeContainer.scrollTop;
+        const containerBottom = containerTop + codeContainer.clientHeight;
+        const elTop = activeEl.offsetTop - codeContainer.offsetTop;
+        const elBottom = elTop + activeEl.clientHeight;
+
+        if (elTop < containerTop + 24) {
+          codeContainer.scrollTo({ top: Math.max(0, elTop - 24), behavior: 'smooth' });
+        } else if (elBottom > containerBottom - 24) {
+          codeContainer.scrollTo({ top: elBottom - codeContainer.clientHeight + 24, behavior: 'smooth' });
+        }
+      }
+    }
+
+    // PHYSICAL LIFT-AND-PLACE ANIMATION FOR BOXES & BARS DURING UPDATES & PRINTING
+    function animateScalarTransfer(transfer, animateFlight) {
+      transferArcSvg.innerHTML = '';
+      flyingCloneLayer.innerHTML = '';
+      if (!transfer) return;
+
+      const stageRect = stageWrapper.getBoundingClientRect();
+      const aRect = regACard.getBoundingClientRect();
+      const bRect = regBCard.getBoundingClientRect();
+
+      if (transfer.type === 'printA') {
+        const termEl = seriesRibbonArena.querySelector(`[data-term-idx="${transfer.termIdx}"]`);
+        if (!termEl) return;
+        const tRect = termEl.getBoundingClientRect();
+
+        const x1 = (aRect.left - stageRect.left) + aRect.width / 2;
+        const y1 = (aRect.bottom - stageRect.top) + 4;
+        const x2 = (tRect.left - stageRect.left) + tRect.width / 2;
+        const y2 = (tRect.top - stageRect.top) - 6;
+        const midX = (x1 + x2) / 2 - 18;
+        const midY = (y1 + y2) / 2;
+
+        transferArcSvg.innerHTML = `
+          <path d="M ${x1} ${y1} Q ${midX} ${midY}, ${x2} ${y2}"
+                fill="none" stroke="#34d399" stroke-width="2.4" class="transfer-arc-path" />
+          <circle cx="${x1}" cy="${y1}" r="4" fill="#fbbf24" />
+          <polygon points="${x2},${y2 + 3} ${x2 - 5},${y2 - 6} ${x2 + 5},${y2 - 6}" fill="#34d399" />
+        `;
+
+        if (!animateFlight) return;
+        const clone = document.createElement('div');
+        clone.className = 'absolute px-2.5 py-1 rounded-xl bg-emerald-400 text-slate-950 code-font text-xs font-extrabold shadow-xl shadow-emerald-400/50 pointer-events-none';
+        clone.textContent = `print(${transfer.val})`;
+        clone.style.left = `${x1 - 28}px`;
+        clone.style.top = `${(aRect.top - stageRect.top) + aRect.height / 2}px`;
+        flyingCloneLayer.appendChild(clone);
+
+        const dx = x2 - x1;
+        const dy = y2 - ((aRect.top - stageRect.top) + aRect.height / 2);
+        const duration = Math.min(540, Math.max(240, playSpeed * 0.78));
+        const anim = clone.animate([
+          { transform: 'translate(0px, 0px) scale(1)', opacity: 1 },
+          { transform: `translate(${dx * 0.45 - 14}px, ${dy * 0.45 - 16}px) scale(1.12)`, opacity: 1, offset: 0.45 },
+          { transform: `translate(${dx}px, ${dy}px) scale(0.95)`, opacity: 0.1 }
+        ], { duration, easing: 'cubic-bezier(0.22, 1, 0.36, 1)' });
+        anim.onfinish = () => clone.remove();
+
+      } else if (transfer.type === 'aToB') {
+        const x1 = (aRect.left - stageRect.left) + aRect.width / 2;
+        const y1 = (aRect.top - stageRect.top) - 4;
+        const x2 = (bRect.left - stageRect.left) + bRect.width / 2;
+        const y2 = (bRect.top - stageRect.top) - 4;
+        const midX = (x1 + x2) / 2;
+        const archY = Math.min(y1, y2) - 28;
+
+        transferArcSvg.innerHTML = `
+          <path d="M ${x1} ${y1} Q ${midX} ${archY}, ${x2} ${y2}"
+                fill="none" stroke="#c084fc" stroke-width="2.4" class="transfer-arc-path" />
+          <circle cx="${x1}" cy="${y1}" r="4" fill="#22d3ee" />
+          <polygon points="${x2},${y2 + 3} ${x2 - 5},${y2 - 6} ${x2 + 5},${y2 - 6}" fill="#c084fc" />
+        `;
+
+        if (!animateFlight) return;
+        const clone = document.createElement('div');
+        clone.className = 'absolute px-2.5 py-1 rounded-xl bg-purple-400 text-slate-950 code-font text-xs font-extrabold shadow-xl shadow-purple-400/50 pointer-events-none';
+        clone.textContent = `+${transfer.aVal} → ${transfer.sum}`;
+        clone.style.left = `${x1 - 30}px`;
+        clone.style.top = `${(aRect.top - stageRect.top) + 18}px`;
+        flyingCloneLayer.appendChild(clone);
+
+        const dx = bRect.left - aRect.left;
+        const duration = Math.min(540, Math.max(240, playSpeed * 0.78));
+        const anim = clone.animate([
+          { transform: 'translate(0px, 0px) scale(1)', opacity: 1 },
+          { transform: `translate(${dx * 0.5}px, -42px) scale(1.12)`, opacity: 1, offset: 0.48 },
+          { transform: `translate(${dx}px, 0px) scale(0.95)`, opacity: 0.1 }
+        ], { duration, easing: 'cubic-bezier(0.22, 1, 0.36, 1)' });
+        anim.onfinish = () => clone.remove();
+
+      } else if (transfer.type === 'bToA') {
+        const x1 = (bRect.left - stageRect.left) + bRect.width / 2;
+        const y1 = (bRect.top - stageRect.top) - 4;
+        const x2 = (aRect.left - stageRect.left) + aRect.width / 2;
+        const y2 = (aRect.top - stageRect.top) - 4;
+        const midX = (x1 + x2) / 2;
+        const archY = Math.min(y1, y2) - 28;
+
+        transferArcSvg.innerHTML = `
+          <path d="M ${x1} ${y1} Q ${midX} ${archY}, ${x2} ${y2}"
+                fill="none" stroke="#22d3ee" stroke-width="2.4" class="transfer-arc-path" />
+          <circle cx="${x1}" cy="${y1}" r="4" fill="#c084fc" />
+          <polygon points="${x2},${y2 + 3} ${x2 - 5},${y2 - 6} ${x2 + 5},${y2 - 6}" fill="#22d3ee" />
+        `;
+
+        if (!animateFlight) return;
+        const clone = document.createElement('div');
+        clone.className = 'absolute px-2.5 py-1 rounded-xl bg-cyan-400 text-slate-950 code-font text-xs font-extrabold shadow-xl shadow-cyan-400/50 pointer-events-none';
+        clone.textContent = `${transfer.bVal} - ${transfer.oldAVal} = ${transfer.recovered}`;
+        clone.style.left = `${x1 - 38}px`;
+        clone.style.top = `${(bRect.top - stageRect.top) + 18}px`;
+        flyingCloneLayer.appendChild(clone);
+
+        const dx = aRect.left - bRect.left;
+        const duration = Math.min(540, Math.max(240, playSpeed * 0.78));
+        const anim = clone.animate([
+          { transform: 'translate(0px, 0px) scale(1)', opacity: 1 },
+          { transform: `translate(${dx * 0.5}px, -42px) scale(1.12)`, opacity: 1, offset: 0.48 },
+          { transform: `translate(${dx}px, 0px) scale(0.95)`, opacity: 0.1 }
+        ], { duration, easing: 'cubic-bezier(0.22, 1, 0.36, 1)' });
+        anim.onfinish = () => clone.remove();
+      }
+    }
+
+    // RENDER CURRENT STEP
+    function renderStep(idx, animateMovement = true) {
+      if (idx < 0 || idx >= steps.length) return;
+      const step = steps[idx];
+      const targetN = step.targetN;
+      const maxScaleVal = step.maxScaleVal;
+
+      // Update Header Scrubber & Badges
+      stepCounterBadge.textContent = `Step: ${idx + 1} / ${steps.length}`;
+      phaseBadge.textContent = step.phase;
+      varsHeaderBadge.textContent = `a = ${step.aInit ? step.a : '-'}, b = ${step.bInit ? step.b : '-'}`;
+      printedCountBadge.textContent = `Printed: ${step.printedCount} / ${targetN}`;
+      stepScrubber.max = steps.length - 1;
+      stepScrubber.value = idx;
+
+      // Update Telemetry HUD Cards
+      varTargetN.textContent = targetN;
+      varLoopBound.textContent = `of ${targetN}`;
+      if (step.loopI >= 0 && step.loopI < targetN) {
+        varPtrI.textContent = step.loopI;
+        varSpaceCheck.textContent = `${step.loopI} < ${targetN - 1} (${step.loopI < targetN - 1})`;
+      } else {
+        varPtrI.textContent = '-';
+        varSpaceCheck.textContent = `i < ${Math.max(0, targetN - 1)}`;
+      }
+
+      varRegA.textContent = step.aInit ? step.a : '-';
+      varRegASub.textContent = step.aInit ? `F(${step.aTermIdx})` : 'uninitialized';
+
+      varRegB.textContent = step.bInit ? step.b : '-';
+      varRegBSub.textContent = step.bInit ? `F(${step.bTermIdx})` : 'uninitialized';
+
+      varPrintedCount.textContent = `${step.printedCount} / ${targetN}`;
+      if (step.isComplete) {
+        finalOutputCard.classList.add('result-win-anim');
+        setTimeout(() => finalOutputCard.classList.remove('result-win-anim'), 650);
+      }
+
+      // Narrative Description
+      stepDescription.innerHTML = step.desc;
+
+      // 1. Update Scalar Register Cards (int a & int b Boxes + Proportional Bars)
+      const aBarPct = !step.aInit || step.a === 0 ? 10 : Math.max(18, (step.a / maxScaleVal) * 100);
+      const bBarPct = !step.bInit || step.b === 0 ? 10 : Math.max(18, (step.b / maxScaleVal) * 100);
+
+      regACard.className = `scalar-slot-card reg-a-style flex-1 max-w-[165px] h-44 rounded-2xl p-3 flex flex-col items-center justify-between select-none ${
+        !step.aInit ? 'opacity-45' : step.updatedReg === 'a' ? 'reg-updated-glow' : step.printingRegA ? 'reg-printing-glow' : ''
+      }`;
+      regATag.textContent = step.aInit ? `F(${step.aTermIdx})` : 'F(i)';
+      regABar.style.height = `${aBarPct}%`;
+      regABarText.textContent = step.aInit ? step.a : '?';
+      regABigVal.textContent = step.aInit ? step.a : '-';
+      regASubCaption.textContent = step.aInit ? `F(${step.aTermIdx})` : 'uninitialized';
+
+      regBCard.className = `scalar-slot-card reg-b-style flex-1 max-w-[165px] h-44 rounded-2xl p-3 flex flex-col items-center justify-between select-none ${
+        !step.bInit ? 'opacity-45' : step.updatedReg === 'b' ? 'reg-updated-glow' : ''
+      }`;
+      regBTag.textContent = step.bInit ? `F(${step.bTermIdx})` : 'F(i+1)';
+      regBBar.style.height = `${bBarPct}%`;
+      regBBarText.textContent = step.bInit ? step.b : '?';
+      regBBigVal.textContent = step.bInit ? step.b : '-';
+      regBSubCaption.textContent = step.bInit ? `F(${step.bTermIdx})` : 'uninitialized';
+
+      if (step.aluStage === 1) {
+        regBridgeBadge.textContent = "+";
+        regBridgeBadge.className = "w-11 h-11 rounded-full bg-purple-500/25 border border-purple-400 text-purple-200 flex items-center justify-center code-font text-base font-black shadow-lg shadow-purple-500/25";
+        regBridgeLabel.textContent = `F(${step.bTermIdx})`;
+      } else if (step.aluStage === 2) {
+        regBridgeBadge.textContent = "−";
+        regBridgeBadge.className = "w-11 h-11 rounded-full bg-cyan-500/25 border border-cyan-400 text-cyan-200 flex items-center justify-center code-font text-base font-black shadow-lg shadow-cyan-500/25";
+        regBridgeLabel.textContent = `F(${step.aTermIdx})`;
+      } else {
+        regBridgeBadge.textContent = "↔";
+        regBridgeBadge.className = "w-11 h-11 rounded-full bg-white/5 border border-white/15 flex items-center justify-center code-font text-sm font-black text-slate-300";
+        regBridgeLabel.textContent = "a, b";
+      }
+
+      // 2. Update Temp-Free Arithmetic ALU Chamber
+      if (step.aluStage === 1) {
+        aluStepTag.textContent = "Step A: Sum";
+        aluStepTag.className = "code-font text-[10px] px-2 py-0.5 rounded bg-purple-500/25 border border-purple-400/45 text-purple-200 font-bold";
+        aluLine1Box.className = "p-2.5 rounded-xl bg-purple-500/20 border border-purple-400 code-font text-xs text-white shadow-lg shadow-purple-500/15 transition-all duration-300";
+        aluLine1Expr.textContent = step.aluExpr1;
+        aluLine2Box.className = "p-2.5 rounded-xl bg-white/[0.03] border border-white/10 code-font text-xs text-slate-400 transition-all duration-300";
+        aluLine2Expr.textContent = step.aluExpr2;
+      } else if (step.aluStage === 2) {
+        aluStepTag.textContent = "Step B: Recover";
+        aluStepTag.className = "code-font text-[10px] px-2 py-0.5 rounded bg-cyan-500/25 border border-cyan-400/45 text-cyan-200 font-bold";
+        aluLine1Box.className = "p-2.5 rounded-xl bg-white/[0.04] border border-white/15 code-font text-xs text-slate-300 transition-all duration-300";
+        aluLine1Expr.textContent = step.aluExpr1;
+        aluLine2Box.className = "p-2.5 rounded-xl bg-cyan-500/20 border border-cyan-400 code-font text-xs text-white shadow-lg shadow-cyan-500/15 transition-all duration-300";
+        aluLine2Expr.textContent = step.aluExpr2;
+      } else {
+        aluStepTag.textContent = "Idle";
+        aluStepTag.className = "code-font text-[10px] px-2 py-0.5 rounded bg-white/5 border border-white/10 text-slate-400";
+        aluLine1Box.className = "p-2.5 rounded-xl bg-white/[0.03] border border-white/10 code-font text-xs text-slate-300 transition-all duration-300";
+        aluLine1Expr.textContent = "b = a + b";
+        aluLine2Box.className = "p-2.5 rounded-xl bg-white/[0.03] border border-white/10 code-font text-xs text-slate-300 transition-all duration-300";
+        aluLine2Expr.textContent = "a = b - a";
+      }
+
+      // 3. Render Printed Fibonacci Series Ribbon: F(0) .. F(n - 1) + Space Delimiters
+      seriesRangeLabel.textContent = targetN > 0 ? `F(0) .. F(${targetN - 1})` : '0 terms (n = 0)';
+      seriesRibbonArena.innerHTML = '';
+
+      if (targetN === 0) {
+        seriesRibbonArena.innerHTML = `<span class="text-xs text-slate-400 italic code-font my-auto">n = 0 &rarr; Loop runs 0 times; prints empty line.</span>`;
+      } else {
+        for (let k = 0; k < targetN; k++) {
+          const val = step.printedTerms[k];
+          const isPrinted = val !== null;
+          const isJustPrinted = step.justPrintedTermIdx === k;
+
+          const card = document.createElement('div');
+          card.dataset.termIdx = k;
+
+          let sClass = 'series-term-card flex-1 min-w-[44px] max-w-[74px] h-28 rounded-xl p-1.5 flex flex-col items-center justify-between select-none ';
+          if (isJustPrinted) sClass += 'term-just-printed ';
+          else if (isPrinted) sClass += 'term-printed ';
+          else sClass += 'term-pending ';
+          card.className = sClass;
+
+          const barPct = !isPrinted || val === 0 ? 8 : Math.max(16, (val / maxScaleVal) * 100);
+          const barStyle = isJustPrinted
+            ? 'bg-gradient-to-t from-emerald-600 to-emerald-400 border-t border-white shadow-[0_0_12px_rgba(16,185,129,0.65)]'
+            : isPrinted
+              ? 'bg-gradient-to-t from-cyan-600 to-cyan-400 border-t border-cyan-100'
+              : 'bg-slate-700/60';
+
+          card.innerHTML = `
+            <span class="text-[9px] code-font ${isJustPrinted ? 'text-emerald-300 font-bold' : 'text-slate-400'}">i=${k}</span>
+            <div class="w-full h-11 flex items-end justify-center my-0.5 bg-black/25 rounded-lg p-1 border border-white/[0.06]">
+              <div class="w-full max-w-[22px] rounded-t-sm transition-all duration-300 ${barStyle}" style="height: ${barPct}%;"></div>
+            </div>
+            <span class="code-font text-xs font-black ${isJustPrinted ? 'text-emerald-200' : isPrinted ? 'text-white' : 'text-slate-500'}">${isPrinted ? val : '?'}</span>
+            <span class="text-[8px] code-font text-slate-500">F(${k})</span>
+          `;
+          seriesRibbonArena.appendChild(card);
+
+          // Render space delimiter badge between terms (for i < n - 1)
+          if (k < targetN - 1) {
+            const spacePrinted = step.printedSpaces[k];
+            const justSpace = step.justPrintedSpaceIdx === k;
+            const sep = document.createElement('span');
+            sep.className = justSpace
+              ? 'px-1.5 py-0.5 rounded bg-amber-400 text-slate-950 code-font text-[9px] font-black shadow self-center shrink-0'
+              : spacePrinted
+                ? 'px-1 py-0.5 rounded bg-white/10 text-amber-300 code-font text-[9px] font-bold self-center shrink-0'
+                : 'text-[9px] code-font text-slate-600 self-center shrink-0';
+            sep.textContent = spacePrinted ? '" "' : '·';
+            seriesRibbonArena.appendChild(sep);
+          }
+        }
+      }
+
+      // 4. Render Standard I/O Console
+      consoleLinesBox.innerHTML = '';
+      if (!step.readN) {
+        consoleLinesBox.innerHTML = `<span class="text-slate-500 italic">Waiting for sc.nextInt()...</span>`;
+      } else {
+        let html = `<div><span class="text-slate-500">&gt; stdin n:</span> <span class="text-amber-200 font-bold">${targetN}</span></div>`;
+        if (step.stdoutBuffer.length > 0 || step.newlinePrinted) {
+          const cursorHtml = step.newlinePrinted
+            ? `<span class="text-slate-500 ml-1">\\n</span>`
+            : `<span class="inline-block w-1.5 h-3.5 bg-emerald-400 align-middle ml-0.5 animate-pulse"></span>`;
+          html += `<div class="mt-0.5 pt-0.5 border-t border-white/10 whitespace-nowrap"><span class="text-slate-400">stdout:</span> <span class="text-emerald-300 font-black">"${step.stdoutBuffer}"</span>${cursorHtml}</div>`;
+        }
+        consoleLinesBox.innerHTML = html;
+      }
+
+      // 5. Trigger Lift-and-Place Box/Bar Transfer Animation
+      requestAnimationFrame(() => {
+        animateScalarTransfer(step.transfer, animateMovement);
+      });
+
+      // 6. Update Action Pill & Decision Banner
+      if (step.actionText) {
+        actionPill.classList.remove('hidden');
+        actionPill.textContent = step.actionText;
+      } else {
+        actionPill.classList.add('hidden');
+      }
+
+      if (step.isComplete || step.justPrintedTermIdx !== undefined || step.updatedReg !== undefined) {
+        decisionIcon.className = "fa-solid fa-trophy text-emerald-400 text-base";
+        decisionBanner.className = "md:col-span-7 p-3.5 rounded-xl bg-emerald-500/15 border border-emerald-400/35 text-xs flex flex-col sm:flex-row items-center justify-between gap-3 backdrop-blur-md";
+      } else {
+        decisionIcon.className = "fa-solid fa-circle-info text-cyan-400 text-base";
+        decisionBanner.className = "md:col-span-7 p-3.5 rounded-xl bg-white/[0.04] border border-white/10 text-xs flex flex-col sm:flex-row items-center justify-between gap-3 backdrop-blur-md";
+      }
+      decisionText.innerHTML = step.desc;
+
+      // 7. Highlight Active Java Line & Play Audio Tone
+      highlightCodeLine(step.line);
+      if (step.soundFreq) {
+        playTone(step.soundFreq, 'sine', 0.08, 0.035);
+      }
+    }
+
+    // PLAYBACK CONTROLLER
+    function setPlaying(playing) {
+      isPlaying = playing;
+      if (isPlaying) {
+        playIcon.className = "fa-solid fa-pause";
+        playText.textContent = "Stop";
+        btnPlay.classList.add('bg-rose-500/25', 'text-rose-200', 'border-rose-400/50');
+        btnPlay.classList.remove('bg-cyan-500/25', 'text-cyan-200', 'border-cyan-400/50');
+
+        playInterval = setInterval(() => {
+          if (currentStepIdx < steps.length - 1) {
+            currentStepIdx++;
+            renderStep(currentStepIdx, true);
+          } else {
+            setPlaying(false);
+          }
+        }, playSpeed);
+      } else {
+        playIcon.className = "fa-solid fa-play";
+        playText.textContent = "Start";
+        btnPlay.classList.remove('bg-rose-500/25', 'text-rose-200', 'border-rose-400/50');
+        btnPlay.classList.add('bg-cyan-500/25', 'text-cyan-200', 'border-cyan-400/50');
+        if (playInterval) {
+          clearInterval(playInterval);
+          playInterval = null;
+        }
+      }
+    }
+
+    function initSimulation(nVal) {
+      setPlaying(false);
+      currentN = Math.max(0, Math.min(15, nVal));
+      steps = generateSteps(currentN);
+      currentStepIdx = 0;
+      stepScrubber.max = steps.length - 1;
+      stepScrubber.value = 0;
+      renderStep(0, false);
+    }
+
+    // EVENT LISTENERS
+    btnPlay.addEventListener('click', () => {
+      if (currentStepIdx >= steps.length - 1) {
+        currentStepIdx = 0;
+        renderStep(0, false);
+      }
+      setPlaying(!isPlaying);
+    });
+
+    btnNext.addEventListener('click', () => {
+      setPlaying(false);
+      if (currentStepIdx < steps.length - 1) {
+        currentStepIdx++;
+        renderStep(currentStepIdx, true);
+      }
+    });
+
+    btnPrev.addEventListener('click', () => {
+      setPlaying(false);
+      if (currentStepIdx > 0) {
+        currentStepIdx--;
+        renderStep(currentStepIdx, true);
+      }
+    });
+
+    btnReset.addEventListener('click', () => {
+      setPlaying(false);
+      currentStepIdx = 0;
+      renderStep(0, false);
+    });
+
+    stepScrubber.addEventListener('input', (e) => {
+      setPlaying(false);
+      currentStepIdx = parseInt(e.target.value, 10);
+      renderStep(currentStepIdx, false);
+    });
+
+    document.querySelectorAll('.speed-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.speed-btn').forEach(b => {
+          b.classList.remove('bg-cyan-500/30', 'text-cyan-200', 'font-semibold');
+        });
+        btn.classList.add('bg-cyan-500/30', 'text-cyan-200', 'font-semibold');
+        playSpeed = parseInt(btn.dataset.speed, 10);
+        if (isPlaying) {
+          setPlaying(false);
+          setPlaying(true);
+        }
+      });
+    });
+
+    btnAudio.addEventListener('click', () => {
+      audioEnabled = !audioEnabled;
+      if (audioEnabled) {
+        audioIcon.className = "fa-solid fa-volume-high";
+        btnAudio.classList.remove('text-slate-600');
+        btnAudio.classList.add('text-slate-300');
+      } else {
+        audioIcon.className = "fa-solid fa-volume-xmark";
+        btnAudio.classList.add('text-slate-600');
+        btnAudio.classList.remove('text-slate-300');
+      }
+    });
+
+    presetSelect.addEventListener('change', (e) => {
+      const idx = parseInt(e.target.value, 10);
+      customNInput.value = PRESETS[idx].n;
+      initSimulation(PRESETS[idx].n);
+    });
+
+    btnApplyCustom.addEventListener('click', () => {
+      const parsedN = parseInt(customNInput.value, 10);
+      if (!isNaN(parsedN) && parsedN >= 0 && parsedN <= 15) {
+        initSimulation(parsedN);
+      } else {
+        decisionIcon.className = "fa-solid fa-triangle-exclamation text-rose-400 text-base";
+        decisionBanner.className = "md:col-span-7 p-3.5 rounded-xl bg-rose-500/15 border border-rose-400/35 text-xs flex flex-col sm:flex-row items-center justify-between gap-3 backdrop-blur-md";
+        decisionText.innerHTML = `<span class="text-rose-300 font-bold">Range Notice:</span> Enter an integer <span class="code-font">0 &le; n &le; 15</span> so the printed Fibonacci series ribbon fits cleanly.`;
+      }
+    });
+
+    window.addEventListener('resize', () => {
+      const step = steps[currentStepIdx];
+      if (step) {
+        animateScalarTransfer(step.transfer, false);
+      }
+    });
+
+    window.addEventListener('keydown', (e) => {
+      if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT') return;
+      if (e.code === 'Space') {
+        e.preventDefault();
+        btnPlay.click();
+      } else if (e.code === 'ArrowRight') {
+        e.preventDefault();
+        btnNext.click();
+      } else if (e.code === 'ArrowLeft') {
+        e.preventDefault();
+        btnPrev.click();
+      }
+    });
+
+    window.onload = function() {
+      customNInput.value = PRESETS[0].n;
+      initSimulation(PRESETS[0].n);
+    };
+  </script>
+</body>
+</html>

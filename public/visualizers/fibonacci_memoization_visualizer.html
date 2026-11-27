@@ -1,0 +1,1691 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Recursive Fibonacci with Memoization (Infosys DSE / LeetCode 509) - Glassmorphic Visualizer</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2064%2064%22%3E%3Cdefs%3E%3ClinearGradient%20id%3D%22bg%22%20x1%3D%220%22%20y1%3D%220%22%20x2%3D%221%22%20y2%3D%221%22%3E%3Cstop%20offset%3D%220%25%22%20stop-color%3D%22%230f172a%22%2F%3E%3Cstop%20offset%3D%22100%25%22%20stop-color%3D%22%23060913%22%2F%3E%3C%2FlinearGradient%3E%3ClinearGradient%20id%3D%22g%22%20x1%3D%220%22%20y1%3D%220%22%20x2%3D%221%22%20y2%3D%221%22%3E%3Cstop%20offset%3D%220%25%22%20stop-color%3D%22%2322d3ee%22%2F%3E%3Cstop%20offset%3D%2255%25%22%20stop-color%3D%22%236366f1%22%2F%3E%3Cstop%20offset%3D%22100%25%22%20stop-color%3D%22%23a855f7%22%2F%3E%3C%2FlinearGradient%3E%3C%2Fdefs%3E%3Crect%20x%3D%222%22%20y%3D%222%22%20width%3D%2260%22%20height%3D%2260%22%20rx%3D%2216%22%20fill%3D%22url(%23bg)%22%20stroke%3D%22url(%23g)%22%20stroke-width%3D%223.5%22%2F%3E%3Cpath%20d%3D%22M20%2042%20L32%2018%20L44%2042%22%20fill%3D%22none%22%20stroke%3D%22url(%23g)%22%20stroke-width%3D%224%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3Cline%20x1%3D%2220%22%20y1%3D%2242%22%20x2%3D%2244%22%20y2%3D%2242%22%20stroke%3D%22%2338bdf8%22%20stroke-width%3D%223%22%20stroke-linecap%3D%22round%22%20opacity%3D%220.55%22%2F%3E%3Ccircle%20cx%3D%2232%22%20cy%3D%2218%22%20r%3D%225.5%22%20fill%3D%22%2322d3ee%22%2F%3E%3Ccircle%20cx%3D%2220%22%20cy%3D%2242%22%20r%3D%225.5%22%20fill%3D%22%236366f1%22%2F%3E%3Ccircle%20cx%3D%2244%22%20cy%3D%2242%22%20r%3D%225.5%22%20fill%3D%22%23a855f7%22%2F%3E%3C%2Fsvg%3E" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: radial-gradient(circle at 14% 16%, #0c192c 0%, #030712 100%);
+      color: #e2e8f0;
+      min-height: 100vh;
+    }
+
+    .code-font {
+      font-family: 'Fira Code', monospace;
+    }
+
+    /* Glassmorphic Surface & Controls */
+    .glass-panel {
+      background: rgba(15, 23, 42, 0.56);
+      backdrop-filter: blur(22px);
+      -webkit-backdrop-filter: blur(22px);
+      border: 1px solid rgba(255, 255, 255, 0.11);
+      box-shadow: 0 20px 45px -15px rgba(0, 0, 0, 0.68), inset 0 1px 0 0 rgba(255, 255, 255, 0.09);
+    }
+
+    .glass-button {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .glass-button:hover:not(:disabled) {
+      background: rgba(255, 255, 255, 0.15);
+      border-color: rgba(255, 255, 255, 0.28);
+      transform: translateY(-1px);
+    }
+    .glass-button:active:not(:disabled) {
+      transform: translateY(1px);
+    }
+    .glass-button:disabled {
+      opacity: 0.35;
+      cursor: not-allowed;
+    }
+
+    /* Code Execution Line Highlight with Exact Preserved Indentation */
+    .code-line {
+      white-space: pre;
+      transition: all 0.2s ease;
+      border-left: 3px solid transparent;
+      padding: 2px 10px;
+    }
+    .code-line.active-line {
+      background: rgba(56, 189, 248, 0.18);
+      border-left: 3px solid #38bdf8;
+      color: #ffffff;
+      box-shadow: inset 0 0 16px rgba(56, 189, 248, 0.15);
+    }
+
+    /* Recursion Tree Glass Nodes */
+    .tree-node {
+      background: rgba(15, 23, 42, 0.72);
+      border: 1.5px solid rgba(255, 255, 255, 0.16);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      transition: all 0.28s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    .tree-node.node-active {
+      background: linear-gradient(180deg, rgba(251, 191, 36, 0.30) 0%, rgba(245, 158, 11, 0.14) 100%) !important;
+      border-color: rgba(251, 191, 36, 0.98) !important;
+      transform: translate(-50%, -50%) scale(1.1);
+      box-shadow: 0 0 26px rgba(251, 191, 36, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.35) !important;
+      z-index: 30;
+    }
+
+    .tree-node.node-base {
+      background: linear-gradient(180deg, rgba(34, 211, 238, 0.22) 0%, rgba(6, 182, 212, 0.09) 100%);
+      border-color: rgba(34, 211, 238, 0.78);
+      box-shadow: 0 8px 20px -4px rgba(34, 211, 238, 0.32);
+    }
+
+    .tree-node.node-cache-hit {
+      background: linear-gradient(180deg, rgba(168, 85, 247, 0.28) 0%, rgba(126, 34, 206, 0.12) 100%);
+      border-color: rgba(192, 132, 252, 0.92);
+      border-style: dashed;
+      box-shadow: 0 10px 24px -4px rgba(168, 85, 247, 0.45);
+    }
+
+    .tree-node.node-computed {
+      background: linear-gradient(180deg, rgba(16, 185, 129, 0.22) 0%, rgba(5, 150, 105, 0.08) 100%);
+      border-color: rgba(52, 211, 153, 0.78);
+      box-shadow: 0 8px 20px -4px rgba(16, 185, 129, 0.3);
+    }
+
+    /* Glassy DP Memoization Array Cells & Bars */
+    .dp-cell {
+      background: rgba(255, 255, 255, 0.035);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      transition: all 0.28s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    .dp-cell.dp-uncomputed {
+      border-style: dashed;
+      border-color: rgba(148, 163, 184, 0.32);
+    }
+
+    .dp-cell.dp-filled {
+      background: linear-gradient(180deg, rgba(16, 185, 129, 0.16) 0%, rgba(5, 150, 105, 0.05) 100%);
+      border-color: rgba(52, 211, 153, 0.65);
+    }
+
+    .dp-cell.dp-just-written {
+      background: linear-gradient(180deg, rgba(16, 185, 129, 0.32) 0%, rgba(5, 150, 105, 0.14) 100%) !important;
+      border-color: rgba(52, 211, 153, 0.98) !important;
+      transform: translateY(-5px) scale(1.06);
+      box-shadow: 0 12px 28px -4px rgba(16, 185, 129, 0.5) !important;
+      z-index: 20;
+    }
+
+    .dp-cell.dp-cache-read {
+      background: linear-gradient(180deg, rgba(168, 85, 247, 0.32) 0%, rgba(126, 34, 206, 0.14) 100%) !important;
+      border-color: rgba(192, 132, 252, 0.98) !important;
+      transform: translateY(-5px) scale(1.06);
+      box-shadow: 0 12px 28px -4px rgba(168, 85, 247, 0.52) !important;
+      z-index: 20;
+    }
+
+    /* Call Stack Frame Pill */
+    .call-frame-pill {
+      backdrop-filter: blur(10px);
+      transition: all 0.25s ease;
+    }
+
+    @keyframes arcDash {
+      to {
+        stroke-dashoffset: -24;
+      }
+    }
+    .transfer-arc-path {
+      stroke-dasharray: 6 6;
+      animation: arcDash 0.8s linear infinite;
+    }
+
+    @keyframes resultPulse {
+      0%, 100% { transform: scale(1); filter: drop-shadow(0 0 8px rgba(16, 185, 129, 0.45)); }
+      50% { transform: scale(1.04); filter: drop-shadow(0 0 22px rgba(16, 185, 129, 0.95)); }
+    }
+    .result-win-anim {
+      animation: resultPulse 0.65s ease-in-out;
+    }
+
+    /* Custom Scrollbars */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: rgba(15, 23, 42, 0.4);
+    }
+    ::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.18);
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(255, 255, 255, 0.3);
+    }
+  </style>
+</head>
+<body class="p-2.5 sm:p-4 lg:px-5 lg:py-4 flex flex-col items-center justify-start min-h-screen">
+
+  <!-- Ambient Glass Glow Orbs -->
+  <div class="fixed top-6 left-1/6 w-96 h-96 bg-cyan-500/14 rounded-full blur-3xl pointer-events-none -z-10"></div>
+  <div class="fixed top-1/3 right-1/6 w-96 h-96 bg-purple-500/14 rounded-full blur-3xl pointer-events-none -z-10"></div>
+  <div class="fixed bottom-12 left-1/2 w-80 h-80 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none -z-10"></div>
+
+  <!-- MAIN WRAPPER -->
+  <div class="w-full max-w-[1560px] flex flex-col gap-5">
+
+    <!-- TOP FROSTED-GLASS CONTROLS DECK -->
+    <header class="glass-panel rounded-2xl p-4 sm:p-5 flex flex-col gap-4 sticky top-3 z-50">
+      <div class="flex flex-wrap items-center justify-between gap-4">
+
+        <!-- Title & Algorithm Metadata -->
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-cyan-500 via-purple-500 to-emerald-400 flex items-center justify-center shadow-lg shadow-cyan-500/25 text-slate-950 font-bold text-lg">
+            <i class="fa-solid fa-diagram-project"></i>
+          </div>
+          <div>
+            <h1 class="text-lg sm:text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white via-cyan-100 to-purple-300">
+              Fibonacci Number (Recursion + Memoization)
+            </h1>
+            <p class="text-xs text-slate-400 flex items-center gap-2">
+              <span class="inline-block w-2 h-2 rounded-full bg-cyan-400 animate-pulse"></span>
+              Infosys DSE / LeetCode 509 • Top-Down DP int[] dp • &Omicron;(n) Time • &Omicron;(n) Space
+            </p>
+          </div>
+        </div>
+
+        <!-- Center Playback Controls: Reset, Previous, Start/Stop, Next -->
+        <div class="flex items-center gap-2 sm:gap-3 bg-white/5 p-1.5 rounded-xl border border-white/10 backdrop-blur-md">
+          <button id="btnReset" class="glass-button text-slate-200 hover:text-white px-3 py-2 rounded-lg text-sm flex items-center gap-1.5" title="Reset to Initial State">
+            <i class="fa-solid fa-rotate-left"></i>
+            <span class="hidden sm:inline">Reset</span>
+          </button>
+          <button id="btnPrev" class="glass-button text-slate-200 hover:text-white px-3 py-2 rounded-lg text-sm flex items-center gap-1.5" title="Previous Step (Left Arrow)">
+            <i class="fa-solid fa-backward-step"></i>
+            <span class="hidden sm:inline">Previous</span>
+          </button>
+          <button id="btnPlay" class="glass-button bg-cyan-500/25 text-cyan-200 hover:bg-cyan-500/35 border-cyan-400/50 px-4 py-2 rounded-lg text-sm font-semibold flex items-center gap-2 shadow-lg shadow-cyan-500/15" title="Start / Stop (Spacebar)">
+            <i class="fa-solid fa-play" id="playIcon"></i>
+            <span id="playText">Start</span>
+          </button>
+          <button id="btnNext" class="glass-button text-slate-200 hover:text-white px-3 py-2 rounded-lg text-sm flex items-center gap-1.5" title="Next Step (Right Arrow)">
+            <span class="hidden sm:inline">Next</span>
+            <i class="fa-solid fa-forward-step"></i>
+          </button>
+        </div>
+
+        <!-- Speed & Audio Controls -->
+        <div class="flex items-center gap-2">
+          <div class="flex items-center bg-white/5 rounded-xl p-1 border border-white/10 text-xs text-slate-300 backdrop-blur-md">
+            <span class="px-2 py-1 text-slate-400"><i class="fa-solid fa-gauge-high mr-1"></i>Speed</span>
+            <button class="speed-btn px-2 py-1 rounded-lg hover:text-white transition" data-speed="1300">0.5x</button>
+            <button class="speed-btn px-2 py-1 rounded-lg bg-cyan-500/30 text-cyan-200 font-semibold transition" data-speed="650">1x</button>
+            <button class="speed-btn px-2 py-1 rounded-lg hover:text-white transition" data-speed="280">2x</button>
+            <button class="speed-btn px-2 py-1 rounded-lg hover:text-white transition" data-speed="110">4x</button>
+          </div>
+          <button id="btnAudio" class="glass-button p-2.5 rounded-xl text-slate-300 hover:text-cyan-300" title="Toggle Sound Effects">
+            <i class="fa-solid fa-volume-high" id="audioIcon"></i>
+          </button>
+        </div>
+
+      </div>
+
+      <!-- Scrubber Slider & Status Badges -->
+      <div class="flex flex-col sm:flex-row items-center gap-3 pt-2 border-t border-white/10">
+        <div class="flex flex-wrap items-center gap-2 text-xs text-slate-300 w-full sm:w-auto shrink-0">
+          <span id="stepCounterBadge" class="code-font px-2.5 py-1 rounded-md bg-white/5 border border-white/10 text-cyan-300">
+            Step: 0 / 0
+          </span>
+          <span id="phaseBadge" class="px-2.5 py-1 rounded-md bg-sky-500/20 border border-sky-400/30 text-sky-200 font-semibold">
+            Ready
+          </span>
+          <span id="cacheHitsHeaderBadge" class="px-2.5 py-1 rounded-md bg-purple-500/20 border border-purple-400/30 text-purple-200 font-bold">
+            Memo Hits: 0
+          </span>
+          <span id="outputHeaderBadge" class="px-2.5 py-1 rounded-md bg-emerald-500/20 border border-emerald-400/30 text-emerald-200 font-bold">
+            Output: Pending
+          </span>
+        </div>
+        <div class="w-full flex items-center gap-3">
+          <input type="range" id="stepScrubber" min="0" max="0" value="0" class="w-full h-1.5 bg-slate-800/80 rounded-lg appearance-none cursor-pointer accent-cyan-400">
+        </div>
+      </div>
+    </header>
+
+    <!-- TEST CASES & CUSTOM N INPUT BAR -->
+    <section class="glass-panel rounded-2xl p-4 flex flex-wrap items-center justify-between gap-4">
+      <div class="flex flex-wrap items-center gap-3">
+        <label for="presetSelect" class="text-xs uppercase font-semibold text-slate-300 tracking-wider flex items-center gap-1.5">
+          <i class="fa-solid fa-flask text-cyan-400"></i> Test Cases:
+        </label>
+        <select id="presetSelect" class="bg-slate-900/75 border border-white/15 text-xs sm:text-sm text-slate-200 rounded-xl px-3 py-2 outline-none focus:border-cyan-400 backdrop-blur-md">
+          <option value="0">1: Classic Memoization Tree (n = 5 &rarr; 5)</option>
+          <option value="1">2: LeetCode 509 / GFG Standard (n = 6 &rarr; 8)</option>
+          <option value="2">3: Compact Dry-Run (n = 4 &rarr; 3)</option>
+          <option value="3">4: Deeper Subtree Pruning (n = 7 &rarr; 13)</option>
+          <option value="4">5: First Cache Hit Demo (n = 3 &rarr; 2)</option>
+          <option value="5">6: Single Recursive Split (n = 2 &rarr; 1)</option>
+          <option value="6">7: Base Case n = 1 (n = 1 &rarr; 1)</option>
+          <option value="7">8: Base Case n = 0 (n = 0 &rarr; 0)</option>
+          <option value="8">9: Extended DP Table (n = 8 &rarr; 21)</option>
+          <option value="9">10: Maximum Tree View (n = 9 &rarr; 34)</option>
+        </select>
+      </div>
+
+      <div class="flex flex-wrap items-center gap-2">
+        <span class="text-xs text-slate-400 code-font">Input n (0..9):</span>
+        <input type="number" id="customNInput" min="0" max="9" value="5" class="w-20 bg-white/5 border border-white/15 rounded-xl px-3 py-2 text-xs text-slate-200 code-font outline-none focus:border-cyan-400 backdrop-blur-md" title="Integer n between 0 and 9">
+        <button id="btnApplyCustom" class="glass-button text-xs px-4 py-2 rounded-xl text-cyan-300 font-semibold shrink-0">
+          Run fib(n)
+        </button>
+      </div>
+    </section>
+
+    <!-- MAIN VISUALIZATION & CODE SECTION -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-5">
+
+      <!-- LEFT: RECURSION CALL TREE, MEMOIZATION DP[] ARRAY, CALL STACK & CONSOLE -->
+      <section class="lg:col-span-7 xl:col-span-8 flex flex-col gap-5">
+
+        <!-- Live Telemetry Cards -->
+        <div class="grid grid-cols-2 sm:grid-cols-5 gap-3">
+
+          <!-- Active Frame Parameter n -->
+          <div class="glass-panel rounded-xl p-3 flex flex-col justify-between border-amber-400/35">
+            <span class="text-[11px] text-slate-400 uppercase font-semibold flex items-center justify-between">
+              Active Call
+              <span class="w-2 h-2 rounded-full bg-amber-400"></span>
+            </span>
+            <div class="flex items-baseline gap-1.5 mt-1.5">
+              <span id="varActiveCall" class="code-font text-lg sm:text-xl font-bold text-amber-300">-</span>
+            </div>
+            <span id="varCallDepth" class="text-[10px] text-amber-200/75 mt-1 code-font">Stack depth: 0</span>
+          </div>
+
+          <!-- Total Calls vs Naive 2^n -->
+          <div class="glass-panel rounded-xl p-3 flex flex-col justify-between border-cyan-400/35">
+            <span class="text-[11px] text-slate-400 uppercase font-semibold flex items-center justify-between">
+              Calls Made
+              <i class="fa-solid fa-code-branch text-cyan-400 text-[10px]"></i>
+            </span>
+            <div class="flex items-baseline gap-1.5 mt-1.5">
+              <span id="varTotalCalls" class="code-font text-xl font-bold text-cyan-300">0</span>
+              <span id="varMaxCallsHint" class="text-[10px] text-slate-400 code-font">of 9</span>
+            </div>
+            <span id="varNaiveCompare" class="text-[10px] text-cyan-200/75 mt-1 code-font">Naive: 15 calls</span>
+          </div>
+
+          <!-- Memoization Hits (dp[n] != -1) -->
+          <div class="glass-panel rounded-xl p-3 flex flex-col justify-between border-purple-400/35">
+            <span class="text-[11px] text-slate-400 uppercase font-semibold flex items-center justify-between">
+              dp[n] != -1 Hits
+              <i class="fa-solid fa-bolt text-purple-400 text-[10px]"></i>
+            </span>
+            <div class="flex items-baseline gap-1.5 mt-1.5">
+              <span id="varMemoHits" class="code-font text-xl font-bold text-purple-300">0</span>
+            </div>
+            <span class="text-[10px] text-purple-200/75 mt-1 code-font">Subtrees pruned</span>
+          </div>
+
+          <!-- Subproblem Addition: fib(n-1) + fib(n-2) -->
+          <div class="glass-panel rounded-xl p-3 flex flex-col justify-between border-sky-400/35">
+            <span class="text-[11px] text-slate-400 uppercase font-semibold flex items-center justify-between">
+              Recurrence
+              <i class="fa-solid fa-plus text-sky-400 text-[10px]"></i>
+            </span>
+            <div class="flex items-baseline gap-1.5 mt-1.5 overflow-hidden">
+              <span id="varRecurrence" class="code-font text-sm sm:text-base font-bold text-sky-300 truncate">-</span>
+            </div>
+            <span class="text-[10px] text-slate-400 mt-1 code-font">fib(n-1) + fib(n-2)</span>
+          </div>
+
+          <!-- Console Print Output -->
+          <div id="finalOutputCard" class="glass-panel rounded-xl p-3 flex flex-col justify-between border-emerald-400/35 col-span-2 sm:col-span-1">
+            <span class="text-[11px] text-slate-400 uppercase font-semibold flex items-center justify-between">
+              System.out
+              <i class="fa-solid fa-terminal text-emerald-400 text-[10px]"></i>
+            </span>
+            <div class="flex items-baseline gap-1.5 mt-1.5">
+              <span id="varConsoleOut" class="code-font text-xl font-black text-slate-400">pending</span>
+            </div>
+            <span id="varTargetNSub" class="text-[10px] text-emerald-300/80 mt-1 code-font">fibonacci(5)</span>
+          </div>
+
+        </div>
+
+        <!-- UNIFIED STAGE: RECURSION TREE, INT[] DP TABLE & CALL STACK -->
+        <div id="stageWrapper" class="glass-panel relative rounded-2xl p-4 sm:p-5 flex flex-col gap-5">
+          <!-- SVG Trajectory Arc Overlay Connecting Tree Nodes and dp[n] Slots -->
+          <svg id="transferArcSvg" class="absolute inset-0 w-full h-full pointer-events-none z-30 overflow-visible"></svg>
+
+          <!-- Floating Lift-and-Place Token Layer -->
+          <div id="flyingCloneLayer" class="absolute inset-0 pointer-events-none z-40"></div>
+
+          <!-- 1. RECURSION CALL TREE WITH MEMOIZATION PRUNING -->
+          <div class="flex flex-col gap-2.5">
+            <div class="flex flex-wrap items-center justify-between text-xs pb-2 border-b border-white/10 gap-2">
+              <span class="font-semibold text-slate-200 uppercase tracking-wider flex items-center gap-1.5">
+                <i class="fa-solid fa-sitemap text-cyan-400"></i>
+                Memoized Recursion Call Tree (<span class="code-font text-white">2n &minus; 1</span> Calls)
+              </span>
+
+              <div class="flex flex-wrap items-center gap-3 text-[11px]">
+                <span class="flex items-center gap-1.5">
+                  <span class="w-2.5 h-2.5 rounded-sm bg-amber-400 inline-block"></span> Active
+                </span>
+                <span class="flex items-center gap-1.5">
+                  <span class="w-2.5 h-2.5 rounded-sm bg-cyan-400 inline-block"></span> Base (n &le; 1)
+                </span>
+                <span class="flex items-center gap-1.5">
+                  <span class="w-2.5 h-2.5 rounded-sm border border-dashed border-purple-400 bg-purple-500/35 inline-block"></span> Memo Hit (dp[n] != -1)
+                </span>
+                <span class="flex items-center gap-1.5">
+                  <span class="w-2.5 h-2.5 rounded-sm bg-emerald-400 inline-block"></span> Stored
+                </span>
+              </div>
+            </div>
+
+            <!-- Interactive Tree Stage -->
+            <div id="treeScrollContainer" class="relative w-full rounded-xl bg-white/[0.02] border border-white/10 overflow-x-auto">
+              <div id="treeCanvas" class="relative w-full min-w-[540px] h-[250px] select-none">
+                <!-- SVG Edges Connecting Parent & Child Calls -->
+                <svg id="treeEdgesSvg" class="absolute inset-0 w-full h-full pointer-events-none z-10"></svg>
+                <!-- Glassy Recursion Node Pills -->
+                <div id="treeNodesLayer" class="absolute inset-0 z-20"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 2. MEMOIZATION TABLE: int[] dp = new int[n + 1] (GLASSY BOXES + MAGNITUDE BARS) -->
+          <div class="flex flex-col gap-2.5 pt-1">
+            <div class="flex flex-wrap items-center justify-between text-xs pb-2 border-b border-white/10 gap-2">
+              <span class="font-semibold text-emerald-300 uppercase tracking-wider flex items-center gap-1.5">
+                <i class="fa-solid fa-database text-emerald-400"></i>
+                Memoization Cache Table: <span class="code-font text-white">int[] dp = new int[n + 1]</span>
+              </span>
+              <span id="dpArrayPreview" class="code-font text-[11px] text-cyan-200 bg-cyan-500/15 px-2.5 py-0.5 rounded border border-cyan-400/30">
+                dp = []
+              </span>
+            </div>
+
+            <div id="dpArrayArena" class="min-h-[132px] p-3.5 rounded-xl bg-white/[0.02] border border-white/10 flex items-center justify-between gap-1.5 sm:gap-2 overflow-x-auto">
+              <!-- Populated dynamically with glassy boxes + proportional Fibonacci magnitude bars -->
+            </div>
+          </div>
+
+          <!-- 3. ACTIVE RECURSION CALL STACK, CONSOLE & DECISION BANNER -->
+          <div class="grid grid-cols-1 md:grid-cols-12 gap-3 items-stretch">
+            <!-- Active Call Stack Strip (5 Cols) -->
+            <div class="md:col-span-5 p-3 rounded-xl bg-slate-950/70 border border-white/10 flex flex-col justify-between gap-2">
+              <div class="flex items-center justify-between text-[10px] code-font text-slate-400 border-b border-white/10 pb-1">
+                <span><i class="fa-solid fa-layer-group text-amber-400 mr-1"></i>Call Stack &amp; Console</span>
+                <span id="consoleInlineOut" class="text-emerald-300 font-bold">stdout: -</span>
+              </div>
+              <div id="callStackArena" class="flex flex-wrap items-center gap-1.5 min-h-[34px]">
+                <span class="text-[11px] text-slate-500 italic code-font">main()</span>
+              </div>
+            </div>
+
+            <!-- Live Step Explanation & Action Pill (7 Cols) -->
+            <div id="decisionBanner" class="md:col-span-7 p-3.5 rounded-xl bg-white/[0.04] border border-white/10 text-xs flex flex-col sm:flex-row items-center justify-between gap-3 backdrop-blur-md">
+              <div class="flex items-center gap-2.5">
+                <i id="decisionIcon" class="fa-solid fa-circle-info text-cyan-400 text-base"></i>
+                <span id="decisionText" class="text-slate-200">Ready to read n, initialize dp[] with -1, and compute fibonacci(n, dp).</span>
+              </div>
+              <div id="actionPill" class="hidden text-xs code-font px-3 py-1.5 rounded-lg bg-slate-950/70 border border-white/15 text-emerald-200 font-semibold shrink-0">
+                <!-- e.g. dp[5] = 3 + 2 = 5 -->
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+      </section>
+
+      <!-- RIGHT: SYNCHRONIZED & PROPERLY INDENTED JAVA CODE CONTAINER -->
+      <section class="lg:col-span-5 xl:col-span-4 flex flex-col gap-4">
+
+        <div class="glass-panel rounded-2xl p-4 flex flex-col h-full">
+          <div class="flex items-center justify-between pb-3 border-b border-white/10 text-xs">
+            <div class="flex items-center gap-2">
+              <div class="flex gap-1.5">
+                <span class="w-3 h-3 rounded-full bg-rose-500/80 inline-block"></span>
+                <span class="w-3 h-3 rounded-full bg-amber-500/80 inline-block"></span>
+                <span class="w-3 h-3 rounded-full bg-emerald-500/80 inline-block"></span>
+              </div>
+              <span class="code-font text-slate-200 font-semibold ml-2">Main.java</span>
+            </div>
+            <span id="codeFrameScopeBadge" class="text-[11px] text-amber-300 bg-amber-500/15 px-2.5 py-0.5 rounded border border-amber-400/30 code-font font-semibold">
+              Frame: main()
+            </span>
+          </div>
+
+          <!-- Properly Indented Java Code Lines with Zero-Jump Localized Scroll -->
+          <div id="codeContainer" class="code-font text-xs sm:text-[13px] leading-relaxed text-slate-300 py-3 overflow-x-auto overflow-y-auto max-h-[640px] flex-grow select-none">
+            <div class="code-line" id="line1"><span class="text-slate-500 mr-2"> 1</span><span class="text-indigo-400 font-semibold">import</span> java.util.*;</div>
+            <div class="code-line" id="line2"><span class="text-slate-500 mr-2"> 2</span></div>
+            <div class="code-line" id="line3"><span class="text-slate-500 mr-2"> 3</span><span class="text-indigo-400 font-semibold">public class</span> <span class="text-amber-300">Main</span> {</div>
+            <div class="code-line" id="line4"><span class="text-slate-500 mr-2"> 4</span></div>
+            <div class="code-line" id="line5"><span class="text-slate-500 mr-2"> 5</span>    <span class="text-indigo-400 font-semibold">static int</span> <span class="text-cyan-300">fibonacci</span>(<span class="text-indigo-400">int</span> n, <span class="text-indigo-400">int</span>[] dp) {</div>
+            <div class="code-line" id="line6"><span class="text-slate-500 mr-2"> 6</span></div>
+            <div class="code-line" id="line7"><span class="text-slate-500 mr-2"> 7</span>        <span class="text-indigo-400 font-semibold">if</span> (n &lt;= <span class="text-rose-400">1</span>) {</div>
+            <div class="code-line" id="line8"><span class="text-slate-500 mr-2"> 8</span>            <span class="text-indigo-400 font-semibold">return</span> n;</div>
+            <div class="code-line" id="line9"><span class="text-slate-500 mr-2"> 9</span>        }</div>
+            <div class="code-line" id="line10"><span class="text-slate-500 mr-2">10</span></div>
+            <div class="code-line" id="line11"><span class="text-slate-500 mr-2">11</span>        <span class="text-indigo-400 font-semibold">if</span> (dp[n] != <span class="text-rose-400">-1</span>) {</div>
+            <div class="code-line" id="line12"><span class="text-slate-500 mr-2">12</span>            <span class="text-indigo-400 font-semibold">return</span> dp[n];</div>
+            <div class="code-line" id="line13"><span class="text-slate-500 mr-2">13</span>        }</div>
+            <div class="code-line" id="line14"><span class="text-slate-500 mr-2">14</span></div>
+            <div class="code-line" id="line15"><span class="text-slate-500 mr-2">15</span>        dp[n] = fibonacci(n - <span class="text-rose-400">1</span>, dp)</div>
+            <div class="code-line" id="line16"><span class="text-slate-500 mr-2">16</span>              + fibonacci(n - <span class="text-rose-400">2</span>, dp);</div>
+            <div class="code-line" id="line17"><span class="text-slate-500 mr-2">17</span></div>
+            <div class="code-line" id="line18"><span class="text-slate-500 mr-2">18</span>        <span class="text-indigo-400 font-semibold">return</span> dp[n];</div>
+            <div class="code-line" id="line19"><span class="text-slate-500 mr-2">19</span>    }</div>
+            <div class="code-line" id="line20"><span class="text-slate-500 mr-2">20</span></div>
+            <div class="code-line" id="line21"><span class="text-slate-500 mr-2">21</span>    <span class="text-indigo-400 font-semibold">public static void</span> <span class="text-cyan-300">main</span>(String[] args) {</div>
+            <div class="code-line" id="line22"><span class="text-slate-500 mr-2">22</span></div>
+            <div class="code-line" id="line23"><span class="text-slate-500 mr-2">23</span>        Scanner sc = <span class="text-indigo-400 font-semibold">new</span> Scanner(System.in);</div>
+            <div class="code-line" id="line24"><span class="text-slate-500 mr-2">24</span></div>
+            <div class="code-line" id="line25"><span class="text-slate-500 mr-2">25</span>        <span class="text-indigo-400 font-semibold">int</span> n = sc.nextInt();</div>
+            <div class="code-line" id="line26"><span class="text-slate-500 mr-2">26</span></div>
+            <div class="code-line" id="line27"><span class="text-slate-500 mr-2">27</span>        <span class="text-indigo-400 font-semibold">int</span>[] dp = <span class="text-indigo-400 font-semibold">new int</span>[n + <span class="text-rose-400">1</span>];</div>
+            <div class="code-line" id="line28"><span class="text-slate-500 mr-2">28</span>        Arrays.fill(dp, <span class="text-rose-400">-1</span>);</div>
+            <div class="code-line" id="line29"><span class="text-slate-500 mr-2">29</span></div>
+            <div class="code-line" id="line30"><span class="text-slate-500 mr-2">30</span>        System.out.println(fibonacci(n, dp));</div>
+            <div class="code-line" id="line31"><span class="text-slate-500 mr-2">31</span></div>
+            <div class="code-line" id="line32"><span class="text-slate-500 mr-2">32</span>        sc.close();</div>
+            <div class="code-line" id="line33"><span class="text-slate-500 mr-2">33</span>    }</div>
+            <div class="code-line" id="line34"><span class="text-slate-500 mr-2">34</span>}</div>
+          </div>
+
+          <!-- Live Step Narrative Box -->
+          <div class="mt-3 p-3 bg-white/[0.04] border border-white/10 rounded-xl flex items-start gap-2.5 backdrop-blur-md">
+            <i class="fa-solid fa-circle-info text-cyan-400 mt-0.5 text-xs"></i>
+            <div class="text-xs text-slate-200 leading-relaxed" id="stepDescription">
+              Ready to run Memoized Recursive Fibonacci. Click <b>Start</b> or <b>Next</b> to step through.
+            </div>
+          </div>
+
+        </div>
+
+      </section>
+
+    </div>
+
+    <!-- BOTTOM SECTION: PROBLEM STATEMENT & ARCHITECTURAL SUMMARY -->
+    <footer class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-2">
+
+      <!-- Problem Statement Card -->
+      <div class="glass-panel rounded-2xl p-5 flex flex-col gap-3">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <span class="text-amber-400 font-bold"><i class="fa-solid fa-file-lines mr-1.5"></i>Problem Statement</span>
+            <span class="px-2 py-0.5 rounded text-[11px] font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-400/30">Easy / DP</span>
+          </div>
+          <span class="text-xs text-slate-400 font-mono">LeetCode 509 • GFG • Infosys DSE</span>
+        </div>
+
+        <p class="text-xs text-slate-300 leading-relaxed">
+          Write a recursive function to compute the <b>N<sup>th</sup> Fibonacci Number</b> <code class="font-mono text-cyan-300">F(n)</code> and optimize overlapping subproblems using <b>Top-Down Memoization</b> (<code class="font-mono text-purple-300">int[] dp</code>):
+          <br>&bull; <code class="font-mono">F(0) = 0</code>, <code class="font-mono">F(1) = 1</code>
+          <br>&bull; <code class="font-mono">F(n) = F(n - 1) + F(n - 2)</code> for <code class="font-mono">n &gt; 1</code>.
+          <br><span class="text-[11px] text-slate-400 italic">Asked at: Infosys DSE, Accenture, TCS. (Note: DSE 2025 iterative variant computes Fibonacci without a temporary variable using <code class="font-mono">b = a + b; a = b - a;</code>.)</span>
+        </p>
+
+        <div class="space-y-2 pt-2 border-t border-white/10 text-xs text-slate-300">
+          <div class="bg-white/[0.03] p-2.5 rounded-lg border border-white/10 font-mono grid grid-cols-1 sm:grid-cols-2 gap-1.5">
+            <div><span class="text-slate-400">Ex 1:</span> n = 2 &rarr; <span class="text-emerald-400 font-bold">1</span> (1 + 0)</div>
+            <div><span class="text-slate-400">Ex 2:</span> n = 3 &rarr; <span class="text-emerald-400 font-bold">2</span> (1 + 1)</div>
+            <div><span class="text-slate-400">Ex 3:</span> n = 5 &rarr; <span class="text-emerald-400 font-bold">5</span> (0,1,1,2,3,5)</div>
+            <div><span class="text-slate-400">Ex 4:</span> n = 6 &rarr; <span class="text-emerald-400 font-bold">8</span> (0,1,1,2,3,5,8)</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Algorithm Summary & Complexity Analysis Card -->
+      <div class="glass-panel rounded-2xl p-5 flex flex-col gap-3">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <span class="text-cyan-400 font-bold"><i class="fa-solid fa-brain mr-1.5"></i>Algorithm Summary &amp; Complexity Analysis</span>
+          </div>
+          <span class="px-2 py-0.5 rounded text-[11px] font-semibold bg-cyan-500/20 text-cyan-200 border border-cyan-400/30">O(2ⁿ) &rarr; O(N)</span>
+        </div>
+
+        <div class="space-y-3 text-xs text-slate-300 leading-relaxed">
+          <div class="p-3 bg-purple-950/30 border border-purple-400/25 rounded-xl">
+            <b class="text-purple-300 flex items-center gap-1.5 mb-1">
+              <i class="fa-solid fa-scissors"></i> How <code class="font-mono">if (dp[n] != -1) return dp[n];</code> Collapses Complexity:
+            </b>
+            Without memoization, <code class="font-mono">fib(n)</code> recomputes the same subtrees exponentially many times (<code class="font-mono">&Omicron;(2<sup>n</sup>)</code> calls). By caching each solved state in <code class="font-mono text-emerald-300 font-semibold">dp[n]</code>, every subproblem <code class="font-mono">2 .. n</code> is computed <b>at most once</b>, reducing the entire recursion tree to <code class="font-mono text-cyan-300 font-bold">2n &minus; 1</code> total calls (<code class="font-mono">&Omicron;(n)</code>).
+          </div>
+
+          <div class="grid grid-cols-2 gap-3 pt-1">
+            <div class="p-2.5 bg-white/[0.03] rounded-lg border border-white/10">
+              <span class="text-[11px] text-slate-400 uppercase font-semibold">Time Complexity</span>
+              <div class="text-sm font-bold text-emerald-400 font-mono mt-0.5">&Omicron;(N)</div>
+              <p class="text-[10px] text-slate-400 mt-0.5">Each state <code class="font-mono">dp[2..n]</code> is solved once in <code class="font-mono">&Omicron;(1)</code>; subsequent lookups hit cache in <code class="font-mono">&Omicron;(1)</code>.</p>
+            </div>
+            <div class="p-2.5 bg-white/[0.03] rounded-lg border border-white/10">
+              <span class="text-[11px] text-slate-400 uppercase font-semibold">Space Complexity</span>
+              <div class="text-sm font-bold text-cyan-400 font-mono mt-0.5">&Omicron;(N)</div>
+              <p class="text-[10px] text-slate-400 mt-0.5"><code class="font-mono">int[n + 1]</code> memoization array + maximum recursion call stack depth of <code class="font-mono">N</code>.</p>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+    </footer>
+
+  </div>
+
+  <!-- JAVASCRIPT SIMULATION ENGINE WITH RECURSION TREE, MEMOIZATION TABLE & LIFT-AND-ARC TRANSFERS -->
+  <script>
+    // 10 COMPREHENSIVE PRESETS
+    const PRESETS = [
+      { name: "1: Classic Memoization Tree (n = 5 -> 5)", n: 5 },
+      { name: "2: LeetCode 509 / GFG Standard (n = 6 -> 8)", n: 6 },
+      { name: "3: Compact Dry-Run (n = 4 -> 3)", n: 4 },
+      { name: "4: Deeper Subtree Pruning (n = 7 -> 13)", n: 7 },
+      { name: "5: First Cache Hit Demo (n = 3 -> 2)", n: 3 },
+      { name: "6: Single Recursive Split (n = 2 -> 1)", n: 2 },
+      { name: "7: Base Case n = 1 (n = 1 -> 1)", n: 1 },
+      { name: "8: Base Case n = 0 (n = 0 -> 0)", n: 0 },
+      { name: "9: Extended DP Table (n = 8 -> 21)", n: 8 },
+      { name: "10: Maximum Tree View (n = 9 -> 34)", n: 9 }
+    ];
+
+    // APPLICATION STATE
+    let currentN = PRESETS[0].n;
+    let steps = [];
+    let currentStepIdx = 0;
+    let isPlaying = false;
+    let playInterval = null;
+    let playSpeed = 650;
+    let audioEnabled = true;
+
+    // WEB AUDIO SYNTHESIZER
+    let audioCtx = null;
+    function initAudio() {
+      if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      }
+    }
+    function playTone(freq = 440, type = 'sine', duration = 0.08, vol = 0.035) {
+      if (!audioEnabled) return;
+      try {
+        initAudio();
+        if (audioCtx.state === 'suspended') {
+          audioCtx.resume();
+        }
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = type;
+        osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+        gain.gain.setValueAtTime(vol, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + duration);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + duration);
+      } catch (e) {}
+    }
+
+    // DOM REFERENCES
+    const btnPlay = document.getElementById('btnPlay');
+    const playIcon = document.getElementById('playIcon');
+    const playText = document.getElementById('playText');
+    const btnPrev = document.getElementById('btnPrev');
+    const btnNext = document.getElementById('btnNext');
+    const btnReset = document.getElementById('btnReset');
+    const btnAudio = document.getElementById('btnAudio');
+    const audioIcon = document.getElementById('audioIcon');
+    const presetSelect = document.getElementById('presetSelect');
+    const customNInput = document.getElementById('customNInput');
+    const btnApplyCustom = document.getElementById('btnApplyCustom');
+    const stepScrubber = document.getElementById('stepScrubber');
+    const stepCounterBadge = document.getElementById('stepCounterBadge');
+    const phaseBadge = document.getElementById('phaseBadge');
+    const cacheHitsHeaderBadge = document.getElementById('cacheHitsHeaderBadge');
+    const outputHeaderBadge = document.getElementById('outputHeaderBadge');
+
+    const varActiveCall = document.getElementById('varActiveCall');
+    const varCallDepth = document.getElementById('varCallDepth');
+    const varTotalCalls = document.getElementById('varTotalCalls');
+    const varMaxCallsHint = document.getElementById('varMaxCallsHint');
+    const varNaiveCompare = document.getElementById('varNaiveCompare');
+    const varMemoHits = document.getElementById('varMemoHits');
+    const varRecurrence = document.getElementById('varRecurrence');
+    const finalOutputCard = document.getElementById('finalOutputCard');
+    const varConsoleOut = document.getElementById('varConsoleOut');
+    const varTargetNSub = document.getElementById('varTargetNSub');
+
+    const stageWrapper = document.getElementById('stageWrapper');
+    const transferArcSvg = document.getElementById('transferArcSvg');
+    const flyingCloneLayer = document.getElementById('flyingCloneLayer');
+    const treeCanvas = document.getElementById('treeCanvas');
+    const treeEdgesSvg = document.getElementById('treeEdgesSvg');
+    const treeNodesLayer = document.getElementById('treeNodesLayer');
+    const dpArrayPreview = document.getElementById('dpArrayPreview');
+    const dpArrayArena = document.getElementById('dpArrayArena');
+    const consoleInlineOut = document.getElementById('consoleInlineOut');
+    const callStackArena = document.getElementById('callStackArena');
+
+    const decisionBanner = document.getElementById('decisionBanner');
+    const decisionIcon = document.getElementById('decisionIcon');
+    const decisionText = document.getElementById('decisionText');
+    const actionPill = document.getElementById('actionPill');
+    const codeFrameScopeBadge = document.getElementById('codeFrameScopeBadge');
+    const codeContainer = document.getElementById('codeContainer');
+    const stepDescription = document.getElementById('stepDescription');
+
+    // HELPER: Count naive un-memoized recursive calls for comparison
+    function countNaiveCalls(n) {
+      if (n <= 1) return 1;
+      let a = 1, b = 1;
+      for (let i = 2; i <= n; i++) {
+        const next = a + b + 1;
+        a = b;
+        b = next;
+      }
+      return b;
+    }
+
+    // PRECOMPUTE IN-ORDER TREE NODE LAYOUT (Zero horizontal overlap guaranteed)
+    function computeTreeLayout(rootNode, allNodesMap) {
+      let inOrderCounter = 0;
+      let maxDepth = 0;
+
+      function assignInOrder(nodeId, depth) {
+        if (nodeId === null || nodeId === undefined) return;
+        const node = allNodesMap.get(nodeId);
+        if (!node) return;
+        maxDepth = Math.max(maxDepth, depth);
+        assignInOrder(node.leftChildId, depth + 1);
+        node.col = inOrderCounter++;
+        node.depth = depth;
+        assignInOrder(node.rightChildId, depth + 1);
+      }
+
+      if (rootNode) {
+        assignInOrder(rootNode.id, 0);
+      }
+      return { totalCols: Math.max(1, inOrderCounter), maxDepth };
+    }
+
+    // STRICT LINE-BY-LINE EXECUTION TRACE GENERATOR
+    function generateSteps(targetN) {
+      const trace = [];
+      const dp = new Array(targetN + 1).fill(0);
+      const allNodes = new Map();
+      let nextNodeId = 0;
+      let callsMade = 0;
+      let memoHits = 0;
+      const callStack = []; // Array of { nodeId, n }
+
+      const snapDp = () => [...dp];
+      const snapNodes = () => Array.from(allNodes.values()).map(nd => ({ ...nd }));
+      const snapStack = () => callStack.map(f => ({ ...f }));
+
+      // Line 21: public static void main(String[] args)
+      trace.push({
+        line: 21,
+        phase: "main() Start",
+        targetN,
+        dpAllocated: false,
+        dp: snapDp(),
+        nodes: snapNodes(),
+        activeNodeId: null,
+        callStack: snapStack(),
+        callsMade,
+        memoHits,
+        consoleOut: null,
+        desc: `Entered <span class="code-font text-cyan-300 font-bold">main(String[] args)</span>.`,
+        soundFreq: 330
+      });
+
+      // Line 23: Scanner sc = new Scanner(System.in);
+      trace.push({
+        line: 23,
+        phase: "Init Scanner",
+        targetN,
+        dpAllocated: false,
+        dp: snapDp(),
+        nodes: snapNodes(),
+        activeNodeId: null,
+        callStack: snapStack(),
+        callsMade,
+        memoHits,
+        consoleOut: null,
+        desc: `Initialized <span class="code-font text-sky-300 font-bold">Scanner sc = new Scanner(System.in)</span>.`,
+        soundFreq: 355
+      });
+
+      // Line 25: int n = sc.nextInt();
+      trace.push({
+        line: 25,
+        phase: `Read n = ${targetN}`,
+        targetN,
+        dpAllocated: false,
+        dp: snapDp(),
+        nodes: snapNodes(),
+        activeNodeId: null,
+        callStack: snapStack(),
+        callsMade,
+        memoHits,
+        consoleOut: null,
+        desc: `Read input integer <span class="code-font text-amber-300 font-bold">int n = ${targetN}</span>.`,
+        soundFreq: 385
+      });
+
+      // Line 27: int[] dp = new int[n + 1];
+      trace.push({
+        line: 27,
+        phase: `Alloc dp[${targetN + 1}]`,
+        targetN,
+        dpAllocated: true,
+        dp: snapDp(),
+        nodes: snapNodes(),
+        activeNodeId: null,
+        callStack: snapStack(),
+        callsMade,
+        memoHits,
+        consoleOut: null,
+        desc: `Allocated memoization array <span class="code-font text-cyan-300 font-bold">int[] dp = new int[${targetN + 1}]</span> (indices <span class="code-font">0..${targetN}</span> initialized to 0).`,
+        soundFreq: 410
+      });
+
+      // Line 28: Arrays.fill(dp, -1);
+      dp.fill(-1);
+      trace.push({
+        line: 28,
+        phase: "Arrays.fill(dp, -1)",
+        targetN,
+        dpAllocated: true,
+        dp: snapDp(),
+        nodes: snapNodes(),
+        activeNodeId: null,
+        callStack: snapStack(),
+        callsMade,
+        memoHits,
+        consoleOut: null,
+        desc: `Filled all slots with sentinel <span class="code-font text-purple-300 font-bold">-1</span> via <span class="code-font">Arrays.fill(dp, -1)</span> to mark subproblems as uncomputed.`,
+        soundFreq: 440
+      });
+
+      // Line 30: System.out.println(fibonacci(n, dp)); (Start call)
+      trace.push({
+        line: 30,
+        phase: `Call fib(${targetN})`,
+        targetN,
+        dpAllocated: true,
+        dp: snapDp(),
+        nodes: snapNodes(),
+        activeNodeId: null,
+        callStack: snapStack(),
+        callsMade,
+        memoHits,
+        consoleOut: null,
+        desc: `Invoking <span class="code-font text-cyan-300 font-bold">fibonacci(${targetN}, dp)</span> inside <span class="code-font">System.out.println(...)</span>.`,
+        soundFreq: 465
+      });
+
+      // Recursive Memoized Simulator
+      function simulateFib(currN, parentId, side) {
+        const nodeId = nextNodeId++;
+        const nodeObj = {
+          id: nodeId,
+          n: currN,
+          parentId,
+          side,
+          status: 'active', // 'active' | 'base' | 'cacheHit' | 'computed'
+          result: null,
+          leftChildId: null,
+          rightChildId: null,
+          col: 0,
+          depth: 0
+        };
+        allNodes.set(nodeId, nodeObj);
+        if (parentId !== null) {
+          const parentNode = allNodes.get(parentId);
+          if (side === 'left') parentNode.leftChildId = nodeId;
+          else parentNode.rightChildId = nodeId;
+        }
+
+        callsMade++;
+        callStack.push({ nodeId, n: currN });
+
+        // Line 5: static int fibonacci(int n, int[] dp)
+        trace.push({
+          line: 5,
+          phase: `Enter fib(${currN})`,
+          targetN,
+          dpAllocated: true,
+          dp: snapDp(),
+          nodes: snapNodes(),
+          activeNodeId: nodeId,
+          callStack: snapStack(),
+          callsMade,
+          memoHits,
+          consoleOut: null,
+          desc: `Entered <span class="code-font text-amber-300 font-bold">fibonacci(n = ${currN}, dp)</span> (Call #${callsMade}).`,
+          soundFreq: 480 + currN * 25
+        });
+
+        // Line 7: if (n <= 1)
+        const isBase = currN <= 1;
+        trace.push({
+          line: 7,
+          phase: isBase ? `n (${currN}) <= 1 (True)` : `n (${currN}) <= 1 (False)`,
+          targetN,
+          dpAllocated: true,
+          dp: snapDp(),
+          nodes: snapNodes(),
+          activeNodeId: nodeId,
+          callStack: snapStack(),
+          callsMade,
+          memoHits,
+          consoleOut: null,
+          desc: isBase
+            ? `Base case check <span class="code-font text-cyan-300 font-bold">n (${currN}) &le; 1</span> is <b>true</b> &rarr; returning <span class="code-font">${currN}</span> directly.`
+            : `Base case check <span class="code-font text-slate-300">n (${currN}) &le; 1</span> is <b>false</b>. Checking memoization cache <span class="code-font">dp[${currN}]</span>.`,
+          soundFreq: isBase ? 600 : 500
+        });
+
+        if (isBase) {
+          // Line 8: return n;
+          nodeObj.status = 'base';
+          nodeObj.result = currN;
+          callStack.pop();
+          const parentNode = parentId !== null ? allNodes.get(parentId) : null;
+          trace.push({
+            line: 8,
+            phase: `Base Return ${currN}`,
+            targetN,
+            dpAllocated: true,
+            dp: snapDp(),
+            nodes: snapNodes(),
+            activeNodeId: nodeId,
+            transfer: parentNode ? { type: 'nodeToParent', fromNodeId: nodeId, toNodeId: parentId, val: currN } : null,
+            callStack: snapStack(),
+            callsMade,
+            memoHits,
+            actionText: parentNode ? `fib(${currN}) → ${currN} (to fib(${parentNode.n}))` : `fib(${currN}) → ${currN}`,
+            consoleOut: null,
+            desc: parentNode
+              ? `Base case <span class="code-font text-cyan-300 font-bold">fib(${currN})</span> returned <span class="code-font text-cyan-200 font-bold">${currN}</span> up to caller <span class="code-font text-amber-300 font-bold">fib(${parentNode.n})</span>.`
+              : `Base case <span class="code-font text-cyan-300 font-bold">fib(${currN})</span> returned <span class="code-font text-cyan-200 font-bold">${currN}</span>.`,
+            soundFreq: 660
+          });
+          return currN;
+        }
+
+        // Line 11: if (dp[n] != -1)
+        const isCached = dp[currN] !== -1;
+        trace.push({
+          line: 11,
+          phase: isCached ? `Cache Hit dp[${currN}]!` : `Cache Miss dp[${currN}] == -1`,
+          targetN,
+          dpAllocated: true,
+          dp: snapDp(),
+          nodes: snapNodes(),
+          activeNodeId: nodeId,
+          dpHighlightIdx: currN,
+          dpHighlightType: isCached ? 'read' : 'miss',
+          callStack: snapStack(),
+          callsMade,
+          memoHits,
+          consoleOut: null,
+          desc: isCached
+            ? `<span class="text-purple-300 font-bold"><i class="fa-solid fa-bolt mr-1"></i>Memoization Cache Hit!</span> <span class="code-font text-purple-200 font-bold">dp[${currN}] (${dp[currN]}) != -1</span> is <b>true</b> &rarr; skipping redundant subtree!`
+            : `Cache check <span class="code-font text-slate-300">dp[${currN}] (${dp[currN]}) != -1</span> is <b>false</b> &rarr; computing <span class="code-font">fib(${currN - 1}) + fib(${currN - 2})</span>.`,
+          soundFreq: isCached ? 740 : 520
+        });
+
+        if (isCached) {
+          // Line 12: return dp[n];
+          memoHits++;
+          const cachedVal = dp[currN];
+          nodeObj.status = 'cacheHit';
+          nodeObj.result = cachedVal;
+          callStack.pop();
+          trace.push({
+            line: 12,
+            phase: `Return Cached ${cachedVal}`,
+            targetN,
+            dpAllocated: true,
+            dp: snapDp(),
+            nodes: snapNodes(),
+            activeNodeId: nodeId,
+            dpHighlightIdx: currN,
+            dpHighlightType: 'read',
+            transfer: { type: 'dpToNode', dpIdx: currN, nodeId, val: cachedVal },
+            callStack: snapStack(),
+            callsMade,
+            memoHits,
+            actionText: `CACHE HIT: dp[${currN}] → ${cachedVal}`,
+            consoleOut: null,
+            desc: `<span class="text-purple-300 font-bold">Pruned Subtree!</span> Reused cached <span class="code-font text-purple-200 font-bold">dp[${currN}] = ${cachedVal}</span> in &Omicron;(1) without recursive branching.`,
+            soundFreq: 820
+          });
+          return cachedVal;
+        }
+
+        // Line 15: dp[n] = fibonacci(n - 1, dp)
+        trace.push({
+          line: 15,
+          phase: `Branch Left fib(${currN - 1})`,
+          targetN,
+          dpAllocated: true,
+          dp: snapDp(),
+          nodes: snapNodes(),
+          activeNodeId: nodeId,
+          callStack: snapStack(),
+          callsMade,
+          memoHits,
+          consoleOut: null,
+          desc: `At <span class="code-font text-amber-300">fib(${currN})</span>: Making left recursive call <span class="code-font text-cyan-300 font-bold">fibonacci(${currN - 1}, dp)</span>.`,
+          soundFreq: 540
+        });
+        const leftRes = simulateFib(currN - 1, nodeId, 'left');
+
+        // Line 16: + fibonacci(n - 2, dp);
+        trace.push({
+          line: 16,
+          phase: `Branch Right fib(${currN - 2})`,
+          targetN,
+          dpAllocated: true,
+          dp: snapDp(),
+          nodes: snapNodes(),
+          activeNodeId: nodeId,
+          recurrenceText: `${leftRes} + fib(${currN - 2})`,
+          callStack: snapStack(),
+          callsMade,
+          memoHits,
+          consoleOut: null,
+          desc: `Back at <span class="code-font text-amber-300">fib(${currN})</span> with <span class="code-font text-cyan-300">fib(${currN - 1}) = ${leftRes}</span>. Making right recursive call <span class="code-font text-purple-300 font-bold">fibonacci(${currN - 2}, dp)</span>.`,
+          soundFreq: 560
+        });
+        const rightRes = simulateFib(currN - 2, nodeId, 'right');
+
+        // Combine & Store into dp[currN] (Lines 15-16 completion)
+        const sumVal = leftRes + rightRes;
+        dp[currN] = sumVal;
+        nodeObj.status = 'computed';
+        nodeObj.result = sumVal;
+
+        trace.push({
+          line: [15, 16],
+          phase: `Store dp[${currN}] = ${sumVal}`,
+          targetN,
+          dpAllocated: true,
+          dp: snapDp(),
+          nodes: snapNodes(),
+          activeNodeId: nodeId,
+          dpHighlightIdx: currN,
+          dpHighlightType: 'write',
+          transfer: { type: 'nodeToDp', nodeId, dpIdx: currN, val: sumVal },
+          recurrenceText: `${leftRes} + ${rightRes} = ${sumVal}`,
+          actionText: `dp[${currN}] = ${leftRes} + ${rightRes} = ${sumVal}`,
+          callStack: snapStack(),
+          callsMade,
+          memoHits,
+          consoleOut: null,
+          desc: `<span class="text-emerald-400 font-bold"><i class="fa-solid fa-floppy-disk mr-1"></i>Memoized!</span> Computed <span class="code-font text-emerald-300 font-bold">dp[${currN}] = ${leftRes} + ${rightRes} = ${sumVal}</span> and cached it in <span class="code-font">dp[${currN}]</span>.`,
+          soundFreq: 720
+        });
+
+        // Line 18: return dp[n];
+        callStack.pop();
+        const parentNode = parentId !== null ? allNodes.get(parentId) : null;
+        trace.push({
+          line: 18,
+          phase: `Return dp[${currN}] (${sumVal})`,
+          targetN,
+          dpAllocated: true,
+          dp: snapDp(),
+          nodes: snapNodes(),
+          activeNodeId: nodeId,
+          dpHighlightIdx: currN,
+          dpHighlightType: 'write',
+          transfer: parentNode ? { type: 'nodeToParent', fromNodeId: nodeId, toNodeId: parentId, val: sumVal } : null,
+          recurrenceText: `${leftRes} + ${rightRes} = ${sumVal}`,
+          callStack: snapStack(),
+          callsMade,
+          memoHits,
+          consoleOut: null,
+          desc: parentNode
+            ? `Returned <span class="code-font text-emerald-300 font-bold">dp[${currN}] = ${sumVal}</span> from <span class="code-font">fib(${currN})</span> back to caller <span class="code-font text-amber-300 font-bold">fib(${parentNode.n})</span>${side === 'left' ? ' (which resumes on Line 16)' : ''}.`
+            : `Returned <span class="code-font text-emerald-300 font-bold">dp[${currN}] = ${sumVal}</span> from <span class="code-font">fib(${currN})</span> to <span class="code-font text-cyan-300 font-bold">main()</span>.`,
+          soundFreq: 780
+        });
+
+        return sumVal;
+      }
+
+      const finalAns = simulateFib(targetN, null, 'root');
+
+      // Compute final in-order coordinates for all nodes in the tree and attach to every step
+      const rootNode = allNodes.get(0);
+      const layout = computeTreeLayout(rootNode, allNodes);
+      trace.forEach(st => {
+        st.treeLayout = layout;
+        st.nodes = st.nodes.map(nd => {
+          const full = allNodes.get(nd.id);
+          return { ...nd, col: full.col, depth: full.depth };
+        });
+      });
+
+      // Line 30: Print final result in main()
+      trace.push({
+        line: 30,
+        phase: `Print ${finalAns}`,
+        targetN,
+        dpAllocated: true,
+        dp: snapDp(),
+        nodes: trace[trace.length - 1].nodes,
+        treeLayout: layout,
+        activeNodeId: 0,
+        callStack: snapStack(),
+        callsMade,
+        memoHits,
+        consoleOut: finalAns,
+        actionText: `System.out.println(${finalAns})`,
+        desc: `<span class="text-emerald-400 font-bold"><i class="fa-solid fa-terminal mr-1"></i>Printed Output: ${finalAns}!</span> <span class="code-font text-emerald-300 font-bold">System.out.println(fibonacci(${targetN}, dp))</span> printed <span class="code-font font-black">${finalAns}</span>.`,
+        soundFreq: 880
+      });
+
+      // Line 32: sc.close();
+      trace.push({
+        line: 32,
+        phase: "Complete",
+        targetN,
+        dpAllocated: true,
+        dp: snapDp(),
+        nodes: trace[trace.length - 1].nodes,
+        treeLayout: layout,
+        activeNodeId: 0,
+        callStack: snapStack(),
+        callsMade,
+        memoHits,
+        consoleOut: finalAns,
+        isComplete: true,
+        desc: `<span class="text-emerald-400 font-bold text-sm"><i class="fa-solid fa-trophy mr-1.5"></i>Complete!</span> Closed <span class="code-font">Scanner</span>. <span class="code-font text-cyan-300">F(${targetN}) = ${finalAns}</span> computed in <span class="code-font text-amber-300">${callsMade}</span> calls (${memoHits} cache hits vs ${countNaiveCalls(targetN)} naive calls).`,
+        soundFreq: 960
+      });
+
+      return trace;
+    }
+
+    // LOCALIZED ZERO-JUMP CODE LINE HIGHLIGHTER
+    function highlightCodeLine(lineSpec) {
+      document.querySelectorAll('.code-line').forEach(el => el.classList.remove('active-line'));
+      const lineNums = Array.isArray(lineSpec) ? lineSpec : [lineSpec];
+      let firstActiveEl = null;
+
+      lineNums.forEach(num => {
+        const el = document.getElementById(`line${num}`);
+        if (el) {
+          el.classList.add('active-line');
+          if (!firstActiveEl) firstActiveEl = el;
+        }
+      });
+
+      if (firstActiveEl) {
+        const containerTop = codeContainer.scrollTop;
+        const containerBottom = containerTop + codeContainer.clientHeight;
+        const elTop = firstActiveEl.offsetTop - codeContainer.offsetTop;
+        const elBottom = elTop + firstActiveEl.clientHeight;
+
+        if (elTop < containerTop + 24) {
+          codeContainer.scrollTo({ top: Math.max(0, elTop - 24), behavior: 'smooth' });
+        } else if (elBottom > containerBottom - 24) {
+          codeContainer.scrollTo({ top: elBottom - codeContainer.clientHeight + 24, behavior: 'smooth' });
+        }
+      }
+    }
+
+    // PHYSICAL LIFT-AND-ARC TRANSFERS BETWEEN RECURSION TREE NODE & DP[N] SLOT
+    function animateMemoTransfer(transfer, animateFlight) {
+      transferArcSvg.innerHTML = '';
+      flyingCloneLayer.innerHTML = '';
+      if (!transfer) return;
+
+      const stageRect = stageWrapper.getBoundingClientRect();
+
+      if (transfer.type === 'nodeToParent') {
+        const fromEl = treeNodesLayer.querySelector(`[data-node-id="${transfer.fromNodeId}"]`);
+        const toEl = treeNodesLayer.querySelector(`[data-node-id="${transfer.toNodeId}"]`);
+        if (!fromEl || !toEl) return;
+
+        const fromRect = fromEl.getBoundingClientRect();
+        const toRect = toEl.getBoundingClientRect();
+        const x1 = (fromRect.left - stageRect.left) + fromRect.width / 2;
+        const y1 = (fromRect.top - stageRect.top) - 4;
+        const x2 = (toRect.left - stageRect.left) + toRect.width / 2;
+        const y2 = (toRect.bottom - stageRect.top) + 6;
+        const midX = (x1 + x2) / 2 - 18;
+        const midY = (y1 + y2) / 2;
+
+        transferArcSvg.innerHTML = `
+          <path d="M ${x1} ${y1} Q ${midX} ${midY}, ${x2} ${y2}"
+                fill="none" stroke="#38bdf8" stroke-width="2.4" class="transfer-arc-path" />
+          <circle cx="${x1}" cy="${y1}" r="4" fill="#34d399" />
+          <polygon points="${x2},${y2 - 3} ${x2 - 5},${y2 + 6} ${x2 + 5},${y2 + 6}" fill="#38bdf8" />
+        `;
+
+        if (!animateFlight) return;
+        const clone = document.createElement('div');
+        clone.className = 'absolute px-2 py-0.5 rounded-lg bg-sky-400 text-slate-950 code-font text-xs font-extrabold shadow-lg shadow-sky-400/50 pointer-events-none';
+        clone.textContent = `return ${transfer.val}`;
+        clone.style.left = `${(fromRect.left - stageRect.left) + fromRect.width / 2 - 26}px`;
+        clone.style.top = `${(fromRect.top - stageRect.top) - 8}px`;
+        flyingCloneLayer.appendChild(clone);
+
+        const dx = x2 - x1;
+        const dy = y2 - y1;
+        const duration = Math.min(520, Math.max(230, playSpeed * 0.76));
+        const anim = clone.animate([
+          { transform: 'translate(0px, 0px) scale(1)', opacity: 1 },
+          { transform: `translate(${dx * 0.45 - 14}px, ${dy * 0.45}px) scale(1.12)`, opacity: 1, offset: 0.45 },
+          { transform: `translate(${dx}px, ${dy}px) scale(0.95)`, opacity: 0.1 }
+        ], { duration, easing: 'cubic-bezier(0.22, 1, 0.36, 1)' });
+        anim.onfinish = () => clone.remove();
+        return;
+      }
+
+      const nodeEl = treeNodesLayer.querySelector(`[data-node-id="${transfer.nodeId}"]`);
+      const dpEl = dpArrayArena.querySelector(`[data-dp-idx="${transfer.dpIdx}"]`);
+      if (!nodeEl || !dpEl) return;
+
+      const nodeRect = nodeEl.getBoundingClientRect();
+      const dpRect = dpEl.getBoundingClientRect();
+
+      if (transfer.type === 'nodeToDp') {
+        const x1 = (nodeRect.left - stageRect.left) + nodeRect.width / 2;
+        const y1 = (nodeRect.bottom - stageRect.top) + 4;
+        const x2 = (dpRect.left - stageRect.left) + dpRect.width / 2;
+        const y2 = (dpRect.top - stageRect.top) - 6;
+        const midX = (x1 + x2) / 2 + 22;
+        const midY = (y1 + y2) / 2;
+
+        transferArcSvg.innerHTML = `
+          <path d="M ${x1} ${y1} Q ${midX} ${midY}, ${x2} ${y2}"
+                fill="none" stroke="#34d399" stroke-width="2.4" class="transfer-arc-path" />
+          <circle cx="${x1}" cy="${y1}" r="4" fill="#fbbf24" />
+          <polygon points="${x2},${y2 + 3} ${x2 - 5},${y2 - 6} ${x2 + 5},${y2 - 6}" fill="#34d399" />
+        `;
+
+        if (!animateFlight) return;
+        const clone = document.createElement('div');
+        clone.className = 'absolute px-2.5 py-1 rounded-lg bg-emerald-400 text-slate-950 code-font text-xs font-extrabold shadow-lg shadow-emerald-400/50 pointer-events-none';
+        clone.textContent = `dp[${transfer.dpIdx}] = ${transfer.val}`;
+        clone.style.left = `${(nodeRect.left - stageRect.left) + nodeRect.width / 2 - 30}px`;
+        clone.style.top = `${(nodeRect.top - stageRect.top) + nodeRect.height / 2}px`;
+        flyingCloneLayer.appendChild(clone);
+
+        const dx = x2 - x1;
+        const dy = y2 - y1;
+        const duration = Math.min(540, Math.max(240, playSpeed * 0.78));
+        const anim = clone.animate([
+          { transform: 'translate(0px, 0px) scale(1)', opacity: 1 },
+          { transform: `translate(${dx * 0.45 + 18}px, ${dy * 0.45 - 16}px) scale(1.12)`, opacity: 1, offset: 0.45 },
+          { transform: `translate(${dx}px, ${dy}px) scale(0.95)`, opacity: 0.1 }
+        ], { duration, easing: 'cubic-bezier(0.22, 1, 0.36, 1)' });
+        anim.onfinish = () => clone.remove();
+
+      } else if (transfer.type === 'dpToNode') {
+        const x1 = (dpRect.left - stageRect.left) + dpRect.width / 2;
+        const y1 = (dpRect.top - stageRect.top) - 4;
+        const x2 = (nodeRect.left - stageRect.left) + nodeRect.width / 2;
+        const y2 = (nodeRect.bottom - stageRect.top) + 6;
+        const midX = (x1 + x2) / 2 - 22;
+        const midY = (y1 + y2) / 2;
+
+        transferArcSvg.innerHTML = `
+          <path d="M ${x1} ${y1} Q ${midX} ${midY}, ${x2} ${y2}"
+                fill="none" stroke="#c084fc" stroke-width="2.4" class="transfer-arc-path" />
+          <circle cx="${x1}" cy="${y1}" r="4" fill="#c084fc" />
+          <polygon points="${x2},${y2 - 3} ${x2 - 5},${y2 + 6} ${x2 + 5},${y2 + 6}" fill="#c084fc" />
+        `;
+
+        if (!animateFlight) return;
+        const clone = document.createElement('div');
+        clone.className = 'absolute px-2.5 py-1 rounded-lg bg-purple-400 text-slate-950 code-font text-xs font-extrabold shadow-lg shadow-purple-400/50 pointer-events-none';
+        clone.textContent = `HIT: ${transfer.val}`;
+        clone.style.left = `${(dpRect.left - stageRect.left) + dpRect.width / 2 - 26}px`;
+        clone.style.top = `${(dpRect.top - stageRect.top) - 8}px`;
+        flyingCloneLayer.appendChild(clone);
+
+        const dx = x2 - x1;
+        const dy = y2 - y1;
+        const duration = Math.min(540, Math.max(240, playSpeed * 0.78));
+        const anim = clone.animate([
+          { transform: 'translate(0px, 0px) scale(1)', opacity: 1 },
+          { transform: `translate(${dx * 0.45 - 18}px, ${dy * 0.45}px) scale(1.12)`, opacity: 1, offset: 0.45 },
+          { transform: `translate(${dx}px, ${dy}px) scale(0.95)`, opacity: 0.1 }
+        ], { duration, easing: 'cubic-bezier(0.22, 1, 0.36, 1)' });
+        anim.onfinish = () => clone.remove();
+      }
+    }
+
+    // RENDER CURRENT STEP
+    function renderStep(idx, animateMovement = true) {
+      if (idx < 0 || idx >= steps.length) return;
+      const step = steps[idx];
+      const targetN = step.targetN;
+      const totalTreeCalls = 2 * targetN - 1 > 0 ? 2 * targetN - 1 : 1;
+      const naiveCalls = countNaiveCalls(targetN);
+
+      // Update Header Scrubber & Badges
+      stepCounterBadge.textContent = `Step: ${idx + 1} / ${steps.length}`;
+      phaseBadge.textContent = step.phase;
+      cacheHitsHeaderBadge.textContent = `Memo Hits: ${step.memoHits}`;
+      stepScrubber.max = steps.length - 1;
+      stepScrubber.value = idx;
+
+      if (step.consoleOut !== null && step.consoleOut !== undefined) {
+        outputHeaderBadge.textContent = `Output: ${step.consoleOut} ✓`;
+        outputHeaderBadge.className = "px-2.5 py-1 rounded-md bg-emerald-500/25 border border-emerald-400/45 text-emerald-200 font-bold";
+      } else {
+        outputHeaderBadge.textContent = "Output: Pending";
+        outputHeaderBadge.className = "px-2.5 py-1 rounded-md bg-white/5 border border-white/15 text-slate-300 font-bold";
+      }
+
+      // Update Telemetry HUD Cards
+      const activeNode = step.nodes.find(nd => nd.id === step.activeNodeId);
+      if (activeNode) {
+        varActiveCall.textContent = `fib(${activeNode.n})`;
+        codeFrameScopeBadge.textContent = `Frame: fib(${activeNode.n}) (n = ${activeNode.n})`;
+        codeFrameScopeBadge.className = "text-[11px] text-amber-300 bg-amber-500/15 px-2.5 py-0.5 rounded border border-amber-400/35 code-font font-semibold";
+      } else {
+        varActiveCall.textContent = step.callStack.length === 0 ? 'main()' : '-';
+        codeFrameScopeBadge.textContent = "Frame: main()";
+        codeFrameScopeBadge.className = "text-[11px] text-cyan-300 bg-cyan-500/15 px-2.5 py-0.5 rounded border border-cyan-400/25 code-font font-semibold";
+      }
+      varCallDepth.textContent = `Stack depth: ${step.callStack.length}`;
+
+      varTotalCalls.textContent = step.callsMade;
+      varMaxCallsHint.textContent = `of ${totalTreeCalls}`;
+      varNaiveCompare.textContent = `Naive: ${naiveCalls} calls`;
+      varMemoHits.textContent = step.memoHits;
+      varRecurrence.textContent = step.recurrenceText || '-';
+      varTargetNSub.textContent = `fibonacci(${targetN})`;
+
+      if (step.consoleOut !== null && step.consoleOut !== undefined) {
+        varConsoleOut.textContent = step.consoleOut;
+        varConsoleOut.className = "code-font text-xl font-black text-emerald-400";
+        consoleInlineOut.textContent = `stdout: ${step.consoleOut}`;
+        if (step.isComplete) {
+          finalOutputCard.classList.add('result-win-anim');
+          setTimeout(() => finalOutputCard.classList.remove('result-win-anim'), 650);
+        }
+      } else {
+        varConsoleOut.textContent = "pending";
+        varConsoleOut.className = "code-font text-lg sm:text-xl font-black text-slate-400";
+        consoleInlineOut.textContent = "stdout: -";
+      }
+
+      // Narrative Description
+      stepDescription.innerHTML = step.desc;
+
+      // 1. Render Recursion Call Tree (SVG Edges + Glassy Node Pills)
+      treeEdgesSvg.innerHTML = '';
+      treeNodesLayer.innerHTML = '';
+
+      if (step.nodes.length === 0 || !step.treeLayout) {
+        treeNodesLayer.innerHTML = `<div class="w-full h-full flex items-center justify-center text-xs text-slate-500 italic code-font">Waiting for main() to call fibonacci(${targetN}, dp)...</div>`;
+      } else {
+        const { totalCols, maxDepth } = step.treeLayout;
+        const canvasHeight = Math.max(220, (maxDepth + 1) * 52 + 32);
+        const canvasMinWidth = Math.max(540, totalCols * 64);
+        treeCanvas.style.height = `${canvasHeight}px`;
+        treeCanvas.style.minWidth = `${canvasMinWidth}px`;
+
+        const nodeMap = new Map(step.nodes.map(nd => [nd.id, nd]));
+        const getNodeCoords = (nd) => {
+          const xPct = ((nd.col + 0.5) / totalCols) * 100;
+          const yPx = 28 + nd.depth * 52;
+          return { xPct, yPx };
+        };
+
+        // Draw SVG Edges from Parent to Visited Children
+        let edgesHtml = '';
+        step.nodes.forEach(nd => {
+          if (nd.parentId !== null && nodeMap.has(nd.parentId)) {
+            const parent = nodeMap.get(nd.parentId);
+            const pPos = getNodeCoords(parent);
+            const cPos = getNodeCoords(nd);
+            const isActiveEdge = (nd.id === step.activeNodeId);
+            const edgeStroke = nd.status === 'cacheHit'
+              ? 'rgba(192, 132, 252, 0.75)'
+              : isActiveEdge
+                ? 'rgba(251, 191, 36, 0.9)'
+                : 'rgba(148, 163, 184, 0.35)';
+            const dashAttr = nd.status === 'cacheHit' ? 'stroke-dasharray="4 3"' : '';
+
+            edgesHtml += `
+              <line x1="${pPos.xPct}%" y1="${pPos.yPx}" x2="${cPos.xPct}%" y2="${cPos.yPx}"
+                    stroke="${edgeStroke}" stroke-width="${isActiveEdge ? 2.4 : 1.7}" ${dashAttr} />
+            `;
+          }
+        });
+        treeEdgesSvg.innerHTML = edgesHtml;
+
+        // Render Glassy Tree Node Pills
+        step.nodes.forEach(nd => {
+          const pos = getNodeCoords(nd);
+          const isCurrent = (nd.id === step.activeNodeId);
+
+          const nodeEl = document.createElement('div');
+          nodeEl.dataset.nodeId = nd.id;
+          nodeEl.style.left = `${pos.xPct}%`;
+          nodeEl.style.top = `${pos.yPx}px`;
+
+          let nClass = 'tree-node absolute -translate-x-1/2 -translate-y-1/2 px-2.5 py-1 rounded-xl flex flex-col items-center justify-center select-none ';
+          if (isCurrent) {
+            nClass += 'node-active ';
+          } else if (nd.status === 'cacheHit') {
+            nClass += 'node-cache-hit ';
+          } else if (nd.status === 'base') {
+            nClass += 'node-base ';
+          } else if (nd.status === 'computed') {
+            nClass += 'node-computed ';
+          }
+          nodeEl.className = nClass;
+
+          let statusBadge = '';
+          if (nd.status === 'cacheHit') {
+            statusBadge = `<span class="text-[8px] code-font text-purple-300 font-extrabold uppercase">HIT &rarr; ${nd.result}</span>`;
+          } else if (nd.result !== null) {
+            statusBadge = `<span class="text-[8px] code-font ${nd.status === 'base' ? 'text-cyan-300' : 'text-emerald-300'} font-bold">&rarr; ${nd.result}</span>`;
+          } else {
+            statusBadge = `<span class="text-[8px] code-font text-amber-200/80">computing</span>`;
+          }
+
+          nodeEl.innerHTML = `
+            <span class="code-font text-[11px] font-extrabold text-white whitespace-nowrap">fib(${nd.n})</span>
+            ${statusBadge}
+          `;
+          treeNodesLayer.appendChild(nodeEl);
+        });
+      }
+
+      // 2. Render Memoization Cache Table: int[] dp = new int[n + 1]
+      dpArrayArena.innerHTML = '';
+      if (!step.dpAllocated) {
+        dpArrayPreview.textContent = "dp = null (unallocated)";
+        dpArrayArena.innerHTML = `<span class="w-full text-center text-xs text-slate-500 italic code-font">Waiting for int[] dp = new int[${targetN + 1}]...</span>`;
+      } else {
+        dpArrayPreview.textContent = `dp = [${step.dp.join(', ')}]`;
+        const maxFibVal = Math.max(1, ...step.dp.filter(v => v > 0));
+
+        step.dp.forEach((val, dIdx) => {
+          const isUncomputed = (val === -1);
+          const isHighlighted = (step.dpHighlightIdx === dIdx);
+          const isWrite = isHighlighted && step.dpHighlightType === 'write';
+          const isRead = isHighlighted && step.dpHighlightType === 'read';
+
+          const cell = document.createElement('div');
+          cell.dataset.dpIdx = dIdx;
+
+          let cClass = 'dp-cell flex-1 min-w-[54px] max-w-[96px] h-28 rounded-2xl p-2 flex flex-col items-center justify-between select-none ';
+          if (isWrite) {
+            cClass += 'dp-just-written ';
+          } else if (isRead) {
+            cClass += 'dp-cache-read ';
+          } else if (isUncomputed) {
+            cClass += 'dp-uncomputed ';
+          } else {
+            cClass += 'dp-filled ';
+          }
+          cell.className = cClass;
+
+          const barPct = isUncomputed || val <= 0 ? 6 : Math.max(18, (val / maxFibVal) * 100);
+          let barGrad = 'bg-slate-700/60';
+          if (isWrite) {
+            barGrad = 'bg-gradient-to-t from-emerald-600 to-emerald-400 border-t border-white shadow-[0_0_12px_rgba(16,185,129,0.65)]';
+          } else if (isRead) {
+            barGrad = 'bg-gradient-to-t from-purple-600 to-purple-400 border-t border-white shadow-[0_0_12px_rgba(168,85,247,0.65)]';
+          } else if (!isUncomputed) {
+            barGrad = 'bg-gradient-to-t from-cyan-600 to-cyan-400 border-t border-cyan-100';
+          }
+
+          const footTag = isWrite
+            ? `<span class="text-[8px] code-font text-emerald-300 font-extrabold uppercase">STORED</span>`
+            : isRead
+              ? `<span class="text-[8px] code-font text-purple-300 font-extrabold uppercase">HIT!</span>`
+              : isUncomputed
+                ? `<span class="text-[8px] code-font text-slate-500">empty</span>`
+                : `<span class="text-[8px] code-font text-cyan-300">cached</span>`;
+
+          cell.innerHTML = `
+            <span class="text-[9px] code-font text-slate-400">dp[${dIdx}]</span>
+            <div class="w-full h-11 flex items-end justify-center my-0.5 bg-black/25 rounded-lg p-1 border border-white/[0.06]">
+              <div class="w-full max-w-[26px] rounded-t-sm transition-all duration-300 ${barGrad}" style="height: ${barPct}%;"></div>
+            </div>
+            <span class="code-font text-xs sm:text-sm font-black ${isWrite ? 'text-emerald-200' : isRead ? 'text-purple-200' : isUncomputed ? 'text-slate-400' : 'text-white'}">${val}</span>
+            ${footTag}
+          `;
+          dpArrayArena.appendChild(cell);
+        });
+      }
+
+      // 3. Render Active Recursion Call Stack Strip
+      callStackArena.innerHTML = '';
+      if (step.callStack.length === 0) {
+        callStackArena.innerHTML = `<span class="px-2 py-0.5 rounded-md bg-white/[0.05] border border-white/10 text-[10px] code-font text-slate-300">main()</span>`;
+      } else {
+        const mainChip = document.createElement('span');
+        mainChip.className = 'px-1.5 py-0.5 rounded bg-white/[0.04] border border-white/10 text-[10px] code-font text-slate-400';
+        mainChip.textContent = 'main';
+        callStackArena.appendChild(mainChip);
+
+        step.callStack.forEach((frame, fIdx) => {
+          const arrow = document.createElement('span');
+          arrow.className = 'text-[10px] text-slate-500';
+          arrow.innerHTML = '&rarr;';
+          callStackArena.appendChild(arrow);
+
+          const isTop = (fIdx === step.callStack.length - 1);
+          const pill = document.createElement('span');
+          pill.className = isTop
+            ? 'call-frame-pill px-2 py-0.5 rounded-md bg-amber-500/25 border border-amber-400/75 text-amber-200 text-[10px] code-font font-extrabold shadow'
+            : 'call-frame-pill px-2 py-0.5 rounded-md bg-cyan-500/15 border border-cyan-400/35 text-cyan-200 text-[10px] code-font';
+          pill.textContent = `fib(${frame.n})`;
+          callStackArena.appendChild(pill);
+        });
+      }
+
+      // 4. Trigger Lift-and-Arc Memoization Transfers
+      requestAnimationFrame(() => {
+        animateMemoTransfer(step.transfer, animateMovement);
+      });
+
+      // 5. Update Action Pill & Decision Banner
+      if (step.actionText) {
+        actionPill.classList.remove('hidden');
+        actionPill.textContent = step.actionText;
+      } else {
+        actionPill.classList.add('hidden');
+      }
+
+      if (step.isComplete || step.dpHighlightType === 'write') {
+        decisionIcon.className = "fa-solid fa-trophy text-emerald-400 text-base";
+        decisionBanner.className = "md:col-span-7 p-3.5 rounded-xl bg-emerald-500/15 border border-emerald-400/35 text-xs flex flex-col sm:flex-row items-center justify-between gap-3 backdrop-blur-md";
+      } else if (step.dpHighlightType === 'read') {
+        decisionIcon.className = "fa-solid fa-bolt text-purple-400 text-base";
+        decisionBanner.className = "md:col-span-7 p-3.5 rounded-xl bg-purple-500/15 border border-purple-400/35 text-xs flex flex-col sm:flex-row items-center justify-between gap-3 backdrop-blur-md";
+      } else {
+        decisionIcon.className = "fa-solid fa-circle-info text-cyan-400 text-base";
+        decisionBanner.className = "md:col-span-7 p-3.5 rounded-xl bg-white/[0.04] border border-white/10 text-xs flex flex-col sm:flex-row items-center justify-between gap-3 backdrop-blur-md";
+      }
+      decisionText.innerHTML = step.desc;
+
+      // 6. Highlight Active Java Line & Play Audio Tone
+      highlightCodeLine(step.line);
+      if (step.soundFreq) {
+        playTone(step.soundFreq, 'sine', 0.08, 0.035);
+      }
+    }
+
+    // PLAYBACK CONTROLLER
+    function setPlaying(playing) {
+      isPlaying = playing;
+      if (isPlaying) {
+        playIcon.className = "fa-solid fa-pause";
+        playText.textContent = "Stop";
+        btnPlay.classList.add('bg-rose-500/25', 'text-rose-200', 'border-rose-400/50');
+        btnPlay.classList.remove('bg-cyan-500/25', 'text-cyan-200', 'border-cyan-400/50');
+
+        playInterval = setInterval(() => {
+          if (currentStepIdx < steps.length - 1) {
+            currentStepIdx++;
+            renderStep(currentStepIdx, true);
+          } else {
+            setPlaying(false);
+          }
+        }, playSpeed);
+      } else {
+        playIcon.className = "fa-solid fa-play";
+        playText.textContent = "Start";
+        btnPlay.classList.remove('bg-rose-500/25', 'text-rose-200', 'border-rose-400/50');
+        btnPlay.classList.add('bg-cyan-500/25', 'text-cyan-200', 'border-cyan-400/50');
+        if (playInterval) {
+          clearInterval(playInterval);
+          playInterval = null;
+        }
+      }
+    }
+
+    function initSimulation(nVal) {
+      setPlaying(false);
+      currentN = Math.max(0, Math.min(9, nVal));
+      steps = generateSteps(currentN);
+      currentStepIdx = 0;
+      stepScrubber.max = steps.length - 1;
+      stepScrubber.value = 0;
+      renderStep(0, false);
+    }
+
+    // EVENT LISTENERS
+    btnPlay.addEventListener('click', () => {
+      if (currentStepIdx >= steps.length - 1) {
+        currentStepIdx = 0;
+        renderStep(0, false);
+      }
+      setPlaying(!isPlaying);
+    });
+
+    btnNext.addEventListener('click', () => {
+      setPlaying(false);
+      if (currentStepIdx < steps.length - 1) {
+        currentStepIdx++;
+        renderStep(currentStepIdx, true);
+      }
+    });
+
+    btnPrev.addEventListener('click', () => {
+      setPlaying(false);
+      if (currentStepIdx > 0) {
+        currentStepIdx--;
+        renderStep(currentStepIdx, true);
+      }
+    });
+
+    btnReset.addEventListener('click', () => {
+      setPlaying(false);
+      currentStepIdx = 0;
+      renderStep(0, false);
+    });
+
+    stepScrubber.addEventListener('input', (e) => {
+      setPlaying(false);
+      currentStepIdx = parseInt(e.target.value, 10);
+      renderStep(currentStepIdx, false);
+    });
+
+    document.querySelectorAll('.speed-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.speed-btn').forEach(b => {
+          b.classList.remove('bg-cyan-500/30', 'text-cyan-200', 'font-semibold');
+        });
+        btn.classList.add('bg-cyan-500/30', 'text-cyan-200', 'font-semibold');
+        playSpeed = parseInt(btn.dataset.speed, 10);
+        if (isPlaying) {
+          setPlaying(false);
+          setPlaying(true);
+        }
+      });
+    });
+
+    btnAudio.addEventListener('click', () => {
+      audioEnabled = !audioEnabled;
+      if (audioEnabled) {
+        audioIcon.className = "fa-solid fa-volume-high";
+        btnAudio.classList.remove('text-slate-600');
+        btnAudio.classList.add('text-slate-300');
+      } else {
+        audioIcon.className = "fa-solid fa-volume-xmark";
+        btnAudio.classList.add('text-slate-600');
+        btnAudio.classList.remove('text-slate-300');
+      }
+    });
+
+    presetSelect.addEventListener('change', (e) => {
+      const idx = parseInt(e.target.value, 10);
+      customNInput.value = PRESETS[idx].n;
+      initSimulation(PRESETS[idx].n);
+    });
+
+    btnApplyCustom.addEventListener('click', () => {
+      const parsedN = parseInt(customNInput.value, 10);
+      if (!isNaN(parsedN) && parsedN >= 0 && parsedN <= 9) {
+        initSimulation(parsedN);
+      } else {
+        decisionIcon.className = "fa-solid fa-triangle-exclamation text-rose-400 text-base";
+        decisionBanner.className = "md:col-span-7 p-3.5 rounded-xl bg-rose-500/15 border border-rose-400/35 text-xs flex flex-col sm:flex-row items-center justify-between gap-3 backdrop-blur-md";
+        decisionText.innerHTML = `<span class="text-rose-300 font-bold">Range Notice:</span> Enter an integer <span class="code-font">0 &le; n &le; 9</span> so the recursion call tree remains clear on screen.`;
+      }
+    });
+
+    window.addEventListener('resize', () => {
+      const step = steps[currentStepIdx];
+      if (step) {
+        animateMemoTransfer(step.transfer, false);
+      }
+    });
+
+    window.addEventListener('keydown', (e) => {
+      if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT') return;
+      if (e.code === 'Space') {
+        e.preventDefault();
+        btnPlay.click();
+      } else if (e.code === 'ArrowRight') {
+        e.preventDefault();
+        btnNext.click();
+      } else if (e.code === 'ArrowLeft') {
+        e.preventDefault();
+        btnPrev.click();
+      }
+    });
+
+    window.onload = function() {
+      customNInput.value = PRESETS[0].n;
+      initSimulation(PRESETS[0].n);
+    };
+  </script>
+</body>
+</html>

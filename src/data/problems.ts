@@ -5693,5 +5693,156 @@ export const PROBLEMS: DSAProblem[] = [
       }
     ],
     "leetcodeUrl": "https://leetcode.com/problems/car-fleet/"
+  },
+  {
+    "id": "nth-fibonacci-number",
+    "number": 509,
+    "title": "Nth Fibonacci Number",
+    "slug": "fibonacci-number",
+    "difficulty": "Easy",
+    "categories": [
+      "Math",
+      "Dynamic Programming"
+    ],
+    "description": "Write a recursive Fibonacci function and analyze/dry-run its complexity, along with memoized DP and O(1)-space no-temporary-variable iterative variants. Given n, compute F(n) where F(0) = 0, F(1) = 1, and F(n) = F(n - 1) + F(n - 2) for n > 1 (or print the first n Fibonacci terms).",
+    "inputFormat": "n = int (0 <= n <= 30)",
+    "outputFormat": "int (F(n), or first n Fibonacci terms for the series variant)",
+    "constraints": [
+      "0 <= n <= 30",
+      "F(0) = 0, F(1) = 1",
+      "DSE 2025 variant: compute/print Fibonacci without using a temporary variable"
+    ],
+    "examples": [
+      {
+        "exampleNumber": 1,
+        "type": "official",
+        "input": "n = 2",
+        "output": "1",
+        "explanation": "F(2) = F(1) + F(0) = 1 + 0 = 1."
+      },
+      {
+        "exampleNumber": 2,
+        "type": "official",
+        "input": "n = 5",
+        "output": "5",
+        "explanation": "F(5) = F(4) + F(3) = 3 + 2 = 5 (series: 0, 1, 1, 2, 3)."
+      }
+    ],
+    "flowSteps": [
+      {
+        "step": 1,
+        "title": "Base Cases (n <= 1)",
+        "description": "Handle F(0) = 0 and F(1) = 1 immediately without further recursion or loop iterations.",
+        "stateSnapshot": "if (n <= 1) return n",
+        "highlight": "Base Case"
+      },
+      {
+        "step": 2,
+        "title": "Memoized / Rolling Transition",
+        "description": "Cache F(n) = fib(n-1) + fib(n-2) in dp[n] to avoid O(2^n) recomputation, or update pair without temp: b = a + b; a = b - a.",
+        "stateSnapshot": "dp[n] = fib(n-1) + fib(n-2) | b = a + b; a = b - a",
+        "highlight": "Recurrence"
+      },
+      {
+        "step": 3,
+        "title": "Return F(n) or Print Series",
+        "description": "Return dp[n] (memoized), pair[1] (rolling no-temp), or print each term a in the series loop.",
+        "stateSnapshot": "return F(n)",
+        "highlight": "Result"
+      }
+    ],
+    "timeComplexity": "O(n)",
+    "timeComplexityExplanation": "Memoization and no-temp iterative variants compute each Fibonacci state once in O(n) time; pure recursion takes O(2^n) due to overlapping subproblems.",
+    "spaceComplexity": "O(1) to O(n)",
+    "spaceComplexityExplanation": "Iterative no-temp uses O(1) space; recursion + memoization uses O(n) for the dp array and call stack.",
+    "visualizerUrl": "/visualizers/fibonacci_memoization_visualizer.html",
+    "addedDate": "2026-11-27",
+    "keyObservations": [
+      "Pure recursion recomputes overlapping subproblems exponentially in O(2^n) time; adding an int[] dp cache collapses it to O(n).",
+      "Without a temporary variable, advancing (a, b) -> (b, a + b) is done in-place via b = a + b; a = b - a.",
+      "Also reported in Infosys interviews as: Fibonacci Number (Recursive + Complexity), Fibonacci Series (variants), Nth Fibonacci (DP). Also asked at Accenture and TCS."
+    ],
+    "importantPattern": "Recursion Tree -> Top-Down Memoization -> O(1) Rolling State",
+    "commonMistakes": [
+      "Forgetting base cases n == 0 or n == 1, causing infinite recursion or negative array indexing.",
+      "Updating a = b; b = a + b without a temp variable (clobbers a before computing a + b); must do b = a + b; a = b - a."
+    ],
+    "optimalApproach": "Rolling State Without Temp Variable (O(n) time, O(1) space) & Top-Down Memoization (O(n) time, O(n) space)",
+    "solutions": [
+      {
+        "id": "memoization",
+        "label": "Recursion + Memoization",
+        "badge": "Top-Down DP · O(n)",
+        "approach": "Top-down recursive Fibonacci with an int[] dp memoization table initialized to -1 so each subproblem F(k) is solved at most once.",
+        "timeComplexity": "O(n)",
+        "spaceComplexity": "O(n)",
+        "visualizerUrl": "/visualizers/fibonacci_memoization_visualizer.html"
+      },
+      {
+        "id": "recursive",
+        "label": "Pure Recursion",
+        "badge": "Baseline · O(2^n)",
+        "approach": "Direct recursive definition fib(n - 1) + fib(n - 2) illustrating the binary recursion tree, call stack depth, and overlapping subproblems.",
+        "timeComplexity": "O(2^n)",
+        "spaceComplexity": "O(n)",
+        "visualizerUrl": "/visualizers/fibonacci_recursive_visualizer.html"
+      },
+      {
+        "id": "pair-no-temp",
+        "label": "Nth Term (No Temp Var)",
+        "badge": "DSE 2025 · O(1) Space",
+        "approach": "Computes F(n) using a fixed 2-element rolling array pair = {0, 1} and in-place arithmetic (pair[1] = pair[0] + pair[1]; pair[0] = pair[1] - pair[0]) without a third variable.",
+        "timeComplexity": "O(n)",
+        "spaceComplexity": "O(1)",
+        "visualizerUrl": "/visualizers/fibonacci_pair_no_temp_visualizer.html"
+      },
+      {
+        "id": "series-no-temp",
+        "label": "Fibonacci Series (No Temp)",
+        "badge": "Series Variant · O(1)",
+        "approach": "Prints the first n Fibonacci terms using only two scalar variables a = 0, b = 1 updated via b = a + b; a = b - a.",
+        "timeComplexity": "O(n)",
+        "spaceComplexity": "O(1)",
+        "visualizerUrl": "/visualizers/fibonacci_series_no_temp_visualizer.html"
+      }
+    ],
+    "infosys": {
+      "roles": [
+        "SP",
+        "System Engineer",
+        "DSE"
+      ],
+      "frequency": "Very High",
+      "frequencyCount": 15,
+      "years": [
+        2024,
+        2025
+      ],
+      "dayPlan": 1,
+      "sourceCount": 14
+    },
+    "relatedProblems": [
+      {
+        "number": 53,
+        "title": "Maximum Subarray (Max Inventory Increase)",
+        "difficulty": "Medium"
+      },
+      {
+        "number": 121,
+        "title": "Best Time to Buy and Sell Stock",
+        "difficulty": "Easy"
+      },
+      {
+        "number": 322,
+        "title": "Greedy Coin Change (Standard Denominations)",
+        "difficulty": "Medium"
+      },
+      {
+        "number": 169,
+        "title": "Majority Element",
+        "difficulty": "Easy"
+      }
+    ],
+    "leetcodeUrl": "https://leetcode.com/problems/fibonacci-number/"
   }
 ];
