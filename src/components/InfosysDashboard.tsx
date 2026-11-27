@@ -47,6 +47,7 @@ export const InfosysDashboard: React.FC<Props> = ({
   const [subTab, setSubTab] = useState<'bank' | 'plan'>('bank');
   const [showTopics, setShowTopics] = useState(true);
   const [selectedItem, setSelectedItem] = useState<InfosysResolvedItem | null>(null);
+  const [visibleCount, setVisibleCount] = useState(50);
 
   useEffect(() => {
     if (!selectedItem) return;
@@ -608,7 +609,7 @@ export const InfosysDashboard: React.FC<Props> = ({
           </div>
 
           {/* Question Bank Table */}
-          <div className="glass-panel rounded-2xl border border-white/10 overflow-hidden">
+          <div className="rounded-2xl border border-white/10 bg-[#0b1020]/90 overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full text-left border-collapse min-w-[980px]">
                 <thead>
@@ -626,7 +627,7 @@ export const InfosysDashboard: React.FC<Props> = ({
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-white/[0.06] text-xs">
-                  {filteredItems.map((item) => {
+                  {filteredItems.slice(0, visibleCount).map((item) => {
                     const { question: q, linkedProblem, storageId } = item;
                     const isSolved = solvedIds.has(storageId);
                     const isBookmarked = bookmarkedIds.has(storageId);
@@ -762,6 +763,27 @@ export const InfosysDashboard: React.FC<Props> = ({
                 </tbody>
               </table>
             </div>
+            {visibleCount < filteredItems.length && (
+              <div className="p-4 border-t border-white/10 bg-white/[0.02] flex flex-wrap items-center justify-between gap-3">
+                <span className="text-xs font-mono text-slate-400">
+                  Showing {Math.min(visibleCount, filteredItems.length)} of {filteredItems.length} questions
+                </span>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => setVisibleCount((c) => c + 50)}
+                    className="px-4 py-1.5 rounded-xl bg-sky-500/20 hover:bg-sky-500/30 border border-sky-400/40 text-sky-200 text-xs font-semibold transition-all cursor-pointer"
+                  >
+                    Load 50 More
+                  </button>
+                  <button
+                    onClick={() => setVisibleCount(filteredItems.length)}
+                    className="px-4 py-1.5 rounded-xl bg-white/[0.05] hover:bg-white/[0.1] border border-white/15 text-slate-300 text-xs font-semibold transition-all cursor-pointer"
+                  >
+                    Show All ({filteredItems.length})
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         </>
       ) : (
