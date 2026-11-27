@@ -2457,6 +2457,26 @@ export const PROBLEMS: DSAProblem[] = [
       "Forgetting k = k % n when k >= nums.length."
     ],
     "optimalApproach": "In-Place Triple Reversal",
+    "solutions": [
+      {
+        "id": "triple-reversal",
+        "label": "In-Place Triple Reversal",
+        "badge": "Optimal · O(1) Space",
+        "approach": "Normalize k = k % n, reverse the entire array, reverse the first k elements, and reverse the remaining n - k elements in-place.",
+        "timeComplexity": "O(n)",
+        "spaceComplexity": "O(1)",
+        "visualizerUrl": "/visualizers/array_rotation_playing_card_visualizer.html"
+      },
+      {
+        "id": "extra-array",
+        "label": "Extra Array (Modulo Buffer)",
+        "badge": "Approach 1 · O(n) Space",
+        "approach": "Allocate temp[n], place each arr[i] at temp[(i + k) % n], then copy temp back into arr.",
+        "timeComplexity": "O(n)",
+        "spaceComplexity": "O(n)",
+        "visualizerUrl": "/visualizers/rotate_array_extra_array_visualizer.html"
+      }
+    ],
     "relatedProblems": [
       {
         "number": 238,

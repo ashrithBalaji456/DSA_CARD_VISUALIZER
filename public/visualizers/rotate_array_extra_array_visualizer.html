@@ -1,0 +1,1401 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Rotate Array Right (Extra Array • LeetCode 189) - Glassmorphic Visualizer</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2064%2064%22%3E%3Cdefs%3E%3ClinearGradient%20id%3D%22bg%22%20x1%3D%220%22%20y1%3D%220%22%20x2%3D%221%22%20y2%3D%221%22%3E%3Cstop%20offset%3D%220%25%22%20stop-color%3D%22%230f172a%22%2F%3E%3Cstop%20offset%3D%22100%25%22%20stop-color%3D%22%23060913%22%2F%3E%3C%2FlinearGradient%3E%3ClinearGradient%20id%3D%22g%22%20x1%3D%220%22%20y1%3D%220%22%20x2%3D%221%22%20y2%3D%221%22%3E%3Cstop%20offset%3D%220%25%22%20stop-color%3D%22%2322d3ee%22%2F%3E%3Cstop%20offset%3D%2255%25%22%20stop-color%3D%22%236366f1%22%2F%3E%3Cstop%20offset%3D%22100%25%22%20stop-color%3D%22%23a855f7%22%2F%3E%3C%2FlinearGradient%3E%3C%2Fdefs%3E%3Crect%20x%3D%222%22%20y%3D%222%22%20width%3D%2260%22%20height%3D%2260%22%20rx%3D%2216%22%20fill%3D%22url(%23bg)%22%20stroke%3D%22url(%23g)%22%20stroke-width%3D%223.5%22%2F%3E%3Cpath%20d%3D%22M20%2042%20L32%2018%20L44%2042%22%20fill%3D%22none%22%20stroke%3D%22url(%23g)%22%20stroke-width%3D%224%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3Cline%20x1%3D%2220%22%20y1%3D%2242%22%20x2%3D%2244%22%20y2%3D%2242%22%20stroke%3D%22%2338bdf8%22%20stroke-width%3D%223%22%20stroke-linecap%3D%22round%22%20opacity%3D%220.55%22%2F%3E%3Ccircle%20cx%3D%2232%22%20cy%3D%2218%22%20r%3D%225.5%22%20fill%3D%22%2322d3ee%22%2F%3E%3Ccircle%20cx%3D%2220%22%20cy%3D%2242%22%20r%3D%225.5%22%20fill%3D%22%236366f1%22%2F%3E%3Ccircle%20cx%3D%2244%22%20cy%3D%2242%22%20r%3D%225.5%22%20fill%3D%22%23a855f7%22%2F%3E%3C%2Fsvg%3E" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: radial-gradient(circle at 14% 16%, #0c192c 0%, #030712 100%);
+      color: #e2e8f0;
+      min-height: 100vh;
+    }
+
+    .code-font {
+      font-family: 'Fira Code', monospace;
+    }
+
+    /* Glassmorphic Surface & Controls */
+    .glass-panel {
+      background: rgba(15, 23, 42, 0.56);
+      backdrop-filter: blur(22px);
+      -webkit-backdrop-filter: blur(22px);
+      border: 1px solid rgba(255, 255, 255, 0.11);
+      box-shadow: 0 20px 45px -15px rgba(0, 0, 0, 0.68), inset 0 1px 0 0 rgba(255, 255, 255, 0.09);
+    }
+
+    .glass-button {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .glass-button:hover:not(:disabled) {
+      background: rgba(255, 255, 255, 0.15);
+      border-color: rgba(255, 255, 255, 0.28);
+      transform: translateY(-1px);
+    }
+    .glass-button:active:not(:disabled) {
+      transform: translateY(1px);
+    }
+    .glass-button:disabled {
+      opacity: 0.35;
+      cursor: not-allowed;
+    }
+
+    /* Code Execution Line Highlight with Exact Preserved Indentation */
+    .code-line {
+      white-space: pre;
+      transition: all 0.2s ease;
+      border-left: 3px solid transparent;
+      padding: 2px 10px;
+    }
+    .code-line.active-line {
+      background: rgba(56, 189, 248, 0.18);
+      border-left: 3px solid #38bdf8;
+      color: #ffffff;
+      box-shadow: inset 0 0 16px rgba(56, 189, 248, 0.15);
+    }
+
+    /* Glassy Element Cards & Magnitude Bars */
+    .glass-element-card {
+      background: rgba(255, 255, 255, 0.045);
+      border: 1px solid rgba(255, 255, 255, 0.13);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      transition: border-color 0.25s ease, background 0.25s ease, box-shadow 0.25s ease, opacity 0.25s ease;
+      will-change: transform;
+    }
+
+    .glass-element-card.empty-temp-slot {
+      background: rgba(15, 23, 42, 0.32);
+      border: 1px dashed rgba(148, 163, 184, 0.32);
+    }
+
+    .glass-element-card.active-source-card {
+      background: linear-gradient(180deg, rgba(251, 191, 36, 0.26) 0%, rgba(245, 158, 11, 0.10) 100%) !important;
+      border-color: rgba(251, 191, 36, 0.95) !important;
+      transform: translateY(-6px) scale(1.04);
+      box-shadow: 0 14px 30px -4px rgba(251, 191, 36, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.3) !important;
+      z-index: 25;
+    }
+
+    .glass-element-card.active-target-card {
+      background: linear-gradient(180deg, rgba(16, 185, 129, 0.28) 0%, rgba(5, 150, 105, 0.12) 100%) !important;
+      border-color: rgba(52, 211, 153, 0.98) !important;
+      box-shadow: 0 14px 32px -4px rgba(16, 185, 129, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.35) !important;
+      z-index: 25;
+    }
+
+    .glass-element-card.filled-temp-card {
+      background: linear-gradient(180deg, rgba(168, 85, 247, 0.18) 0%, rgba(126, 34, 206, 0.06) 100%);
+      border-color: rgba(192, 132, 252, 0.6);
+    }
+
+    .glass-element-card.rotated-done-card {
+      background: linear-gradient(180deg, rgba(16, 185, 129, 0.16) 0%, rgba(5, 150, 105, 0.05) 100%);
+      border-color: rgba(52, 211, 153, 0.55);
+    }
+
+    @keyframes arcDash {
+      to {
+        stroke-dashoffset: -24;
+      }
+    }
+    .transfer-arc-path {
+      stroke-dasharray: 6 6;
+      animation: arcDash 0.8s linear infinite;
+    }
+
+    @keyframes completePulse {
+      0%, 100% { transform: scale(1); filter: drop-shadow(0 0 8px rgba(16, 185, 129, 0.45)); }
+      50% { transform: scale(1.04); filter: drop-shadow(0 0 20px rgba(16, 185, 129, 0.95)); }
+    }
+    .complete-badge-anim {
+      animation: completePulse 0.65s ease-in-out;
+    }
+
+    /* Custom Scrollbars */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: rgba(15, 23, 42, 0.4);
+    }
+    ::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.18);
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(255, 255, 255, 0.3);
+    }
+  </style>
+</head>
+<body class="p-2.5 sm:p-4 lg:px-5 lg:py-4 flex flex-col items-center justify-start min-h-screen">
+
+  <!-- Ambient Glass Glow Orbs -->
+  <div class="fixed top-6 left-1/6 w-96 h-96 bg-cyan-500/14 rounded-full blur-3xl pointer-events-none -z-10"></div>
+  <div class="fixed top-1/3 right-1/6 w-96 h-96 bg-purple-500/14 rounded-full blur-3xl pointer-events-none -z-10"></div>
+  <div class="fixed bottom-12 left-1/2 w-80 h-80 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none -z-10"></div>
+
+  <!-- MAIN WRAPPER -->
+  <div class="w-full max-w-[1560px] flex flex-col gap-5">
+
+    <!-- TOP FROSTED-GLASS CONTROLS DECK -->
+    <header class="glass-panel rounded-2xl p-4 sm:p-5 flex flex-col gap-4 sticky top-3 z-50">
+      <div class="flex flex-wrap items-center justify-between gap-4">
+
+        <!-- Title & Algorithm Metadata -->
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-cyan-500 via-purple-500 to-emerald-400 flex items-center justify-center shadow-lg shadow-cyan-500/25 text-slate-950 font-bold text-lg">
+            <i class="fa-solid fa-rotate-right"></i>
+          </div>
+          <div>
+            <h1 class="text-lg sm:text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white via-cyan-100 to-purple-300">
+              Rotate Array Right (Extra Array)
+            </h1>
+            <p class="text-xs text-slate-400 flex items-center gap-2">
+              <span class="inline-block w-2 h-2 rounded-full bg-cyan-400 animate-pulse"></span>
+              LeetCode 189 Approach 1 • temp[(i + k) % n] = arr[i] &amp; Copy Back • &Omicron;(n) Time • &Omicron;(n) Space
+            </p>
+          </div>
+        </div>
+
+        <!-- Center Playback Controls: Reset, Previous, Start/Stop, Next -->
+        <div class="flex items-center gap-2 sm:gap-3 bg-white/5 p-1.5 rounded-xl border border-white/10 backdrop-blur-md">
+          <button id="btnReset" class="glass-button text-slate-200 hover:text-white px-3 py-2 rounded-lg text-sm flex items-center gap-1.5" title="Reset to Initial State">
+            <i class="fa-solid fa-rotate-left"></i>
+            <span class="hidden sm:inline">Reset</span>
+          </button>
+          <button id="btnPrev" class="glass-button text-slate-200 hover:text-white px-3 py-2 rounded-lg text-sm flex items-center gap-1.5" title="Previous Step (Left Arrow)">
+            <i class="fa-solid fa-backward-step"></i>
+            <span class="hidden sm:inline">Previous</span>
+          </button>
+          <button id="btnPlay" class="glass-button bg-cyan-500/25 text-cyan-200 hover:bg-cyan-500/35 border-cyan-400/50 px-4 py-2 rounded-lg text-sm font-semibold flex items-center gap-2 shadow-lg shadow-cyan-500/15" title="Start / Stop (Spacebar)">
+            <i class="fa-solid fa-play" id="playIcon"></i>
+            <span id="playText">Start</span>
+          </button>
+          <button id="btnNext" class="glass-button text-slate-200 hover:text-white px-3 py-2 rounded-lg text-sm flex items-center gap-1.5" title="Next Step (Right Arrow)">
+            <span class="hidden sm:inline">Next</span>
+            <i class="fa-solid fa-forward-step"></i>
+          </button>
+        </div>
+
+        <!-- Speed & Audio Controls -->
+        <div class="flex items-center gap-2">
+          <div class="flex items-center bg-white/5 rounded-xl p-1 border border-white/10 text-xs text-slate-300 backdrop-blur-md">
+            <span class="px-2 py-1 text-slate-400"><i class="fa-solid fa-gauge-high mr-1"></i>Speed</span>
+            <button class="speed-btn px-2 py-1 rounded-lg hover:text-white transition" data-speed="1300">0.5x</button>
+            <button class="speed-btn px-2 py-1 rounded-lg bg-cyan-500/30 text-cyan-200 font-semibold transition" data-speed="650">1x</button>
+            <button class="speed-btn px-2 py-1 rounded-lg hover:text-white transition" data-speed="280">2x</button>
+            <button class="speed-btn px-2 py-1 rounded-lg hover:text-white transition" data-speed="110">4x</button>
+          </div>
+          <button id="btnAudio" class="glass-button p-2.5 rounded-xl text-slate-300 hover:text-cyan-300" title="Toggle Sound Effects">
+            <i class="fa-solid fa-volume-high" id="audioIcon"></i>
+          </button>
+        </div>
+
+      </div>
+
+      <!-- Scrubber Slider & Status Badges -->
+      <div class="flex flex-col sm:flex-row items-center gap-3 pt-2 border-t border-white/10">
+        <div class="flex flex-wrap items-center gap-2 text-xs text-slate-300 w-full sm:w-auto shrink-0">
+          <span id="stepCounterBadge" class="code-font px-2.5 py-1 rounded-md bg-white/5 border border-white/10 text-cyan-300">
+            Step: 0 / 0
+          </span>
+          <span id="phaseBadge" class="px-2.5 py-1 rounded-md bg-sky-500/20 border border-sky-400/30 text-sky-200 font-semibold">
+            Ready
+          </span>
+          <span id="kModBadge" class="px-2.5 py-1 rounded-md bg-purple-500/20 border border-purple-400/30 text-purple-200 font-bold">
+            k = 3 (k % n = 3)
+          </span>
+          <span id="resultHeaderBadge" class="px-2.5 py-1 rounded-md bg-emerald-500/20 border border-emerald-400/30 text-emerald-200 font-bold">
+            arr[]: Initial
+          </span>
+        </div>
+        <div class="w-full flex items-center gap-3">
+          <input type="range" id="stepScrubber" min="0" max="0" value="0" class="w-full h-1.5 bg-slate-800/80 rounded-lg appearance-none cursor-pointer accent-cyan-400">
+        </div>
+      </div>
+    </header>
+
+    <!-- TEST CASES & CUSTOM (ARR, K) BAR -->
+    <section class="glass-panel rounded-2xl p-4 flex flex-wrap items-center justify-between gap-4">
+      <div class="flex flex-wrap items-center gap-3">
+        <label for="presetSelect" class="text-xs uppercase font-semibold text-slate-300 tracking-wider flex items-center gap-1.5">
+          <i class="fa-solid fa-flask text-cyan-400"></i> Test Cases:
+        </label>
+        <select id="presetSelect" class="bg-slate-900/75 border border-white/15 text-xs sm:text-sm text-slate-200 rounded-xl px-3 py-2 outline-none focus:border-cyan-400 backdrop-blur-md">
+          <option value="0">1: LeetCode 189 Ex 1 (arr = [1, 2, 3, 4, 5, 6, 7], k = 3 &rarr; [5, 6, 7, 1, 2, 3, 4])</option>
+          <option value="1">2: LeetCode 189 Ex 2 (arr = [-1, -100, 3, 99], k = 2 &rarr; [3, 99, -1, -100])</option>
+          <option value="2">3: k Larger Than n Wrap-Around (arr = [10, 20, 30, 40], k = 6 &rarr; [30, 40, 10, 20])</option>
+          <option value="3">4: Single Step Shift k = 1 (arr = [5, 10, 15, 20, 25], k = 1 &rarr; [25, 5, 10, 15, 20])</option>
+          <option value="4">5: Full Cycle k == n (arr = [4, 8, 12, 16], k = 4 &rarr; [4, 8, 12, 16])</option>
+          <option value="5">6: Zero Rotation k = 0 (arr = [3, 6, 9], k = 0 &rarr; [3, 6, 9])</option>
+          <option value="6">7: Descending Values (arr = [9, 7, 5, 3, 1], k = 2 &rarr; [3, 1, 9, 7, 5])</option>
+          <option value="7">8: Single Element Array (arr = [42], k = 5 &rarr; [42])</option>
+          <option value="8">9: Two-Element Swap (arr = [1, 2], k = 1 &rarr; [2, 1])</option>
+          <option value="9">10: Mixed Negatives &amp; Positives (arr = [-5, 0, 5, 10, 15, 20], k = 4 &rarr; [5, 10, 15, 20, -5, 0])</option>
+        </select>
+      </div>
+
+      <div class="flex flex-wrap items-center gap-2 flex-grow max-w-lg">
+        <input type="text" id="customArrInput" placeholder="Array: 1, 2, 3, 4, 5, 6, 7" class="flex-1 min-w-[140px] bg-white/5 border border-white/15 rounded-xl px-3 py-2 text-xs text-slate-200 code-font outline-none focus:border-cyan-400 backdrop-blur-md" title="Comma-separated integers">
+        <input type="number" id="customKInput" min="0" max="100" value="3" placeholder="k" class="w-16 bg-white/5 border border-white/15 rounded-xl px-2.5 py-2 text-xs text-slate-200 code-font outline-none focus:border-purple-400 backdrop-blur-md" title="Right rotation steps k (>= 0)">
+        <button id="btnApplyCustom" class="glass-button text-xs px-4 py-2 rounded-xl text-cyan-300 font-semibold shrink-0">
+          Load (arr, k)
+        </button>
+      </div>
+    </section>
+
+    <!-- MAIN VISUALIZATION & CODE SECTION -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-5">
+
+      <!-- LEFT: DUAL ARRAYS (arr[] & temp[]) WITH LIFT-AND-PLACE BOX + BAR ANIMATIONS -->
+      <section class="lg:col-span-7 xl:col-span-8 flex flex-col gap-5">
+
+        <!-- Live Variable Telemetry Cards -->
+        <div class="grid grid-cols-2 sm:grid-cols-5 gap-3">
+
+          <!-- Array Length n -->
+          <div class="glass-panel rounded-xl p-3 flex flex-col justify-between border-sky-400/35">
+            <span class="text-[11px] text-slate-400 uppercase font-semibold flex items-center justify-between">
+              Length (n)
+              <i class="fa-solid fa-ruler text-sky-400 text-[10px]"></i>
+            </span>
+            <div class="flex items-baseline gap-1.5 mt-1.5">
+              <span id="varLenN" class="code-font text-xl font-bold text-sky-300">7</span>
+            </div>
+            <span class="text-[10px] text-sky-200/75 mt-1 code-font">arr.length</span>
+          </div>
+
+          <!-- Normalized k = k % n -->
+          <div class="glass-panel rounded-xl p-3 flex flex-col justify-between border-purple-400/35">
+            <span class="text-[11px] text-slate-400 uppercase font-semibold flex items-center justify-between">
+              Effective k
+              <i class="fa-solid fa-percent text-purple-400 text-[10px]"></i>
+            </span>
+            <div class="flex items-baseline gap-1.5 mt-1.5">
+              <span id="varEffK" class="code-font text-xl font-bold text-purple-300">3</span>
+              <span id="varKOrigSub" class="text-[10px] text-slate-400 code-font">3 % 7</span>
+            </div>
+            <span class="text-[10px] text-purple-200/75 mt-1 code-font">k = k % n</span>
+          </div>
+
+          <!-- Scanner Index i -->
+          <div class="glass-panel rounded-xl p-3 flex flex-col justify-between border-amber-400/35">
+            <span class="text-[11px] text-slate-400 uppercase font-semibold flex items-center justify-between">
+              Scanner (i)
+              <span class="w-2 h-2 rounded-full bg-amber-400"></span>
+            </span>
+            <div class="flex items-baseline gap-1.5 mt-1.5">
+              <span id="varPtrI" class="code-font text-xl font-bold text-amber-300">-</span>
+              <span id="varPassSub" class="text-[10px] text-slate-400 code-font">Pass -</span>
+            </div>
+            <span class="text-[10px] text-amber-200/75 mt-1 code-font">for (i = 0 .. n-1)</span>
+          </div>
+
+          <!-- Target Mapped Index: (i + k) % n -->
+          <div class="glass-panel rounded-xl p-3 flex flex-col justify-between border-cyan-400/35">
+            <span class="text-[11px] text-slate-400 uppercase font-semibold flex items-center justify-between">
+              Target Slot
+              <i class="fa-solid fa-location-crosshairs text-cyan-400 text-[10px]"></i>
+            </span>
+            <div class="flex items-baseline gap-1.5 mt-1.5">
+              <span id="varTargetIdx" class="code-font text-xl font-bold text-cyan-300">-</span>
+            </div>
+            <span id="varTargetFormula" class="text-[10px] text-cyan-200/75 mt-1 code-font">(i + k) % n</span>
+          </div>
+
+          <!-- Rotation Status -->
+          <div id="statusResultCard" class="glass-panel rounded-xl p-3 flex flex-col justify-between border-emerald-400/35 col-span-2 sm:col-span-1">
+            <span class="text-[11px] text-slate-400 uppercase font-semibold flex items-center justify-between">
+              Progress
+              <i class="fa-solid fa-check-double text-emerald-400 text-[10px]"></i>
+            </span>
+            <div class="flex items-baseline gap-1.5 mt-1.5">
+              <span id="varProgressRatio" class="code-font text-xl font-black text-emerald-400">0 / 7</span>
+            </div>
+            <span id="varPassRole" class="text-[10px] text-emerald-300/80 mt-1 code-font">Ready</span>
+          </div>
+
+        </div>
+
+        <!-- UNIFIED STAGE: PRIMARY ARRAY arr[] & AUXILIARY ARRAY temp[] (BOXES + BARS) -->
+        <div id="stageWrapper" class="glass-panel relative rounded-2xl p-4 sm:p-5 flex flex-col gap-5">
+          <!-- SVG Trajectory Arc Overlay Connecting Source & Destination Elements -->
+          <svg id="transferArcSvg" class="absolute inset-0 w-full h-full pointer-events-none z-30 overflow-visible"></svg>
+
+          <!-- Floating Lift-and-Place Box+Bar Clone Layer -->
+          <div id="flyingCloneLayer" class="absolute inset-0 pointer-events-none z-40"></div>
+
+          <!-- 1. PRIMARY ARRAY: int[] arr (BOXES + MAGNITUDE BARS) -->
+          <div class="flex flex-col gap-2.5">
+            <div class="flex flex-wrap items-center justify-between text-xs pb-2 border-b border-white/10 gap-2">
+              <span class="font-semibold text-cyan-300 uppercase tracking-wider flex items-center gap-1.5">
+                <i class="fa-solid fa-database text-cyan-400"></i>
+                Primary Array: <span class="code-font text-white">int[] arr</span>
+                <span id="arrPreviewTag" class="code-font text-cyan-200 text-[11px]">[1, 2, 3, 4, 5, 6, 7]</span>
+              </span>
+
+              <div class="flex items-center gap-2">
+                <!-- View Mode Switcher: Bars + Boxes | Bars Only | Boxes Only -->
+                <div class="flex items-center bg-white/5 rounded-xl p-1 border border-white/10 text-[10px] backdrop-blur-md">
+                  <button class="view-mode-btn px-2 py-0.5 rounded-lg bg-cyan-500/30 text-cyan-200 font-semibold transition" data-mode="both">
+                    Bars + Boxes
+                  </button>
+                  <button class="view-mode-btn px-2 py-0.5 rounded-lg text-slate-300 hover:text-white transition" data-mode="bars">
+                    Bars Only
+                  </button>
+                  <button class="view-mode-btn px-2 py-0.5 rounded-lg text-slate-300 hover:text-white transition" data-mode="boxes">
+                    Boxes Only
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div class="relative w-full pt-4 pb-2 px-3 rounded-xl bg-white/[0.02] border border-white/10 overflow-x-auto">
+              <div id="arrArena" class="relative w-full flex items-center justify-center gap-2 sm:gap-2.5 min-h-[164px]">
+                <!-- Populated dynamically with glassy boxes + bi-directional bars -->
+              </div>
+            </div>
+          </div>
+
+          <!-- 2. AUXILIARY BUFFER ARRAY: int[] temp = new int[n] (BOXES + MAGNITUDE BARS) -->
+          <div class="flex flex-col gap-2.5 pt-1">
+            <div class="flex flex-wrap items-center justify-between text-xs pb-2 border-b border-white/10 gap-2">
+              <span class="font-semibold text-purple-300 uppercase tracking-wider flex items-center gap-1.5">
+                <i class="fa-solid fa-layer-group text-purple-400"></i>
+                Auxiliary Buffer: <span class="code-font text-white">int[] temp = new int[n]</span>
+              </span>
+              <span id="tempStatusPill" class="code-font text-[10px] px-2.5 py-0.5 rounded bg-white/5 border border-white/10 text-slate-400">
+                Unallocated
+              </span>
+            </div>
+
+            <div class="relative w-full pt-4 pb-2 px-3 rounded-xl bg-white/[0.02] border border-white/10 overflow-x-auto">
+              <div id="tempArena" class="relative w-full flex items-center justify-center gap-2 sm:gap-2.5 min-h-[164px]">
+                <span class="text-xs text-slate-500 italic my-auto code-font">Waiting for int[] temp = new int[n]...</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Live Index Mapping Formula & Decision Banner -->
+          <div id="decisionBanner" class="p-3.5 rounded-xl bg-white/[0.04] border border-white/10 text-xs flex flex-col sm:flex-row items-center justify-between gap-3 backdrop-blur-md">
+            <div class="flex items-center gap-2.5">
+              <i id="decisionIcon" class="fa-solid fa-circle-info text-cyan-400 text-base"></i>
+              <span id="decisionText" class="text-slate-200">Ready to normalize k = k % n, scatter arr[i] into temp[(i + k) % n], and copy temp back to arr.</span>
+            </div>
+            <div id="actionPill" class="hidden text-xs code-font px-3 py-1.5 rounded-lg bg-slate-950/70 border border-white/15 text-emerald-200 font-semibold shrink-0">
+              <!-- e.g. temp[(0 + 3) % 7] = temp[3] = 1 -->
+            </div>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- RIGHT: SYNCHRONIZED & PROPERLY INDENTED JAVA CODE CONTAINER -->
+      <section class="lg:col-span-5 xl:col-span-4 flex flex-col gap-4">
+
+        <div class="glass-panel rounded-2xl p-4 flex flex-col h-full">
+          <div class="flex items-center justify-between pb-3 border-b border-white/10 text-xs">
+            <div class="flex items-center gap-2">
+              <div class="flex gap-1.5">
+                <span class="w-3 h-3 rounded-full bg-rose-500/80 inline-block"></span>
+                <span class="w-3 h-3 rounded-full bg-amber-500/80 inline-block"></span>
+                <span class="w-3 h-3 rounded-full bg-emerald-500/80 inline-block"></span>
+              </div>
+              <span class="code-font text-slate-200 font-semibold ml-2">Solution.java</span>
+            </div>
+            <span class="text-[11px] text-cyan-300 bg-cyan-500/15 px-2.5 py-0.5 rounded border border-cyan-400/25 code-font">
+              Extra Array O(n)
+            </span>
+          </div>
+
+          <!-- Properly Indented Java Code Lines with Zero-Jump Localized Scroll -->
+          <div id="codeContainer" class="code-font text-xs sm:text-[13px] leading-relaxed text-slate-300 py-3 overflow-x-auto overflow-y-auto max-h-[640px] flex-grow select-none">
+            <div class="code-line" id="line1"><span class="text-slate-500 mr-2"> 1</span><span class="text-indigo-400 font-semibold">import</span> java.util.*;</div>
+            <div class="code-line" id="line2"><span class="text-slate-500 mr-2"> 2</span></div>
+            <div class="code-line" id="line3"><span class="text-slate-500 mr-2"> 3</span><span class="text-indigo-400 font-semibold">class</span> <span class="text-amber-300">Solution</span> {</div>
+            <div class="code-line" id="line4"><span class="text-slate-500 mr-2"> 4</span></div>
+            <div class="code-line" id="line5"><span class="text-slate-500 mr-2"> 5</span>    <span class="text-indigo-400 font-semibold">static void</span> <span class="text-cyan-300">rotateRight</span>(<span class="text-indigo-400">int</span>[] arr, <span class="text-indigo-400">int</span> k) {</div>
+            <div class="code-line" id="line6"><span class="text-slate-500 mr-2"> 6</span></div>
+            <div class="code-line" id="line7"><span class="text-slate-500 mr-2"> 7</span>        <span class="text-indigo-400 font-semibold">int</span> n = arr.length;</div>
+            <div class="code-line" id="line8"><span class="text-slate-500 mr-2"> 8</span>        k = k % n;</div>
+            <div class="code-line" id="line9"><span class="text-slate-500 mr-2"> 9</span></div>
+            <div class="code-line" id="line10"><span class="text-slate-500 mr-2">10</span>        <span class="text-indigo-400 font-semibold">int</span>[] temp = <span class="text-indigo-400 font-semibold">new int</span>[n];</div>
+            <div class="code-line" id="line11"><span class="text-slate-500 mr-2">11</span></div>
+            <div class="code-line" id="line12"><span class="text-slate-500 mr-2">12</span>        <span class="text-indigo-400 font-semibold">for</span> (<span class="text-indigo-400">int</span> i = <span class="text-rose-400">0</span>; i &lt; n; i++) {</div>
+            <div class="code-line" id="line13"><span class="text-slate-500 mr-2">13</span>            temp[(i + k) % n] = arr[i];</div>
+            <div class="code-line" id="line14"><span class="text-slate-500 mr-2">14</span>        }</div>
+            <div class="code-line" id="line15"><span class="text-slate-500 mr-2">15</span></div>
+            <div class="code-line" id="line16"><span class="text-slate-500 mr-2">16</span>        <span class="text-indigo-400 font-semibold">for</span> (<span class="text-indigo-400">int</span> i = <span class="text-rose-400">0</span>; i &lt; n; i++) {</div>
+            <div class="code-line" id="line17"><span class="text-slate-500 mr-2">17</span>            arr[i] = temp[i];</div>
+            <div class="code-line" id="line18"><span class="text-slate-500 mr-2">18</span>        }</div>
+            <div class="code-line" id="line19"><span class="text-slate-500 mr-2">19</span>    }</div>
+            <div class="code-line" id="line20"><span class="text-slate-500 mr-2">20</span>}</div>
+          </div>
+
+          <!-- Live Step Narrative Box -->
+          <div class="mt-3 p-3 bg-white/[0.04] border border-white/10 rounded-xl flex items-start gap-2.5 backdrop-blur-md">
+            <i class="fa-solid fa-circle-info text-cyan-400 mt-0.5 text-xs"></i>
+            <div class="text-xs text-slate-200 leading-relaxed" id="stepDescription">
+              Ready to run Rotate Array Right. Click <b>Start</b> or <b>Next</b> to step through.
+            </div>
+          </div>
+
+        </div>
+
+      </section>
+
+    </div>
+
+    <!-- BOTTOM SECTION: PROBLEM STATEMENT & ARCHITECTURAL SUMMARY -->
+    <footer class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-2">
+
+      <!-- Problem Statement Card -->
+      <div class="glass-panel rounded-2xl p-5 flex flex-col gap-3">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <span class="text-amber-400 font-bold"><i class="fa-solid fa-file-lines mr-1.5"></i>Problem Statement</span>
+            <span class="px-2 py-0.5 rounded text-[11px] font-semibold bg-amber-500/20 text-amber-300 border border-amber-400/30">Medium</span>
+          </div>
+          <span class="text-xs text-slate-400 font-mono">Rotate Array • LeetCode 189</span>
+        </div>
+
+        <p class="text-xs text-slate-300 leading-relaxed">
+          Given an integer array <code class="font-mono text-cyan-300">arr</code> and a non-negative integer <code class="font-mono text-purple-300">k</code>, <b>rotate the array to the right by <code class="font-mono">k</code> steps</b>, so that every element at index <code class="font-mono">i</code> moves to index <code class="font-mono">(i + k) % n</code>.
+          <br><span class="text-[11px] text-slate-400 italic">Approach 1 (Extra Array): Store the rotated elements in an auxiliary array <code class="font-mono">temp[n]</code>, then copy them back into <code class="font-mono">arr</code>.</span>
+        </p>
+
+        <div class="space-y-2 pt-2 border-t border-white/10 text-xs text-slate-300">
+          <div class="bg-white/[0.03] p-2.5 rounded-lg border border-white/10 font-mono">
+            <span class="text-slate-400">Example 1:</span>
+            <b>Input:</b> arr = [1, 2, 3, 4, 5, 6, 7], k = 3 &rarr; <b>Output:</b> <span class="text-emerald-400 font-bold">[5, 6, 7, 1, 2, 3, 4]</span>
+            <div class="text-[11px] text-slate-400 font-sans mt-0.5">The last 3 elements [5, 6, 7] wrap around to the front, followed by [1, 2, 3, 4].</div>
+          </div>
+          <div class="bg-white/[0.03] p-2.5 rounded-lg border border-white/10 font-mono">
+            <span class="text-slate-400">Example 2:</span>
+            <b>Input:</b> arr = [-1, -100, 3, 99], k = 2 &rarr; <b>Output:</b> <span class="text-emerald-400 font-bold">[3, 99, -1, -100]</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Algorithm Summary & Complexity Card -->
+      <div class="glass-panel rounded-2xl p-5 flex flex-col gap-3">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <span class="text-cyan-400 font-bold"><i class="fa-solid fa-brain mr-1.5"></i>Algorithm Summary &amp; Complexity Comparison</span>
+          </div>
+          <span class="px-2 py-0.5 rounded text-[11px] font-semibold bg-cyan-500/20 text-cyan-200 border border-cyan-400/30">O(N) Time • O(N) Space</span>
+        </div>
+
+        <div class="space-y-3 text-xs text-slate-300 leading-relaxed">
+          <div class="p-3 bg-cyan-950/30 border border-cyan-400/25 rounded-xl">
+            <b class="text-cyan-300 flex items-center gap-1.5 mb-1">
+              <i class="fa-solid fa-calculator"></i> Modular Cyclic Index Mapping <code class="font-mono">(i + k) % n</code>:
+            </b>
+            First, <code class="font-mono text-purple-300 font-semibold">k = k % n</code> eliminates full-cycle rotations (since rotating an <code class="font-mono">n</code>-element array by <code class="font-mono">n</code> leaves it unchanged). Then, Pass 1 places each <code class="font-mono">arr[i]</code> directly into its rotated slot <code class="font-mono text-emerald-300 font-semibold">temp[(i + k) % n]</code>, and Pass 2 copies <code class="font-mono">temp[i]</code> back into <code class="font-mono">arr[i]</code>.
+          </div>
+
+          <div class="grid grid-cols-2 gap-3 pt-1">
+            <div class="p-2.5 bg-white/[0.03] rounded-lg border border-white/10">
+              <span class="text-[11px] text-slate-400 uppercase font-semibold">Time Complexity</span>
+              <div class="text-sm font-bold text-emerald-400 font-mono mt-0.5">&Omicron;(N)</div>
+              <p class="text-[10px] text-slate-400 mt-0.5">Two linear passes of <code class="font-mono">N</code> steps each (<code class="font-mono">2N = &Omicron;(N)</code>).</p>
+            </div>
+            <div class="p-2.5 bg-white/[0.03] rounded-lg border border-white/10">
+              <span class="text-[11px] text-slate-400 uppercase font-semibold">Space Complexity</span>
+              <div class="text-sm font-bold text-amber-400 font-mono mt-0.5">&Omicron;(N)</div>
+              <p class="text-[10px] text-slate-400 mt-0.5">Allocates <code class="font-mono">int[] temp = new int[n]</code> (the 3-step reversal algorithm achieves <code class="font-mono">&Omicron;(1)</code> space).</p>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+    </footer>
+
+  </div>
+
+  <!-- JAVASCRIPT SIMULATION ENGINE WITH LIFT-AND-PLACE BOX + BAR TRANSFERS -->
+  <script>
+    // 10 COMPREHENSIVE PRESETS
+    const PRESETS = [
+      { name: "1: LeetCode 189 Ex 1 (arr = [1, 2, 3, 4, 5, 6, 7], k = 3)", arr: [1, 2, 3, 4, 5, 6, 7], k: 3 },
+      { name: "2: LeetCode 189 Ex 2 (arr = [-1, -100, 3, 99], k = 2)", arr: [-1, -100, 3, 99], k: 2 },
+      { name: "3: k Larger Than n Wrap-Around (arr = [10, 20, 30, 40], k = 6)", arr: [10, 20, 30, 40], k: 6 },
+      { name: "4: Single Step Shift k = 1 (arr = [5, 10, 15, 20, 25], k = 1)", arr: [5, 10, 15, 20, 25], k: 1 },
+      { name: "5: Full Cycle k == n (arr = [4, 8, 12, 16], k = 4)", arr: [4, 8, 12, 16], k: 4 },
+      { name: "6: Zero Rotation k = 0 (arr = [3, 6, 9], k = 0)", arr: [3, 6, 9], k: 0 },
+      { name: "7: Descending Values (arr = [9, 7, 5, 3, 1], k = 2)", arr: [9, 7, 5, 3, 1], k: 2 },
+      { name: "8: Single Element Array (arr = [42], k = 5)", arr: [42], k: 5 },
+      { name: "9: Two-Element Swap (arr = [1, 2], k = 1)", arr: [1, 2], k: 1 },
+      { name: "10: Mixed Negatives & Positives (arr = [-5, 0, 5, 10, 15, 20], k = 4)", arr: [-5, 0, 5, 10, 15, 20], k: 4 }
+    ];
+
+    // APPLICATION STATE
+    let currentArr = [...PRESETS[0].arr];
+    let currentK = PRESETS[0].k;
+    let steps = [];
+    let currentStepIdx = 0;
+    let isPlaying = false;
+    let playInterval = null;
+    let playSpeed = 650;
+    let audioEnabled = true;
+    let viewMode = 'both'; // 'both' | 'bars' | 'boxes'
+
+    // WEB AUDIO SYNTHESIZER
+    let audioCtx = null;
+    function initAudio() {
+      if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      }
+    }
+    function playTone(freq = 440, type = 'sine', duration = 0.08, vol = 0.035) {
+      if (!audioEnabled) return;
+      try {
+        initAudio();
+        if (audioCtx.state === 'suspended') {
+          audioCtx.resume();
+        }
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = type;
+        osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+        gain.gain.setValueAtTime(vol, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + duration);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + duration);
+      } catch (e) {}
+    }
+
+    // DOM REFERENCES
+    const btnPlay = document.getElementById('btnPlay');
+    const playIcon = document.getElementById('playIcon');
+    const playText = document.getElementById('playText');
+    const btnPrev = document.getElementById('btnPrev');
+    const btnNext = document.getElementById('btnNext');
+    const btnReset = document.getElementById('btnReset');
+    const btnAudio = document.getElementById('btnAudio');
+    const audioIcon = document.getElementById('audioIcon');
+    const presetSelect = document.getElementById('presetSelect');
+    const customArrInput = document.getElementById('customArrInput');
+    const customKInput = document.getElementById('customKInput');
+    const btnApplyCustom = document.getElementById('btnApplyCustom');
+    const stepScrubber = document.getElementById('stepScrubber');
+    const stepCounterBadge = document.getElementById('stepCounterBadge');
+    const phaseBadge = document.getElementById('phaseBadge');
+    const kModBadge = document.getElementById('kModBadge');
+    const resultHeaderBadge = document.getElementById('resultHeaderBadge');
+
+    const varLenN = document.getElementById('varLenN');
+    const varEffK = document.getElementById('varEffK');
+    const varKOrigSub = document.getElementById('varKOrigSub');
+    const varPtrI = document.getElementById('varPtrI');
+    const varPassSub = document.getElementById('varPassSub');
+    const varTargetIdx = document.getElementById('varTargetIdx');
+    const varTargetFormula = document.getElementById('varTargetFormula');
+    const statusResultCard = document.getElementById('statusResultCard');
+    const varProgressRatio = document.getElementById('varProgressRatio');
+    const varPassRole = document.getElementById('varPassRole');
+
+    const stageWrapper = document.getElementById('stageWrapper');
+    const transferArcSvg = document.getElementById('transferArcSvg');
+    const flyingCloneLayer = document.getElementById('flyingCloneLayer');
+    const arrPreviewTag = document.getElementById('arrPreviewTag');
+    const arrArena = document.getElementById('arrArena');
+    const tempStatusPill = document.getElementById('tempStatusPill');
+    const tempArena = document.getElementById('tempArena');
+
+    const decisionBanner = document.getElementById('decisionBanner');
+    const decisionIcon = document.getElementById('decisionIcon');
+    const decisionText = document.getElementById('decisionText');
+    const actionPill = document.getElementById('actionPill');
+    const codeContainer = document.getElementById('codeContainer');
+    const stepDescription = document.getElementById('stepDescription');
+
+    // STRICT LINE-BY-LINE EXECUTION TRACE GENERATOR
+    function generateSteps(arrInput, origK) {
+      const trace = [];
+      const arr = [...arrInput];
+      const n = arr.length;
+      const effK = origK % n;
+      const temp = new Array(n).fill(null);
+      const arrOverwritten = new Array(n).fill(false);
+
+      const snapArr = () => [...arr];
+      const snapTemp = () => [...temp];
+      const snapOver = () => [...arrOverwritten];
+
+      // Line 5: static void rotateRight(int[] arr, int k)
+      trace.push({
+        line: 5,
+        phase: "Start",
+        arr: snapArr(),
+        temp: snapTemp(),
+        arrOverwritten: snapOver(),
+        tempAllocated: false,
+        origK,
+        effK: origK,
+        kNormalized: false,
+        passNum: 0,
+        i: -1,
+        desc: `Entered <span class="code-font text-cyan-300 font-bold">rotateRight</span> with <span class="code-font text-slate-100">arr = [${arr.join(', ')}]</span> and <span class="code-font text-purple-300 font-bold">k = ${origK}</span>.`,
+        soundFreq: 330
+      });
+
+      // Line 7: int n = arr.length;
+      trace.push({
+        line: 7,
+        phase: `n = ${n}`,
+        arr: snapArr(),
+        temp: snapTemp(),
+        arrOverwritten: snapOver(),
+        tempAllocated: false,
+        origK,
+        effK: origK,
+        kNormalized: false,
+        passNum: 0,
+        i: -1,
+        desc: `Stored array length <span class="code-font text-sky-300 font-bold">int n = arr.length = ${n}</span>.`,
+        soundFreq: 360
+      });
+
+      // Line 8: k = k % n;
+      trace.push({
+        line: 8,
+        phase: `k = ${origK} % ${n} = ${effK}`,
+        arr: snapArr(),
+        temp: snapTemp(),
+        arrOverwritten: snapOver(),
+        tempAllocated: false,
+        origK,
+        effK,
+        kNormalized: true,
+        passNum: 0,
+        i: -1,
+        actionText: `k = ${origK} % ${n} = ${effK}`,
+        desc: `Normalized rotation steps via <span class="code-font text-purple-300 font-bold">k = ${origK} % ${n} = ${effK}</span>${origK >= n ? ' (removed redundant full cycles)' : ''}.`,
+        soundFreq: 400
+      });
+
+      // Line 10: int[] temp = new int[n];
+      trace.push({
+        line: 10,
+        phase: `Alloc temp[${n}]`,
+        arr: snapArr(),
+        temp: snapTemp(),
+        arrOverwritten: snapOver(),
+        tempAllocated: true,
+        origK,
+        effK,
+        kNormalized: true,
+        passNum: 0,
+        i: -1,
+        desc: `Allocated auxiliary array <span class="code-font text-purple-300 font-bold">int[] temp = new int[${n}]</span> to hold rotated elements.`,
+        soundFreq: 430
+      });
+
+      // Pass 1: Scatter arr[i] into temp[(i + k) % n] (Lines 12-13)
+      for (let i = 0; i < n; i++) {
+        const targetSlot = (i + effK) % n;
+
+        // Line 12: for (int i = 0; i < n; i++)
+        trace.push({
+          line: 12,
+          phase: `Pass 1: i = ${i}`,
+          arr: snapArr(),
+          temp: snapTemp(),
+          arrOverwritten: snapOver(),
+          tempAllocated: true,
+          origK,
+          effK,
+          kNormalized: true,
+          passNum: 1,
+          i,
+          srcArrIdx: i,
+          dstTempIdx: targetSlot,
+          targetFormulaText: `(${i} + ${effK}) % ${n} = ${targetSlot}`,
+          desc: `Pass 1 check <span class="code-font text-amber-300 font-bold">i (${i}) &lt; n (${n})</span> is <b>true</b>: Mapping <span class="code-font text-cyan-300">arr[${i}] (${arr[i]})</span> &rarr; <span class="code-font text-purple-300">temp[(${i} + ${effK}) % ${n}] = temp[${targetSlot}]</span>.`,
+          soundFreq: 460 + i * 22
+        });
+
+        // Line 13: temp[(i + k) % n] = arr[i];
+        temp[targetSlot] = arr[i];
+        trace.push({
+          line: 13,
+          phase: `temp[${targetSlot}] = ${arr[i]}`,
+          arr: snapArr(),
+          temp: snapTemp(),
+          arrOverwritten: snapOver(),
+          tempAllocated: true,
+          origK,
+          effK,
+          kNormalized: true,
+          passNum: 1,
+          i,
+          srcArrIdx: i,
+          dstTempIdx: targetSlot,
+          targetFormulaText: `(${i} + ${effK}) % ${n} = ${targetSlot}`,
+          transfer: { type: 'arrToTemp', fromIdx: i, toIdx: targetSlot, val: arr[i] },
+          actionText: `temp[${targetSlot}] = arr[${i}] (${arr[i]})`,
+          desc: `Lifted <span class="code-font text-amber-300 font-bold">arr[${i}] (${arr[i]})</span> and placed it into <span class="code-font text-emerald-300 font-bold">temp[${targetSlot}]</span>.`,
+          soundFreq: 540 + i * 25
+        });
+      }
+
+      // Line 12: Exit Pass 1 loop
+      trace.push({
+        line: 12,
+        phase: "Pass 1 Complete",
+        arr: snapArr(),
+        temp: snapTemp(),
+        arrOverwritten: snapOver(),
+        tempAllocated: true,
+        origK,
+        effK,
+        kNormalized: true,
+        passNum: 1,
+        i: n,
+        desc: `Pass 1 loop condition <span class="code-font text-amber-300">i (${n}) &lt; n (${n})</span> is <b>false</b>. <span class="code-font text-purple-200 font-bold">temp = [${temp.join(', ')}]</span> holds the rotated sequence.`,
+        soundFreq: 660
+      });
+
+      // Pass 2: Copy temp[i] back into arr[i] (Lines 16-17)
+      for (let i = 0; i < n; i++) {
+        // Line 16: for (int i = 0; i < n; i++)
+        trace.push({
+          line: 16,
+          phase: `Pass 2: i = ${i}`,
+          arr: snapArr(),
+          temp: snapTemp(),
+          arrOverwritten: snapOver(),
+          tempAllocated: true,
+          origK,
+          effK,
+          kNormalized: true,
+          passNum: 2,
+          i,
+          srcTempIdx: i,
+          dstArrIdx: i,
+          targetFormulaText: `arr[${i}] ← temp[${i}]`,
+          desc: `Pass 2 check <span class="code-font text-amber-300 font-bold">i (${i}) &lt; n (${n})</span> is <b>true</b>: Copying <span class="code-font text-purple-300">temp[${i}] (${temp[i]})</span> back into <span class="code-font text-cyan-300">arr[${i}]</span>.`,
+          soundFreq: 520 + i * 22
+        });
+
+        // Line 17: arr[i] = temp[i];
+        arr[i] = temp[i];
+        arrOverwritten[i] = true;
+        trace.push({
+          line: 17,
+          phase: `arr[${i}] = ${temp[i]}`,
+          arr: snapArr(),
+          temp: snapTemp(),
+          arrOverwritten: snapOver(),
+          tempAllocated: true,
+          origK,
+          effK,
+          kNormalized: true,
+          passNum: 2,
+          i,
+          srcTempIdx: i,
+          dstArrIdx: i,
+          targetFormulaText: `arr[${i}] ← temp[${i}]`,
+          transfer: { type: 'tempToArr', fromIdx: i, toIdx: i, val: temp[i] },
+          actionText: `arr[${i}] = temp[${i}] (${temp[i]})`,
+          desc: `Lifted <span class="code-font text-purple-300 font-bold">temp[${i}] (${temp[i]})</span> and placed it into <span class="code-font text-emerald-300 font-bold">arr[${i}]</span>.`,
+          soundFreq: 640 + i * 25
+        });
+      }
+
+      // Line 16: Exit Pass 2 loop
+      trace.push({
+        line: 16,
+        phase: "Pass 2 Complete",
+        arr: snapArr(),
+        temp: snapTemp(),
+        arrOverwritten: snapOver(),
+        tempAllocated: true,
+        origK,
+        effK,
+        kNormalized: true,
+        passNum: 2,
+        i: n,
+        desc: `Pass 2 loop condition <span class="code-font text-amber-300">i (${n}) &lt; n (${n})</span> is <b>false</b>. All rotated elements copied back into <span class="code-font">arr</span>.`,
+        soundFreq: 820
+      });
+
+      // Line 19: Complete
+      trace.push({
+        line: 19,
+        phase: "Complete",
+        arr: snapArr(),
+        temp: snapTemp(),
+        arrOverwritten: snapOver(),
+        tempAllocated: true,
+        origK,
+        effK,
+        kNormalized: true,
+        passNum: 3,
+        i: -1,
+        isComplete: true,
+        desc: `<span class="text-emerald-400 font-bold text-sm"><i class="fa-solid fa-trophy mr-1.5"></i>Rotated Right by ${origK}!</span> Final <span class="code-font text-emerald-300 font-bold text-sm">arr = [${arr.join(', ')}]</span>.`,
+        soundFreq: 960
+      });
+
+      return trace;
+    }
+
+    // LOCALIZED ZERO-JUMP CODE LINE HIGHLIGHTER
+    function highlightCodeLine(lineNum) {
+      document.querySelectorAll('.code-line').forEach(el => el.classList.remove('active-line'));
+      const activeEl = document.getElementById(`line${lineNum}`);
+      if (activeEl) {
+        activeEl.classList.add('active-line');
+
+        const containerTop = codeContainer.scrollTop;
+        const containerBottom = containerTop + codeContainer.clientHeight;
+        const elTop = activeEl.offsetTop - codeContainer.offsetTop;
+        const elBottom = elTop + activeEl.clientHeight;
+
+        if (elTop < containerTop + 24) {
+          codeContainer.scrollTo({ top: Math.max(0, elTop - 24), behavior: 'smooth' });
+        } else if (elBottom > containerBottom - 24) {
+          codeContainer.scrollTo({ top: elBottom - codeContainer.clientHeight + 24, behavior: 'smooth' });
+        }
+      }
+    }
+
+    // BUILD ELEMENT CARD INNER CONTENT (BOX + BI-DIRECTIONAL BAR)
+    function buildElementInnerHtml(val, index, maxAbs, topBadgeHtml, footTagHtml, accentMode) {
+      const topHeader = `
+        <div class="w-full flex items-center justify-between text-[10px] code-font min-h-[18px]">
+          <span class="text-slate-400">[${index}]</span>
+          ${topBadgeHtml}
+        </div>
+      `;
+
+      let barSection = '';
+      if (viewMode === 'both' || viewMode === 'bars') {
+        const isNull = (val === null || val === undefined);
+        const magPct = isNull || val === 0 ? 0 : Math.max(15, (Math.abs(val) / maxAbs) * 100);
+        const isPos = !isNull && val > 0;
+        const isNeg = !isNull && val < 0;
+
+        let posStyle = 'bg-gradient-to-t from-cyan-600/80 via-cyan-500/80 to-cyan-300 border-t border-cyan-100';
+        let negStyle = 'bg-gradient-to-b from-rose-600/80 via-rose-500/80 to-rose-400 border-b border-rose-200';
+
+        if (accentMode === 'source') {
+          posStyle = 'bg-gradient-to-t from-amber-600 via-amber-400 to-amber-200 border-t border-white shadow-[0_0_14px_rgba(251,191,36,0.65)]';
+          negStyle = 'bg-gradient-to-b from-amber-600 via-amber-400 to-amber-200 border-b border-white shadow-[0_0_14px_rgba(251,191,36,0.65)]';
+        } else if (accentMode === 'target' || accentMode === 'done') {
+          posStyle = 'bg-gradient-to-t from-emerald-600 via-emerald-500 to-emerald-300 border-t border-white shadow-[0_0_14px_rgba(16,185,129,0.6)]';
+          negStyle = 'bg-gradient-to-b from-emerald-600 via-emerald-500 to-emerald-300 border-b border-white shadow-[0_0_14px_rgba(16,185,129,0.6)]';
+        } else if (accentMode === 'temp') {
+          posStyle = 'bg-gradient-to-t from-purple-600 via-purple-500 to-purple-300 border-t border-purple-100';
+          negStyle = 'bg-gradient-to-b from-purple-600 via-purple-500 to-purple-300 border-b border-purple-100';
+        }
+
+        barSection = `
+          <div class="w-full flex-1 flex flex-col items-center justify-center my-1">
+            <div class="w-8 sm:w-10 h-10 flex items-end justify-center">
+              ${isPos ? `<div class="w-full rounded-t-sm transition-all duration-300 ${posStyle}" style="height: ${magPct}%;"></div>` : ''}
+            </div>
+            <div class="w-10 sm:w-12 h-[1.5px] ${!isNull && val === 0 ? 'bg-slate-400' : 'bg-white/25'} rounded-full"></div>
+            <div class="w-8 sm:w-10 h-10 flex items-start justify-center">
+              ${isNeg ? `<div class="w-full rounded-b-sm transition-all duration-300 ${negStyle}" style="height: ${magPct}%;"></div>` : ''}
+            </div>
+          </div>
+        `;
+      }
+
+      const dispVal = (val === null || val === undefined) ? '?' : val;
+      const valColor = (val === null || val === undefined)
+        ? 'text-slate-600'
+        : accentMode === 'source'
+          ? 'text-amber-200'
+          : accentMode === 'target' || accentMode === 'done'
+            ? 'text-emerald-200'
+            : accentMode === 'temp'
+              ? 'text-purple-200'
+              : 'text-white';
+
+      const bottomRow = `
+        <div class="w-full flex flex-col items-center gap-0.5">
+          <span class="code-font ${viewMode === 'boxes' ? 'text-xl sm:text-2xl my-1.5' : 'text-sm sm:text-base'} font-extrabold ${valColor}">
+            ${dispVal}
+          </span>
+          ${footTagHtml}
+        </div>
+      `;
+
+      return `${topHeader}${barSection}${bottomRow}`;
+    }
+
+    // PHYSICAL LIFT-AND-PLACE ANIMATION FOR BOXES & BARS BETWEEN arr[] AND temp[]
+    function animateElementTransfer(transfer, maxAbs, animateFlight) {
+      transferArcSvg.innerHTML = '';
+      flyingCloneLayer.innerHTML = '';
+      if (!transfer) return;
+
+      const stageRect = stageWrapper.getBoundingClientRect();
+      const isPass1 = transfer.type === 'arrToTemp';
+      const srcEl = isPass1
+        ? arrArena.querySelector(`[data-arr-idx="${transfer.fromIdx}"]`)
+        : tempArena.querySelector(`[data-temp-idx="${transfer.fromIdx}"]`);
+      const dstEl = isPass1
+        ? tempArena.querySelector(`[data-temp-idx="${transfer.toIdx}"]`)
+        : arrArena.querySelector(`[data-arr-idx="${transfer.toIdx}"]`);
+
+      if (!srcEl || !dstEl) return;
+
+      const srcRect = srcEl.getBoundingClientRect();
+      const dstRect = dstEl.getBoundingClientRect();
+
+      const x1 = (srcRect.left - stageRect.left) + srcRect.width / 2;
+      const y1 = isPass1 ? (srcRect.bottom - stageRect.top) + 4 : (srcRect.top - stageRect.top) - 4;
+      const x2 = (dstRect.left - stageRect.left) + dstRect.width / 2;
+      const y2 = isPass1 ? (dstRect.top - stageRect.top) - 6 : (dstRect.bottom - stageRect.top) + 6;
+      const midX = (x1 + x2) / 2 + (isPass1 ? 22 : -22);
+      const midY = (y1 + y2) / 2;
+      const arcColor = isPass1 ? '#38bdf8' : '#34d399';
+
+      const arrowPoints = isPass1
+        ? `${x2},${y2 + 3} ${x2 - 5},${y2 - 6} ${x2 + 5},${y2 - 6}`
+        : `${x2},${y2 - 3} ${x2 - 5},${y2 + 6} ${x2 + 5},${y2 + 6}`;
+
+      transferArcSvg.innerHTML = `
+        <path d="M ${x1} ${y1} Q ${midX} ${midY}, ${x2} ${y2}"
+              fill="none" stroke="${arcColor}" stroke-width="2.4" class="transfer-arc-path" />
+        <circle cx="${x1}" cy="${y1}" r="4.5" fill="#fbbf24" />
+        <polygon points="${arrowPoints}" fill="${arcColor}" />
+      `;
+
+      if (!animateFlight) return;
+
+      // Spawn a physical glassy box+bar clone that lifts upward above other bars/boxes and lands in target slot!
+      const clone = document.createElement('div');
+      const cardHeightClass = viewMode === 'bars' ? 'w-14 sm:w-16 h-36' : viewMode === 'boxes' ? 'w-16 sm:w-20 h-24' : 'w-16 sm:w-20 h-40';
+      clone.className = `glass-element-card active-target-card absolute rounded-2xl p-2 flex flex-col items-center justify-between select-none ${cardHeightClass}`;
+      clone.style.left = `${srcRect.left - stageRect.left}px`;
+      clone.style.top = `${srcRect.top - stageRect.top}px`;
+
+      const srcChip = `<span class="px-1.5 py-0.2 rounded bg-amber-400 text-slate-950 font-extrabold text-[8px] code-font">${isPass1 ? `a[${transfer.fromIdx}]` : `t[${transfer.fromIdx}]`}</span>`;
+      const dstChip = `<span class="text-[8px] code-font text-emerald-200 font-bold">&rarr; [${transfer.toIdx}]</span>`;
+      clone.innerHTML = buildElementInnerHtml(transfer.val, transfer.toIdx, maxAbs, srcChip, dstChip, 'target');
+      flyingCloneLayer.appendChild(clone);
+
+      const dx = dstRect.left - srcRect.left;
+      const dy = dstRect.top - srcRect.top;
+      const liftY = Math.min(0, dy) - 38; // Lifts cleanly above intermediate bars & boxes!
+      const duration = Math.min(540, Math.max(240, playSpeed * 0.78));
+
+      const anim = clone.animate([
+        { transform: 'translate(0px, 0px) scale(1)', opacity: 0.98 },
+        { transform: `translate(${dx * 0.35}px, ${liftY}px) scale(1.08)`, opacity: 1, offset: 0.38 },
+        { transform: `translate(${dx * 0.72}px, ${liftY}px) scale(1.08)`, opacity: 1, offset: 0.72 },
+        { transform: `translate(${dx}px, ${dy}px) scale(1)`, opacity: 0.15 }
+      ], {
+        duration,
+        easing: 'cubic-bezier(0.22, 1, 0.36, 1)'
+      });
+      anim.onfinish = () => clone.remove();
+    }
+
+    // RENDER CURRENT STEP
+    function renderStep(idx, animateMovement = true) {
+      if (idx < 0 || idx >= steps.length) return;
+      const step = steps[idx];
+      const arr = step.arr;
+      const temp = step.temp;
+      const n = arr.length;
+      const maxAbs = Math.max(1, ...arr.map(v => Math.abs(v)));
+
+      // Update Header Scrubber & Badges
+      stepCounterBadge.textContent = `Step: ${idx + 1} / ${steps.length}`;
+      phaseBadge.textContent = step.phase;
+      kModBadge.textContent = step.kNormalized
+        ? `k = ${step.origK} (k % n = ${step.effK})`
+        : `k = ${step.origK}`;
+      stepScrubber.max = steps.length - 1;
+      stepScrubber.value = idx;
+
+      if (step.isComplete) {
+        resultHeaderBadge.textContent = `arr[]: [${arr.join(', ')}] ✓`;
+        resultHeaderBadge.className = "px-2.5 py-1 rounded-md bg-emerald-500/25 border border-emerald-400/45 text-emerald-200 font-bold";
+      } else if (step.passNum === 2) {
+        resultHeaderBadge.textContent = `Copying Back (${step.arrOverwritten.filter(Boolean).length}/${n})`;
+        resultHeaderBadge.className = "px-2.5 py-1 rounded-md bg-cyan-500/20 border border-cyan-400/35 text-cyan-200 font-bold";
+      } else {
+        resultHeaderBadge.textContent = `temp Filled: ${temp.filter(v => v !== null).length} / ${n}`;
+        resultHeaderBadge.className = "px-2.5 py-1 rounded-md bg-white/5 border border-white/15 text-slate-300 font-bold";
+      }
+
+      // Update Telemetry HUD Cards
+      varLenN.textContent = n;
+      varEffK.textContent = step.kNormalized ? step.effK : step.origK;
+      varKOrigSub.textContent = step.kNormalized ? `${step.origK} % ${n}` : 'raw k';
+
+      if (step.i >= 0 && step.i < n) {
+        varPtrI.textContent = step.i;
+        varPassSub.textContent = `Pass ${step.passNum}`;
+      } else {
+        varPtrI.textContent = '-';
+        varPassSub.textContent = step.isComplete ? 'Done' : 'Pass -';
+      }
+
+      if (step.passNum === 1 && step.dstTempIdx !== undefined) {
+        varTargetIdx.textContent = `temp[${step.dstTempIdx}]`;
+        varTargetFormula.textContent = step.targetFormulaText;
+      } else if (step.passNum === 2 && step.dstArrIdx !== undefined) {
+        varTargetIdx.textContent = `arr[${step.dstArrIdx}]`;
+        varTargetFormula.textContent = step.targetFormulaText;
+      } else {
+        varTargetIdx.textContent = '-';
+        varTargetFormula.textContent = '(i + k) % n';
+      }
+
+      const tempFilledCount = temp.filter(v => v !== null).length;
+      const arrFilledCount = step.arrOverwritten.filter(Boolean).length;
+      if (step.isComplete) {
+        varProgressRatio.textContent = `${n} / ${n}`;
+        varPassRole.textContent = "Rotated ✓";
+        statusResultCard.classList.add('complete-badge-anim');
+        setTimeout(() => statusResultCard.classList.remove('complete-badge-anim'), 650);
+      } else if (step.passNum === 2) {
+        varProgressRatio.textContent = `${arrFilledCount} / ${n}`;
+        varPassRole.textContent = "Pass 2: Copy";
+      } else if (step.passNum === 1) {
+        varProgressRatio.textContent = `${tempFilledCount} / ${n}`;
+        varPassRole.textContent = "Pass 1: Scatter";
+      } else {
+        varProgressRatio.textContent = `0 / ${n}`;
+        varPassRole.textContent = "Init";
+      }
+
+      // Narrative Description
+      stepDescription.innerHTML = step.desc;
+
+      // 1. Render Primary Array: int[] arr (Glassy Boxes + Bi-Directional Bars)
+      arrPreviewTag.textContent = `[${arr.join(', ')}]`;
+      arrArena.innerHTML = '';
+      const compactFit = n <= 12;
+      arrArena.className = compactFit
+        ? 'relative w-full flex items-center justify-center gap-2 sm:gap-2.5 min-h-[164px]'
+        : 'relative w-max mx-auto flex items-center gap-2 min-h-[164px]';
+
+      const cardWidthClass = compactFit ? 'flex-1 min-w-[46px] max-w-[74px] ' : 'w-14 shrink-0 ';
+      const cardHeightClass = viewMode === 'boxes' ? 'h-24 ' : 'h-40 ';
+
+      arr.forEach((val, index) => {
+        const isSrc = (step.srcArrIdx === index);
+        const isDst = (step.dstArrIdx === index && step.transfer && step.transfer.type === 'tempToArr');
+        const isPendingDst = (step.dstArrIdx === index && !isDst);
+        const isDoneSlot = step.arrOverwritten[index];
+
+        const card = document.createElement('div');
+        card.dataset.arrIdx = index;
+
+        let classes = `glass-element-card relative ${cardWidthClass} ${cardHeightClass} rounded-2xl p-2 flex flex-col items-center justify-between select-none `;
+        let accentMode = 'default';
+
+        if (isDst) {
+          classes += 'active-target-card ';
+          accentMode = 'target';
+        } else if (isSrc || isPendingDst) {
+          classes += 'active-source-card ';
+          accentMode = 'source';
+        } else if (isDoneSlot || step.isComplete) {
+          classes += 'rotated-done-card ';
+          accentMode = 'done';
+        }
+        card.className = classes;
+
+        let topBadge = '';
+        if (isSrc) {
+          topBadge = `<span class="px-1.5 py-0.2 rounded bg-amber-400 text-slate-950 font-extrabold text-[8px] code-font shadow">i=${index}</span>`;
+        } else if (isDst) {
+          topBadge = `<span class="px-1.5 py-0.2 rounded bg-emerald-400 text-slate-950 font-extrabold text-[8px] code-font shadow">✓</span>`;
+        } else if (isPendingDst) {
+          topBadge = `<span class="px-1.5 py-0.2 rounded bg-amber-400 text-slate-950 font-extrabold text-[8px] code-font shadow">dst</span>`;
+        }
+
+        const footTag = isDoneSlot || step.isComplete
+          ? `<span class="text-[8px] code-font text-emerald-300 font-bold">rotated</span>`
+          : `<span class="text-[8px] code-font text-slate-500">orig</span>`;
+
+        card.innerHTML = buildElementInnerHtml(val, index, maxAbs, topBadge, footTag, accentMode);
+        arrArena.appendChild(card);
+      });
+
+      // 2. Render Auxiliary Buffer Array: int[] temp (Glassy Boxes + Bi-Directional Bars)
+      tempArena.innerHTML = '';
+      if (!step.tempAllocated) {
+        tempStatusPill.textContent = 'Unallocated';
+        tempStatusPill.className = 'code-font text-[10px] px-2.5 py-0.5 rounded bg-white/5 border border-white/10 text-slate-400';
+        tempArena.innerHTML = `<span class="text-xs text-slate-500 italic my-auto code-font">Waiting for int[] temp = new int[${n}]...</span>`;
+      } else {
+        tempStatusPill.textContent = `${tempFilledCount} / ${n} Filled`;
+        tempStatusPill.className = tempFilledCount === n
+          ? 'code-font text-[10px] px-2.5 py-0.5 rounded bg-purple-500/20 border border-purple-400/40 text-purple-200 font-bold'
+          : 'code-font text-[10px] px-2.5 py-0.5 rounded bg-white/5 border border-white/10 text-slate-300';
+
+        tempArena.className = compactFit
+          ? 'relative w-full flex items-center justify-center gap-2 sm:gap-2.5 min-h-[164px]'
+          : 'relative w-max mx-auto flex items-center gap-2 min-h-[164px]';
+
+        temp.forEach((val, index) => {
+          const isSrc = (step.srcTempIdx === index);
+          const isDst = (step.dstTempIdx === index && step.transfer && step.transfer.type === 'arrToTemp');
+          const isPendingDst = (step.dstTempIdx === index && !isDst);
+          const isFilled = (val !== null);
+
+          const card = document.createElement('div');
+          card.dataset.tempIdx = index;
+
+          let classes = `glass-element-card relative ${cardWidthClass} ${cardHeightClass} rounded-2xl p-2 flex flex-col items-center justify-between select-none `;
+          let accentMode = 'temp';
+
+          if (isDst) {
+            classes += 'active-target-card ';
+            accentMode = 'target';
+          } else if (isSrc || isPendingDst) {
+            classes += 'active-source-card ';
+            accentMode = 'source';
+          } else if (isFilled) {
+            classes += 'filled-temp-card ';
+            accentMode = 'temp';
+          } else {
+            classes += 'empty-temp-slot ';
+            accentMode = 'default';
+          }
+          card.className = classes;
+
+          let topBadge = '';
+          if (isSrc) {
+            topBadge = `<span class="px-1.5 py-0.2 rounded bg-amber-400 text-slate-950 font-extrabold text-[8px] code-font shadow">i=${index}</span>`;
+          } else if (isDst) {
+            topBadge = `<span class="px-1.5 py-0.2 rounded bg-emerald-400 text-slate-950 font-extrabold text-[8px] code-font shadow">+1</span>`;
+          } else if (isPendingDst) {
+            topBadge = `<span class="px-1.5 py-0.2 rounded bg-cyan-400 text-slate-950 font-extrabold text-[8px] code-font shadow">slot</span>`;
+          }
+
+          const footTag = isFilled
+            ? `<span class="text-[8px] code-font text-purple-300">temp</span>`
+            : `<span class="text-[8px] code-font text-slate-600">0</span>`;
+
+          card.innerHTML = buildElementInnerHtml(val, index, maxAbs, topBadge, footTag, accentMode);
+          tempArena.appendChild(card);
+        });
+      }
+
+      // 3. Trigger Physical Lift-and-Place Box + Bar Animation
+      requestAnimationFrame(() => {
+        animateElementTransfer(step.transfer, maxAbs, animateMovement);
+      });
+
+      // 4. Update Action Pill & Decision Banner
+      if (step.actionText) {
+        actionPill.classList.remove('hidden');
+        actionPill.textContent = step.actionText;
+      } else {
+        actionPill.classList.add('hidden');
+      }
+
+      if (step.isComplete || step.transfer) {
+        decisionIcon.className = "fa-solid fa-trophy text-emerald-400 text-base";
+        decisionBanner.className = "p-3.5 rounded-xl bg-emerald-500/15 border border-emerald-400/35 text-xs flex flex-col sm:flex-row items-center justify-between gap-3 backdrop-blur-md";
+      } else {
+        decisionIcon.className = "fa-solid fa-circle-info text-cyan-400 text-base";
+        decisionBanner.className = "p-3.5 rounded-xl bg-white/[0.04] border border-white/10 text-xs flex flex-col sm:flex-row items-center justify-between gap-3 backdrop-blur-md";
+      }
+      decisionText.innerHTML = step.desc;
+
+      // 5. Highlight Active Java Line & Play Audio Tone
+      highlightCodeLine(step.line);
+      if (step.soundFreq) {
+        playTone(step.soundFreq, 'sine', 0.08, 0.035);
+      }
+    }
+
+    // PLAYBACK CONTROLLER
+    function setPlaying(playing) {
+      isPlaying = playing;
+      if (isPlaying) {
+        playIcon.className = "fa-solid fa-pause";
+        playText.textContent = "Stop";
+        btnPlay.classList.add('bg-rose-500/25', 'text-rose-200', 'border-rose-400/50');
+        btnPlay.classList.remove('bg-cyan-500/25', 'text-cyan-200', 'border-cyan-400/50');
+
+        playInterval = setInterval(() => {
+          if (currentStepIdx < steps.length - 1) {
+            currentStepIdx++;
+            renderStep(currentStepIdx, true);
+          } else {
+            setPlaying(false);
+          }
+        }, playSpeed);
+      } else {
+        playIcon.className = "fa-solid fa-play";
+        playText.textContent = "Start";
+        btnPlay.classList.remove('bg-rose-500/25', 'text-rose-200', 'border-rose-400/50');
+        btnPlay.classList.add('bg-cyan-500/25', 'text-cyan-200', 'border-cyan-400/50');
+        if (playInterval) {
+          clearInterval(playInterval);
+          playInterval = null;
+        }
+      }
+    }
+
+    function initSimulation(arrVal, kVal) {
+      setPlaying(false);
+      currentArr = [...arrVal];
+      currentK = Math.max(0, kVal);
+      steps = generateSteps(currentArr, currentK);
+      currentStepIdx = 0;
+      stepScrubber.max = steps.length - 1;
+      stepScrubber.value = 0;
+      renderStep(0, false);
+    }
+
+    // EVENT LISTENERS
+    btnPlay.addEventListener('click', () => {
+      if (currentStepIdx >= steps.length - 1) {
+        currentStepIdx = 0;
+        renderStep(0, false);
+      }
+      setPlaying(!isPlaying);
+    });
+
+    btnNext.addEventListener('click', () => {
+      setPlaying(false);
+      if (currentStepIdx < steps.length - 1) {
+        currentStepIdx++;
+        renderStep(currentStepIdx, true);
+      }
+    });
+
+    btnPrev.addEventListener('click', () => {
+      setPlaying(false);
+      if (currentStepIdx > 0) {
+        currentStepIdx--;
+        renderStep(currentStepIdx, true);
+      }
+    });
+
+    btnReset.addEventListener('click', () => {
+      setPlaying(false);
+      currentStepIdx = 0;
+      renderStep(0, false);
+    });
+
+    stepScrubber.addEventListener('input', (e) => {
+      setPlaying(false);
+      currentStepIdx = parseInt(e.target.value, 10);
+      renderStep(currentStepIdx, false);
+    });
+
+    document.querySelectorAll('.speed-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.speed-btn').forEach(b => {
+          b.classList.remove('bg-cyan-500/30', 'text-cyan-200', 'font-semibold');
+        });
+        btn.classList.add('bg-cyan-500/30', 'text-cyan-200', 'font-semibold');
+        playSpeed = parseInt(btn.dataset.speed, 10);
+        if (isPlaying) {
+          setPlaying(false);
+          setPlaying(true);
+        }
+      });
+    });
+
+    document.querySelectorAll('.view-mode-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.view-mode-btn').forEach(b => {
+          b.classList.remove('bg-cyan-500/30', 'text-cyan-200', 'font-semibold');
+          b.classList.add('text-slate-300');
+        });
+        btn.classList.add('bg-cyan-500/30', 'text-cyan-200', 'font-semibold');
+        btn.classList.remove('text-slate-300');
+        viewMode = btn.dataset.mode;
+        renderStep(currentStepIdx, false);
+      });
+    });
+
+    btnAudio.addEventListener('click', () => {
+      audioEnabled = !audioEnabled;
+      if (audioEnabled) {
+        audioIcon.className = "fa-solid fa-volume-high";
+        btnAudio.classList.remove('text-slate-600');
+        btnAudio.classList.add('text-slate-300');
+      } else {
+        audioIcon.className = "fa-solid fa-volume-xmark";
+        btnAudio.classList.add('text-slate-600');
+        btnAudio.classList.remove('text-slate-300');
+      }
+    });
+
+    presetSelect.addEventListener('change', (e) => {
+      const idx = parseInt(e.target.value, 10);
+      customArrInput.value = PRESETS[idx].arr.join(', ');
+      customKInput.value = PRESETS[idx].k;
+      initSimulation(PRESETS[idx].arr, PRESETS[idx].k);
+    });
+
+    btnApplyCustom.addEventListener('click', () => {
+      const text = customArrInput.value.trim();
+      const parsedK = parseInt(customKInput.value, 10);
+      if (!text || isNaN(parsedK) || parsedK < 0) return;
+
+      const parsedArr = text.split(',')
+        .map(s => parseInt(s.trim(), 10))
+        .filter(n => !isNaN(n));
+
+      if (parsedArr.length >= 1) {
+        customArrInput.value = parsedArr.join(', ');
+        customKInput.value = parsedK;
+        initSimulation(parsedArr, parsedK);
+      }
+    });
+
+    window.addEventListener('resize', () => {
+      const step = steps[currentStepIdx];
+      if (step && step.transfer) {
+        const maxAbs = Math.max(1, ...step.arr.map(v => Math.abs(v)));
+        animateElementTransfer(step.transfer, maxAbs, false);
+      }
+    });
+
+    window.addEventListener('keydown', (e) => {
+      if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT') return;
+      if (e.code === 'Space') {
+        e.preventDefault();
+        btnPlay.click();
+      } else if (e.code === 'ArrowRight') {
+        e.preventDefault();
+        btnNext.click();
+      } else if (e.code === 'ArrowLeft') {
+        e.preventDefault();
+        btnPrev.click();
+      }
+    });
+
+    window.onload = function() {
+      customArrInput.value = PRESETS[0].arr.join(', ');
+      customKInput.value = PRESETS[0].k;
+      initSimulation(PRESETS[0].arr, PRESETS[0].k);
+    };
+  </script>
+</body>
+</html>
