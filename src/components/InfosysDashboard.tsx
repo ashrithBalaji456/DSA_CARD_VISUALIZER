@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import {
   Briefcase,
   Search,
@@ -47,6 +47,20 @@ export const InfosysDashboard: React.FC<Props> = ({
   const [subTab, setSubTab] = useState<'bank' | 'plan'>('bank');
   const [showTopics, setShowTopics] = useState(true);
   const [selectedItem, setSelectedItem] = useState<InfosysResolvedItem | null>(null);
+
+  useEffect(() => {
+    if (!selectedItem) return;
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setSelectedItem(null);
+    };
+    window.addEventListener('keydown', onKey);
+    return () => {
+      document.body.style.overflow = prevOverflow;
+      window.removeEventListener('keydown', onKey);
+    };
+  }, [selectedItem]);
 
   // Filters
   const [searchQuery, setSearchQuery] = useState('');
@@ -877,15 +891,15 @@ export const InfosysDashboard: React.FC<Props> = ({
       {/* INFOSYS QUESTION REFERENCE & PLAY CARD MODAL */}
       {selectedItem && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm"
+          className="fixed inset-0 z-50 overflow-hidden flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm"
           onClick={() => setSelectedItem(null)}
         >
           <div
-            className="glass-panel w-full max-w-3xl max-h-[88vh] rounded-3xl border border-white/15 bg-[#0b1020] overflow-hidden flex flex-col shadow-2xl"
+            className="w-full max-w-3xl max-h-[88vh] rounded-3xl border border-white/15 bg-[#0b1020] overflow-hidden flex flex-col shadow-2xl"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Modal Header */}
-            <div className="p-5 sm:p-6 border-b border-white/10 flex items-start justify-between gap-4">
+            <div className="p-5 sm:p-6 border-b border-white/10 bg-[#101727]/90 flex items-start justify-between gap-4 shrink-0">
               <div>
                 <div className="flex items-center gap-2 flex-wrap mb-1.5">
                   <DifficultyBadge difficulty={selectedItem.question.difficulty} size="sm" />
@@ -907,7 +921,7 @@ export const InfosysDashboard: React.FC<Props> = ({
             </div>
 
             {/* Modal Body */}
-            <div className="p-5 sm:p-6 overflow-y-auto space-y-5 text-xs sm:text-sm">
+            <div className="p-5 sm:p-6 flex-1 min-h-0 overflow-y-auto overscroll-contain space-y-5 text-xs sm:text-sm">
               {/* Play Card / Coming Soon Banner */}
               {selectedItem.linkedProblem ? (
                 <div className="rounded-2xl p-4 border border-cyan-500/30 bg-gradient-to-r from-cyan-950/40 to-indigo-950/40 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
