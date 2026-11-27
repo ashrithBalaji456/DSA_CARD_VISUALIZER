@@ -36,6 +36,30 @@ type SortKey = 'frequency-desc' | 'sources-desc' | 'difficulty' | 'name-asc' | '
 
 const DIFF_ORDER: Record<string, number> = { Easy: 1, Medium: 2, Hard: 3 };
 
+function getLeetCodeUrl(
+  q: { leetcode: string; leetcodeExact: boolean; leetcodeNumber?: number },
+  linkedProblem?: DSAProblem
+): string | null {
+  if (!q.leetcode) return null;
+  if (q.leetcodeExact && linkedProblem?.leetcodeUrl) {
+    return linkedProblem.leetcodeUrl;
+  }
+  const clean = q.leetcode
+    .replace(/^\d+\.\s*/, '')
+    .replace(/\s*\((related|variant|LC\s*\d+)\)\s*$/i, '')
+    .trim();
+  if (!clean) return null;
+  if (q.leetcodeNumber || /^\d+\.\s*/.test(q.leetcode)) {
+    const slug = clean
+      .toLowerCase()
+      .replace(/[^a-z0-9\s-]/g, '')
+      .trim()
+      .replace(/\s+/g, '-');
+    if (slug) return `https://leetcode.com/problems/${slug}/`;
+  }
+  return `https://leetcode.com/problemset/?search=${encodeURIComponent(clean)}`;
+}
+
 export const InfosysDashboard: React.FC<Props> = ({
   problems,
   solvedIds,
@@ -749,8 +773,29 @@ export const InfosysDashboard: React.FC<Props> = ({
                         </td>
 
                         {/* LeetCode */}
-                        <td className="py-2.5 px-3 text-[11px] text-slate-300 truncate max-w-[180px]">
-                          {q.leetcode || '—'}
+                        <td
+                          className="py-2.5 px-3 text-[11px] max-w-[180px]"
+                          onClick={(e) => {
+                            if (q.leetcode) e.stopPropagation();
+                          }}
+                        >
+                          {(() => {
+                            const lcUrl = getLeetCodeUrl(q, linkedProblem);
+                            return lcUrl ? (
+                              <a
+                                href={lcUrl}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="inline-flex items-center gap-1 text-amber-300/90 hover:text-amber-200 hover:underline max-w-full"
+                                title={`Open ${q.leetcode} on LeetCode`}
+                              >
+                                <span className="truncate">{q.leetcode}</span>
+                                <ExternalLink className="w-3 h-3 shrink-0 opacity-80" />
+                              </a>
+                            ) : (
+                              <span className="text-slate-500">—</span>
+                            );
+                          })()}
                         </td>
 
                         {/* Sources */}
@@ -934,12 +979,30 @@ export const InfosysDashboard: React.FC<Props> = ({
                 </div>
                 <h2 className="text-xl font-bold text-white">{selectedItem.question.name}</h2>
               </div>
-              <button
-                onClick={() => setSelectedItem(null)}
-                className="p-2 rounded-xl bg-white/5 border border-white/10 text-slate-400 hover:text-white cursor-pointer"
-              >
-                <X className="w-4 h-4" />
-              </button>
+              <div className="flex items-center gap-2 shrink-0">
+                {(() => {
+                  const lcUrl = getLeetCodeUrl(selectedItem.question, selectedItem.linkedProblem);
+                  return lcUrl ? (
+                    <a
+                      href={lcUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold bg-amber-500/15 border border-amber-500/35 text-amber-300 hover:bg-amber-500/25 transition-all whitespace-nowrap"
+                      title={`Open ${selectedItem.question.leetcode} on LeetCode`}
+                    >
+                      <span className="font-mono font-bold">LeetCode</span>
+                      <ExternalLink className="w-3.5 h-3.5" />
+                    </a>
+                  ) : null;
+                })()}
+                <button
+                  onClick={() => setSelectedItem(null)}
+                  className="p-2 rounded-xl bg-white/5 border border-white/10 text-slate-400 hover:text-white cursor-pointer shrink-0"
+                  title="Close (Esc)"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
             </div>
 
             {/* Modal Body */}
@@ -1052,14 +1115,44 @@ export const InfosysDashboard: React.FC<Props> = ({
                 <div>
                   <span className="text-slate-400">Equivalents: </span>
                   <span className="text-slate-200">
-                    {[
-                      selectedItem.question.leetcode && `LC: ${selectedItem.question.leetcode}`,
-                      selectedItem.question.gfg && `GFG: ${selectedItem.question.gfg}`,
-                      selectedItem.question.hackerrank && `HR: ${selectedItem.question.hackerrank}`,
-                      selectedItem.question.codeforces && `CF: ${selectedItem.question.codeforces}`,
-                    ]
-                      .filter(Boolean)
-                      .join(' · ') || '—'}
+                    {(() => {
+                      const lcUrl = getLeetCodeUrl(selectedItem.question, selectedItem.linkedProblem);
+                      const parts: React.ReactNode[] = [];
+                      if (selectedItem.question.leetcode) {
+                        parts.push(
+                          lcUrl ? (
+                            <a
+                              key="lc"
+                              href={lcUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-flex items-center gap-1 text-amber-300 hover:text-amber-200 underline decoration-amber-400/40"
+                            >
+                              <span>LC: {selectedItem.question.leetcode}</span>
+                              <ExternalLink className="w-3 h-3 inline" />
+                            </a>
+                          ) : (
+                            <span key="lc">LC: {selectedItem.question.leetcode}</span>
+                          )
+                        );
+                      }
+                      if (selectedItem.question.gfg) {
+                        parts.push(<span key="gfg">GFG: {selectedItem.question.gfg}</span>);
+                      }
+                      if (selectedItem.question.hackerrank) {
+                        parts.push(<span key="hr">HR: {selectedItem.question.hackerrank}</span>);
+                      }
+                      if (selectedItem.question.codeforces) {
+                        parts.push(<span key="cf">CF: {selectedItem.question.codeforces}</span>);
+                      }
+                      if (parts.length === 0) return '—';
+                      return parts.map((node, i) => (
+                        <React.Fragment key={i}>
+                          {i > 0 && ' · '}
+                          {node}
+                        </React.Fragment>
+                      ));
+                    })()}
                   </span>
                 </div>
               </div>
