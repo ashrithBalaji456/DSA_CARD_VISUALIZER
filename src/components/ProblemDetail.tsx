@@ -60,18 +60,29 @@ export const ProblemDetail: React.FC<Props> = ({
   const scrollRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
     setSelectedSolutionIdx(0);
-    scrollRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
+    scrollRef.current?.scrollTo({ top: 0 });
   }, [problem.id]);
 
+  useEffect(() => {
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = prevOverflow;
+    };
+  }, []);
+
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto bg-black/80 backdrop-blur-xl flex items-center justify-center p-3 sm:p-6 lg:p-8 animate-in fade-in duration-200">
+    <div
+      className="fixed inset-0 z-50 overflow-hidden bg-black/80 backdrop-blur-md flex items-center justify-center p-3 sm:p-6 lg:p-8 animate-in fade-in duration-200"
+      onClick={onClose}
+    >
       <div
-        className="w-full max-w-5xl bg-[#080B14] border border-white/15 rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[92vh] my-auto"
+        className="w-full max-w-5xl bg-[#080B14] border border-white/15 rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Modal Header */}
-        <div className="p-5 sm:p-6 border-b border-white/10 bg-[#101727]/80 backdrop-blur-md flex flex-col md:flex-row md:items-center justify-between gap-4 shrink-0">
-          <div>
+        <div className="p-5 sm:p-6 border-b border-white/10 bg-[#101727]/90 flex items-start justify-between gap-4 shrink-0">
+          <div className="min-w-0 flex-1">
             <div className="flex flex-wrap items-center gap-2 mb-2">
               <span className="font-mono text-xs font-bold px-2.5 py-1 rounded-lg bg-white/10 border border-white/15 text-slate-200">
                 Problem #{problem.number}
@@ -98,58 +109,60 @@ export const ProblemDetail: React.FC<Props> = ({
             </h2>
           </div>
 
-          {/* Action buttons */}
-          <div className="flex items-center gap-2 self-start md:self-auto flex-wrap">
-            {/* Dedicated Interactive Visualizer Link */}
-            {activeVisualizerUrl && (
-              <a
-                href={activeVisualizerUrl}
-                className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold bg-gradient-to-r from-cyan-600 via-indigo-600 to-violet-600 hover:from-cyan-500 hover:to-violet-500 text-white shadow-md shadow-cyan-500/20 transition-all"
-                title="Navigate to full interactive visualizer page"
-              >
-                <Sparkles className="w-3.5 h-3.5 text-cyan-200" />
-                <span>{activeSolution ? `Open ${activeSolution.label}` : 'Open Problem Visualizer'}</span>
-                <ExternalLink className="w-3 h-3 text-cyan-200" />
-              </a>
-            )}
-
-            {/* LeetCode official link */}
-            <a
-              href={problem.leetcodeUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold bg-amber-500/15 border border-amber-500/30 text-amber-300 hover:bg-amber-500/25 transition-all shadow-sm"
-              title="Open problem on LeetCode in a new Chrome tab"
-            >
-              <span className="font-mono font-bold">LeetCode</span>
-              <ExternalLink className="w-3.5 h-3.5" />
-            </a>
-
-            {/* Solved toggle */}
-            <button
-              onClick={() => onToggleSolved(problem.id)}
-              className={`flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold border transition-all ${isSolved
-                  ? 'bg-emerald-500/20 border-emerald-500/40 text-emerald-300'
-                  : 'bg-white/5 border-white/10 text-slate-300 hover:text-emerald-300 hover:bg-white/10'
-                }`}
-            >
-              {isSolved ? (
-                <>
-                  <CheckCircle2 className="w-4 h-4 fill-emerald-400/20" />
-                  <span>Solved</span>
-                </>
-              ) : (
-                <>
-                  <Circle className="w-4 h-4" />
-                  <span>Mark Solved</span>
-                </>
+          {/* Action buttons + pinned Close button at top-right */}
+          <div className="flex items-start gap-2 shrink-0">
+            <div className="flex items-center gap-2 flex-wrap justify-end">
+              {/* Dedicated Interactive Visualizer Link */}
+              {activeVisualizerUrl && (
+                <a
+                  href={activeVisualizerUrl}
+                  className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold bg-gradient-to-r from-cyan-600 via-indigo-600 to-violet-600 hover:from-cyan-500 hover:to-violet-500 text-white shadow-md shadow-cyan-500/20 transition-all whitespace-nowrap"
+                  title="Navigate to full interactive visualizer page"
+                >
+                  <Sparkles className="w-3.5 h-3.5 text-cyan-200 shrink-0" />
+                  <span>{activeSolution ? `Open ${activeSolution.label}` : 'Open Problem Visualizer'}</span>
+                  <ExternalLink className="w-3 h-3 text-cyan-200 shrink-0" />
+                </a>
               )}
-            </button>
+
+              {/* LeetCode official link */}
+              <a
+                href={problem.leetcodeUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold bg-amber-500/15 border border-amber-500/30 text-amber-300 hover:bg-amber-500/25 transition-all shadow-sm whitespace-nowrap"
+                title="Open problem on LeetCode in a new Chrome tab"
+              >
+                <span className="font-mono font-bold">LeetCode</span>
+                <ExternalLink className="w-3.5 h-3.5" />
+              </a>
+
+              {/* Solved toggle */}
+              <button
+                onClick={() => onToggleSolved(problem.id)}
+                className={`flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold border transition-all whitespace-nowrap cursor-pointer ${isSolved
+                    ? 'bg-emerald-500/20 border-emerald-500/40 text-emerald-300'
+                    : 'bg-white/5 border-white/10 text-slate-300 hover:text-emerald-300 hover:bg-white/10'
+                  }`}
+              >
+                {isSolved ? (
+                  <>
+                    <CheckCircle2 className="w-4 h-4 fill-emerald-400/20" />
+                    <span>Solved</span>
+                  </>
+                ) : (
+                  <>
+                    <Circle className="w-4 h-4" />
+                    <span>Mark Solved</span>
+                  </>
+                )}
+              </button>
+            </div>
 
             {/* Bookmark toggle */}
             <button
               onClick={() => onToggleBookmark(problem.id)}
-              className={`p-2 rounded-xl border transition-all ${isBookmarked
+              className={`p-2 rounded-xl border transition-all cursor-pointer shrink-0 ${isBookmarked
                   ? 'bg-purple-500/20 border-purple-500/40 text-purple-300'
                   : 'bg-white/5 border-white/10 text-slate-300 hover:text-purple-300 hover:bg-white/10'
                 }`}
@@ -158,11 +171,12 @@ export const ProblemDetail: React.FC<Props> = ({
               <Bookmark className={`w-4 h-4 ${isBookmarked ? 'fill-purple-400' : ''}`} />
             </button>
 
-            {/* Close button */}
+            {/* Close button pinned at top-right end */}
             <button
               onClick={onClose}
-              className="p-2 rounded-xl bg-white/5 border border-white/10 text-slate-400 hover:text-white hover:bg-white/10 transition-all ml-1"
+              className="p-2 rounded-xl bg-white/5 border border-white/10 text-slate-400 hover:text-white hover:bg-white/10 transition-all cursor-pointer shrink-0"
               title="Close (Esc)"
+              aria-label="Close modal"
             >
               <X className="w-5 h-5" />
             </button>
@@ -196,7 +210,10 @@ export const ProblemDetail: React.FC<Props> = ({
         </div>
 
         {/* Modal Scrollable Body */}
-        <div ref={scrollRef} className="p-6 overflow-y-auto space-y-6">
+        <div
+          ref={scrollRef}
+          className="p-6 flex-1 min-h-0 overflow-y-auto overscroll-contain space-y-6"
+        >
           {/* TAB 1: VISUAL PROBLEM-SOLVING FLOW */}
           {activeTab === 'flow' && (
             <div className="space-y-6">
