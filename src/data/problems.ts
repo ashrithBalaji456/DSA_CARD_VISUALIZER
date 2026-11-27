@@ -181,6 +181,50 @@ export const PROBLEMS: DSAProblem[] = [
       "Sorting both strings (O(n log n)) instead of O(n) array counting."
     ],
     "optimalApproach": "26-Element Frequency Vector",
+    "solutions": [
+      {
+        "id": "utf16-frequency",
+        "label": "UTF-16 Frequency Array",
+        "badge": "Infosys DSE · O(n)",
+        "approach": "Single-pass +1 / -1 cancellation using a fixed int[65536] UTF-16 frequency array supporting all characters, digits, and case.",
+        "timeComplexity": "O(n)",
+        "spaceComplexity": "O(1)",
+        "visualizerUrl": "/visualizers/valid_anagram_frequency_visualizer.html"
+      },
+      {
+        "id": "sorting-equals",
+        "label": "char[] Sorting + Arrays.equals",
+        "badge": "Canonical Sort · O(n log n)",
+        "approach": "Converts s1 and s2 to char[] arrays, sorts both with Arrays.sort(), and compares with Arrays.equals(a, b).",
+        "timeComplexity": "O(n log n)",
+        "spaceComplexity": "O(n)",
+        "visualizerUrl": "/visualizers/valid_anagram_sorting_visualizer.html"
+      },
+      {
+        "id": "lowercase-26-array",
+        "label": "26-Letter Frequency Vector",
+        "badge": "LeetCode 242 · O(n)",
+        "approach": "Fixed-size int[26] array for lowercase English letters ('a'-'z') incrementing for s and decrementing for t.",
+        "timeComplexity": "O(n)",
+        "spaceComplexity": "O(1)",
+        "visualizerUrl": "/visualizers/valid_anagram_visualizer.html"
+      }
+    ],
+    "infosys": {
+      "roles": [
+        "DSE"
+      ],
+      "frequency": "Very High",
+      "frequencyCount": 15,
+      "years": [
+        2021,
+        2024,
+        2025,
+        2026
+      ],
+      "dayPlan": 3,
+      "sourceCount": 12
+    },
     "relatedProblems": [
       {
         "number": 49,
