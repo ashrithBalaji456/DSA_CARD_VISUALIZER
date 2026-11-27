@@ -47,6 +47,13 @@ export const ProblemCard: React.FC<Props> = ({
   onSelectRelatedProblem,
 }) => {
   const [showAllRelated, setShowAllRelated] = useState(false);
+  const [selectedSolutionIdx, setSelectedSolutionIdx] = useState(0);
+  const solutions = problem.solutions && problem.solutions.length > 0 ? problem.solutions : null;
+  const activeSolution = solutions ? solutions[selectedSolutionIdx] || solutions[0] : null;
+  const displayTimeComplexity = activeSolution?.timeComplexity || problem.timeComplexity;
+  const displaySpaceComplexity = activeSolution?.spaceComplexity || problem.spaceComplexity;
+  const activeVisualizerUrl = activeSolution?.visualizerUrl || problem.visualizerUrl;
+
   const visibleRelated = problem.relatedProblems
     ? showAllRelated
       ? problem.relatedProblems
@@ -143,9 +150,66 @@ export const ProblemCard: React.FC<Props> = ({
         </div>
 
         {/* Short description */}
-        <p className="text-xs text-slate-400 line-clamp-2 leading-relaxed mb-4">
+        <p className="text-xs text-slate-400 line-clamp-2 leading-relaxed mb-3">
           {problem.description.replace(/\n\n/g, ' ')}
         </p>
+
+        {/* Infosys OA / Interview Metadata Badge (if tagged) */}
+        {problem.infosys && (
+          <div className="flex flex-wrap items-center gap-1.5 mb-3">
+            <span className="px-2 py-0.5 rounded-md bg-sky-500/15 border border-sky-400/30 text-[10px] font-semibold text-sky-300 font-mono">
+              Infosys{problem.infosys.frequency ? ` • ${problem.infosys.frequency}` : ''}
+              {problem.infosys.frequencyCount ? ` (${problem.infosys.frequencyCount})` : ''}
+            </span>
+            {problem.infosys.roles?.slice(0, 2).map((role) => (
+              <span
+                key={role}
+                className="px-1.5 py-0.5 rounded-md bg-white/[0.04] border border-white/10 text-[10px] text-slate-300 font-mono"
+              >
+                {role}
+              </span>
+            ))}
+          </div>
+        )}
+
+        {/* Multiple Solution Variants Switcher (All solutions in one place) */}
+        {solutions && solutions.length > 1 && (
+          <div className="mb-3 p-2 rounded-xl bg-white/[0.025] border border-white/[0.07]">
+            <div className="flex items-center justify-between text-[10px] text-slate-400 font-mono mb-1.5">
+              <span className="flex items-center gap-1 text-cyan-300/90 font-semibold">
+                <Sparkles className="w-2.5 h-2.5" />
+                <span>Solutions ({solutions.length})</span>
+              </span>
+              {activeSolution?.badge && (
+                <span className="px-1.5 py-0.2 rounded bg-emerald-500/15 border border-emerald-400/30 text-emerald-300 text-[9px]">
+                  {activeSolution.badge}
+                </span>
+              )}
+            </div>
+            <div className="flex flex-wrap gap-1">
+              {solutions.map((sol, idx) => {
+                const isAct = idx === selectedSolutionIdx;
+                return (
+                  <button
+                    key={sol.id}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setSelectedSolutionIdx(idx);
+                    }}
+                    className={`px-2 py-0.5 rounded-lg text-[10px] font-medium transition-all cursor-pointer select-none border ${
+                      isAct
+                        ? 'bg-cyan-500/20 border-cyan-400/50 text-cyan-200 shadow-sm'
+                        : 'bg-white/[0.03] border-white/10 text-slate-400 hover:text-slate-200 hover:bg-white/[0.07]'
+                    }`}
+                    title={`${sol.label} (${sol.timeComplexity}, ${sol.spaceComplexity})`}
+                  >
+                    {sol.label}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Card Footer: Complexities, LeetCode link, and Explore button */}
@@ -153,11 +217,11 @@ export const ProblemCard: React.FC<Props> = ({
         <div className="flex items-center gap-3 text-[11px] text-slate-400 font-mono py-2.5 border-t border-white/5 mb-3">
           <div className="flex items-center gap-1">
             <Clock className="w-3 h-3 text-slate-400" />
-            <span>{problem.timeComplexity}</span>
+            <span>{displayTimeComplexity}</span>
           </div>
           <div className="flex items-center gap-1">
             <HardDrive className="w-3 h-3 text-slate-400" />
-            <span>{problem.spaceComplexity}</span>
+            <span>{displaySpaceComplexity}</span>
           </div>
         </div>
 
@@ -177,15 +241,19 @@ export const ProblemCard: React.FC<Props> = ({
           </a>
 
           {/* Open Problem action button */}
-          {problem.visualizerUrl ? (
+          {activeVisualizerUrl ? (
             <a
-              href={problem.visualizerUrl}
+              href={activeVisualizerUrl}
               onClick={(e) => e.stopPropagation()}
               className="flex-1 flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold bg-gradient-to-r from-cyan-600 via-indigo-600 to-violet-600 hover:from-cyan-500 hover:to-violet-500 text-white shadow-md shadow-indigo-600/25 hover:shadow-cyan-500/35 transition-all group/btn cursor-pointer active:scale-95 select-none"
-              title="Open full interactive visualizer page"
+              title={
+                activeSolution
+                  ? `Open ${activeSolution.label} visualizer`
+                  : 'Open full interactive visualizer page'
+              }
             >
               <Sparkles className="w-3 h-3 text-cyan-200" />
-              <span>Open Problem</span>
+              <span>{activeSolution ? `Open ${activeSolution.label}` : 'Open Problem'}</span>
               <ArrowRight className="w-3 h-3 group-hover/btn:translate-x-0.5 transition-transform" />
             </a>
           ) : (
@@ -199,7 +267,7 @@ export const ProblemCard: React.FC<Props> = ({
           )}
 
           {/* Quick Details button when visualizer is available */}
-          {problem.visualizerUrl && (
+          {activeVisualizerUrl && (
             <button
               onClick={(e) => {
                 e.stopPropagation();

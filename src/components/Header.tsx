@@ -14,6 +14,7 @@ import {
   Sparkles,
   Calendar,
   ArrowRight,
+  Briefcase,
 } from 'lucide-react';
 import type { DSAProblem } from '../types/problem';
 import { DifficultyBadge } from './DifficultyBadge';
@@ -29,11 +30,12 @@ const formatDate = (dateStr?: string): string => {
 };
 
 interface Props {
-  activeTab: 'dashboard' | 'problems' | 'categories' | 'bookmarks' | 'progress';
-  onSelectTab: (tab: 'dashboard' | 'problems' | 'categories' | 'bookmarks' | 'progress') => void;
+  activeTab: 'dashboard' | 'problems' | 'categories' | 'bookmarks' | 'progress' | 'infosys';
+  onSelectTab: (tab: 'dashboard' | 'problems' | 'categories' | 'bookmarks' | 'progress' | 'infosys') => void;
   solvedCount: number;
   totalCount: number;
   bookmarkedCount: number;
+  infosysCount?: number;
   onOpenSearch?: () => void;
   latestProblems?: DSAProblem[];
   onSelectProblem?: (problem: DSAProblem) => void;
@@ -46,6 +48,7 @@ export const Header: React.FC<Props> = ({
   solvedCount,
   totalCount,
   bookmarkedCount,
+  infosysCount,
   onOpenSearch,
   latestProblems,
   onSelectProblem,
@@ -70,7 +73,7 @@ export const Header: React.FC<Props> = ({
   }, [notifOpen]);
 
   interface NavItem {
-    id: 'dashboard' | 'problems' | 'categories' | 'bookmarks' | 'progress';
+    id: 'dashboard' | 'problems' | 'categories' | 'bookmarks' | 'progress' | 'infosys';
     label: string;
     icon: React.ElementType;
     badge?: number;
@@ -79,6 +82,7 @@ export const Header: React.FC<Props> = ({
   const navItems: NavItem[] = [
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
     { id: 'problems', label: 'Problems', icon: BookOpen },
+    { id: 'infosys', label: 'Infosys Prep', icon: Briefcase, badge: infosysCount },
     { id: 'categories', label: 'Categories', icon: Layers },
     { id: 'bookmarks', label: 'Bookmarks', icon: Bookmark, badge: bookmarkedCount },
     { id: 'progress', label: 'Progress', icon: BarChart3 },

@@ -44,9 +44,22 @@ export const ProblemDetail: React.FC<Props> = ({
   const [activeTab, setActiveTab] = useState<'statement' | 'flow' | 'examples' | 'notes'>(
     'flow'
   );
+  const [selectedSolutionIdx, setSelectedSolutionIdx] = useState(0);
+
+  const solutions = problem.solutions && problem.solutions.length > 0 ? problem.solutions : null;
+  const activeSolution = solutions ? solutions[selectedSolutionIdx] || solutions[0] : null;
+  const activeVisualizerUrl = activeSolution?.visualizerUrl || problem.visualizerUrl;
+  const activeApproach = activeSolution?.approach || problem.approach;
+  const activeFlowSteps =
+    activeSolution?.flowSteps && activeSolution.flowSteps.length > 0
+      ? activeSolution.flowSteps
+      : problem.flowSteps;
+  const activeTimeComplexity = activeSolution?.timeComplexity || problem.timeComplexity;
+  const activeSpaceComplexity = activeSolution?.spaceComplexity || problem.spaceComplexity;
 
   const scrollRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
+    setSelectedSolutionIdx(0);
     scrollRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
   }, [problem.id]);
 
@@ -88,14 +101,14 @@ export const ProblemDetail: React.FC<Props> = ({
           {/* Action buttons */}
           <div className="flex items-center gap-2 self-start md:self-auto flex-wrap">
             {/* Dedicated Interactive Visualizer Link */}
-            {problem.visualizerUrl && (
+            {activeVisualizerUrl && (
               <a
-                href={problem.visualizerUrl}
+                href={activeVisualizerUrl}
                 className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold bg-gradient-to-r from-cyan-600 via-indigo-600 to-violet-600 hover:from-cyan-500 hover:to-violet-500 text-white shadow-md shadow-cyan-500/20 transition-all"
                 title="Navigate to full interactive visualizer page"
               >
                 <Sparkles className="w-3.5 h-3.5 text-cyan-200" />
-                <span>Open Problem Visualizer</span>
+                <span>{activeSolution ? `Open ${activeSolution.label}` : 'Open Problem Visualizer'}</span>
                 <ExternalLink className="w-3 h-3 text-cyan-200" />
               </a>
             )}
@@ -187,8 +200,49 @@ export const ProblemDetail: React.FC<Props> = ({
           {/* TAB 1: VISUAL PROBLEM-SOLVING FLOW */}
           {activeTab === 'flow' && (
             <div className="space-y-6">
+              {/* Solution Variants Switcher when multiple solutions exist */}
+              {solutions && solutions.length > 0 && (
+                <div className="glass-panel rounded-2xl p-4 border border-white/10">
+                  <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
+                    <span className="text-xs font-bold uppercase tracking-wider text-cyan-300 flex items-center gap-1.5">
+                      <Sparkles className="w-3.5 h-3.5" />
+                      <span>Solution Approaches ({solutions.length})</span>
+                    </span>
+                    <span className="text-[11px] font-mono text-slate-400">
+                      Switch between approaches &amp; visualizers in one place
+                    </span>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    {solutions.map((sol, idx) => {
+                      const isAct = idx === selectedSolutionIdx;
+                      return (
+                        <button
+                          key={sol.id}
+                          onClick={() => setSelectedSolutionIdx(idx)}
+                          className={`flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-semibold border transition-all cursor-pointer ${
+                            isAct
+                              ? 'bg-cyan-500/20 border-cyan-400/60 text-white shadow-md shadow-cyan-500/15'
+                              : 'bg-white/[0.03] border-white/10 text-slate-400 hover:text-white hover:bg-white/[0.08]'
+                          }`}
+                        >
+                          <span>{sol.label}</span>
+                          <span className="text-[10px] font-mono text-slate-400">
+                            {sol.timeComplexity}
+                          </span>
+                          {sol.badge && (
+                            <span className="px-1.5 py-0.2 rounded bg-emerald-500/20 border border-emerald-400/30 text-emerald-300 text-[9px] font-mono">
+                              {sol.badge}
+                            </span>
+                          )}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
               {/* Standalone Interactive Visualizer Callout */}
-              {problem.visualizerUrl && (
+              {activeVisualizerUrl && (
                 <div className="glass-panel rounded-2xl p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 border border-cyan-500/30 bg-gradient-to-r from-cyan-950/30 via-slate-900/40 to-indigo-950/30">
                   <div className="flex items-center gap-3.5">
                     <div className="w-10 h-10 rounded-xl bg-cyan-500/20 border border-cyan-500/30 text-cyan-300 flex items-center justify-center shrink-0 shadow-lg shadow-cyan-500/20">
@@ -196,49 +250,55 @@ export const ProblemDetail: React.FC<Props> = ({
                     </div>
                     <div>
                       <h4 className="text-sm font-bold text-white flex items-center gap-2">
-                        <span>Interactive Visualizer Page Available</span>
+                        <span>
+                          {activeSolution
+                            ? `${activeSolution.label} Visualizer Available`
+                            : 'Interactive Visualizer Page Available'}
+                        </span>
                         <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-cyan-400/20 text-cyan-300 border border-cyan-400/30">
                           Full Screen
                         </span>
                       </h4>
                       <p className="text-xs text-slate-300 mt-0.5">
-                        Includes real-time memory registers, code line tracking, speed controls & sound effects.
+                        Includes real-time memory registers, code line tracking, speed controls &amp; sound effects.
                       </p>
                     </div>
                   </div>
 
                   <a
-                    href={problem.visualizerUrl}
+                    href={activeVisualizerUrl}
                     className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold bg-gradient-to-r from-cyan-500 to-indigo-600 hover:from-cyan-400 hover:to-indigo-500 text-white shadow-lg shadow-cyan-500/25 transition-all shrink-0"
                   >
-                    <span>Open Problem Visualizer</span>
+                    <span>{activeSolution ? `Open ${activeSolution.label}` : 'Open Problem Visualizer'}</span>
                     <ExternalLink className="w-3.5 h-3.5" />
                   </a>
                 </div>
               )}
 
               {/* Approach summary banner */}
-              {problem.approach && (
+              {activeApproach && (
                 <div className="glass-panel rounded-2xl p-4 border-l-4 border-l-indigo-500">
                   <span className="text-[11px] font-bold uppercase tracking-wider text-indigo-400 flex items-center gap-1.5 mb-1">
                     <Sparkles className="w-3.5 h-3.5" />
-                    <span>Algorithmic Approach</span>
+                    <span>
+                      {activeSolution ? `Algorithmic Approach (${activeSolution.label})` : 'Algorithmic Approach'}
+                    </span>
                   </span>
                   <p className="text-xs text-slate-200 leading-relaxed font-mono">
-                    {problem.approach}
+                    {activeApproach}
                   </p>
                 </div>
               )}
 
               {/* Step-by-step Interactive Flow component */}
-              <FlowVisualization steps={problem.flowSteps} problemTitle={problem.title} />
+              <FlowVisualization steps={activeFlowSteps} problemTitle={problem.title} />
 
               {/* Complexities Quick Preview */}
               <div className="pt-4 border-t border-white/10">
                 <ComplexityCard
-                  timeComplexity={problem.timeComplexity}
+                  timeComplexity={activeTimeComplexity}
                   timeExplanation={problem.timeComplexityExplanation}
-                  spaceComplexity={problem.spaceComplexity}
+                  spaceComplexity={activeSpaceComplexity}
                   spaceExplanation={problem.spaceComplexityExplanation}
                 />
               </div>
