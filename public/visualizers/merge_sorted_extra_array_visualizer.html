@@ -1,0 +1,2214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Merge Two Sorted Arrays (Extra Array Two-Pointer) — Glassmorphic Java Visualizer</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2064%2064%22%3E%3Cdefs%3E%3ClinearGradient%20id%3D%22bg%22%20x1%3D%220%22%20y1%3D%220%22%20x2%3D%221%22%20y2%3D%221%22%3E%3Cstop%20offset%3D%220%25%22%20stop-color%3D%22%230f172a%22%2F%3E%3Cstop%20offset%3D%22100%25%22%20stop-color%3D%22%23060913%22%2F%3E%3C%2FlinearGradient%3E%3ClinearGradient%20id%3D%22g%22%20x1%3D%220%22%20y1%3D%220%22%20x2%3D%221%22%20y2%3D%221%22%3E%3Cstop%20offset%3D%220%25%22%20stop-color%3D%22%2322d3ee%22%2F%3E%3Cstop%20offset%3D%2255%25%22%20stop-color%3D%22%236366f1%22%2F%3E%3Cstop%20offset%3D%22100%25%22%20stop-color%3D%22%23a855f7%22%2F%3E%3C%2FlinearGradient%3E%3C%2Fdefs%3E%3Crect%20x%3D%222%22%20y%3D%222%22%20width%3D%2260%22%20height%3D%2260%22%20rx%3D%2216%22%20fill%3D%22url(%23bg)%22%20stroke%3D%22url(%23g)%22%20stroke-width%3D%223.5%22%2F%3E%3Cpath%20d%3D%22M20%2042%20L32%2018%20L44%2042%22%20fill%3D%22none%22%20stroke%3D%22url(%23g)%22%20stroke-width%3D%224%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3Cline%20x1%3D%2220%22%20y1%3D%2242%22%20x2%3D%2244%22%20y2%3D%2242%22%20stroke%3D%22%2338bdf8%22%20stroke-width%3D%223%22%20stroke-linecap%3D%22round%22%20opacity%3D%220.55%22%2F%3E%3Ccircle%20cx%3D%2232%22%20cy%3D%2218%22%20r%3D%225.5%22%20fill%3D%22%2322d3ee%22%2F%3E%3Ccircle%20cx%3D%2220%22%20cy%3D%2242%22%20r%3D%225.5%22%20fill%3D%22%236366f1%22%2F%3E%3Ccircle%20cx%3D%2244%22%20cy%3D%2242%22%20r%3D%225.5%22%20fill%3D%22%23a855f7%22%2F%3E%3C%2Fsvg%3E" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <style>
+        :root {
+            --glass-bg: rgba(15, 23, 42, 0.56);
+            --glass-border: rgba(148, 163, 184, 0.22);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background:
+                radial-gradient(circle at 12% 10%, rgba(56, 189, 248, 0.14), transparent 34%),
+                radial-gradient(circle at 88% 12%, rgba(168, 85, 247, 0.15), transparent 36%),
+                radial-gradient(circle at 50% 92%, rgba(16, 185, 129, 0.14), transparent 40%),
+                linear-gradient(160deg, #050914 0%, #091122 50%, #050a16 100%);
+            color: #e2e8f0;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .font-mono-code {
+            font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+        }
+
+        /* Liquid transparent dark-glass panels & subcards */
+        .glass-panel {
+            background: linear-gradient(155deg, rgba(255, 255, 255, 0.085) 0%, rgba(15, 23, 42, 0.56) 45%, rgba(7, 13, 28, 0.72) 100%);
+            backdrop-filter: blur(22px) saturate(145%);
+            -webkit-backdrop-filter: blur(22px) saturate(145%);
+            border: 1px solid rgba(186, 230, 253, 0.18);
+            box-shadow:
+                0 14px 36px rgba(2, 6, 23, 0.52),
+                inset 0 1px 0 rgba(255, 255, 255, 0.22),
+                inset 0 -1px 0 rgba(56, 189, 248, 0.08);
+        }
+
+        .glass-subcard {
+            background: linear-gradient(165deg, rgba(255, 255, 255, 0.05) 0%, rgba(7, 13, 25, 0.58) 100%);
+            backdrop-filter: blur(14px) saturate(130%);
+            -webkit-backdrop-filter: blur(14px) saturate(130%);
+            border: 1px solid rgba(148, 163, 184, 0.18);
+            box-shadow:
+                inset 0 1px 0 rgba(255, 255, 255, 0.12),
+                0 6px 20px rgba(2, 6, 23, 0.32);
+        }
+
+        .glass-pill {
+            background: linear-gradient(160deg, rgba(255, 255, 255, 0.11), rgba(15, 23, 42, 0.48));
+            backdrop-filter: blur(14px) saturate(140%);
+            -webkit-backdrop-filter: blur(14px) saturate(140%);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.18);
+        }
+
+        .glass-btn {
+            background: linear-gradient(165deg, rgba(255, 255, 255, 0.14), rgba(15, 23, 42, 0.56));
+            backdrop-filter: blur(14px) saturate(140%);
+            -webkit-backdrop-filter: blur(14px) saturate(140%);
+            border: 1px solid rgba(255, 255, 255, 0.22);
+            box-shadow:
+                0 6px 16px rgba(2, 6, 23, 0.34),
+                inset 0 1px 0 rgba(255, 255, 255, 0.24);
+            transition: transform 0.15s ease, background 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
+        }
+
+        .glass-btn:hover:not(:disabled) {
+            background: linear-gradient(165deg, rgba(255, 255, 255, 0.22), rgba(30, 41, 59, 0.65));
+            border-color: rgba(125, 211, 252, 0.65);
+            transform: translateY(-1px);
+            box-shadow:
+                0 8px 22px rgba(14, 165, 233, 0.28),
+                inset 0 1px 0 rgba(255, 255, 255, 0.32);
+        }
+
+        .glass-btn:active:not(:disabled) {
+            transform: translateY(0px) scale(0.98);
+        }
+
+        .glass-btn:disabled {
+            opacity: 0.38;
+            cursor: not-allowed;
+        }
+
+        .glass-btn-primary {
+            background: linear-gradient(135deg, rgba(56, 189, 248, 0.45), rgba(16, 185, 129, 0.42));
+            border-color: rgba(125, 211, 252, 0.72);
+            box-shadow:
+                0 0 20px rgba(14, 165, 233, 0.3),
+                inset 0 1px 0 rgba(255, 255, 255, 0.34);
+        }
+
+        .glass-btn-primary:hover:not(:disabled) {
+            background: linear-gradient(135deg, rgba(56, 189, 248, 0.64), rgba(16, 185, 129, 0.58));
+            border-color: rgba(186, 230, 253, 0.92);
+        }
+
+        .glass-btn-active {
+            background: linear-gradient(135deg, rgba(56, 189, 248, 0.38), rgba(52, 211, 153, 0.28));
+            border: 1px solid rgba(125, 211, 252, 0.72);
+            color: #f0f9ff;
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.28);
+        }
+
+        /* Liquid-transparent Glass Element Box & Inner Proportional Bar */
+        .array-box {
+            position: relative;
+            overflow: hidden;
+            backdrop-filter: blur(18px) saturate(170%);
+            -webkit-backdrop-filter: blur(18px) saturate(170%);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            transition: transform 0.22s ease, border-color 0.22s ease, box-shadow 0.22s ease, opacity 0.2s ease;
+        }
+
+        .array-box::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.28) 0%, rgba(255, 255, 255, 0.05) 38%, transparent 62%);
+            pointer-events: none;
+        }
+
+        .array-box.is-ptr-i {
+            outline: 2px solid rgba(56, 189, 248, 0.96);
+            outline-offset: 2px;
+            transform: translateY(-2px);
+        }
+
+        .array-box.is-ptr-j {
+            outline: 2px solid rgba(192, 132, 252, 0.96);
+            outline-offset: 2px;
+            transform: translateY(-2px);
+        }
+
+        .array-box.is-ptr-k {
+            outline: 2px solid rgba(251, 191, 36, 0.96);
+            outline-offset: 2px;
+        }
+
+        .array-box.is-placed {
+            outline: 1.5px solid rgba(52, 211, 153, 0.78);
+            outline-offset: 1px;
+        }
+
+        .array-box.is-empty-slot {
+            background: rgba(15, 23, 42, 0.36) !important;
+            border: 1.5px dashed rgba(148, 163, 184, 0.38) !important;
+            box-shadow: inset 0 2px 10px rgba(2, 6, 23, 0.45) !important;
+        }
+
+        .array-box.is-consumed {
+            opacity: 0.32;
+            filter: saturate(0.45);
+        }
+
+        .array-box.is-unloaded {
+            opacity: 0.22;
+            border-style: dashed;
+        }
+
+        .array-bar {
+            position: relative;
+            overflow: hidden;
+            backdrop-filter: blur(12px) saturate(175%);
+            -webkit-backdrop-filter: blur(12px) saturate(175%);
+            border: 1px solid rgba(255, 255, 255, 0.45);
+            border-top: 2px solid rgba(255, 255, 255, 0.85);
+            transition: height 0.28s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.2s ease;
+        }
+
+        .array-bar::before {
+            content: '';
+            position: absolute;
+            top: 2px;
+            left: 12%;
+            width: 22%;
+            bottom: 2px;
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.46) 0%, rgba(255, 255, 255, 0.05) 100%);
+            border-radius: 999px;
+            pointer-events: none;
+        }
+
+        .array-bar.is-ptr-i {
+            outline: 2px solid rgba(56, 189, 248, 0.96);
+            outline-offset: 2px;
+        }
+
+        .array-bar.is-ptr-j {
+            outline: 2px solid rgba(192, 132, 252, 0.96);
+            outline-offset: 2px;
+        }
+
+        .array-bar.is-ptr-k {
+            outline: 2px solid rgba(251, 191, 36, 0.96);
+            outline-offset: 2px;
+        }
+
+        .array-bar.is-empty-slot {
+            background: rgba(30, 41, 59, 0.35) !important;
+            border: 1px dashed rgba(148, 163, 184, 0.38) !important;
+            box-shadow: none !important;
+        }
+
+        .array-bar.is-consumed {
+            opacity: 0.28;
+            filter: saturate(0.42);
+        }
+
+        .array-bar.is-unloaded {
+            opacity: 0.2;
+            border-style: dashed;
+        }
+
+        /* Floating Liquid-Glass Ghosts (topmost z-50, full opacity) */
+        .flying-ghost {
+            position: absolute;
+            pointer-events: none;
+            z-index: 50;
+            will-change: transform, opacity;
+            overflow: hidden;
+            backdrop-filter: blur(18px) saturate(185%);
+            -webkit-backdrop-filter: blur(18px) saturate(185%);
+        }
+
+        .ghost-from-a {
+            border: 2px solid rgba(186, 230, 253, 0.98) !important;
+            box-shadow: 0 16px 34px rgba(14, 165, 233, 0.48), 0 0 26px rgba(56, 189, 248, 0.55) !important;
+        }
+
+        .ghost-from-b {
+            border: 2px solid rgba(233, 213, 255, 0.98) !important;
+            box-shadow: 0 16px 34px rgba(168, 85, 247, 0.48), 0 0 26px rgba(192, 132, 252, 0.55) !important;
+        }
+
+        /* Code panel with exact 4-space indentation */
+        .code-scroll {
+            max-height: 520px;
+            overflow-y: auto;
+            overflow-x: auto;
+            scrollbar-width: thin;
+            scrollbar-color: rgba(125, 211, 252, 0.4) rgba(15, 23, 42, 0.35);
+        }
+
+        .code-scroll::-webkit-scrollbar {
+            width: 7px;
+            height: 7px;
+        }
+
+        .code-scroll::-webkit-scrollbar-track {
+            background: rgba(15, 23, 42, 0.35);
+            border-radius: 999px;
+        }
+
+        .code-scroll::-webkit-scrollbar-thumb {
+            background: rgba(125, 211, 252, 0.38);
+            border-radius: 999px;
+            border: 1px solid rgba(255, 255, 255, 0.12);
+        }
+
+        .code-scroll::-webkit-scrollbar-thumb:hover {
+            background: rgba(125, 211, 252, 0.62);
+        }
+
+        @media (min-width: 1280px) {
+            .code-scroll {
+                max-height: none;
+            }
+        }
+
+        .code-line {
+            display: flex;
+            align-items: baseline;
+            padding: 2px 12px;
+            border-left: 3px solid transparent;
+            transition: background-color 0.16s ease, border-color 0.16s ease;
+            white-space: pre;
+            font-size: 12.5px;
+            line-height: 1.62;
+        }
+
+        .code-line.active-line {
+            background: linear-gradient(90deg, rgba(56, 189, 248, 0.24), rgba(16, 185, 129, 0.12));
+            border-left-color: #38bdf8;
+            box-shadow: inset 0 0 14px rgba(56, 189, 248, 0.14);
+        }
+
+        .code-ln {
+            width: 32px;
+            flex-shrink: 0;
+            text-align: right;
+            padding-right: 12px;
+            color: rgba(148, 163, 184, 0.55);
+            user-select: none;
+        }
+
+        .code-line.active-line .code-ln {
+            color: #7dd3fc;
+            font-weight: 700;
+        }
+
+        .code-text {
+            white-space: pre;
+            tab-size: 4;
+        }
+
+        /* Syntax highlight tokens */
+        .tok-kw { color: #c084fc; font-weight: 600; }
+        .tok-type { color: #38bdf8; }
+        .tok-num { color: #fbbf24; }
+        .tok-str { color: #34d399; }
+        .tok-cmt { color: #64748b; font-style: italic; }
+        .tok-fn { color: #93c5fd; }
+
+        /* Range scrubber */
+        input[type="range"].glass-slider {
+            -webkit-appearance: none;
+            appearance: none;
+            background: rgba(148, 163, 184, 0.24);
+            height: 6px;
+            border-radius: 999px;
+            outline: none;
+        }
+
+        input[type="range"].glass-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 16px;
+            height: 16px;
+            border-radius: 999px;
+            background: linear-gradient(135deg, #38bdf8, #34d399);
+            border: 2px solid #ffffff;
+            box-shadow: 0 0 12px rgba(56, 189, 248, 0.6);
+            cursor: pointer;
+        }
+
+        input[type="range"].glass-slider::-moz-range-thumb {
+            width: 16px;
+            height: 16px;
+            border-radius: 999px;
+            background: linear-gradient(135deg, #38bdf8, #34d399);
+            border: 2px solid #ffffff;
+            box-shadow: 0 0 12px rgba(56, 189, 248, 0.6);
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body class="antialiased selection:bg-sky-400/30 selection:text-sky-100">
+    <div class="max-w-[1440px] mx-auto px-3 sm:px-5 py-3.5 space-y-3.5">
+
+        <!-- 1. TOP STICKY FROSTED-GLASS PLAYBACK DECK -->
+        <header class="glass-panel rounded-2xl px-4 py-3 space-y-2.5 sticky top-2 z-50">
+            <!-- Row 1: Title | Playback Controls | Speed, Audio & Haptics -->
+            <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3">
+                <!-- Left: Icon + Title + Subtitle -->
+                <div class="flex items-center gap-3 min-w-0">
+                    <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-sky-400 via-emerald-400 to-purple-500 flex items-center justify-center text-slate-950 font-extrabold text-lg shadow-lg shadow-emerald-500/20 shrink-0">
+                        ⛙
+                    </div>
+                    <div class="min-w-0">
+                        <h1 class="text-base sm:text-lg font-bold tracking-tight bg-gradient-to-r from-white via-sky-100 to-emerald-200 bg-clip-text text-transparent truncate">
+                            Merge Two Sorted Arrays (Extra Array Two-Pointer)
+                        </h1>
+                        <p class="text-[11px] text-slate-400 flex items-center gap-1.5 truncate">
+                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 shrink-0"></span>
+                            <span>Standard Two-Pointer Merge into merged[m + n] • O(m + n) Time • O(m + n) Extra Space</span>
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Center: Grouped Glass Playback Buttons -->
+                <div class="glass-pill rounded-xl p-1 flex flex-wrap items-center gap-1.5 self-start lg:self-auto">
+                    <button id="btnReset" class="glass-btn px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-200 flex items-center gap-1.5" title="Reset to Step 1">
+                        <span>↺</span><span>Reset</span>
+                    </button>
+                    <button id="btnPrev" class="glass-btn px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-200 flex items-center gap-1.5" title="Previous Step (Left Arrow)">
+                        <span>⏮</span><span>Previous</span>
+                    </button>
+                    <button id="btnPlayPause" class="glass-btn glass-btn-primary px-4 py-1.5 rounded-lg text-xs font-bold text-white flex items-center gap-1.5 min-w-[88px] justify-center" title="Start / Stop (Space)">
+                        <span id="playIcon">▶</span><span id="playLabel">Start</span>
+                    </button>
+                    <button id="btnNext" class="glass-btn px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-200 flex items-center gap-1.5" title="Next Step (Right Arrow)">
+                        <span>Next</span><span>⏭</span>
+                    </button>
+                </div>
+
+                <!-- Right: Speed Multipliers + Audio + Vibration Toggle -->
+                <div class="flex items-center gap-2 self-start lg:self-auto">
+                    <div class="glass-pill rounded-xl px-2 py-1 flex items-center gap-1 text-xs">
+                        <span class="text-slate-400 text-[11px] mr-1">⏱ Speed</span>
+                        <button data-speed="0.5" class="speed-btn px-2 py-0.5 rounded-md font-mono-code text-slate-300 hover:text-white transition">0.5x</button>
+                        <button data-speed="1" class="speed-btn px-2 py-0.5 rounded-md font-mono-code transition glass-btn-active">1x</button>
+                        <button data-speed="2" class="speed-btn px-2 py-0.5 rounded-md font-mono-code text-slate-300 hover:text-white transition">2x</button>
+                        <button data-speed="4" class="speed-btn px-2 py-0.5 rounded-md font-mono-code text-slate-300 hover:text-white transition">4x</button>
+                    </div>
+                    <button id="btnAudio" class="glass-btn w-9 h-9 rounded-xl flex items-center justify-center text-sm text-slate-200" title="Toggle Audio Cues">
+                        <span id="audioIcon">🔊</span>
+                    </button>
+                    <button id="btnHaptics" class="glass-btn glass-btn-active w-9 h-9 rounded-xl flex items-center justify-center text-sm text-slate-200" title="Toggle Vibration / Haptics">
+                        <span id="hapticsIcon">📳</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Row 2: Live Status Pills + Full-Width Timeline Scrubber -->
+            <div class="flex flex-wrap sm:flex-nowrap items-center gap-2 pt-2 border-t border-white/10">
+                <span id="badgeStep" class="px-2.5 py-1 rounded-lg text-[11px] font-mono-code font-semibold bg-sky-500/15 text-sky-300 border border-sky-400/30 shrink-0">
+                    Step: 1 / 1
+                </span>
+                <span id="phaseBadge" class="px-2.5 py-1 rounded-lg text-[11px] font-mono-code font-semibold bg-cyan-500/15 text-cyan-200 border border-cyan-400/30 shrink-0">
+                    main() Start
+                </span>
+                <span id="badgePtrsTop" class="px-2.5 py-1 rounded-lg text-[11px] font-mono-code font-semibold bg-purple-500/15 text-purple-200 border border-purple-400/30 shrink-0">
+                    i:—  j:—  k:—
+                </span>
+                <span id="badgeMergedTop" class="px-2.5 py-1 rounded-lg text-[11px] font-mono-code font-semibold bg-emerald-500/15 text-emerald-300 border border-emerald-400/30 shrink-0">
+                    Merged: 0 / 6
+                </span>
+                <div class="flex-1 min-w-[140px] flex items-center pl-1">
+                    <input id="stepSlider" type="range" min="0" max="0" value="0" class="glass-slider w-full" />
+                </div>
+            </div>
+        </header>
+
+        <!-- 2. COMPACT TEST CASES & CUSTOM INPUT BAR -->
+        <section class="glass-panel rounded-2xl px-4 py-2.5 space-y-2">
+            <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-2.5">
+                <div class="flex flex-wrap items-center gap-2.5">
+                    <span class="text-[11px] font-bold uppercase tracking-wider text-emerald-300 flex items-center gap-1.5 shrink-0">
+                        <span>🧪</span><span>TEST CASES:</span>
+                    </span>
+                    <select id="presetSelect" class="glass-pill rounded-xl px-3 py-1.5 text-xs text-slate-100 bg-slate-900/90 outline-none focus:border-emerald-400 min-w-[260px]">
+                        <option value="0">1: Classic Interleaved ([1, 4, 7] + [2, 3, 6] → [1,2,3,4,6,7])</option>
+                        <option value="1">2: Leftover in a[] ([1, 5, 9, 12] + [2, 3])</option>
+                        <option value="2">3: Leftover in b[] ([2, 4] + [1, 6, 8, 11])</option>
+                        <option value="3">4: Stability / Equal Ties ([2, 5, 5] + [2, 5, 8])</option>
+                        <option value="4">5: Disjoint Halves ([1, 2, 3] + [7, 8, 9])</option>
+                        <option value="5">6: Reversed Halves ([7, 8, 9] + [1, 2, 3])</option>
+                        <option value="6">7: Negatives Included ([-6, -1, 4] + [-4, 0, 5])</option>
+                        <option value="7">8: Empty a[] ([] + [2, 5, 8])</option>
+                        <option value="8">9: Empty b[] ([1, 4, 7] + [])</option>
+                        <option value="9">10: Eight Total ([1, 5, 9, 13] + [2, 6, 10, 14])</option>
+                    </select>
+                </div>
+
+                <div class="flex flex-wrap items-center gap-2">
+                    <span class="text-xs font-mono-code text-sky-300">a[]:</span>
+                    <input id="customAInput" type="text" placeholder="1, 4, 7" class="glass-pill rounded-xl px-2.5 py-1.5 text-xs font-mono-code text-slate-100 w-28 sm:w-32 outline-none focus:border-sky-400" />
+                    <span class="text-xs font-mono-code text-purple-300">b[]:</span>
+                    <input id="customBInput" type="text" placeholder="2, 3, 6" class="glass-pill rounded-xl px-2.5 py-1.5 text-xs font-mono-code text-slate-100 w-28 sm:w-32 outline-none focus:border-purple-400" />
+                    <button id="btnLoadCustom" class="glass-btn px-3.5 py-1.5 rounded-xl text-xs font-semibold text-emerald-200">
+                        Run Merge
+                    </button>
+                </div>
+            </div>
+            <div id="errorBanner" class="hidden rounded-xl px-3 py-1.5 text-xs font-medium bg-rose-500/20 border border-rose-400/40 text-rose-200"></div>
+        </section>
+
+        <!-- 3. MAIN WORKSPACE: LEFT (5 KPI CARDS + 3-ARRAY MERGE STAGE) & RIGHT (HEIGHT-MATCHED CODE CARD) -->
+        <main class="grid grid-cols-1 xl:grid-cols-12 gap-4 items-stretch">
+
+            <!-- LEFT COLUMN -->
+            <section class="xl:col-span-7 flex flex-col gap-3.5">
+
+                <!-- 5-CARD LIVE TWO-POINTER TELEMETRY ROW -->
+                <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2.5">
+                    <div class="glass-panel rounded-xl p-3 flex flex-col justify-between border border-sky-400/30">
+                        <div class="flex items-center justify-between text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                            <span>PTR i (a[])</span>
+                            <span class="w-2 h-2 rounded-full bg-sky-400"></span>
+                        </div>
+                        <div id="kpiI" class="font-mono-code text-base font-bold text-sky-300 mt-1 truncate">—</div>
+                        <div id="kpiISub" class="text-[10px] font-mono-code text-slate-400 mt-0.5 truncate">0 → m</div>
+                    </div>
+
+                    <div class="glass-panel rounded-xl p-3 flex flex-col justify-between border border-purple-400/30">
+                        <div class="flex items-center justify-between text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                            <span>PTR j (b[])</span>
+                            <span class="w-2 h-2 rounded-full bg-purple-400"></span>
+                        </div>
+                        <div id="kpiJ" class="font-mono-code text-base font-bold text-purple-300 mt-1 truncate">—</div>
+                        <div id="kpiJSub" class="text-[10px] font-mono-code text-slate-400 mt-0.5 truncate">0 → n</div>
+                    </div>
+
+                    <div class="glass-panel rounded-xl p-3 flex flex-col justify-between border border-amber-400/30">
+                        <div class="flex items-center justify-between text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                            <span>WRITE PTR k</span>
+                            <span class="text-amber-400 text-xs">✎</span>
+                        </div>
+                        <div id="kpiK" class="font-mono-code text-base font-bold text-amber-300 mt-1 truncate">—</div>
+                        <div id="kpiKSub" class="text-[10px] font-mono-code text-slate-400 mt-0.5 truncate">merged[k]</div>
+                    </div>
+
+                    <div class="glass-panel rounded-xl p-3 flex flex-col justify-between border border-emerald-400/25">
+                        <div class="flex items-center justify-between text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                            <span>COMPARISON</span>
+                            <span class="text-emerald-400 text-xs">⚖</span>
+                        </div>
+                        <div id="kpiComp" class="font-mono-code text-xs font-bold text-slate-200 mt-1 truncate">Waiting</div>
+                        <div id="kpiCompSub" class="text-[10px] font-mono-code text-slate-400 mt-0.5 truncate">a[i] &lt;= b[j]</div>
+                    </div>
+
+                    <div class="glass-panel rounded-xl p-3 flex flex-col justify-between border border-cyan-400/25 col-span-2 sm:col-span-1">
+                        <div class="flex items-center justify-between text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                            <span>SYSTEM.OUT</span>
+                            <span class="text-cyan-400 font-mono-code text-[11px]">&gt;_</span>
+                        </div>
+                        <div id="kpiStdout" class="font-mono-code text-xs font-bold text-slate-200 mt-1 truncate">pending</div>
+                        <div id="kpiStdoutSub" class="text-[10px] font-mono-code text-emerald-300/80 mt-0.5 truncate">m+n = 6</div>
+                    </div>
+                </div>
+
+                <!-- MAIN 3-ARRAY TWO-POINTER MERGE STAGE -->
+                <div id="stageContainer" class="glass-panel rounded-2xl p-4 space-y-3 relative overflow-hidden">
+                    <!-- Header + Legend + View Mode Toggle -->
+                    <div class="flex flex-wrap items-center justify-between gap-2">
+                        <div class="flex items-center gap-2">
+                            <span class="text-emerald-400 text-sm">⛙</span>
+                            <h2 class="text-xs font-bold uppercase tracking-wider text-slate-100">
+                                Two-Pointer Merge Stage: a[] + b[] → merged[m + n]
+                            </h2>
+                        </div>
+
+                        <div class="flex flex-wrap items-center gap-2.5">
+                            <div class="hidden sm:flex items-center gap-2 text-[10px] text-slate-300">
+                                <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-sm bg-sky-400"></span>i (a)</span>
+                                <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-sm bg-purple-400"></span>j (b)</span>
+                                <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-sm bg-amber-400"></span>k (write)</span>
+                                <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-sm bg-emerald-400"></span>placed</span>
+                            </div>
+                            <div class="glass-pill rounded-lg p-0.5 flex items-center gap-0.5 text-[11px]">
+                                <button data-view="both" class="view-btn px-2 py-0.5 rounded-md font-medium transition glass-btn-active">Bars + Boxes</button>
+                                <button data-view="boxes" class="view-btn px-2 py-0.5 rounded-md font-medium transition text-slate-300">Boxes</button>
+                                <button data-view="bars" class="view-btn px-2 py-0.5 rounded-md font-medium transition text-slate-300">Bars</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 3-Phase Loop Tracker Ribbon -->
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 font-mono-code text-[10.5px]">
+                        <div id="loopCard1" class="rounded-xl px-3 py-1.5 border border-white/10 bg-white/5 flex items-center justify-between">
+                            <span class="text-sky-300 font-semibold">1. while (i&lt;m &amp;&amp; j&lt;n)</span>
+                            <span id="loopStatus1" class="text-slate-400">Pending</span>
+                        </div>
+                        <div id="loopCard2" class="rounded-xl px-3 py-1.5 border border-white/10 bg-white/5 flex items-center justify-between">
+                            <span class="text-cyan-300 font-semibold">2. while (i &lt; m)</span>
+                            <span id="loopStatus2" class="text-slate-400">Pending</span>
+                        </div>
+                        <div id="loopCard3" class="rounded-xl px-3 py-1.5 border border-white/10 bg-white/5 flex items-center justify-between">
+                            <span class="text-purple-300 font-semibold">3. while (j &lt; n)</span>
+                            <span id="loopStatus3" class="text-slate-400">Pending</span>
+                        </div>
+                    </div>
+
+                    <!-- Unified Coordinate Canvas for Source a[], Source b[], and Destination merged[] -->
+                    <div id="visualCanvas" class="glass-subcard rounded-xl relative pt-10 pb-3.5 px-3 select-none overflow-hidden space-y-3.5">
+                        <!-- Top Airspace Label -->
+                        <div class="absolute top-2 left-3 right-3 flex items-center justify-between text-[10px] font-mono-code text-slate-400 z-20">
+                            <span>▲ Lift &amp; Glide Elements From a[i] / b[j] Into merged[k]</span>
+                            <span id="moveStatusBadge" class="hidden px-2 py-0.5 rounded-full bg-emerald-400/15 border border-emerald-400/40 text-emerald-200">
+                                Moving element...
+                            </span>
+                        </div>
+
+                        <!-- SOURCE ARRAYS ROW: a[] (left) and b[] (right) -->
+                        <div class="relative z-10 grid grid-cols-1 md:grid-cols-2 gap-3">
+                            <!-- Array a[] -->
+                            <div class="space-y-1">
+                                <div class="flex items-center justify-between text-[10px] font-mono-code px-1">
+                                    <span class="text-sky-300 font-bold">Source a[0 .. m-1]</span>
+                                    <span id="aMeta" class="text-slate-400">m = 3</span>
+                                </div>
+                                <div id="aGrid" class="flex items-end justify-center gap-1.5 sm:gap-2 px-2 py-2.5 rounded-xl bg-slate-950/45 border border-sky-400/20 min-h-[104px]"></div>
+                            </div>
+
+                            <!-- Array b[] -->
+                            <div class="space-y-1">
+                                <div class="flex items-center justify-between text-[10px] font-mono-code px-1">
+                                    <span class="text-purple-300 font-bold">Source b[0 .. n-1]</span>
+                                    <span id="bMeta" class="text-slate-400">n = 3</span>
+                                </div>
+                                <div id="bGrid" class="flex items-end justify-center gap-1.5 sm:gap-2 px-2 py-2.5 rounded-xl bg-slate-950/45 border border-purple-400/20 min-h-[104px]"></div>
+                            </div>
+                        </div>
+
+                        <!-- DESTINATION EXTRA ARRAY: merged[m + n] -->
+                        <div class="relative z-10 space-y-1">
+                            <div class="flex items-center justify-between text-[10px] font-mono-code px-1">
+                                <span class="text-emerald-300 font-bold">Extra Array merged[0 .. m+n-1]</span>
+                                <span id="mergedMeta" class="text-amber-300/90">O(m + n) auxiliary space</span>
+                            </div>
+                            <div id="mergedGrid" class="flex items-end justify-center gap-1.5 sm:gap-2 px-2 py-2.5 rounded-xl bg-slate-950/55 border border-emerald-400/25 min-h-[108px]"></div>
+                        </div>
+
+                        <!-- SVG Overlay for Comparison & Lift-and-Glide Trajectory Arcs (z-30) -->
+                        <svg id="arcOverlay" class="absolute inset-0 w-full h-full pointer-events-none z-30" xmlns="http://www.w3.org/2000/svg">
+                            <defs>
+                                <marker id="arrowSky" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                                    <path d="M 0 1 L 10 5 L 0 9 z" fill="#38bdf8" />
+                                </marker>
+                                <marker id="arrowPurple" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                                    <path d="M 0 1 L 10 5 L 0 9 z" fill="#c084fc" />
+                                </marker>
+                                <marker id="arrowAmber" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                                    <path d="M 0 1 L 10 5 L 0 9 z" fill="#fbbf24" />
+                                </marker>
+                            </defs>
+                            <g id="arcGroup"></g>
+                        </svg>
+
+                        <!-- Floating Liquid-Glass Ghost Layer (topmost z-50) -->
+                        <div id="ghostLayer" class="absolute inset-0 pointer-events-none z-50"></div>
+                    </div>
+
+                    <!-- Merge Placement Log -->
+                    <div class="glass-subcard rounded-xl px-3 py-2.5 space-y-1.5">
+                        <div class="flex items-center justify-between text-[10px] font-mono-code">
+                            <span class="text-slate-300 font-semibold uppercase tracking-wider">Left-to-Right Merge Copy Log (k = 0 → m+n-1)</span>
+                            <span id="ledgerCountBadge" class="text-emerald-300 font-semibold">0 copied</span>
+                        </div>
+                        <div id="mergeLedger" class="flex flex-wrap items-center gap-1.5 font-mono-code text-[10px]"></div>
+                    </div>
+
+                    <!-- Bottom Row Inside Stage Card: Console + Live Info Narration -->
+                    <div class="grid grid-cols-1 md:grid-cols-12 gap-3">
+                        <div class="md:col-span-5 glass-subcard rounded-xl p-3 space-y-1.5">
+                            <div class="flex items-center justify-between text-[11px] font-mono-code">
+                                <span class="text-amber-300 font-semibold flex items-center gap-1.5">
+                                    <span>▤</span><span>Standard I/O Console</span>
+                                </span>
+                                <span id="ioStdout" class="text-emerald-300 truncate max-w-[130px]">stdout: —</span>
+                            </div>
+                            <div id="ioStdin" class="text-[10px] font-mono-code text-slate-400 truncate">stdin: 3 3 | [1 4 7] | [2 3 6]</div>
+                        </div>
+
+                        <div class="md:col-span-7 glass-subcard rounded-xl p-3 flex items-center gap-2.5">
+                            <span class="w-5 h-5 rounded-full bg-sky-400/20 border border-sky-400/40 text-sky-300 flex items-center justify-center text-[11px] font-bold shrink-0">i</span>
+                            <p id="stepNarration" class="text-xs font-mono-code text-sky-200 leading-relaxed">
+                                Press Start or Next to trace the standard two-pointer merge into merged[].
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- RIGHT COLUMN: HEIGHT-LOCKED SCROLLABLE JAVA CODE CARD WITH FOOTER NARRATION -->
+            <div class="xl:col-span-5 xl:relative">
+                <aside class="xl:absolute xl:inset-0 glass-panel rounded-2xl overflow-hidden flex flex-col">
+                    <!-- Code Header -->
+                    <div class="px-4 py-2.5 border-b border-white/10 flex items-center justify-between gap-2 bg-slate-950/45 shrink-0">
+                        <div class="flex items-center gap-2">
+                            <span class="w-2.5 h-2.5 rounded-full bg-rose-400/90"></span>
+                            <span class="w-2.5 h-2.5 rounded-full bg-amber-400/90"></span>
+                            <span class="w-2.5 h-2.5 rounded-full bg-emerald-400/90"></span>
+                            <span class="font-mono-code text-xs font-semibold text-slate-200 ml-1">Main.java</span>
+                        </div>
+                        <span id="activeFrameBadge" class="px-2.5 py-0.5 rounded-lg font-mono-code text-[11px] bg-sky-500/15 text-sky-300 border border-sky-400/35">
+                            Frame: main()
+                        </span>
+                    </div>
+
+                    <!-- Scrollable Code Body -->
+                    <div id="codeContainer" class="code-scroll relative flex-1 min-h-0 py-2 font-mono-code bg-[#070d19]/80"></div>
+
+                    <!-- Code Card Footer Narration -->
+                    <div class="px-4 py-2.5 border-t border-white/10 bg-slate-950/55 flex items-center gap-2 shrink-0">
+                        <span class="w-4 h-4 rounded-full bg-sky-400/20 border border-sky-400/40 text-sky-300 flex items-center justify-center text-[10px] font-bold shrink-0">i</span>
+                        <span id="codeFooterNarration" class="text-[11px] font-mono-code text-sky-200 truncate">
+                            Entered main(String[] args).
+                        </span>
+                    </div>
+                </aside>
+            </div>
+        </main>
+
+        <!-- 4. BOTTOM DOSSIER: 2-COLUMN COMPLETE PROBLEM STATEMENT & DETAILED ALGORITHM SUMMARY -->
+        <section class="grid grid-cols-1 lg:grid-cols-2 gap-4 pb-6">
+            <!-- Left: Complete Problem Statement -->
+            <article class="glass-panel rounded-2xl p-5 space-y-3.5">
+                <div class="flex flex-wrap items-center justify-between gap-2">
+                    <div class="flex items-center gap-2">
+                        <span class="text-amber-400 text-sm">📄</span>
+                        <h2 class="text-sm font-bold text-amber-300">Problem Statement</h2>
+                        <span class="px-2 py-0.5 rounded-md text-[10px] font-semibold bg-emerald-500/15 text-emerald-300 border border-emerald-400/30">
+                            Easy / Two Pointers
+                        </span>
+                    </div>
+                    <span class="text-[11px] font-mono-code text-slate-400">Merge Sort Subroutine • Extra Array</span>
+                </div>
+
+                <p class="text-xs sm:text-sm text-slate-200 leading-relaxed">
+                    Given two sorted integer arrays <code class="font-mono-code text-sky-300">a[]</code> of length <code class="font-mono-code text-sky-300">m</code> and <code class="font-mono-code text-purple-300">b[]</code> of length <code class="font-mono-code text-purple-300">n</code>, combine all elements into a new sorted array <code class="font-mono-code text-emerald-300">merged[]</code> of size <code class="font-mono-code text-emerald-300">m + n</code> and print the merged sequence.
+                </p>
+
+                <!-- Key Characteristics & Trade-offs -->
+                <div class="rounded-xl p-3.5 bg-amber-500/10 border border-amber-400/25 space-y-1.5">
+                    <div class="text-xs font-bold text-amber-300 flex items-center gap-1.5">
+                        <span>📌</span><span>Key Properties &amp; How It Compares</span>
+                    </div>
+                    <ul class="text-xs text-slate-200 space-y-1.5 leading-relaxed">
+                        <li>• <strong>Simplest &amp; Fastest Linear Merge:</strong> Runs in clean <code class="font-mono-code text-emerald-300">O(m + n)</code> time and forms the core merge step of <strong>Merge Sort</strong>.</li>
+                        <li>• <strong>Not In-Place:</strong> Allocates an extra array <code class="font-mono-code text-amber-300">int[] merged = new int[m + n]</code>, using <code class="font-mono-code text-amber-300">O(m + n)</code> auxiliary space (unlike LeetCode 88 or the Gap Method).</li>
+                        <li>• <strong>Stable Ordering:</strong> Using <code class="font-mono-code text-sky-300">a[i] &lt;= b[j]</code> preserves the relative order of equal elements (<code class="font-mono-code">a[]</code> elements come before equal <code class="font-mono-code">b[]</code> elements).</li>
+                    </ul>
+                </div>
+
+                <!-- Input / Output Format -->
+                <div class="glass-subcard rounded-xl p-3 grid grid-cols-1 sm:grid-cols-2 gap-2.5 text-[11px] font-mono-code text-slate-300">
+                    <div class="space-y-1">
+                        <div class="text-[10px] font-bold uppercase tracking-wider text-sky-300">Input Format</div>
+                        <div>Line 1: <span class="text-white">m n</span> (array sizes)</div>
+                        <div>Line 2: <span class="text-sky-300">m sorted ints</span> (a[])</div>
+                        <div>Line 3: <span class="text-purple-300">n sorted ints</span> (b[])</div>
+                    </div>
+                    <div class="space-y-1">
+                        <div class="text-[10px] font-bold uppercase tracking-wider text-emerald-300">Sample Output</div>
+                        <div>Input: <span class="text-white">3 3 / 1 4 7 / 2 3 6</span></div>
+                        <div>Output: <span class="text-emerald-300 font-bold">1 2 3 4 6 7</span></div>
+                    </div>
+                </div>
+            </article>
+
+            <!-- Right: Detailed Algorithm Summary & Complexity Analysis -->
+            <article class="glass-panel rounded-2xl p-5 space-y-3.5">
+                <div class="flex flex-wrap items-center justify-between gap-2">
+                    <div class="flex items-center gap-2">
+                        <span class="text-cyan-400 text-sm">🧠</span>
+                        <h2 class="text-sm font-bold text-cyan-300">Algorithm Summary &amp; Complexity Analysis</h2>
+                    </div>
+                    <span class="px-2.5 py-0.5 rounded-md text-[11px] font-mono-code bg-emerald-500/15 text-emerald-300 border border-emerald-400/30">
+                        O(m + n) Time • O(m + n) Space
+                    </span>
+                </div>
+
+                <!-- 1. Why Use Two Pointers? -->
+                <div class="rounded-xl p-3.5 bg-sky-500/10 border border-sky-400/25 space-y-1.5">
+                    <div class="text-xs font-bold text-sky-300 flex items-center gap-1.5">
+                        <span>🎯</span><span>1. Why Use Two Pointers Instead of Concatenating &amp; Sorting?</span>
+                    </div>
+                    <p class="text-xs text-slate-200 leading-relaxed">
+                        Copying both arrays into <code class="font-mono-code">merged[]</code> and calling <code class="font-mono-code">Arrays.sort(merged)</code> ignores the fact that <code class="font-mono-code text-sky-300">a[]</code> and <code class="font-mono-code text-purple-300">b[]</code> are <em>already sorted</em>, wasting <code class="font-mono-code text-rose-300">O((m+n) log(m+n))</code> time. Because the next smallest element overall must always be at the front of either <code class="font-mono-code text-sky-300">a[i]</code> or <code class="font-mono-code text-purple-300">b[j]</code>, comparing just those two front elements finishes in optimal <code class="font-mono-code text-emerald-300">O(m + n)</code> linear time!
+                    </p>
+                </div>
+
+                <!-- 2. How the 3 While Loops Work -->
+                <div class="rounded-xl p-3.5 bg-purple-500/10 border border-purple-400/30 space-y-2">
+                    <div class="text-xs font-bold text-purple-300 flex items-center gap-1.5">
+                        <span>⚙️</span><span>2. How the Three <code class="font-mono-code">while</code> Loops Work Step-by-Step:</span>
+                    </div>
+                    <ul class="text-xs text-slate-200 space-y-1.5 leading-relaxed">
+                        <li>
+                            <strong class="text-sky-300">Loop 1 (<code class="font-mono-code">while (i &lt; m &amp;&amp; j &lt; n)</code>):</strong> Compare <code class="font-mono-code">a[i]</code> and <code class="font-mono-code">b[j]</code>. Copy the smaller value into <code class="font-mono-code">merged[k++]</code> and advance that array's pointer (<code class="font-mono-code">i++</code> or <code class="font-mono-code">j++</code>).
+                        </li>
+                        <li>
+                            <strong class="text-cyan-300">Loop 2 (<code class="font-mono-code">while (i &lt; m)</code>):</strong> Once <code class="font-mono-code">b[]</code> runs out, drain any remaining elements from <code class="font-mono-code">a[]</code> directly into <code class="font-mono-code">merged[]</code>.
+                        </li>
+                        <li>
+                            <strong class="text-purple-300">Loop 3 (<code class="font-mono-code">while (j &lt; n)</code>):</strong> Conversely, if <code class="font-mono-code">a[]</code> ran out first, drain all remaining elements from <code class="font-mono-code">b[]</code> into <code class="font-mono-code">merged[]</code>. At most one of Loops 2 &amp; 3 executes.
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Bottom 2 Complexity Subcards -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div class="glass-subcard rounded-xl p-3">
+                        <div class="text-[10px] font-bold uppercase tracking-wider text-slate-400">TIME COMPLEXITY</div>
+                        <div class="font-mono-code text-base font-bold text-emerald-400 mt-0.5">O(m + n)</div>
+                        <div class="text-[11px] text-slate-400 mt-0.5">
+                            Every element from <code class="font-mono-code text-slate-300">a[]</code> and <code class="font-mono-code text-slate-300">b[]</code> is visited and copied exactly once.
+                        </div>
+                    </div>
+                    <div class="glass-subcard rounded-xl p-3">
+                        <div class="text-[10px] font-bold uppercase tracking-wider text-slate-400">AUXILIARY SPACE</div>
+                        <div class="font-mono-code text-base font-bold text-amber-400 mt-0.5">O(m + n)</div>
+                        <div class="text-[11px] text-slate-400 mt-0.5">
+                            Allocates the extra output array <code class="font-mono-code text-slate-300">int[] merged = new int[m + n]</code>.
+                        </div>
+                    </div>
+                </div>
+            </article>
+        </section>
+    </div>
+
+    <script>
+        /* =========================================================================
+           1. EXACT JAVA SOURCE CODE (4-Space Indentation, Strict Line Numbers)
+           ========================================================================= */
+        const JAVA_CODE_LINES = [
+            'import java.util.*;',
+            '',
+            'public class Main {',
+            '    public static void main(String[] args) {',
+            '        Scanner sc = new Scanner(System.in);',
+            '',
+            '        int m = sc.nextInt();',
+            '        int n = sc.nextInt();',
+            '',
+            '        int[] a = new int[m];',
+            '        int[] b = new int[n];',
+            '',
+            '        for (int i = 0; i < m; i++) a[i] = sc.nextInt();',
+            '        for (int i = 0; i < n; i++) b[i] = sc.nextInt();',
+            '',
+            '        int[] merged = new int[m + n];',
+            '        int i = 0, j = 0, k = 0;',
+            '',
+            '        while (i < m && j < n) {',
+            '            if (a[i] <= b[j]) {',
+            '                merged[k++] = a[i++];',
+            '            } else {',
+            '                merged[k++] = b[j++];',
+            '            }',
+            '        }',
+            '',
+            '        while (i < m) merged[k++] = a[i++];',
+            '        while (j < n) merged[k++] = b[j++];',
+            '',
+            '        for (int x : merged) System.out.print(x + " ");',
+            '        System.out.println();',
+            '    }',
+            '}'
+        ];
+
+        /* =========================================================================
+           2. UNIQUE LIQUID-GLASS COLOR PALETTE & CURATED PRESETS
+           ========================================================================= */
+        const LIQUID_PALETTE = [
+            { // 0: Cyan
+                boxBg: 'linear-gradient(160deg, rgba(56, 189, 248, 0.30) 0%, rgba(14, 165, 233, 0.13) 55%, rgba(8, 47, 73, 0.34) 100%)',
+                boxBorder: 'rgba(125, 211, 252, 0.65)',
+                boxGlow: '0 8px 22px rgba(14, 165, 233, 0.25), inset 0 1px 1px rgba(224, 242, 254, 0.55)',
+                barBg: 'linear-gradient(180deg, rgba(125, 211, 252, 0.88) 0%, rgba(14, 165, 233, 0.52) 55%, rgba(3, 105, 161, 0.32) 100%)',
+                barBorder: 'rgba(186, 230, 253, 0.9)',
+                barGlow: '0 0 16px rgba(56, 189, 248, 0.45), inset 0 1px 2px rgba(255, 255, 255, 0.7)'
+            },
+            { // 1: Emerald
+                boxBg: 'linear-gradient(160deg, rgba(52, 211, 153, 0.30) 0%, rgba(16, 185, 129, 0.13) 55%, rgba(6, 78, 59, 0.34) 100%)',
+                boxBorder: 'rgba(110, 231, 183, 0.65)',
+                boxGlow: '0 8px 22px rgba(16, 185, 129, 0.25), inset 0 1px 1px rgba(209, 250, 229, 0.55)',
+                barBg: 'linear-gradient(180deg, rgba(110, 231, 183, 0.88) 0%, rgba(16, 185, 129, 0.52) 55%, rgba(4, 120, 87, 0.32) 100%)',
+                barBorder: 'rgba(167, 243, 208, 0.9)',
+                barGlow: '0 0 16px rgba(52, 211, 153, 0.45), inset 0 1px 2px rgba(255, 255, 255, 0.7)'
+            },
+            { // 2: Teal
+                boxBg: 'linear-gradient(160deg, rgba(45, 212, 191, 0.30) 0%, rgba(20, 184, 166, 0.13) 55%, rgba(4, 47, 46, 0.34) 100%)',
+                boxBorder: 'rgba(94, 234, 212, 0.65)',
+                boxGlow: '0 8px 22px rgba(20, 184, 166, 0.25), inset 0 1px 1px rgba(204, 251, 241, 0.55)',
+                barBg: 'linear-gradient(180deg, rgba(94, 234, 212, 0.88) 0%, rgba(20, 184, 166, 0.52) 55%, rgba(15, 118, 110, 0.32) 100%)',
+                barBorder: 'rgba(153, 246, 228, 0.9)',
+                barGlow: '0 0 16px rgba(45, 212, 191, 0.45), inset 0 1px 2px rgba(255, 255, 255, 0.7)'
+            },
+            { // 3: Blue
+                boxBg: 'linear-gradient(160deg, rgba(96, 165, 250, 0.30) 0%, rgba(59, 130, 246, 0.13) 55%, rgba(23, 37, 84, 0.34) 100%)',
+                boxBorder: 'rgba(147, 197, 253, 0.65)',
+                boxGlow: '0 8px 22px rgba(59, 130, 246, 0.25), inset 0 1px 1px rgba(219, 234, 254, 0.55)',
+                barBg: 'linear-gradient(180deg, rgba(147, 197, 253, 0.88) 0%, rgba(59, 130, 246, 0.52) 55%, rgba(29, 78, 216, 0.32) 100%)',
+                barBorder: 'rgba(191, 219, 254, 0.9)',
+                barGlow: '0 0 16px rgba(96, 165, 250, 0.45), inset 0 1px 2px rgba(255, 255, 255, 0.7)'
+            },
+            { // 4: Violet
+                boxBg: 'linear-gradient(160deg, rgba(167, 139, 250, 0.30) 0%, rgba(139, 92, 246, 0.13) 55%, rgba(46, 16, 101, 0.34) 100%)',
+                boxBorder: 'rgba(196, 181, 253, 0.65)',
+                boxGlow: '0 8px 22px rgba(139, 92, 246, 0.25), inset 0 1px 1px rgba(237, 233, 254, 0.55)',
+                barBg: 'linear-gradient(180deg, rgba(196, 181, 253, 0.88) 0%, rgba(139, 92, 246, 0.52) 55%, rgba(91, 33, 182, 0.32) 100%)',
+                barBorder: 'rgba(221, 214, 254, 0.9)',
+                barGlow: '0 0 16px rgba(167, 139, 250, 0.45), inset 0 1px 2px rgba(255, 255, 255, 0.7)'
+            },
+            { // 5: Fuchsia
+                boxBg: 'linear-gradient(160deg, rgba(232, 121, 249, 0.30) 0%, rgba(217, 70, 239, 0.13) 55%, rgba(74, 4, 78, 0.34) 100%)',
+                boxBorder: 'rgba(240, 171, 252, 0.65)',
+                boxGlow: '0 8px 22px rgba(217, 70, 239, 0.25), inset 0 1px 1px rgba(250, 232, 255, 0.55)',
+                barBg: 'linear-gradient(180deg, rgba(240, 171, 252, 0.88) 0%, rgba(217, 70, 239, 0.52) 55%, rgba(134, 25, 143, 0.32) 100%)',
+                barBorder: 'rgba(245, 208, 254, 0.9)',
+                barGlow: '0 0 16px rgba(232, 121, 249, 0.45), inset 0 1px 2px rgba(255, 255, 255, 0.7)'
+            },
+            { // 6: Amber
+                boxBg: 'linear-gradient(160deg, rgba(251, 191, 36, 0.30) 0%, rgba(245, 158, 11, 0.13) 55%, rgba(69, 26, 3, 0.34) 100%)',
+                boxBorder: 'rgba(253, 224, 71, 0.65)',
+                boxGlow: '0 8px 22px rgba(245, 158, 11, 0.25), inset 0 1px 1px rgba(254, 243, 199, 0.55)',
+                barBg: 'linear-gradient(180deg, rgba(253, 224, 71, 0.88) 0%, rgba(245, 158, 11, 0.52) 55%, rgba(180, 83, 9, 0.32) 100%)',
+                barBorder: 'rgba(254, 240, 138, 0.9)',
+                barGlow: '0 0 16px rgba(251, 191, 36, 0.45), inset 0 1px 2px rgba(255, 255, 255, 0.7)'
+            },
+            { // 7: Rose
+                boxBg: 'linear-gradient(160deg, rgba(251, 113, 133, 0.30) 0%, rgba(244, 63, 94, 0.13) 55%, rgba(76, 5, 25, 0.34) 100%)',
+                boxBorder: 'rgba(253, 164, 175, 0.65)',
+                boxGlow: '0 8px 22px rgba(244, 63, 94, 0.25), inset 0 1px 1px rgba(255, 228, 230, 0.55)',
+                barBg: 'linear-gradient(180deg, rgba(253, 164, 175, 0.88) 0%, rgba(244, 63, 94, 0.52) 55%, rgba(159, 18, 57, 0.32) 100%)',
+                barBorder: 'rgba(254, 205, 211, 0.9)',
+                barGlow: '0 0 16px rgba(251, 113, 133, 0.45), inset 0 1px 2px rgba(255, 255, 255, 0.7)'
+            },
+            { // 8: Orange
+                boxBg: 'linear-gradient(160deg, rgba(251, 146, 60, 0.30) 0%, rgba(249, 115, 22, 0.13) 55%, rgba(67, 20, 7, 0.34) 100%)',
+                boxBorder: 'rgba(253, 186, 116, 0.65)',
+                boxGlow: '0 8px 22px rgba(249, 115, 22, 0.25), inset 0 1px 1px rgba(255, 237, 213, 0.55)',
+                barBg: 'linear-gradient(180deg, rgba(253, 186, 116, 0.88) 0%, rgba(249, 115, 22, 0.52) 55%, rgba(194, 65, 12, 0.32) 100%)',
+                barBorder: 'rgba(254, 215, 170, 0.9)',
+                barGlow: '0 0 16px rgba(251, 146, 60, 0.45), inset 0 1px 2px rgba(255, 255, 255, 0.7)'
+            },
+            { // 9: Lime
+                boxBg: 'linear-gradient(160deg, rgba(163, 230, 53, 0.28) 0%, rgba(132, 204, 22, 0.13) 55%, rgba(26, 46, 5, 0.34) 100%)',
+                boxBorder: 'rgba(190, 242, 100, 0.65)',
+                boxGlow: '0 8px 22px rgba(132, 204, 22, 0.25), inset 0 1px 1px rgba(236, 252, 203, 0.55)',
+                barBg: 'linear-gradient(180deg, rgba(190, 242, 100, 0.88) 0%, rgba(132, 204, 22, 0.52) 55%, rgba(77, 124, 15, 0.32) 100%)',
+                barBorder: 'rgba(217, 249, 157, 0.9)',
+                barGlow: '0 0 16px rgba(163, 230, 53, 0.45), inset 0 1px 2px rgba(255, 255, 255, 0.7)'
+            }
+        ];
+
+        function getTheme(colorId) {
+            if (colorId === null || colorId === undefined) return null;
+            return LIQUID_PALETTE[Math.abs(colorId) % LIQUID_PALETTE.length];
+        }
+
+        const PRESETS = [
+            { a: [1, 4, 7], b: [2, 3, 6] },
+            { a: [1, 5, 9, 12], b: [2, 3] },
+            { a: [2, 4], b: [1, 6, 8, 11] },
+            { a: [2, 5, 5], b: [2, 5, 8] },
+            { a: [1, 2, 3], b: [7, 8, 9] },
+            { a: [7, 8, 9], b: [1, 2, 3] },
+            { a: [-6, -1, 4], b: [-4, 0, 5] },
+            { a: [], b: [2, 5, 8] },
+            { a: [1, 4, 7], b: [] },
+            { a: [1, 5, 9, 13], b: [2, 6, 10, 14] }
+        ];
+
+        /* =========================================================================
+           3. APPLICATION STATE
+           ========================================================================= */
+        let currentA = [...PRESETS[0].a];
+        let currentB = [...PRESETS[0].b];
+        let steps = [];
+        let stepIndex = 0;
+        let isPlaying = false;
+        let playTimer = null;
+        let speedMultiplier = 1;
+        let viewMode = 'both'; // 'both' | 'boxes' | 'bars'
+        let audioEnabled = true;
+        let hapticsEnabled = true;
+        let audioCtx = null;
+        let activeAnimations = [];
+        let lastScrubCueAt = 0;
+
+        /* =========================================================================
+           4. DOM ELEMENT REFERENCES
+           ========================================================================= */
+        const el = {
+            badgeStep: document.getElementById('badgeStep'),
+            phaseBadge: document.getElementById('phaseBadge'),
+            badgePtrsTop: document.getElementById('badgePtrsTop'),
+            badgeMergedTop: document.getElementById('badgeMergedTop'),
+            btnReset: document.getElementById('btnReset'),
+            btnPrev: document.getElementById('btnPrev'),
+            btnPlayPause: document.getElementById('btnPlayPause'),
+            playIcon: document.getElementById('playIcon'),
+            playLabel: document.getElementById('playLabel'),
+            btnNext: document.getElementById('btnNext'),
+            btnAudio: document.getElementById('btnAudio'),
+            audioIcon: document.getElementById('audioIcon'),
+            btnHaptics: document.getElementById('btnHaptics'),
+            hapticsIcon: document.getElementById('hapticsIcon'),
+            stepSlider: document.getElementById('stepSlider'),
+            presetSelect: document.getElementById('presetSelect'),
+            customAInput: document.getElementById('customAInput'),
+            customBInput: document.getElementById('customBInput'),
+            btnLoadCustom: document.getElementById('btnLoadCustom'),
+            errorBanner: document.getElementById('errorBanner'),
+            kpiI: document.getElementById('kpiI'),
+            kpiISub: document.getElementById('kpiISub'),
+            kpiJ: document.getElementById('kpiJ'),
+            kpiJSub: document.getElementById('kpiJSub'),
+            kpiK: document.getElementById('kpiK'),
+            kpiKSub: document.getElementById('kpiKSub'),
+            kpiComp: document.getElementById('kpiComp'),
+            kpiCompSub: document.getElementById('kpiCompSub'),
+            kpiStdout: document.getElementById('kpiStdout'),
+            kpiStdoutSub: document.getElementById('kpiStdoutSub'),
+            loopCards: [
+                document.getElementById('loopCard1'),
+                document.getElementById('loopCard2'),
+                document.getElementById('loopCard3')
+            ],
+            loopStatuses: [
+                document.getElementById('loopStatus1'),
+                document.getElementById('loopStatus2'),
+                document.getElementById('loopStatus3')
+            ],
+            visualCanvas: document.getElementById('visualCanvas'),
+            moveStatusBadge: document.getElementById('moveStatusBadge'),
+            aMeta: document.getElementById('aMeta'),
+            bMeta: document.getElementById('bMeta'),
+            mergedMeta: document.getElementById('mergedMeta'),
+            aGrid: document.getElementById('aGrid'),
+            bGrid: document.getElementById('bGrid'),
+            mergedGrid: document.getElementById('mergedGrid'),
+            arcGroup: document.getElementById('arcGroup'),
+            ghostLayer: document.getElementById('ghostLayer'),
+            ledgerCountBadge: document.getElementById('ledgerCountBadge'),
+            mergeLedger: document.getElementById('mergeLedger'),
+            ioStdin: document.getElementById('ioStdin'),
+            ioStdout: document.getElementById('ioStdout'),
+            stepNarration: document.getElementById('stepNarration'),
+            codeFooterNarration: document.getElementById('codeFooterNarration'),
+            activeFrameBadge: document.getElementById('activeFrameBadge'),
+            codeContainer: document.getElementById('codeContainer')
+        };
+
+        /* =========================================================================
+           5. WEB AUDIO SYNTHESIZER & HAPTIC VIBRATION ENGINE
+           ========================================================================= */
+        function initAudio() {
+            try {
+                if (!audioCtx) {
+                    const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+                    if (AudioContextClass) audioCtx = new AudioContextClass();
+                }
+                if (audioCtx && audioCtx.state === 'suspended') {
+                    return audioCtx.resume().catch(() => {});
+                }
+            } catch (_) {}
+            return Promise.resolve();
+        }
+
+        function scheduleOsc(freq, duration, type, gainPeak, delayOffset = 0, slideToFreq = null) {
+            if (!audioCtx) return;
+            const now = audioCtx.currentTime + delayOffset;
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = type;
+            osc.frequency.setValueAtTime(freq, now);
+            if (slideToFreq !== null) {
+                osc.frequency.exponentialRampToValueAtTime(Math.max(20, slideToFreq), now + duration);
+            }
+            gain.gain.setValueAtTime(0.0001, now);
+            gain.gain.exponentialRampToValueAtTime(gainPeak, now + 0.012);
+            gain.gain.exponentialRampToValueAtTime(0.0001, now + duration);
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.start(now);
+            osc.stop(now + duration + 0.02);
+        }
+
+        function playTone(freq = 440, duration = 0.1, type = 'sine', gainPeak = 0.17, withThump = true) {
+            if (!audioEnabled) return;
+            try {
+                const startSound = () => {
+                    if (!audioCtx) return;
+                    scheduleOsc(freq, duration, type, gainPeak, 0);
+                    if (withThump) {
+                        scheduleOsc(125, 0.075, 'sine', Math.min(0.24, gainPeak * 1.15), 0, 48);
+                    }
+                };
+                if (!audioCtx || audioCtx.state === 'suspended') {
+                    initAudio().then(startSound);
+                } else {
+                    startSound();
+                }
+            } catch (_) {}
+        }
+
+        function playChord(freqs, duration = 0.16, type = 'triangle', gainPeak = 0.16) {
+            if (!audioEnabled) return;
+            try {
+                const startChord = () => {
+                    if (!audioCtx) return;
+                    scheduleOsc(130, 0.085, 'sine', 0.21, 0, 52);
+                    freqs.forEach((f, idx) => scheduleOsc(f, duration, type, gainPeak, idx * 0.045));
+                };
+                if (!audioCtx || audioCtx.state === 'suspended') {
+                    initAudio().then(startChord);
+                } else {
+                    startChord();
+                }
+            } catch (_) {}
+        }
+
+        function triggerVibration(pattern = 20) {
+            if (!hapticsEnabled) return;
+            try {
+                if (typeof navigator !== 'undefined' && typeof navigator.vibrate === 'function') {
+                    navigator.vibrate(pattern);
+                }
+            } catch (_) {}
+        }
+
+        function triggerStepFeedback(step) {
+            if (step.anim?.fromArr === 'a') {
+                playChord([587, 784], 0.15, 'triangle', 0.17);
+                triggerVibration([26, 22, 36]);
+            } else if (step.anim?.fromArr === 'b') {
+                playChord([659, 880], 0.15, 'triangle', 0.17);
+                triggerVibration([28, 22, 40]);
+            } else if (step.isDone) {
+                playChord([523, 659, 784, 1046], 0.2, 'sine', 0.18);
+                triggerVibration([45, 35, 70]);
+            } else {
+                playTone(460, 0.085, 'sine', 0.14, true);
+                triggerVibration(18);
+            }
+        }
+
+        /* =========================================================================
+           6. SYNTAX HIGHLIGHTER & CODE PANEL
+           ========================================================================= */
+        function escapeHtml(str) {
+            return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+        }
+
+        function highlightJavaLine(raw) {
+            const escaped = escapeHtml(raw);
+            if (escaped.trim().startsWith('//')) {
+                return `<span class="tok-cmt">${escaped}</span>`;
+            }
+            const strings = [];
+            let temp = escaped.replace(/"[^"]*"/g, (m) => {
+                const idx = strings.length;
+                strings.push(`<span class="tok-str">${m}</span>`);
+                return `__STR_${idx}__`;
+            });
+            temp = temp.replace(
+                /\b(import|public|class|static|void|int|for|while|if|else|new)\b/g,
+                '<span class="tok-kw">$1</span>'
+            );
+            temp = temp.replace(
+                /\b(Main|Scanner|String|System)\b/g,
+                '<span class="tok-type">$1</span>'
+            );
+            temp = temp.replace(
+                /\b(main|nextInt|print|println)\b(?=\()/g,
+                '<span class="tok-fn">$1</span>'
+            );
+            temp = temp.replace(/\b(\d+)\b/g, '<span class="tok-num">$1</span>');
+            strings.forEach((s, idx) => {
+                temp = temp.replace(`__STR_${idx}__`, s);
+            });
+            return temp;
+        }
+
+        function buildCodePanel() {
+            el.codeContainer.innerHTML = JAVA_CODE_LINES.map((line, i) => {
+                const ln = i + 1;
+                return `<div class="code-line" data-line="${ln}"><span class="code-ln">${ln}</span><span class="code-text">${highlightJavaLine(line) || ' '}</span></div>`;
+            }).join('');
+        }
+
+        function highlightSingleLine(lineNumber) {
+            const rows = el.codeContainer.querySelectorAll('.code-line');
+            rows.forEach((row) => row.classList.remove('active-line'));
+            const activeRow = el.codeContainer.querySelector(`.code-line[data-line="${lineNumber}"]`);
+            if (activeRow) {
+                activeRow.classList.add('active-line');
+                const container = el.codeContainer;
+                const rowTop = activeRow.offsetTop;
+                const rowBottom = rowTop + activeRow.offsetHeight;
+                const viewTop = container.scrollTop;
+                const viewBottom = viewTop + container.clientHeight;
+                if (rowTop < viewTop + 32 || rowBottom > viewBottom - 32) {
+                    container.scrollTo({
+                        top: Math.max(0, rowTop - container.clientHeight / 2 + activeRow.offsetHeight / 2),
+                        behavior: 'smooth'
+                    });
+                }
+            }
+        }
+
+        /* =========================================================================
+           7. STEP TRACE GENERATOR (Strictly ONE Java Line per Step, No Skipped Steps)
+           ========================================================================= */
+        function generateSteps(inA, inB) {
+            const trace = [];
+            const m = inA.length;
+            const n = inB.length;
+            const total = m + n;
+
+            let a = new Array(m).fill(null);
+            let aColor = new Array(m).fill(null);
+            let aConsumed = new Array(m).fill(false);
+
+            let b = new Array(n).fill(null);
+            let bColor = new Array(n).fill(null);
+            let bConsumed = new Array(n).fill(false);
+
+            let mergedAllocated = false;
+            let merged = new Array(total).fill(null);
+            let mergedColor = new Array(total).fill(null);
+            let mergedFilled = new Array(total).fill(false);
+
+            let ptrI = null;
+            let ptrJ = null;
+            let ptrK = null;
+            let loopStates = ['pending', 'pending', 'pending'];
+            let ledger = [];
+            let printed = [];
+
+            function pushStep({
+                line,
+                phase = 'Setup',
+                narration,
+                compText = 'Waiting',
+                compSub = 'a[i] <= b[j]',
+                showCompareArc = false,
+                anim = null, // { fromArr: 'a'|'b', fromIdx, toIdx, value, colorId }
+                isDone = false
+            }) {
+                trace.push({
+                    line,
+                    phase,
+                    narration,
+                    m,
+                    n,
+                    total,
+                    a: [...a],
+                    aColor: [...aColor],
+                    aConsumed: [...aConsumed],
+                    b: [...b],
+                    bColor: [...bColor],
+                    bConsumed: [...bConsumed],
+                    mergedAllocated,
+                    merged: [...merged],
+                    mergedColor: [...mergedColor],
+                    mergedFilled: [...mergedFilled],
+                    ptrI,
+                    ptrJ,
+                    ptrK,
+                    loopStates: [...loopStates],
+                    compText,
+                    compSub,
+                    showCompareArc,
+                    anim: anim ? { ...anim } : null,
+                    ledger: ledger.map((x) => ({ ...x })),
+                    printed: [...printed],
+                    isDone
+                });
+            }
+
+            // Input setup
+            pushStep({
+                line: 5,
+                phase: 'Input',
+                narration: 'Initialize Scanner sc to read sizes m, n and both sorted arrays a[] and b[].'
+            });
+
+            pushStep({
+                line: 7,
+                phase: 'Input',
+                narration: `Read m = ${m} (length of sorted array a[]).`
+            });
+
+            pushStep({
+                line: 8,
+                phase: 'Input',
+                narration: `Read n = ${n} (length of sorted array b[]).`
+            });
+
+            a = new Array(m).fill(0);
+            pushStep({
+                line: 10,
+                phase: 'Allocate a[]',
+                narration: `Allocate int[] a = new int[${m}].`
+            });
+
+            b = new Array(n).fill(0);
+            pushStep({
+                line: 11,
+                phase: 'Allocate b[]',
+                narration: `Allocate int[] b = new int[${n}].`
+            });
+
+            // Populate a[] ONE element at a time
+            if (m === 0) {
+                pushStep({
+                    line: 13,
+                    phase: 'Read a[]',
+                    narration: 'Loop for (int i = 0; i < 0; i++) → false immediately (a[] is empty).'
+                });
+            } else {
+                for (let idx = 0; idx < m; idx++) {
+                    a[idx] = inA[idx];
+                    aColor[idx] = idx;
+                    pushStep({
+                        line: 13,
+                        phase: `Read a[${idx}]`,
+                        narration: `i = ${idx} < ${m}: Read nextInt() and store a[${idx}] = ${inA[idx]}.`,
+                        compText: `a[${idx}] = ${inA[idx]}`,
+                        compSub: `Reading a[] (${idx + 1}/${m})`
+                    });
+                }
+            }
+
+            // Populate b[] ONE element at a time
+            if (n === 0) {
+                pushStep({
+                    line: 14,
+                    phase: 'Read b[]',
+                    narration: 'Loop for (int i = 0; i < 0; i++) → false immediately (b[] is empty).'
+                });
+            } else {
+                for (let idx = 0; idx < n; idx++) {
+                    b[idx] = inB[idx];
+                    bColor[idx] = m + idx;
+                    pushStep({
+                        line: 14,
+                        phase: `Read b[${idx}]`,
+                        narration: `i = ${idx} < ${n}: Read nextInt() and store b[${idx}] = ${inB[idx]}.`,
+                        compText: `b[${idx}] = ${inB[idx]}`,
+                        compSub: `Reading b[] (${idx + 1}/${n})`
+                    });
+                }
+            }
+
+            // Allocate merged[m + n]
+            mergedAllocated = true;
+            merged = new Array(total).fill(0);
+            pushStep({
+                line: 16,
+                phase: 'Allocate merged[]',
+                narration: `Allocate extra array int[] merged = new int[${m} + ${n}] (size ${total}, O(m + n) extra space).`,
+                compText: `new int[${total}]`,
+                compSub: 'Extra array ready'
+            });
+
+            // Initialize pointers i = 0, j = 0, k = 0
+            ptrI = 0;
+            ptrJ = 0;
+            ptrK = 0;
+            pushStep({
+                line: 17,
+                phase: 'Init Pointers',
+                narration: 'Initialize three pointers at index 0: i = 0 (for a[]), j = 0 (for b[]), k = 0 (for merged[]).',
+                compText: 'i=0, j=0, k=0',
+                compSub: 'Start from fronts'
+            });
+
+            // Loop 1: while (i < m && j < n)
+            loopStates[0] = 'active';
+            while (ptrI < m && ptrJ < n) {
+                pushStep({
+                    line: 19,
+                    phase: 'Loop 1 Check',
+                    narration: `Check while (i < m && j < n) → (${ptrI} < ${m} && ${ptrJ} < ${n}) is TRUE! Both arrays still have elements.`,
+                    compText: `${ptrI}<${m} && ${ptrJ}<${n}`,
+                    compSub: 'Both active'
+                });
+
+                const pickA = a[ptrI] <= b[ptrJ];
+                pushStep({
+                    line: 20,
+                    phase: pickA ? 'a[i] <= b[j] ✓' : 'b[j] < a[i] ✓',
+                    narration: pickA
+                        ? `Compare a[${ptrI}] (${a[ptrI]}) <= b[${ptrJ}] (${b[ptrJ]}) → TRUE! Pick a[${ptrI}] (<= preserves stability on ties).`
+                        : `Compare a[${ptrI}] (${a[ptrI]}) <= b[${ptrJ}] (${b[ptrJ]}) → FALSE! b[${ptrJ}] (${b[ptrJ]}) is strictly smaller, so go to else.`,
+                    compText: `${a[ptrI]} <= ${b[ptrJ]} ?`,
+                    compSub: pickA ? `TRUE → take a[${ptrI}]` : `false → take b[${ptrJ}]`,
+                    showCompareArc: true
+                });
+
+                if (pickA) {
+                    const srcIdx = ptrI;
+                    const dstIdx = ptrK;
+                    const val = a[srcIdx];
+                    const col = aColor[srcIdx];
+
+                    merged[dstIdx] = val;
+                    mergedColor[dstIdx] = col;
+                    mergedFilled[dstIdx] = true;
+                    aConsumed[srcIdx] = true;
+                    ptrI++;
+                    ptrK++;
+
+                    ledger.push({ from: `a[${srcIdx}]`, val, toIdx: dstIdx, srcArr: 'a' });
+
+                    pushStep({
+                        line: 21,
+                        phase: 'Copy a[i] → merged[k]',
+                        narration: `merged[${dstIdx}] = a[${srcIdx}] (${val}), then increment i → ${ptrI} and k → ${ptrK}.`,
+                        compText: `merged[${dstIdx}] ← ${val}`,
+                        compSub: `from a[${srcIdx}]`,
+                        anim: { fromArr: 'a', fromIdx: srcIdx, toIdx: dstIdx, value: val, colorId: col }
+                    });
+                } else {
+                    const srcIdx = ptrJ;
+                    const dstIdx = ptrK;
+                    const val = b[srcIdx];
+                    const col = bColor[srcIdx];
+
+                    merged[dstIdx] = val;
+                    mergedColor[dstIdx] = col;
+                    mergedFilled[dstIdx] = true;
+                    bConsumed[srcIdx] = true;
+                    ptrJ++;
+                    ptrK++;
+
+                    ledger.push({ from: `b[${srcIdx}]`, val, toIdx: dstIdx, srcArr: 'b' });
+
+                    pushStep({
+                        line: 23,
+                        phase: 'Copy b[j] → merged[k]',
+                        narration: `merged[${dstIdx}] = b[${srcIdx}] (${val}), then increment j → ${ptrJ} and k → ${ptrK}.`,
+                        compText: `merged[${dstIdx}] ← ${val}`,
+                        compSub: `from b[${srcIdx}]`,
+                        anim: { fromArr: 'b', fromIdx: srcIdx, toIdx: dstIdx, value: val, colorId: col }
+                    });
+                }
+            }
+
+            // Loop 1 exit check (false)
+            loopStates[0] = 'done';
+            pushStep({
+                line: 19,
+                phase: 'Loop 1 Done',
+                narration: `Check while (i < m && j < n) → (${ptrI} < ${m} && ${ptrJ} < ${n}) is FALSE! At least one array is exhausted.`,
+                compText: 'Loop 1 Exit',
+                compSub: ptrI >= m ? 'a[] exhausted' : 'b[] exhausted'
+            });
+
+            // Loop 2: while (i < m) merged[k++] = a[i++];
+            loopStates[1] = 'active';
+            if (ptrI >= m) {
+                loopStates[1] = 'done';
+                pushStep({
+                    line: 27,
+                    phase: 'Loop 2 Skip',
+                    narration: `Check while (i < m) → ${ptrI} < ${m} is FALSE. No leftover elements in a[].`,
+                    compText: `${ptrI} < ${m} (false)`,
+                    compSub: 'a[] already empty'
+                });
+            } else {
+                while (ptrI < m) {
+                    const srcIdx = ptrI;
+                    const dstIdx = ptrK;
+                    const val = a[srcIdx];
+                    const col = aColor[srcIdx];
+
+                    merged[dstIdx] = val;
+                    mergedColor[dstIdx] = col;
+                    mergedFilled[dstIdx] = true;
+                    aConsumed[srcIdx] = true;
+                    ptrI++;
+                    ptrK++;
+
+                    ledger.push({ from: `a[${srcIdx}]`, val, toIdx: dstIdx, srcArr: 'a' });
+
+                    pushStep({
+                        line: 27,
+                        phase: 'Drain a[]',
+                        narration: `Drain leftover a[${srcIdx}] (${val}) → merged[${dstIdx}], then i → ${ptrI}, k → ${ptrK}.`,
+                        compText: `merged[${dstIdx}] ← ${val}`,
+                        compSub: `leftover a[${srcIdx}]`,
+                        anim: { fromArr: 'a', fromIdx: srcIdx, toIdx: dstIdx, value: val, colorId: col }
+                    });
+                }
+                loopStates[1] = 'done';
+                pushStep({
+                    line: 27,
+                    phase: 'Loop 2 Done',
+                    narration: `Check while (i < m) → ${ptrI} < ${m} is FALSE. All leftover elements from a[] copied!`,
+                    compText: 'a[] drained ✓',
+                    compSub: `i == ${m}`
+                });
+            }
+
+            // Loop 3: while (j < n) merged[k++] = b[j++];
+            loopStates[2] = 'active';
+            if (ptrJ >= n) {
+                loopStates[2] = 'done';
+                pushStep({
+                    line: 28,
+                    phase: 'Loop 3 Skip',
+                    narration: `Check while (j < n) → ${ptrJ} < ${n} is FALSE. No leftover elements in b[].`,
+                    compText: `${ptrJ} < ${n} (false)`,
+                    compSub: 'b[] already empty'
+                });
+            } else {
+                while (ptrJ < n) {
+                    const srcIdx = ptrJ;
+                    const dstIdx = ptrK;
+                    const val = b[srcIdx];
+                    const col = bColor[srcIdx];
+
+                    merged[dstIdx] = val;
+                    mergedColor[dstIdx] = col;
+                    mergedFilled[dstIdx] = true;
+                    bConsumed[srcIdx] = true;
+                    ptrJ++;
+                    ptrK++;
+
+                    ledger.push({ from: `b[${srcIdx}]`, val, toIdx: dstIdx, srcArr: 'b' });
+
+                    pushStep({
+                        line: 28,
+                        phase: 'Drain b[]',
+                        narration: `Drain leftover b[${srcIdx}] (${val}) → merged[${dstIdx}], then j → ${ptrJ}, k → ${ptrK}.`,
+                        compText: `merged[${dstIdx}] ← ${val}`,
+                        compSub: `leftover b[${srcIdx}]`,
+                        anim: { fromArr: 'b', fromIdx: srcIdx, toIdx: dstIdx, value: val, colorId: col }
+                    });
+                }
+                loopStates[2] = 'done';
+                pushStep({
+                    line: 28,
+                    phase: 'Loop 3 Done',
+                    narration: `Check while (j < n) → ${ptrJ} < ${n} is FALSE. All leftover elements from b[] copied!`,
+                    compText: 'b[] drained ✓',
+                    compSub: `j == ${n}`
+                });
+            }
+
+            // Print merged[] element by element
+            if (total === 0) {
+                pushStep({
+                    line: 30,
+                    phase: 'Output',
+                    narration: 'Enhanced for-loop over merged[]: 0 elements to print.',
+                    compText: 'merged[] empty',
+                    compSub: 'Skip print'
+                });
+            } else {
+                for (let x = 0; x < total; x++) {
+                    printed.push(merged[x]);
+                    pushStep({
+                        line: 30,
+                        phase: `Print [${x}]`,
+                        narration: `System.out.print("${merged[x]} ") → stdout: "${printed.join(' ')}".`,
+                        compText: `Print ${merged[x]}`,
+                        compSub: `merged[${x}] (${x + 1}/${total})`
+                    });
+                }
+            }
+
+            pushStep({
+                line: 31,
+                phase: 'Completed',
+                narration: `System.out.println() — Done! Merged sorted array: [${merged.join(', ')}].`,
+                compText: 'Completed ✓',
+                compSub: 'O(m+n) / O(m+n)',
+                isDone: true
+            });
+
+            return trace;
+        }
+
+        /* =========================================================================
+           8. PHYSICAL LIFT, OVER-THE-TOP GLIDE & PLACEMENT ANIMATIONS
+           ========================================================================= */
+        function cancelActiveAnimations() {
+            activeAnimations.forEach((a) => {
+                try { a.cancel(); } catch (_) {}
+            });
+            activeAnimations = [];
+            el.ghostLayer.innerHTML = '';
+            el.arcGroup.innerHTML = '';
+        }
+
+        function getRelRect(node, container) {
+            if (!node || !container) return null;
+            const cRect = container.getBoundingClientRect();
+            const r = node.getBoundingClientRect();
+            return {
+                left: r.left - cRect.left,
+                top: r.top - cRect.top,
+                right: r.right - cRect.left,
+                bottom: r.bottom - cRect.top,
+                width: r.width,
+                height: r.height,
+                cx: r.left - cRect.left + r.width / 2,
+                cy: r.top - cRect.top + r.height / 2
+            };
+        }
+
+        function svgEl(tag, attrs = {}) {
+            const node = document.createElementNS('http://www.w3.org/2000/svg', tag);
+            Object.entries(attrs).forEach(([k, v]) => node.setAttribute(k, v));
+            return node;
+        }
+
+        function createFlyingGhost(value, barHeight, colorId, fromArr, labelText) {
+            const theme = getTheme(colorId);
+            const ghostCls = fromArr === 'a' ? 'ghost-from-a' : 'ghost-from-b';
+            const div = document.createElement('div');
+
+            if (viewMode === 'both') {
+                div.className = `flying-ghost ${ghostCls} rounded-2xl p-1.5 flex flex-col justify-between items-center font-mono-code text-white`;
+                if (theme) {
+                    div.style.background = theme.boxBg;
+                    div.style.borderColor = theme.boxBorder;
+                }
+                const barStyle = theme
+                    ? `height: ${barHeight}px; background: ${theme.barBg}; border-color: ${theme.barBorder};`
+                    : `height: ${barHeight}px;`;
+                div.innerHTML = `
+                    <div class="w-full flex flex-col items-center leading-none pt-0.5">
+                        <span class="text-[8px] uppercase tracking-wider text-amber-200 font-bold mb-0.5">${labelText}</span>
+                        <span class="text-sm font-bold drop-shadow">${value}</span>
+                    </div>
+                    <div class="w-full flex-1 flex items-end justify-center pt-1">
+                        <div class="array-bar w-full rounded-t-lg rounded-b-md" style="${barStyle}"></div>
+                    </div>
+                `;
+            } else if (viewMode === 'boxes') {
+                div.className = `flying-ghost ${ghostCls} rounded-2xl flex flex-col items-center justify-center font-mono-code font-bold text-white`;
+                if (theme) {
+                    div.style.background = theme.boxBg;
+                    div.style.borderColor = theme.boxBorder;
+                }
+                div.innerHTML = `
+                    <span class="text-[8px] uppercase tracking-wider text-amber-200 leading-none mb-0.5">${labelText}</span>
+                    <span class="text-base leading-none drop-shadow">${value}</span>
+                `;
+            } else {
+                div.className = `flying-ghost ${ghostCls} rounded-t-xl rounded-b-md flex flex-col items-center justify-start pt-1 font-mono-code text-xs font-bold text-white`;
+                if (theme) {
+                    div.style.background = theme.barBg;
+                    div.style.borderColor = theme.barBorder;
+                }
+                div.innerHTML = `
+                    <span class="text-[8px] uppercase tracking-wider text-amber-100 leading-none">${labelText}</span>
+                    <span class="leading-tight drop-shadow">${value}</span>
+                `;
+            }
+            el.ghostLayer.appendChild(div);
+            return div;
+        }
+
+        function runStageVisuals(step) {
+            cancelActiveAnimations();
+            el.moveStatusBadge.classList.add('hidden');
+
+            // 1) Draw comparison arc ONLY on Line 20 (if (a[i] <= b[j]))
+            if (step.showCompareArc && !step.anim && step.ptrI < step.m && step.ptrJ < step.n) {
+                const aNode = el.aGrid.querySelector(`[data-a-idx="${step.ptrI}"]`);
+                const bNode = el.bGrid.querySelector(`[data-b-idx="${step.ptrJ}"]`);
+                const rA = getRelRect(aNode, el.visualCanvas);
+                const rB = getRelRect(bNode, el.visualCanvas);
+                if (rA && rB) {
+                    const midX = (rA.cx + rB.cx) / 2;
+                    const arcY = Math.max(24, Math.min(rA.top, rB.top) - 36);
+                    el.arcGroup.appendChild(svgEl('path', {
+                        d: `M ${rA.cx} ${rA.top - 4} Q ${midX} ${arcY} ${rB.cx} ${rB.top - 4}`,
+                        fill: 'none',
+                        stroke: '#fbbf24',
+                        'stroke-width': 2.2,
+                        'stroke-dasharray': '5 4',
+                        'marker-start': 'url(#arrowAmber)',
+                        'marker-end': 'url(#arrowAmber)'
+                    }));
+                    const pillY = Math.max(24, (rA.top - 4 + arcY) / 2 - 4);
+                    const cmpStr = `${step.a[step.ptrI]} <= ${step.b[step.ptrJ]}?`;
+                    const pillW = Math.max(76, cmpStr.length * 7.2 + 16);
+                    el.arcGroup.appendChild(svgEl('rect', {
+                        x: midX - pillW / 2,
+                        y: pillY - 12,
+                        width: pillW,
+                        height: 18,
+                        rx: 9,
+                        fill: 'rgba(15, 23, 42, 0.94)',
+                        stroke: 'rgba(251, 191, 36, 0.72)',
+                        'stroke-width': 1
+                    }));
+                    const txt = svgEl('text', {
+                        x: midX,
+                        y: pillY,
+                        'text-anchor': 'middle',
+                        fill: '#fde047',
+                        'font-family': 'JetBrains Mono, monospace',
+                        'font-size': '10.5',
+                        'font-weight': '700'
+                    });
+                    txt.textContent = cmpStr;
+                    el.arcGroup.appendChild(txt);
+                }
+                return;
+            }
+
+            // 2) Physical lift-and-glide copy animation into merged[k]
+            if (!step.anim) return;
+            const anim = step.anim;
+            const srcNode = anim.fromArr === 'a'
+                ? el.aGrid.querySelector(`[data-a-idx="${anim.fromIdx}"]`)
+                : el.bGrid.querySelector(`[data-b-idx="${anim.fromIdx}"]`);
+            const dstNode = el.mergedGrid.querySelector(`[data-m-idx="${anim.toIdx}"]`);
+            if (!srcNode || !dstNode) return;
+
+            const rSrc = getRelRect(srcNode, el.visualCanvas);
+            const rDst = getRelRect(dstNode, el.visualCanvas);
+            if (!rSrc || !rDst) return;
+
+            el.moveStatusBadge.textContent = `${anim.fromArr}[${anim.fromIdx}] (${anim.value}) → merged[${anim.toIdx}]`;
+            el.moveStatusBadge.classList.remove('hidden');
+
+            dstNode.style.opacity = '0.22';
+
+            const allVals = [...currentA, ...currentB];
+            const minV = allVals.length ? Math.min(...allVals) : 0;
+            const maxV = allVals.length ? Math.max(...allVals) : 1;
+            const span = Math.max(1, maxV - minV);
+            const norm = (anim.value - minV) / span;
+            const barH = viewMode === 'bars' ? Math.round(28 + norm * 62) : Math.round(14 + norm * 42);
+
+            const ghost = createFlyingGhost(
+                anim.value,
+                barH,
+                anim.colorId,
+                anim.fromArr,
+                `${anim.fromArr}[${anim.fromIdx}]→k`
+            );
+            ghost.style.left = `${rSrc.left}px`;
+            ghost.style.top = `${rSrc.top}px`;
+            ghost.style.width = `${rSrc.width}px`;
+            ghost.style.height = `${rSrc.height}px`;
+
+            const dx = rDst.left - rSrc.left;
+            const dy = rDst.top - rSrc.top;
+            const strokeColor = anim.fromArr === 'a' ? '#38bdf8' : '#c084fc';
+            const markerId = anim.fromArr === 'a' ? 'arrowSky' : 'arrowPurple';
+
+            const midX = (rSrc.cx + rDst.cx) / 2;
+            const midY = (rSrc.bottom + rDst.top) / 2 - 18;
+            el.arcGroup.appendChild(svgEl('path', {
+                d: `M ${rSrc.cx} ${rSrc.bottom + 2} Q ${midX} ${midY} ${rDst.cx} ${rDst.top - 5}`,
+                fill: 'none',
+                stroke: strokeColor,
+                'stroke-width': 2.5,
+                'stroke-dasharray': '5 4',
+                'stroke-linecap': 'round',
+                'marker-end': `url(#${markerId})`
+            }));
+
+            const durScale = 1 / Math.min(speedMultiplier, 2.5);
+            const wa = ghost.animate([
+                { transform: 'translate(0px, 0px) scale(1)', opacity: 0.96 },
+                { transform: `translate(${dx * 0.25}px, ${dy * 0.12 - 22}px) scale(1.06)`, opacity: 1, offset: 0.3 },
+                { transform: `translate(${dx * 0.78}px, ${dy * 0.68 - 10}px) scale(1.04)`, opacity: 1, offset: 0.72 },
+                { transform: `translate(${dx}px, ${dy}px) scale(1)`, opacity: 1 }
+            ], {
+                duration: Math.round(680 * durScale),
+                easing: 'cubic-bezier(0.22, 1, 0.36, 1)',
+                fill: 'forwards'
+            });
+            activeAnimations.push(wa);
+            wa.onfinish = () => {
+                dstNode.style.opacity = '1';
+                ghost.style.opacity = '0';
+            };
+        }
+
+        /* =========================================================================
+           9. MAIN STEP RENDERER
+           ========================================================================= */
+        function renderSlot({
+            dataAttr,
+            idx,
+            val,
+            colorId,
+            isEmptySlot = false,
+            isConsumed = false,
+            isPlaced = false,
+            isPtrI = false,
+            isPtrJ = false,
+            isPtrK = false,
+            minV,
+            span
+        }) {
+            const theme = isEmptySlot || val === null ? null : getTheme(colorId);
+            const norm = val === null || isEmptySlot ? 0.12 : (val - minV) / span;
+
+            let stateCls = '';
+            if (val === null) stateCls = 'is-unloaded';
+            else if (isEmptySlot) stateCls = 'is-empty-slot';
+            else if (isConsumed) stateCls = 'is-consumed';
+
+            if (isPtrK) stateCls += ' is-ptr-k';
+            else if (isPtrI) stateCls += ' is-ptr-i';
+            else if (isPtrJ) stateCls += ' is-ptr-j';
+            else if (isPlaced && !isEmptySlot) stateCls += ' is-placed';
+
+            const badges = [];
+            if (isPtrI) badges.push('<span class="px-1.5 py-0.5 rounded bg-sky-500/25 border border-sky-300/65 text-[9px] font-bold text-sky-200">i</span>');
+            if (isPtrJ) badges.push('<span class="px-1.5 py-0.5 rounded bg-purple-500/25 border border-purple-300/65 text-[9px] font-bold text-purple-200">j</span>');
+            if (isPtrK) badges.push('<span class="px-1.5 py-0.5 rounded bg-amber-500/25 border border-amber-300/65 text-[9px] font-bold text-amber-200">k</span>');
+
+            const displayVal = val === null ? '·' : (isEmptySlot ? '0' : val);
+
+            if (viewMode === 'both') {
+                const barH = val === null || isEmptySlot ? 12 : Math.round(14 + norm * 42);
+                const boxStyle = theme
+                    ? `background: ${theme.boxBg}; border-color: ${theme.boxBorder}; box-shadow: ${theme.boxGlow};`
+                    : '';
+                const barStyle = theme
+                    ? `height: ${barH}px; background: ${theme.barBg}; border-color: ${theme.barBorder}; box-shadow: ${theme.barGlow};`
+                    : `height: ${barH}px;`;
+
+                return `
+                    <div class="flex flex-col items-center flex-1 max-w-[68px]">
+                        <div ${dataAttr}
+                             class="array-box ${stateCls} w-full h-[96px] rounded-2xl p-1.5 flex flex-col justify-between items-center"
+                             style="${boxStyle}">
+                            <span class="relative z-10 font-mono-code text-xs sm:text-sm font-bold ${isEmptySlot ? 'text-slate-500' : 'text-white'} drop-shadow pt-0.5">${displayVal}</span>
+                            <div class="w-full flex-1 flex items-end justify-center pt-1 relative z-10">
+                                <div class="array-bar ${isEmptySlot ? 'is-empty-slot' : (val === null ? 'is-unloaded' : '')} w-full rounded-t-lg rounded-b-md" style="${barStyle}"></div>
+                            </div>
+                        </div>
+                        <span class="text-[9.5px] font-mono-code text-slate-400 mt-1">[${idx}]</span>
+                        <div class="h-4 flex items-center justify-center gap-0.5 mt-0.5">${badges.join('')}</div>
+                    </div>
+                `;
+            }
+
+            if (viewMode === 'boxes') {
+                const boxStyle = theme
+                    ? `background: ${theme.boxBg}; border-color: ${theme.boxBorder}; box-shadow: ${theme.boxGlow};`
+                    : '';
+                return `
+                    <div class="flex flex-col items-center flex-1 max-w-[68px]">
+                        <div ${dataAttr}
+                             class="array-box ${stateCls} w-full h-12 rounded-2xl flex items-center justify-center font-mono-code text-sm font-bold ${isEmptySlot ? 'text-slate-500' : 'text-white'}"
+                             style="${boxStyle}">
+                            <span class="relative z-10 drop-shadow">${displayVal}</span>
+                        </div>
+                        <span class="text-[9.5px] font-mono-code text-slate-400 mt-1">[${idx}]</span>
+                        <div class="h-4 flex items-center justify-center gap-0.5 mt-0.5">${badges.join('')}</div>
+                    </div>
+                `;
+            }
+
+            // Bars only
+            const barH = val === null || isEmptySlot ? 18 : Math.round(26 + norm * 58);
+            const barStyle = theme
+                ? `height: ${barH}px; background: ${theme.barBg}; border-color: ${theme.barBorder}; box-shadow: ${theme.barGlow};`
+                : `height: ${barH}px;`;
+
+            return `
+                <div class="flex flex-col items-center justify-end flex-1 max-w-[68px] h-[106px]">
+                    <div ${dataAttr}
+                         class="array-bar ${stateCls} w-full rounded-t-xl rounded-b-md flex flex-col items-center justify-start pt-1 font-mono-code text-xs font-bold ${isEmptySlot ? 'text-slate-500' : 'text-white'}"
+                         style="${barStyle}">
+                        <span class="relative z-10 drop-shadow">${displayVal}</span>
+                    </div>
+                    <span class="text-[9.5px] font-mono-code text-slate-400 mt-1">[${idx}]</span>
+                    <div class="h-4 flex items-center justify-center gap-0.5 mt-0.5">${badges.join('')}</div>
+                </div>
+            `;
+        }
+
+        function renderStep(idx, playSound = false) {
+            if (!steps.length) return;
+            stepIndex = Math.max(0, Math.min(idx, steps.length - 1));
+            const s = steps[stepIndex];
+
+            // Top bar badges
+            el.badgeStep.textContent = `Step: ${stepIndex + 1} / ${steps.length}`;
+            el.phaseBadge.textContent = s.phase;
+            el.badgePtrsTop.textContent = `i:${s.ptrI ?? '—'}  j:${s.ptrJ ?? '—'}  k:${s.ptrK ?? '—'}`;
+            el.badgeMergedTop.textContent = `Merged: ${s.ledger.length} / ${s.total}`;
+            el.stepSlider.value = stepIndex;
+
+            el.btnPrev.disabled = stepIndex === 0;
+            el.btnNext.disabled = stepIndex === steps.length - 1;
+
+            // Narration & frame
+            el.activeFrameBadge.textContent = 'Frame: main()';
+            el.stepNarration.textContent = s.narration;
+            el.codeFooterNarration.textContent = s.narration;
+
+            // 5-Card KPI Telemetry Row
+            el.kpiI.textContent = s.ptrI === null ? '—' : `${s.ptrI}`;
+            el.kpiISub.textContent = s.ptrI !== null && s.ptrI < s.m
+                ? `a[${s.ptrI}] = ${s.a[s.ptrI]}`
+                : (s.ptrI !== null ? `done (i == ${s.m})` : `0 → ${s.m}`);
+
+            el.kpiJ.textContent = s.ptrJ === null ? '—' : `${s.ptrJ}`;
+            el.kpiJSub.textContent = s.ptrJ !== null && s.ptrJ < s.n
+                ? `b[${s.ptrJ}] = ${s.b[s.ptrJ]}`
+                : (s.ptrJ !== null ? `done (j == ${s.n})` : `0 → ${s.n}`);
+
+            el.kpiK.textContent = s.ptrK === null ? '—' : `${s.ptrK}`;
+            el.kpiKSub.textContent = s.ptrK !== null && s.ptrK < s.total
+                ? `next: merged[${s.ptrK}]`
+                : (s.ptrK !== null ? `full (k == ${s.total})` : `0 → ${s.total}`);
+
+            el.kpiComp.textContent = s.compText;
+            el.kpiCompSub.textContent = s.compSub;
+
+            el.kpiStdout.textContent = s.printed.length ? s.printed.join(' ') : 'pending';
+            el.kpiStdoutSub.textContent = `m=${s.m}, n=${s.n}`;
+
+            // 3-Phase Loop Tracker Cards
+            s.loopStates.forEach((st, i) => {
+                const card = el.loopCards[i];
+                const statusEl = el.loopStatuses[i];
+                card.className = 'rounded-xl px-3 py-1.5 border flex items-center justify-between transition-all';
+                if (st === 'active') {
+                    card.classList.add('border-sky-400/70', 'bg-sky-400/15');
+                    statusEl.textContent = 'Running';
+                    statusEl.className = 'text-sky-300 font-bold';
+                } else if (st === 'done') {
+                    card.classList.add('border-emerald-400/50', 'bg-emerald-400/10');
+                    statusEl.textContent = 'Done ✓';
+                    statusEl.className = 'text-emerald-300 font-semibold';
+                } else {
+                    card.classList.add('border-white/10', 'bg-white/5');
+                    statusEl.textContent = 'Pending';
+                    statusEl.className = 'text-slate-400';
+                }
+            });
+
+            // Array headers
+            el.aMeta.textContent = `m = ${s.m}`;
+            el.bMeta.textContent = `n = ${s.n}`;
+            el.mergedMeta.textContent = s.mergedAllocated
+                ? `size = ${s.total} (${s.ledger.length}/${s.total} filled)`
+                : 'Not allocated yet';
+
+            // Shared value scale for proportional bars
+            const allVals = [...currentA, ...currentB];
+            const minV = allVals.length ? Math.min(...allVals) : 0;
+            const maxV = allVals.length ? Math.max(...allVals) : 1;
+            const span = Math.max(1, maxV - minV);
+
+            // Render a[]
+            if (s.m === 0) {
+                el.aGrid.innerHTML = '<div class="text-xs font-mono-code text-slate-400 py-6">a[] is empty (m = 0)</div>';
+            } else {
+                el.aGrid.innerHTML = s.a.map((val, i) => renderSlot({
+                    dataAttr: `data-a-idx="${i}"`,
+                    idx: i,
+                    val,
+                    colorId: s.aColor[i],
+                    isConsumed: s.aConsumed[i],
+                    isPtrI: s.ptrI === i && !s.isDone,
+                    minV,
+                    span
+                })).join('');
+            }
+
+            // Render b[]
+            if (s.n === 0) {
+                el.bGrid.innerHTML = '<div class="text-xs font-mono-code text-slate-400 py-6">b[] is empty (n = 0)</div>';
+            } else {
+                el.bGrid.innerHTML = s.b.map((val, j) => renderSlot({
+                    dataAttr: `data-b-idx="${j}"`,
+                    idx: j,
+                    val,
+                    colorId: s.bColor[j],
+                    isConsumed: s.bConsumed[j],
+                    isPtrJ: s.ptrJ === j && !s.isDone,
+                    minV,
+                    span
+                })).join('');
+            }
+
+            // Render merged[]
+            if (!s.mergedAllocated) {
+                el.mergedGrid.innerHTML = '<div class="text-xs font-mono-code text-slate-500 py-6">Waiting for int[] merged = new int[m + n];</div>';
+            } else if (s.total === 0) {
+                el.mergedGrid.innerHTML = '<div class="text-xs font-mono-code text-slate-400 py-6">merged[] is empty (m + n = 0)</div>';
+            } else {
+                el.mergedGrid.innerHTML = s.merged.map((val, k) => renderSlot({
+                    dataAttr: `data-m-idx="${k}"`,
+                    idx: k,
+                    val,
+                    colorId: s.mergedColor[k],
+                    isEmptySlot: !s.mergedFilled[k],
+                    isPlaced: s.mergedFilled[k],
+                    isPtrK: s.ptrK === k && !s.isDone,
+                    minV,
+                    span
+                })).join('');
+            }
+
+            // Merge Placement Ledger
+            if (!s.ledger.length) {
+                el.mergeLedger.innerHTML = '<span class="text-slate-500">No elements copied into merged[] yet...</span>';
+                el.ledgerCountBadge.textContent = '0 copied';
+            } else {
+                el.mergeLedger.innerHTML = s.ledger.map((item, idx) => {
+                    const isLatest = idx === s.ledger.length - 1 && !s.isDone;
+                    const cls = item.srcArr === 'a'
+                        ? (isLatest ? 'bg-sky-500/25 border-sky-300/75 text-sky-100 font-bold' : 'bg-sky-500/15 border-sky-400/35 text-sky-200')
+                        : (isLatest ? 'bg-purple-500/25 border-purple-300/75 text-purple-100 font-bold' : 'bg-purple-500/15 border-purple-400/35 text-purple-200');
+                    return `<span class="px-2 py-0.5 rounded-md border ${cls}">k=${item.toIdx} ← ${item.from} (${item.val})</span>`;
+                }).join('<span class="text-slate-600">→</span>');
+                el.ledgerCountBadge.textContent = `${s.ledger.length} copied`;
+            }
+
+            // Standard I/O Console
+            el.ioStdin.textContent = `stdin: ${s.m} ${s.n} | [${currentA.join(' ')}] | [${currentB.join(' ')}]`;
+            el.ioStdout.textContent = `stdout: ${s.printed.length ? s.printed.join(' ') : '—'}`;
+
+            // Strictly single-line Java highlight
+            highlightSingleLine(s.line);
+
+            // Comparison arc or physical lift-and-glide copy animation
+            requestAnimationFrame(() => runStageVisuals(s));
+
+            // Tactile sound & vibration feedback
+            if (playSound) {
+                triggerStepFeedback(s);
+            }
+        }
+
+        /* =========================================================================
+           10. PLAYBACK ENGINE
+           ========================================================================= */
+        function stopPlayback() {
+            isPlaying = false;
+            if (playTimer) {
+                clearTimeout(playTimer);
+                playTimer = null;
+            }
+            el.playIcon.textContent = '▶';
+            el.playLabel.textContent = 'Start';
+        }
+
+        function scheduleNextTick() {
+            if (!isPlaying) return;
+            if (stepIndex >= steps.length - 1) {
+                stopPlayback();
+                return;
+            }
+            const currStep = steps[stepIndex];
+            const baseDelay = currStep?.anim ? 960 : 560;
+            const delay = Math.max(150, Math.round(baseDelay / speedMultiplier));
+            playTimer = setTimeout(() => {
+                if (!isPlaying) return;
+                renderStep(stepIndex + 1, true);
+                scheduleNextTick();
+            }, delay);
+        }
+
+        function togglePlayback() {
+            initAudio();
+            if (isPlaying) {
+                stopPlayback();
+            } else {
+                if (stepIndex >= steps.length - 1) {
+                    renderStep(0, true);
+                } else {
+                    triggerStepFeedback(steps[stepIndex]);
+                }
+                isPlaying = true;
+                el.playIcon.textContent = '⏸';
+                el.playLabel.textContent = 'Stop';
+                scheduleNextTick();
+            }
+        }
+
+        /* =========================================================================
+           11. DATASET LOADER & VALIDATION
+           ========================================================================= */
+        function showError(msg) {
+            el.errorBanner.textContent = msg;
+            el.errorBanner.classList.remove('hidden');
+            setTimeout(() => el.errorBanner.classList.add('hidden'), 4600);
+        }
+
+        function loadDataset(aArr, bArr) {
+            stopPlayback();
+            cancelActiveAnimations();
+            currentA = [...aArr];
+            currentB = [...bArr];
+            el.customAInput.value = currentA.join(', ');
+            el.customBInput.value = currentB.join(', ');
+            steps = generateSteps(currentA, currentB);
+            el.stepSlider.max = Math.max(0, steps.length - 1);
+            renderStep(0, false);
+        }
+
+        function parseSortedList(raw, label) {
+            if (!raw.trim()) return [];
+            const tokens = raw.trim().split(/[\s,]+/).filter(Boolean);
+            const arr = [];
+            for (const t of tokens) {
+                const num = Number(t);
+                if (!Number.isInteger(num) || num < -999 || num > 999) {
+                    throw new Error(`Invalid integer "${t}" in ${label}. Use integers between -999 and 999.`);
+                }
+                arr.push(num);
+            }
+            for (let i = 1; i < arr.length; i++) {
+                if (arr[i] < arr[i - 1]) {
+                    throw new Error(`${label} must be sorted in non-decreasing order (found ${arr[i]} after ${arr[i - 1]}).`);
+                }
+            }
+            return arr;
+        }
+
+        /* =========================================================================
+           12. EVENT LISTENERS
+           ========================================================================= */
+        el.btnReset.addEventListener('click', () => {
+            stopPlayback();
+            renderStep(0, true);
+        });
+
+        el.btnPrev.addEventListener('click', () => {
+            stopPlayback();
+            if (stepIndex > 0) renderStep(stepIndex - 1, true);
+        });
+
+        el.btnNext.addEventListener('click', () => {
+            stopPlayback();
+            if (stepIndex < steps.length - 1) renderStep(stepIndex + 1, true);
+        });
+
+        el.btnPlayPause.addEventListener('click', togglePlayback);
+
+        el.stepSlider.addEventListener('input', (e) => {
+            stopPlayback();
+            const now = Date.now();
+            const shouldCue = now - lastScrubCueAt > 70;
+            if (shouldCue) lastScrubCueAt = now;
+            renderStep(parseInt(e.target.value, 10), shouldCue);
+        });
+
+        document.querySelectorAll('.speed-btn').forEach((btn) => {
+            btn.addEventListener('click', () => {
+                speedMultiplier = parseFloat(btn.dataset.speed);
+                document.querySelectorAll('.speed-btn').forEach((b) => b.classList.remove('glass-btn-active'));
+                btn.classList.add('glass-btn-active');
+            });
+        });
+
+        document.querySelectorAll('.view-btn').forEach((btn) => {
+            btn.addEventListener('click', () => {
+                viewMode = btn.dataset.view;
+                document.querySelectorAll('.view-btn').forEach((b) => b.classList.remove('glass-btn-active'));
+                btn.classList.add('glass-btn-active');
+                renderStep(stepIndex, false);
+            });
+        });
+
+        el.btnAudio.addEventListener('click', () => {
+            audioEnabled = !audioEnabled;
+            el.audioIcon.textContent = audioEnabled ? '🔊' : '🔇';
+            if (audioEnabled) {
+                initAudio();
+                playTone(580, 0.09, 'sine', 0.16, true);
+            }
+        });
+
+        el.btnHaptics.addEventListener('click', () => {
+            hapticsEnabled = !hapticsEnabled;
+            el.btnHaptics.classList.toggle('glass-btn-active', hapticsEnabled);
+            el.hapticsIcon.textContent = hapticsEnabled ? '📳' : '📴';
+            if (hapticsEnabled) {
+                triggerVibration([25, 25, 35]);
+            }
+        });
+
+        ['pointerdown', 'keydown'].forEach((evt) => {
+            window.addEventListener(evt, () => initAudio(), { once: true, passive: true });
+        });
+
+        el.presetSelect.addEventListener('change', (e) => {
+            const p = PRESETS[parseInt(e.target.value, 10)];
+            if (p) loadDataset(p.a, p.b);
+        });
+
+        el.btnLoadCustom.addEventListener('click', () => {
+            try {
+                const aArr = parseSortedList(el.customAInput.value, 'a[]');
+                const bArr = parseSortedList(el.customBInput.value, 'b[]');
+                if (aArr.length + bArr.length > 10) {
+                    showError('Please keep total elements (m + n) at most 10 so all three liquid-glass arrays stay crisp.');
+                    return;
+                }
+                loadDataset(aArr, bArr);
+            } catch (err) {
+                showError(err.message);
+            }
+        });
+
+        window.addEventListener('keydown', (e) => {
+            if (document.activeElement && ['INPUT', 'SELECT', 'TEXTAREA'].includes(document.activeElement.tagName)) {
+                return;
+            }
+            if (e.code === 'Space') {
+                e.preventDefault();
+                togglePlayback();
+            } else if (e.code === 'ArrowRight') {
+                e.preventDefault();
+                stopPlayback();
+                if (stepIndex < steps.length - 1) renderStep(stepIndex + 1, true);
+            } else if (e.code === 'ArrowLeft') {
+                e.preventDefault();
+                stopPlayback();
+                if (stepIndex > 0) renderStep(stepIndex - 1, true);
+            }
+        });
+
+        window.addEventListener('resize', () => {
+            if (steps.length) renderStep(stepIndex, false);
+        });
+
+        /* =========================================================================
+           13. BOOTSTRAP
+           ========================================================================= */
+        buildCodePanel();
+        loadDataset(PRESETS[0].a, PRESETS[0].b);
+    </script>
+</body>
+</html>

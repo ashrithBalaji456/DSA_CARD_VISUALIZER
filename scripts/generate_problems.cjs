@@ -2091,6 +2091,26 @@ const problems = [
       "Not handling duplicate instances of the largest element."
     ],
     "optimalApproach": "One-Pass Two-Variable Cascade",
+    "solutions": [
+      {
+        "id": "one-pass-cascade",
+        "label": "One-Pass Cascade (Classic)",
+        "badge": "Optimal · O(n)",
+        "approach": "Track largest and secondLargest in a single scan, demoting largest to secondLargest whenever a new maximum arrives.",
+        "timeComplexity": "O(n)",
+        "spaceComplexity": "O(1)",
+        "visualizerUrl": "/visualizers/second_largest_playing_card_visualizer.html"
+      },
+      {
+        "id": "one-pass-podium",
+        "label": "One-Pass Top-2 Podium (Java)",
+        "badge": "Java · O(n) / O(1)",
+        "approach": "Initialize largest and secondLargest to Integer.MIN_VALUE so negative arrays work cleanly, handling duplicates via value < largest && value > secondLargest.",
+        "timeComplexity": "O(n)",
+        "spaceComplexity": "O(1)",
+        "visualizerUrl": "/visualizers/second_largest_one_pass_visualizer.html"
+      }
+    ],
     "relatedProblems": [
       {
         "number": 169,
@@ -3360,6 +3380,26 @@ const problems = [
       "Finding the maximum element in suffix instead of the smallest element strictly greater than nums[i]."
     ],
     "optimalApproach": "Single-Pass Pivot Search with In-Place Suffix Reversal",
+    "solutions": [
+      {
+        "id": "pivot-suffix-reversal",
+        "label": "In-Place Pivot & Suffix Reversal",
+        "badge": "Optimal · O(n)",
+        "approach": "Find rightmost pivot a[i] < a[i+1], swap with rightmost successor a[j] > a[i], and reverse suffix [i+1..n-1].",
+        "timeComplexity": "O(n)",
+        "spaceComplexity": "O(1)",
+        "visualizerUrl": "/visualizers/next_permutation_visualizer.html"
+      },
+      {
+        "id": "pivot-suffix-java",
+        "label": "In-Place Pivot & Reverse (Java)",
+        "badge": "Java · O(n) / O(1)",
+        "approach": "Step-by-step Java trace of nextPermutation(int[] a) with helper reverse(a, left, right) and wrap-around handling.",
+        "timeComplexity": "O(n)",
+        "spaceComplexity": "O(1)",
+        "visualizerUrl": "/visualizers/next_permutation_in_place_visualizer.html"
+      }
+    ],
     "relatedProblems": [
       {
         "number": 189,
@@ -4101,6 +4141,44 @@ const problems = [
       "Forgetting to handle m = 0 or n = 0 edge cases."
     ],
     "optimalApproach": "Reverse Three-Pointer In-Place Merge",
+    "solutions": [
+      {
+        "id": "reverse-three-pointer",
+        "label": "Reverse 3-Pointer In-Place (LC 88)",
+        "badge": "Optimal · O(1) Space",
+        "approach": "Fill nums1 from the back (k = m + n - 1) comparing nums1[i] and nums2[j] so unread elements are never overwritten.",
+        "timeComplexity": "O(m + n)",
+        "spaceComplexity": "O(1)",
+        "visualizerUrl": "/visualizers/merge_sorted_lc88_in_place_visualizer.html"
+      },
+      {
+        "id": "gap-method",
+        "label": "Gap Method / Shell Sort (GFG)",
+        "badge": "No Buffer · O(1) Space",
+        "approach": "Treat separate arrays a[m] and b[n] as one virtual sequence and compare/swap across shrinking ceiling-half gaps.",
+        "timeComplexity": "O((m+n) log(m+n))",
+        "spaceComplexity": "O(1)",
+        "visualizerUrl": "/visualizers/merge_sorted_gap_method_visualizer.html"
+      },
+      {
+        "id": "extra-array-two-pointer",
+        "label": "Extra Array Two-Pointer",
+        "badge": "Classic · O(m+n) Space",
+        "approach": "Merge a[0..m-1] and b[0..n-1] left-to-right into a new merged[m + n] buffer using three forward pointers.",
+        "timeComplexity": "O(m + n)",
+        "spaceComplexity": "O(m + n)",
+        "visualizerUrl": "/visualizers/merge_sorted_extra_array_visualizer.html"
+      },
+      {
+        "id": "in-place-variant-classic",
+        "label": "In-Place Merge (Classic View)",
+        "badge": "Alternative",
+        "approach": "Original in-place merge visualizer.",
+        "timeComplexity": "O(m + n)",
+        "spaceComplexity": "O(1)",
+        "visualizerUrl": "/visualizers/merge_two_sorted_arrays_without_extra_space_visualizer.html"
+      }
+    ],
     "relatedProblems": [
       {
         "number": 167,

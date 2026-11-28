@@ -40,6 +40,8 @@ export const INFOSYS_SLUG_TO_PROBLEM_ID: Record<string, string> = {
   'minimum railway platforms': 'minimum-railway-platforms',
   'maximum subarray sum kadane': 'max-inventory-increase',
   'coin change minimum coins': 'greedy-coin-change',
+  'merge two sorted arrays place': 'merge-sorted-array',
+  'merge sorted arrays without extra space': 'merge-sorted-array',
 };
 
 export interface InfosysResolvedItem {
