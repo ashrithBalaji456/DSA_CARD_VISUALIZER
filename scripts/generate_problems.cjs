@@ -5966,18 +5966,7 @@ const problems = [
       "Greedy",
       "Dynamic Programming"
     ],
-    "subPatterns": [
-      "Peak-Valley Greedy Accumulation",
-      "2-State DP Machine (Cash / Hold)"
-    ],
-    "tags": [
-      "Array",
-      "Greedy",
-      "Dynamic Programming",
-      "Infosys"
-    ],
-    "shortDescription": "Given an array prices where prices[i] is the price of a stock on day i, find the maximum profit you can achieve when you may complete as many buy/sell transactions as you like (holding at most one share at a time).",
-    "problemStatement": "You are given an integer array prices where prices[i] is the price of a given stock on the ith day.\n\nOn each day, you may decide to buy and/or sell the stock. You can only hold at most one share of the stock at any time. However, you can buy it then immediately sell it on the same day.\n\nFind and return the maximum profit you can achieve.",
+    "description": "You are given an integer array prices where prices[i] is the price of a given stock on the ith day.\n\nOn each day, you may decide to buy and/or sell the stock. You can only hold at most one share of the stock at any time. However, you can buy it then immediately sell it on the same day.\n\nFind and return the maximum profit you can achieve.",
     "constraints": [
       "1 <= prices.length <= 3 * 10^4",
       "0 <= prices[i] <= 10^4"
@@ -5998,7 +5987,8 @@ const problems = [
         "explanation": "Buy on day 1 (price = 1) and sell on day 5 (price = 5), profit = 5 - 1 = 4 (equivalent to summing every positive daily uptick: 1 + 1 + 1 + 1 = 4)."
       }
     ],
-    "algorithmSteps": [
+    "approach": "Sum every positive day-over-day increase (prices[i] - prices[i - 1]) greedily in a single pass, or track two rolling DP states (cash and hold).",
+    "flowSteps": [
       {
         "step": 1,
         "title": "Initialize Profit / States",
