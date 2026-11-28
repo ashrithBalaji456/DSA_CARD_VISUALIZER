@@ -4317,6 +4317,15 @@ export const PROBLEMS: DSAProblem[] = [
         "visualizerUrl": "/visualizers/best_time_to_buy_and_sell_stock_visualizer.html"
       },
       {
+        "id": "max-difference-prefix-min",
+        "label": "Maximum Difference (Prefix Min)",
+        "badge": "Infosys Variant · O(n)",
+        "approach": "Maintain running minSoFar and compute arr[i] - minSoFar before updating minSoFar, handling negative values and n < 2 guard.",
+        "timeComplexity": "O(n)",
+        "spaceComplexity": "O(1)",
+        "visualizerUrl": "/visualizers/maximum_difference_prefix_min_visualizer.html"
+      },
+      {
         "id": "brute-force",
         "label": "Brute Force Nested Loop",
         "badge": "Baseline · O(n²)",
