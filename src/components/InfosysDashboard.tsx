@@ -22,6 +22,7 @@ import type { DSAProblem, Difficulty } from '../types/problem';
 import { INFOSYS_PLAN, INFOSYS_TOTAL_CITATIONS } from '../data/infosysBank';
 import { resolveInfosysItems, type InfosysResolvedItem } from '../data/infosysProblems';
 import { DifficultyBadge } from './DifficultyBadge';
+import { CurvedSelect } from './CurvedSelect';
 
 interface Props {
   problems: DSAProblem[];
@@ -465,80 +466,67 @@ export const InfosysDashboard: React.FC<Props> = ({
                 />
               </div>
 
-              <select
+              <CurvedSelect
                 value={selectedTopic}
-                onChange={(e) => setSelectedTopic(e.target.value)}
-                className="px-3 py-2 rounded-xl bg-[#0d1324] border border-white/10 text-xs text-slate-200 focus:outline-none focus:border-sky-500/50"
-              >
-                <option value="all">Topic: All</option>
-                {topicStats.map((t) => (
-                  <option key={t.topic} value={t.topic}>
-                    {t.topic} ({t.count})
-                  </option>
-                ))}
-              </select>
+                onChange={setSelectedTopic}
+                options={[
+                  { value: 'all', label: 'Topic: All' },
+                  ...topicStats.map((t) => ({
+                    value: t.topic,
+                    label: `${t.topic} (${t.count})`,
+                  })),
+                ]}
+              />
 
-              <select
+              <CurvedSelect
                 value={selectedDifficulty}
-                onChange={(e) => setSelectedDifficulty(e.target.value as Difficulty | 'All')}
-                className="px-3 py-2 rounded-xl bg-[#0d1324] border border-white/10 text-xs text-slate-200 focus:outline-none focus:border-sky-500/50"
-              >
-                <option value="All">Difficulty: All</option>
-                <option value="Easy">Easy</option>
-                <option value="Medium">Medium</option>
-                <option value="Hard">Hard</option>
-              </select>
+                onChange={(v) => setSelectedDifficulty(v as Difficulty | 'All')}
+                options={[
+                  { value: 'All', label: 'Difficulty: All' },
+                  { value: 'Easy', label: 'Easy' },
+                  { value: 'Medium', label: 'Medium' },
+                  { value: 'Hard', label: 'Hard' },
+                ]}
+              />
 
-              <select
+              <CurvedSelect
                 value={selectedFrequency}
-                onChange={(e) => setSelectedFrequency(e.target.value)}
-                className="px-3 py-2 rounded-xl bg-[#0d1324] border border-white/10 text-xs text-slate-200 focus:outline-none focus:border-sky-500/50"
-              >
-                <option value="All">Frequency: All</option>
-                <option value="Very High">Very High</option>
-                <option value="High">High</option>
-                <option value="Medium">Medium</option>
-                <option value="Low">Low</option>
-              </select>
+                onChange={setSelectedFrequency}
+                options={[
+                  { value: 'All', label: 'Frequency: All' },
+                  { value: 'Very High', label: 'Very High' },
+                  { value: 'High', label: 'High' },
+                  { value: 'Medium', label: 'Medium' },
+                  { value: 'Low', label: 'Low' },
+                ]}
+              />
 
-              <select
+              <CurvedSelect
                 value={selectedRole}
-                onChange={(e) => setSelectedRole(e.target.value)}
-                className="px-3 py-2 rounded-xl bg-[#0d1324] border border-white/10 text-xs text-slate-200 focus:outline-none focus:border-sky-500/50"
-              >
-                <option value="All">Role: All</option>
-                {allRoles.map((r) => (
-                  <option key={r} value={r}>
-                    {r}
-                  </option>
-                ))}
-              </select>
+                onChange={setSelectedRole}
+                options={[
+                  { value: 'All', label: 'Role: All' },
+                  ...allRoles.map((r) => ({ value: r, label: r })),
+                ]}
+              />
 
-              <select
+              <CurvedSelect
                 value={selectedYear}
-                onChange={(e) => setSelectedYear(e.target.value)}
-                className="px-3 py-2 rounded-xl bg-[#0d1324] border border-white/10 text-xs text-slate-200 focus:outline-none focus:border-sky-500/50"
-              >
-                <option value="All">Year: All</option>
-                {allYears.map((y) => (
-                  <option key={y} value={String(y)}>
-                    {y}
-                  </option>
-                ))}
-              </select>
+                onChange={setSelectedYear}
+                options={[
+                  { value: 'All', label: 'Year: All' },
+                  ...allYears.map((y) => ({ value: String(y), label: String(y) })),
+                ]}
+              />
 
-              <select
+              <CurvedSelect
                 value={selectedCompany}
-                onChange={(e) => setSelectedCompany(e.target.value)}
-                className="px-3 py-2 rounded-xl bg-[#0d1324] border border-white/10 text-xs text-slate-200 focus:outline-none focus:border-sky-500/50"
-              >
-                <option value="All">Company: All</option>
-                {allCompanies.map((c) => (
-                  <option key={c} value={c}>
-                    {c}
-                  </option>
-                ))}
-              </select>
+                onChange={setSelectedCompany}
+                options={[
+                  { value: 'All', label: 'Company: All' },
+                  ...allCompanies.map((c) => ({ value: c, label: c })),
+                ]}
+              />
             </div>
 
             {/* Toggle Pills & Sort */}
@@ -614,17 +602,18 @@ export const InfosysDashboard: React.FC<Props> = ({
               </div>
 
               <div className="flex items-center gap-2">
-                <select
+                <CurvedSelect
+                  align="right"
                   value={sortBy}
-                  onChange={(e) => setSortBy(e.target.value as SortKey)}
-                  className="px-3 py-1.5 rounded-lg bg-[#0d1324] border border-white/10 text-xs text-slate-200 focus:outline-none focus:border-sky-500/50"
-                >
-                  <option value="frequency-desc">Sort: Frequency (high → low)</option>
-                  <option value="sources-desc">Sort: Sources (high → low)</option>
-                  <option value="playcard-first">Sort: Play Cards First</option>
-                  <option value="difficulty">Sort: Difficulty</option>
-                  <option value="name-asc">Sort: Name (A → Z)</option>
-                </select>
+                  onChange={(v) => setSortBy(v as SortKey)}
+                  options={[
+                    { value: 'frequency-desc', label: 'Sort: Frequency (high → low)' },
+                    { value: 'sources-desc', label: 'Sort: Sources (high → low)' },
+                    { value: 'playcard-first', label: 'Sort: Play Cards First' },
+                    { value: 'difficulty', label: 'Sort: Difficulty' },
+                    { value: 'name-asc', label: 'Sort: Name (A → Z)' },
+                  ]}
+                />
                 <span className="text-xs font-mono text-slate-400">
                   {filteredItems.length} of {totalQuestions}
                 </span>
