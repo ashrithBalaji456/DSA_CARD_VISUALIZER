@@ -1,0 +1,1573 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Best Time to Buy &amp; Sell Stock (Brute Force O(n²)) — Glassmorphic Java Visualizer</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2064%2064%22%3E%3Cdefs%3E%3ClinearGradient%20id%3D%22bg%22%20x1%3D%220%22%20y1%3D%220%22%20x2%3D%221%22%20y2%3D%221%22%3E%3Cstop%20offset%3D%220%25%22%20stop-color%3D%22%230f172a%22%2F%3E%3Cstop%20offset%3D%22100%25%22%20stop-color%3D%22%23060913%22%2F%3E%3C%2FlinearGradient%3E%3ClinearGradient%20id%3D%22g%22%20x1%3D%220%22%20y1%3D%220%22%20x2%3D%221%22%20y2%3D%221%22%3E%3Cstop%20offset%3D%220%25%22%20stop-color%3D%22%2322d3ee%22%2F%3E%3Cstop%20offset%3D%2255%25%22%20stop-color%3D%22%236366f1%22%2F%3E%3Cstop%20offset%3D%22100%25%22%20stop-color%3D%22%23a855f7%22%2F%3E%3C%2FlinearGradient%3E%3C%2Fdefs%3E%3Crect%20x%3D%222%22%20y%3D%222%22%20width%3D%2260%22%20height%3D%2260%22%20rx%3D%2216%22%20fill%3D%22url(%23bg)%22%20stroke%3D%22url(%23g)%22%20stroke-width%3D%223.5%22%2F%3E%3Cpath%20d%3D%22M20%2042%20L32%2018%20L44%2042%22%20fill%3D%22none%22%20stroke%3D%22url(%23g)%22%20stroke-width%3D%224%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3Cline%20x1%3D%2220%22%20y1%3D%2242%22%20x2%3D%2244%22%20y2%3D%2242%22%20stroke%3D%22%2338bdf8%22%20stroke-width%3D%223%22%20stroke-linecap%3D%22round%22%20opacity%3D%220.55%22%2F%3E%3Ccircle%20cx%3D%2232%22%20cy%3D%2218%22%20r%3D%225.5%22%20fill%3D%22%2322d3ee%22%2F%3E%3Ccircle%20cx%3D%2220%22%20cy%3D%2242%22%20r%3D%225.5%22%20fill%3D%22%236366f1%22%2F%3E%3Ccircle%20cx%3D%2244%22%20cy%3D%2242%22%20r%3D%225.5%22%20fill%3D%22%23a855f7%22%2F%3E%3C%2Fsvg%3E" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <style>
+        :root {
+            --glass-bg: rgba(15, 23, 42, 0.56);
+            --glass-border: rgba(148, 163, 184, 0.22);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background:
+                radial-gradient(circle at 12% 10%, rgba(16, 185, 129, 0.13), transparent 34%),
+                radial-gradient(circle at 88% 12%, rgba(56, 189, 248, 0.14), transparent 36%),
+                radial-gradient(circle at 50% 92%, rgba(168, 85, 247, 0.12), transparent 40%),
+                linear-gradient(160deg, #050914 0%, #091122 50%, #050a16 100%);
+            color: #e2e8f0;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .font-mono-code {
+            font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+        }
+
+        /* Liquid transparent dark-glass panels & subcards */
+        .glass-panel {
+            background: linear-gradient(155deg, rgba(255, 255, 255, 0.085) 0%, rgba(15, 23, 42, 0.56) 45%, rgba(7, 13, 28, 0.72) 100%);
+            backdrop-filter: blur(22px) saturate(145%);
+            -webkit-backdrop-filter: blur(22px) saturate(145%);
+            border: 1px solid rgba(186, 230, 253, 0.18);
+            box-shadow:
+                0 14px 36px rgba(2, 6, 23, 0.52),
+                inset 0 1px 0 rgba(255, 255, 255, 0.22),
+                inset 0 -1px 0 rgba(56, 189, 248, 0.08);
+        }
+
+        .glass-subcard {
+            background: linear-gradient(165deg, rgba(255, 255, 255, 0.05) 0%, rgba(7, 13, 25, 0.58) 100%);
+            backdrop-filter: blur(14px) saturate(130%);
+            -webkit-backdrop-filter: blur(14px) saturate(130%);
+            border: 1px solid rgba(148, 163, 184, 0.18);
+            box-shadow:
+                inset 0 1px 0 rgba(255, 255, 255, 0.12),
+                0 6px 20px rgba(2, 6, 23, 0.32);
+        }
+
+        .glass-pill {
+            background: linear-gradient(160deg, rgba(255, 255, 255, 0.11), rgba(15, 23, 42, 0.48));
+            backdrop-filter: blur(14px) saturate(140%);
+            -webkit-backdrop-filter: blur(14px) saturate(140%);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.18);
+        }
+
+        .glass-btn {
+            background: linear-gradient(165deg, rgba(255, 255, 255, 0.14), rgba(15, 23, 42, 0.56));
+            backdrop-filter: blur(14px) saturate(140%);
+            -webkit-backdrop-filter: blur(14px) saturate(140%);
+            border: 1px solid rgba(255, 255, 255, 0.22);
+            box-shadow:
+                0 6px 16px rgba(2, 6, 23, 0.34),
+                inset 0 1px 0 rgba(255, 255, 255, 0.24);
+            transition: transform 0.15s ease, background 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
+        }
+
+        .glass-btn:hover:not(:disabled) {
+            background: linear-gradient(165deg, rgba(255, 255, 255, 0.22), rgba(30, 41, 59, 0.65));
+            border-color: rgba(125, 211, 252, 0.65);
+            transform: translateY(-1px);
+            box-shadow:
+                0 8px 22px rgba(14, 165, 233, 0.28),
+                inset 0 1px 0 rgba(255, 255, 255, 0.32);
+        }
+
+        .glass-btn:active:not(:disabled) {
+            transform: translateY(0px) scale(0.98);
+        }
+
+        .glass-btn:disabled {
+            opacity: 0.38;
+            cursor: not-allowed;
+        }
+
+        .glass-btn-primary {
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.45), rgba(56, 189, 248, 0.42));
+            border-color: rgba(110, 231, 183, 0.72);
+            box-shadow:
+                0 0 20px rgba(16, 185, 129, 0.28),
+                inset 0 1px 0 rgba(255, 255, 255, 0.34);
+        }
+
+        .glass-btn-primary:hover:not(:disabled) {
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.64), rgba(56, 189, 248, 0.56));
+            border-color: rgba(167, 243, 208, 0.92);
+        }
+
+        .glass-btn-active {
+            background: linear-gradient(135deg, rgba(56, 189, 248, 0.38), rgba(52, 211, 153, 0.28));
+            border: 1px solid rgba(125, 211, 252, 0.72);
+            color: #f0f9ff;
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.28);
+        }
+
+        /* Liquid-glass Stock Day Column */
+        .stock-col {
+            position: relative;
+            overflow: hidden;
+            backdrop-filter: blur(14px) saturate(175%);
+            -webkit-backdrop-filter: blur(14px) saturate(175%);
+            border: 1px solid rgba(255, 255, 255, 0.35);
+            border-top: 2px solid rgba(255, 255, 255, 0.85);
+            transition: height 0.28s cubic-bezier(0.22, 1, 0.36, 1), transform 0.22s ease, opacity 0.2s ease, box-shadow 0.22s ease;
+        }
+
+        .stock-col::before {
+            content: '';
+            position: absolute;
+            top: 3px;
+            left: 12%;
+            width: 22%;
+            bottom: 3px;
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.45) 0%, rgba(255, 255, 255, 0.04) 100%);
+            border-radius: 999px;
+            pointer-events: none;
+        }
+
+        .stock-col.is-buy {
+            outline: 2px solid rgba(56, 189, 248, 0.96);
+            outline-offset: 2px;
+            transform: translateY(-2px);
+        }
+
+        .stock-col.is-sell-gain {
+            outline: 2px solid rgba(52, 211, 153, 0.96);
+            outline-offset: 2px;
+            transform: translateY(-2px);
+        }
+
+        .stock-col.is-sell-loss {
+            outline: 2px solid rgba(251, 113, 133, 0.96);
+            outline-offset: 2px;
+        }
+
+        .stock-col.is-best {
+            box-shadow: 0 0 24px rgba(251, 191, 36, 0.55), inset 0 1px 2px rgba(255, 255, 255, 0.75) !important;
+        }
+
+        .stock-col.is-dimmed {
+            opacity: 0.42;
+        }
+
+        .stock-col.is-unloaded {
+            opacity: 0.22;
+            border-style: dashed;
+        }
+
+        /* Floating Profit Token Ghost */
+        .flying-token {
+            position: absolute;
+            pointer-events: none;
+            z-index: 45;
+            will-change: transform, opacity;
+            backdrop-filter: blur(16px) saturate(180%);
+            -webkit-backdrop-filter: blur(16px) saturate(180%);
+        }
+
+        @keyframes vaultFlash {
+            0% { box-shadow: 0 0 0 rgba(52, 211, 153, 0); transform: scale(1); }
+            45% { box-shadow: 0 0 28px rgba(52, 211, 153, 0.72); transform: scale(1.04); }
+            100% { box-shadow: 0 0 12px rgba(52, 211, 153, 0.2); transform: scale(1); }
+        }
+
+        .vault-flash {
+            animation: vaultFlash 0.65s ease-out;
+        }
+
+        /* Code panel with exact 4-space indentation */
+        .code-scroll {
+            max-height: 520px;
+            overflow-y: auto;
+            overflow-x: auto;
+            scrollbar-width: thin;
+            scrollbar-color: rgba(125, 211, 252, 0.4) rgba(15, 23, 42, 0.35);
+        }
+
+        .code-scroll::-webkit-scrollbar {
+            width: 7px;
+            height: 7px;
+        }
+
+        .code-scroll::-webkit-scrollbar-track {
+            background: rgba(15, 23, 42, 0.35);
+            border-radius: 999px;
+        }
+
+        .code-scroll::-webkit-scrollbar-thumb {
+            background: rgba(125, 211, 252, 0.38);
+            border-radius: 999px;
+            border: 1px solid rgba(255, 255, 255, 0.12);
+        }
+
+        .code-scroll::-webkit-scrollbar-thumb:hover {
+            background: rgba(125, 211, 252, 0.62);
+        }
+
+        @media (min-width: 1280px) {
+            .code-scroll {
+                max-height: none;
+            }
+        }
+
+        .code-line {
+            display: flex;
+            align-items: baseline;
+            padding: 2.5px 12px;
+            border-left: 3px solid transparent;
+            transition: background-color 0.16s ease, border-color 0.16s ease;
+            white-space: pre;
+            font-size: 12.5px;
+            line-height: 1.65;
+        }
+
+        .code-line.active-line {
+            background: linear-gradient(90deg, rgba(56, 189, 248, 0.24), rgba(16, 185, 129, 0.08));
+            border-left-color: #38bdf8;
+            box-shadow: inset 0 0 14px rgba(56, 189, 248, 0.14);
+        }
+
+        .code-ln {
+            width: 32px;
+            flex-shrink: 0;
+            text-align: right;
+            padding-right: 12px;
+            color: rgba(148, 163, 184, 0.55);
+            user-select: none;
+        }
+
+        .code-line.active-line .code-ln {
+            color: #7dd3fc;
+            font-weight: 700;
+        }
+
+        .code-text {
+            white-space: pre;
+            tab-size: 4;
+        }
+
+        /* Syntax highlight tokens */
+        .tok-kw { color: #c084fc; font-weight: 600; }
+        .tok-type { color: #38bdf8; }
+        .tok-num { color: #fbbf24; }
+        .tok-str { color: #34d399; }
+        .tok-cmt { color: #64748b; font-style: italic; }
+        .tok-fn { color: #93c5fd; }
+
+        /* Range scrubber */
+        input[type="range"].glass-slider {
+            -webkit-appearance: none;
+            appearance: none;
+            background: rgba(148, 163, 184, 0.24);
+            height: 6px;
+            border-radius: 999px;
+            outline: none;
+        }
+
+        input[type="range"].glass-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 16px;
+            height: 16px;
+            border-radius: 999px;
+            background: linear-gradient(135deg, #34d399, #38bdf8);
+            border: 2px solid #ffffff;
+            box-shadow: 0 0 12px rgba(52, 211, 153, 0.6);
+            cursor: pointer;
+        }
+
+        input[type="range"].glass-slider::-moz-range-thumb {
+            width: 16px;
+            height: 16px;
+            border-radius: 999px;
+            background: linear-gradient(135deg, #34d399, #38bdf8);
+            border: 2px solid #ffffff;
+            box-shadow: 0 0 12px rgba(52, 211, 153, 0.6);
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body class="antialiased selection:bg-emerald-400/30 selection:text-emerald-100">
+    <div class="max-w-[1440px] mx-auto px-3 sm:px-5 py-3.5 space-y-3.5">
+
+        <!-- 1. TOP STICKY FROSTED-GLASS PLAYBACK DECK -->
+        <header class="glass-panel rounded-2xl px-4 py-3 space-y-2.5 sticky top-2 z-50">
+            <!-- Row 1: Title | Playback Controls | Speed & Audio -->
+            <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3">
+                <!-- Left: Icon + Title + Subtitle -->
+                <div class="flex items-center gap-3 min-w-0">
+                    <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-400 via-cyan-500 to-indigo-500 flex items-center justify-center text-slate-950 font-extrabold text-lg shadow-lg shadow-emerald-500/20 shrink-0">
+                        📈
+                    </div>
+                    <div class="min-w-0">
+                        <h1 class="text-base sm:text-lg font-bold tracking-tight bg-gradient-to-r from-white via-emerald-100 to-sky-200 bg-clip-text text-transparent truncate">
+                            Best Time to Buy &amp; Sell Stock (Brute Force)
+                        </h1>
+                        <p class="text-[11px] text-slate-400 flex items-center gap-1.5 truncate">
+                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 shrink-0"></span>
+                            <span>LeetCode 121 • One Transaction • Nested (buy, sell) Pairs • O(n²) Time • O(1) Space</span>
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Center: Grouped Glass Playback Buttons -->
+                <div class="glass-pill rounded-xl p-1 flex flex-wrap items-center gap-1.5 self-start lg:self-auto">
+                    <button id="btnReset" class="glass-btn px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-200 flex items-center gap-1.5" title="Reset to Step 1">
+                        <span>↺</span><span>Reset</span>
+                    </button>
+                    <button id="btnPrev" class="glass-btn px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-200 flex items-center gap-1.5" title="Previous Step (Left Arrow)">
+                        <span>⏮</span><span>Previous</span>
+                    </button>
+                    <button id="btnPlayPause" class="glass-btn glass-btn-primary px-4 py-1.5 rounded-lg text-xs font-bold text-white flex items-center gap-1.5 min-w-[88px] justify-center" title="Start / Stop (Space)">
+                        <span id="playIcon">▶</span><span id="playLabel">Start</span>
+                    </button>
+                    <button id="btnNext" class="glass-btn px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-200 flex items-center gap-1.5" title="Next Step (Right Arrow)">
+                        <span>Next</span><span>⏭</span>
+                    </button>
+                </div>
+
+                <!-- Right: Speed Multipliers + Audio Toggle -->
+                <div class="flex items-center gap-2 self-start lg:self-auto">
+                    <div class="glass-pill rounded-xl px-2 py-1 flex items-center gap-1 text-xs">
+                        <span class="text-slate-400 text-[11px] mr-1">⏱ Speed</span>
+                        <button data-speed="0.5" class="speed-btn px-2 py-0.5 rounded-md font-mono-code text-slate-300 hover:text-white transition">0.5x</button>
+                        <button data-speed="1" class="speed-btn px-2 py-0.5 rounded-md font-mono-code transition glass-btn-active">1x</button>
+                        <button data-speed="2" class="speed-btn px-2 py-0.5 rounded-md font-mono-code text-slate-300 hover:text-white transition">2x</button>
+                        <button data-speed="4" class="speed-btn px-2 py-0.5 rounded-md font-mono-code text-slate-300 hover:text-white transition">4x</button>
+                    </div>
+                    <button id="btnAudio" class="glass-btn w-9 h-9 rounded-xl flex items-center justify-center text-sm text-slate-200" title="Toggle Audio Cues">
+                        <span id="audioIcon">🔊</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Row 2: Live Status Pills + Full-Width Timeline Scrubber -->
+            <div class="flex flex-wrap sm:flex-nowrap items-center gap-2 pt-2 border-t border-white/10">
+                <span id="badgeStep" class="px-2.5 py-1 rounded-lg text-[11px] font-mono-code font-semibold bg-sky-500/15 text-sky-300 border border-sky-400/30 shrink-0">
+                    Step: 1 / 1
+                </span>
+                <span id="phaseBadge" class="px-2.5 py-1 rounded-lg text-[11px] font-mono-code font-semibold bg-cyan-500/15 text-cyan-200 border border-cyan-400/30 shrink-0">
+                    main() Start
+                </span>
+                <span id="badgePairsTop" class="px-2.5 py-1 rounded-lg text-[11px] font-mono-code font-semibold bg-purple-500/15 text-purple-300 border border-purple-400/30 shrink-0">
+                    Pairs: 0 / 15
+                </span>
+                <span id="badgeOutputTop" class="px-2.5 py-1 rounded-lg text-[11px] font-mono-code font-semibold bg-emerald-500/15 text-emerald-300 border border-emerald-400/30 shrink-0">
+                    maxProfit: 0
+                </span>
+                <div class="flex-1 min-w-[140px] flex items-center pl-1">
+                    <input id="stepSlider" type="range" min="0" max="0" value="0" class="glass-slider w-full" />
+                </div>
+            </div>
+        </header>
+
+        <!-- 2. COMPACT TEST CASES & CUSTOM INPUT BAR -->
+        <section class="glass-panel rounded-2xl px-4 py-2.5 space-y-2">
+            <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-2.5">
+                <div class="flex flex-wrap items-center gap-2.5">
+                    <span class="text-[11px] font-bold uppercase tracking-wider text-emerald-300 flex items-center gap-1.5 shrink-0">
+                        <span>🧪</span><span>TEST CASES:</span>
+                    </span>
+                    <select id="presetSelect" class="glass-pill rounded-xl px-3 py-1.5 text-xs text-slate-100 bg-slate-900/90 outline-none focus:border-emerald-400 min-w-[250px]">
+                        <option value="0">1: LeetCode Ex 1 ([7, 1, 5, 3, 6, 4] → Profit 5)</option>
+                        <option value="1">2: Strictly Falling ([7, 6, 4, 3, 1] → Profit 0)</option>
+                        <option value="2">3: Late Bull Surge ([8, 5, 2, 1, 10] → Profit 9)</option>
+                        <option value="3">4: Early Peak ([1, 9, 2, 6, 3] → Profit 8)</option>
+                        <option value="4">5: Flat Market ([4, 4, 4, 4] → Profit 0)</option>
+                        <option value="5">6: Two Days Profit ([2, 9] → Profit 7)</option>
+                        <option value="6">7: Two Days Drop ([9, 2] → Profit 0)</option>
+                        <option value="7">8: Single Day ([5] → Profit 0)</option>
+                        <option value="8">9: V-Shaped Dip ([6, 3, 1, 4, 8, 2] → Profit 7)</option>
+                        <option value="9">10: Steady Climb ([2, 4, 6, 8, 10] → Profit 8)</option>
+                    </select>
+                </div>
+
+                <div class="flex flex-wrap items-center gap-2">
+                    <span class="text-xs font-mono-code text-slate-400">prices[]:</span>
+                    <input id="customPricesInput" type="text" placeholder="7, 1, 5, 3, 6, 4" class="glass-pill rounded-xl px-2.5 py-1.5 text-xs font-mono-code text-slate-100 w-44 sm:w-52 outline-none focus:border-emerald-400" />
+                    <button id="btnLoadCustom" class="glass-btn px-3.5 py-1.5 rounded-xl text-xs font-semibold text-emerald-200">
+                        Run Stock Scan
+                    </button>
+                </div>
+            </div>
+            <div id="errorBanner" class="hidden rounded-xl px-3 py-1.5 text-xs font-medium bg-rose-500/20 border border-rose-400/40 text-rose-200"></div>
+        </section>
+
+        <!-- 3. MAIN WORKSPACE: LEFT (5 KPI CARDS + STOCK STAGE) & RIGHT (HEIGHT-MATCHED CODE CARD) -->
+        <main class="grid grid-cols-1 xl:grid-cols-12 gap-4 items-stretch">
+
+            <!-- LEFT COLUMN -->
+            <section class="xl:col-span-7 flex flex-col gap-3.5">
+
+                <!-- 5-CARD LIVE TRADING TELEMETRY ROW -->
+                <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2.5">
+                    <div class="glass-panel rounded-xl p-3 flex flex-col justify-between border border-sky-400/25">
+                        <div class="flex items-center justify-between text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                            <span>BUY DAY</span>
+                            <span class="w-2 h-2 rounded-full bg-sky-400"></span>
+                        </div>
+                        <div id="kpiBuy" class="font-mono-code text-base font-bold text-sky-300 mt-1 truncate">—</div>
+                        <div id="kpiBuySub" class="text-[10px] font-mono-code text-slate-400 mt-0.5 truncate">prices[buy]</div>
+                    </div>
+
+                    <div class="glass-panel rounded-xl p-3 flex flex-col justify-between border border-purple-400/25">
+                        <div class="flex items-center justify-between text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                            <span>SELL DAY</span>
+                            <span class="text-purple-400 text-xs">⚡</span>
+                        </div>
+                        <div id="kpiSell" class="font-mono-code text-base font-bold text-purple-300 mt-1 truncate">—</div>
+                        <div id="kpiSellSub" class="text-[10px] font-mono-code text-slate-400 mt-0.5 truncate">prices[sell]</div>
+                    </div>
+
+                    <div class="glass-panel rounded-xl p-3 flex flex-col justify-between border border-cyan-400/20">
+                        <div class="flex items-center justify-between text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                            <span>CANDIDATE Δ</span>
+                            <span class="text-cyan-400 text-xs">±</span>
+                        </div>
+                        <div id="kpiDiff" class="font-mono-code text-base font-bold text-slate-300 mt-1 truncate">—</div>
+                        <div id="kpiDiffSub" class="text-[10px] font-mono-code text-slate-400 mt-0.5 truncate">sell - buy</div>
+                    </div>
+
+                    <div id="kpiMaxCard" class="glass-panel rounded-xl p-3 flex flex-col justify-between border border-amber-400/30">
+                        <div class="flex items-center justify-between text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                            <span>MAX PROFIT</span>
+                            <span class="text-amber-400 text-xs">★</span>
+                        </div>
+                        <div id="kpiMaxProfit" class="font-mono-code text-base font-bold text-amber-300 mt-1 truncate">0</div>
+                        <div id="kpiMaxSub" class="text-[10px] font-mono-code text-slate-400 mt-0.5 truncate">No profit yet</div>
+                    </div>
+
+                    <div class="glass-panel rounded-xl p-3 flex flex-col justify-between border border-emerald-400/25 col-span-2 sm:col-span-1">
+                        <div class="flex items-center justify-between text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                            <span>SYSTEM.OUT</span>
+                            <span class="text-emerald-400 font-mono-code text-[11px]">&gt;_</span>
+                        </div>
+                        <div id="kpiStdout" class="font-mono-code text-sm font-bold text-slate-200 mt-1 truncate">pending</div>
+                        <div id="kpiStdoutSub" class="text-[10px] font-mono-code text-emerald-300/80 mt-0.5 truncate">O(n²) pairs</div>
+                    </div>
+                </div>
+
+                <!-- MAIN DOMAIN-RELEVANT STOCK MARKET VISUALIZATION CARD -->
+                <div id="stageContainer" class="glass-panel rounded-2xl p-4 space-y-3 relative overflow-hidden">
+                    <!-- Header + Legend + Best Profit Vault -->
+                    <div class="flex flex-wrap items-center justify-between gap-2">
+                        <div class="flex items-center gap-2">
+                            <span class="text-emerald-400 text-sm">📊</span>
+                            <h2 class="text-xs font-bold uppercase tracking-wider text-slate-100">
+                                Stock Price Market Timeline &amp; (buy, sell) Trade Scanner
+                            </h2>
+                        </div>
+
+                        <div class="flex flex-wrap items-center gap-2.5 text-[10px] text-slate-300">
+                            <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-sm bg-sky-400"></span>buy</span>
+                            <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-sm bg-emerald-400"></span>profit sell</span>
+                            <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-sm bg-rose-400"></span>loss sell</span>
+                            <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-sm bg-amber-400"></span>best trade</span>
+                        </div>
+                    </div>
+
+                    <!-- Trade Evaluation & Best Profit Vault Strip -->
+                    <div class="grid grid-cols-1 sm:grid-cols-12 gap-2.5">
+                        <div class="sm:col-span-7 glass-subcard rounded-xl px-3 py-2 flex items-center justify-between gap-2 font-mono-code text-[11px]">
+                            <span class="text-slate-400">Current Pair:</span>
+                            <span id="tradeEquation" class="text-slate-200 font-semibold truncate">Waiting for buy / sell loops...</span>
+                        </div>
+                        <div id="profitVaultBox" class="sm:col-span-5 glass-subcard rounded-xl px-3 py-2 flex items-center justify-between gap-2 font-mono-code text-[11px] border border-amber-400/35">
+                            <span class="text-amber-300 font-bold flex items-center gap-1">
+                                <span>★</span><span>maxProfit Vault</span>
+                            </span>
+                            <span id="vaultValueBadge" class="px-2 py-0.5 rounded-md bg-amber-400/15 border border-amber-400/40 text-amber-200 font-bold">
+                                0
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Stock Chart Stage Canvas -->
+                    <div id="visualCanvas" class="glass-subcard rounded-xl relative pt-12 pb-3 px-3 sm:px-4 select-none overflow-hidden">
+                        <!-- Top Airspace Label -->
+                        <div class="absolute top-2 left-3 right-3 flex items-center justify-between text-[10px] font-mono-code text-slate-400 z-20">
+                            <span id="chartSubtitle">▲ Trade Arcs &amp; Buy Baseline ($prices[buy])</span>
+                            <span id="pairProgressBadge" class="px-2 py-0.5 rounded-full bg-purple-500/15 border border-purple-400/35 text-purple-200">
+                                Pairs checked: 0 / 0
+                            </span>
+                        </div>
+
+                        <!-- SVG Layer for Gridlines, Price Trendline, Buy Baseline, Profit Zone & Trade Arcs -->
+                        <svg id="chartOverlay" class="absolute inset-0 w-full h-full pointer-events-none z-20" xmlns="http://www.w3.org/2000/svg">
+                            <defs>
+                                <marker id="arrowGreen" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                                    <path d="M 0 1 L 10 5 L 0 9 z" fill="#34d399" />
+                                </marker>
+                                <marker id="arrowRose" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                                    <path d="M 0 1 L 10 5 L 0 9 z" fill="#fb7185" />
+                                </marker>
+                                <marker id="arrowAmber" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                                    <path d="M 0 1 L 10 5 L 0 9 z" fill="#fbbf24" />
+                                </marker>
+                            </defs>
+                            <g id="gridGroup"></g>
+                            <g id="trendGroup"></g>
+                            <g id="tradeGroup"></g>
+                        </svg>
+
+                        <!-- Floating Token Layer (for physical lift-and-place into maxProfit vault) -->
+                        <div id="ghostLayer" class="absolute inset-0 pointer-events-none z-40"></div>
+
+                        <!-- Day Columns Container -->
+                        <div id="stockColumnsGrid" class="relative z-10 flex items-end justify-center gap-2 sm:gap-3.5 h-56 pt-6 pb-1 px-2"></div>
+                    </div>
+
+                    <!-- Compact O(n²) Pair Matrix Strip (shows every buy < sell cell evaluated) -->
+                    <div class="glass-subcard rounded-xl px-3 py-2.5 space-y-1.5">
+                        <div class="flex items-center justify-between text-[10px] font-mono-code">
+                            <span class="text-slate-300 font-semibold uppercase tracking-wider">O(n²) Trade Pairs Evaluated (buy &lt; sell)</span>
+                            <span id="bestTradeSummary" class="text-amber-300">Best: none yet</span>
+                        </div>
+                        <div id="pairsStrip" class="flex flex-wrap items-center gap-1.5 font-mono-code text-[10px]"></div>
+                    </div>
+
+                    <!-- Bottom Row Inside Stage Card: Console + Live Info Narration -->
+                    <div class="grid grid-cols-1 md:grid-cols-12 gap-3">
+                        <div class="md:col-span-5 glass-subcard rounded-xl p-3 space-y-1.5">
+                            <div class="flex items-center justify-between text-[11px] font-mono-code">
+                                <span class="text-amber-300 font-semibold flex items-center gap-1.5">
+                                    <span>▤</span><span>Standard I/O Console</span>
+                                </span>
+                                <span id="ioStdout" class="text-emerald-300 truncate max-w-[120px]">stdout: —</span>
+                            </div>
+                            <div id="ioStdin" class="text-[10px] font-mono-code text-slate-400 truncate">stdin: 6 | 7 1 5 3 6 4</div>
+                        </div>
+
+                        <div class="md:col-span-7 glass-subcard rounded-xl p-3 flex items-center gap-2.5">
+                            <span class="w-5 h-5 rounded-full bg-sky-400/20 border border-sky-400/40 text-sky-300 flex items-center justify-center text-[11px] font-bold shrink-0">i</span>
+                            <p id="stepNarration" class="text-xs font-mono-code text-sky-200 leading-relaxed">
+                                Press Start or Next to trace every (buy, sell) trade pair in Main.main().
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- RIGHT COLUMN: HEIGHT-LOCKED SCROLLABLE JAVA CODE CARD WITH FOOTER NARRATION -->
+            <div class="xl:col-span-5 xl:relative">
+                <aside class="xl:absolute xl:inset-0 glass-panel rounded-2xl overflow-hidden flex flex-col">
+                    <!-- Code Header -->
+                    <div class="px-4 py-2.5 border-b border-white/10 flex items-center justify-between gap-2 bg-slate-950/45 shrink-0">
+                        <div class="flex items-center gap-2">
+                            <span class="w-2.5 h-2.5 rounded-full bg-rose-400/90"></span>
+                            <span class="w-2.5 h-2.5 rounded-full bg-amber-400/90"></span>
+                            <span class="w-2.5 h-2.5 rounded-full bg-emerald-400/90"></span>
+                            <span class="font-mono-code text-xs font-semibold text-slate-200 ml-1">Main.java</span>
+                        </div>
+                        <span id="activeFrameBadge" class="px-2.5 py-0.5 rounded-lg font-mono-code text-[11px] bg-sky-500/15 text-sky-300 border border-sky-400/35">
+                            Frame: main()
+                        </span>
+                    </div>
+
+                    <!-- Scrollable Code Body -->
+                    <div id="codeContainer" class="code-scroll relative flex-1 min-h-0 py-2 font-mono-code bg-[#070d19]/80"></div>
+
+                    <!-- Code Card Footer Narration -->
+                    <div class="px-4 py-2.5 border-t border-white/10 bg-slate-950/55 flex items-center gap-2 shrink-0">
+                        <span class="w-4 h-4 rounded-full bg-sky-400/20 border border-sky-400/40 text-sky-300 flex items-center justify-center text-[10px] font-bold shrink-0">i</span>
+                        <span id="codeFooterNarration" class="text-[11px] font-mono-code text-sky-200 truncate">
+                            Entered main(String[] args).
+                        </span>
+                    </div>
+                </aside>
+            </div>
+        </main>
+
+        <!-- 4. BOTTOM DOSSIER: 2-COLUMN PROBLEM STATEMENT & COMPLEXITY ANALYSIS -->
+        <section class="grid grid-cols-1 lg:grid-cols-2 gap-4 pb-6">
+            <!-- Left: Problem Statement -->
+            <article class="glass-panel rounded-2xl p-5 space-y-3">
+                <div class="flex flex-wrap items-center justify-between gap-2">
+                    <div class="flex items-center gap-2">
+                        <span class="text-amber-400 text-sm">📄</span>
+                        <h2 class="text-sm font-bold text-amber-300">Problem Statement</h2>
+                        <span class="px-2 py-0.5 rounded-md text-[10px] font-semibold bg-emerald-500/15 text-emerald-300 border border-emerald-400/30">
+                            Easy / Arrays
+                        </span>
+                    </div>
+                    <span class="text-[11px] font-mono-code text-slate-400">LeetCode 121 • One Transaction</span>
+                </div>
+
+                <p class="text-xs sm:text-sm text-slate-200 leading-relaxed">
+                    Given an array <code class="font-mono-code text-sky-300">prices</code> where <code class="font-mono-code text-sky-300">prices[i]</code> is the price of a stock on day <code class="font-mono-code text-sky-300">i</code>, choose a single day to <strong>buy</strong> one stock and a different <strong>later day</strong> to <strong>sell</strong> it to maximize your profit (<code class="font-mono-code text-emerald-300">prices[sell] - prices[buy]</code>).
+                </p>
+                <ul class="text-xs text-slate-300 space-y-1 font-mono-code">
+                    <li>• Constraint: You must buy before you sell (buy &lt; sell).</li>
+                    <li>• If prices only fall (no profit possible), return 0.</li>
+                </ul>
+
+                <div class="glass-subcard rounded-xl p-3 grid grid-cols-1 sm:grid-cols-2 gap-2 text-[11px] font-mono-code text-slate-300">
+                    <div>Ex 1: <span class="text-white">[7, 1, 5, 3, 6, 4]</span></div>
+                    <div>→ Buy at 1, Sell at 6 → <span class="text-emerald-300 font-bold">Profit 5</span></div>
+                    <div>Ex 2: <span class="text-white">[7, 6, 4, 3, 1]</span></div>
+                    <div>→ Only falling → <span class="text-amber-300 font-bold">Profit 0</span></div>
+                </div>
+            </article>
+
+            <!-- Right: Algorithm Summary & Complexity Analysis -->
+            <article class="glass-panel rounded-2xl p-5 space-y-3">
+                <div class="flex flex-wrap items-center justify-between gap-2">
+                    <div class="flex items-center gap-2">
+                        <span class="text-cyan-400 text-sm">🧠</span>
+                        <h2 class="text-sm font-bold text-cyan-300">Algorithm Summary &amp; Complexity Analysis</h2>
+                    </div>
+                    <span class="px-2.5 py-0.5 rounded-md text-[11px] font-mono-code bg-purple-500/15 text-purple-300 border border-purple-400/30">
+                        Brute Force O(n²)
+                    </span>
+                </div>
+
+                <!-- Purple Highlight Callout Box -->
+                <div class="rounded-xl p-3.5 bg-purple-500/10 border border-purple-400/30 space-y-1.5">
+                    <div class="text-xs font-bold text-purple-300 flex items-center gap-1.5">
+                        <span>✂</span><span>Exhaustive Pair Scan &amp; Why It Takes O(n²):</span>
+                    </div>
+                    <p class="text-xs text-slate-200 leading-relaxed">
+                        The outer loop picks every possible <code class="font-mono-code text-sky-300">buy</code> day (<code class="font-mono-code">0 .. n-1</code>), and the inner loop tests every later <code class="font-mono-code text-purple-200">sell</code> day (<code class="font-mono-code">buy + 1 .. n-1</code>), updating <code class="font-mono-code text-amber-300">maxProfit</code> across all <code class="font-mono-code">n(n - 1) / 2</code> pairs. <em>(Optimal follow-up: tracking the running minimum price solves this in a single O(n) pass!)</em>
+                    </p>
+                </div>
+
+                <!-- Bottom 2 Complexity Subcards -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div class="glass-subcard rounded-xl p-3">
+                        <div class="text-[10px] font-bold uppercase tracking-wider text-slate-400">TIME COMPLEXITY</div>
+                        <div class="font-mono-code text-base font-bold text-amber-400 mt-0.5">O(n²)</div>
+                        <div class="text-[11px] text-slate-400 mt-0.5">
+                            Nested loops evaluate all <code class="font-mono-code text-slate-300">n(n - 1) / 2</code> valid <code class="font-mono-code text-slate-300">(buy, sell)</code> pairs.
+                        </div>
+                    </div>
+                    <div class="glass-subcard rounded-xl p-3">
+                        <div class="text-[10px] font-bold uppercase tracking-wider text-slate-400">AUXILIARY SPACE</div>
+                        <div class="font-mono-code text-base font-bold text-sky-400 mt-0.5">O(1)</div>
+                        <div class="text-[11px] text-slate-400 mt-0.5">
+                            Uses only scalar variables (<code class="font-mono-code text-slate-300">buy</code>, <code class="font-mono-code text-slate-300">sell</code>, <code class="font-mono-code text-slate-300">maxProfit</code>) beyond the input array.
+                        </div>
+                    </div>
+                </div>
+            </article>
+        </section>
+    </div>
+
+    <script>
+        /* =========================================================================
+           1. EXACT JAVA SOURCE CODE (4-Space Indentation, Strict Line Numbers)
+           ========================================================================= */
+        const JAVA_CODE_LINES = [
+            'import java.util.*;',
+            '',
+            'public class Main {',
+            '    public static void main(String[] args) {',
+            '        Scanner sc = new Scanner(System.in);',
+            '',
+            '        int n = sc.nextInt();',
+            '        int[] prices = new int[n];',
+            '',
+            '        for (int i = 0; i < n; i++) {',
+            '            prices[i] = sc.nextInt();',
+            '        }',
+            '',
+            '        int maxProfit = 0;',
+            '',
+            '        for (int buy = 0; buy < n; buy++) {',
+            '            for (int sell = buy + 1; sell < n; sell++) {',
+            '                maxProfit = Math.max(',
+            '                    maxProfit,',
+            '                    prices[sell] - prices[buy]',
+            '                );',
+            '            }',
+            '        }',
+            '',
+            '        System.out.println(maxProfit);',
+            '    }',
+            '}'
+        ];
+
+        /* =========================================================================
+           2. UNIQUE LIQUID-GLASS COLOR PALETTE & CURATED PRESETS
+           ========================================================================= */
+        const LIQUID_PALETTE = [
+            { // 0: Cyan
+                barBg: 'linear-gradient(180deg, rgba(125, 211, 252, 0.86) 0%, rgba(14, 165, 233, 0.48) 58%, rgba(3, 105, 161, 0.28) 100%)',
+                barBorder: 'rgba(186, 230, 253, 0.88)',
+                barGlow: '0 0 18px rgba(56, 189, 248, 0.42), inset 0 1px 2px rgba(255, 255, 255, 0.7)'
+            },
+            { // 1: Emerald
+                barBg: 'linear-gradient(180deg, rgba(110, 231, 183, 0.86) 0%, rgba(16, 185, 129, 0.48) 58%, rgba(4, 120, 87, 0.28) 100%)',
+                barBorder: 'rgba(167, 243, 208, 0.88)',
+                barGlow: '0 0 18px rgba(52, 211, 153, 0.42), inset 0 1px 2px rgba(255, 255, 255, 0.7)'
+            },
+            { // 2: Violet
+                barBg: 'linear-gradient(180deg, rgba(196, 181, 253, 0.86) 0%, rgba(139, 92, 246, 0.48) 58%, rgba(91, 33, 182, 0.28) 100%)',
+                barBorder: 'rgba(221, 214, 254, 0.88)',
+                barGlow: '0 0 18px rgba(167, 139, 250, 0.42), inset 0 1px 2px rgba(255, 255, 255, 0.7)'
+            },
+            { // 3: Amber
+                barBg: 'linear-gradient(180deg, rgba(253, 224, 71, 0.86) 0%, rgba(245, 158, 11, 0.48) 58%, rgba(180, 83, 9, 0.28) 100%)',
+                barBorder: 'rgba(254, 240, 138, 0.88)',
+                barGlow: '0 0 18px rgba(251, 191, 36, 0.42), inset 0 1px 2px rgba(255, 255, 255, 0.7)'
+            },
+            { // 4: Fuchsia
+                barBg: 'linear-gradient(180deg, rgba(240, 171, 252, 0.86) 0%, rgba(217, 70, 239, 0.48) 58%, rgba(134, 25, 143, 0.28) 100%)',
+                barBorder: 'rgba(245, 208, 254, 0.88)',
+                barGlow: '0 0 18px rgba(232, 121, 249, 0.42), inset 0 1px 2px rgba(255, 255, 255, 0.7)'
+            },
+            { // 5: Teal
+                barBg: 'linear-gradient(180deg, rgba(94, 234, 212, 0.86) 0%, rgba(20, 184, 166, 0.48) 58%, rgba(15, 118, 110, 0.28) 100%)',
+                barBorder: 'rgba(153, 246, 228, 0.88)',
+                barGlow: '0 0 18px rgba(45, 212, 191, 0.42), inset 0 1px 2px rgba(255, 255, 255, 0.7)'
+            },
+            { // 6: Rose
+                barBg: 'linear-gradient(180deg, rgba(253, 164, 175, 0.86) 0%, rgba(244, 63, 94, 0.48) 58%, rgba(159, 18, 57, 0.28) 100%)',
+                barBorder: 'rgba(254, 205, 211, 0.88)',
+                barGlow: '0 0 18px rgba(251, 113, 133, 0.42), inset 0 1px 2px rgba(255, 255, 255, 0.7)'
+            },
+            { // 7: Indigo
+                barBg: 'linear-gradient(180deg, rgba(165, 180, 252, 0.86) 0%, rgba(99, 102, 241, 0.48) 58%, rgba(67, 56, 202, 0.28) 100%)',
+                barBorder: 'rgba(199, 210, 254, 0.88)',
+                barGlow: '0 0 18px rgba(129, 140, 248, 0.42), inset 0 1px 2px rgba(255, 255, 255, 0.7)'
+            },
+            { // 8: Orange
+                barBg: 'linear-gradient(180deg, rgba(253, 186, 116, 0.86) 0%, rgba(249, 115, 22, 0.48) 58%, rgba(194, 65, 12, 0.28) 100%)',
+                barBorder: 'rgba(254, 215, 170, 0.88)',
+                barGlow: '0 0 18px rgba(251, 146, 60, 0.42), inset 0 1px 2px rgba(255, 255, 255, 0.7)'
+            },
+            { // 9: Lime
+                barBg: 'linear-gradient(180deg, rgba(190, 242, 100, 0.86) 0%, rgba(132, 204, 22, 0.48) 58%, rgba(77, 124, 15, 0.28) 100%)',
+                barBorder: 'rgba(217, 249, 157, 0.88)',
+                barGlow: '0 0 18px rgba(163, 230, 53, 0.42), inset 0 1px 2px rgba(255, 255, 255, 0.7)'
+            }
+        ];
+
+        const PRESETS = [
+            [7, 1, 5, 3, 6, 4],
+            [7, 6, 4, 3, 1],
+            [8, 5, 2, 1, 10],
+            [1, 9, 2, 6, 3],
+            [4, 4, 4, 4],
+            [2, 9],
+            [9, 2],
+            [5],
+            [6, 3, 1, 4, 8, 2],
+            [2, 4, 6, 8, 10]
+        ];
+
+        /* =========================================================================
+           3. APPLICATION STATE
+           ========================================================================= */
+        let currentPrices = [...PRESETS[0]];
+        let steps = [];
+        let stepIndex = 0;
+        let isPlaying = false;
+        let playTimer = null;
+        let speedMultiplier = 1;
+        let audioEnabled = true;
+        let audioCtx = null;
+        let activeAnimations = [];
+
+        /* =========================================================================
+           4. DOM ELEMENT REFERENCES
+           ========================================================================= */
+        const el = {
+            badgeStep: document.getElementById('badgeStep'),
+            phaseBadge: document.getElementById('phaseBadge'),
+            badgePairsTop: document.getElementById('badgePairsTop'),
+            badgeOutputTop: document.getElementById('badgeOutputTop'),
+            btnReset: document.getElementById('btnReset'),
+            btnPrev: document.getElementById('btnPrev'),
+            btnPlayPause: document.getElementById('btnPlayPause'),
+            playIcon: document.getElementById('playIcon'),
+            playLabel: document.getElementById('playLabel'),
+            btnNext: document.getElementById('btnNext'),
+            btnAudio: document.getElementById('btnAudio'),
+            audioIcon: document.getElementById('audioIcon'),
+            stepSlider: document.getElementById('stepSlider'),
+            presetSelect: document.getElementById('presetSelect'),
+            customPricesInput: document.getElementById('customPricesInput'),
+            btnLoadCustom: document.getElementById('btnLoadCustom'),
+            errorBanner: document.getElementById('errorBanner'),
+            kpiBuy: document.getElementById('kpiBuy'),
+            kpiBuySub: document.getElementById('kpiBuySub'),
+            kpiSell: document.getElementById('kpiSell'),
+            kpiSellSub: document.getElementById('kpiSellSub'),
+            kpiDiff: document.getElementById('kpiDiff'),
+            kpiDiffSub: document.getElementById('kpiDiffSub'),
+            kpiMaxCard: document.getElementById('kpiMaxCard'),
+            kpiMaxProfit: document.getElementById('kpiMaxProfit'),
+            kpiMaxSub: document.getElementById('kpiMaxSub'),
+            kpiStdout: document.getElementById('kpiStdout'),
+            kpiStdoutSub: document.getElementById('kpiStdoutSub'),
+            tradeEquation: document.getElementById('tradeEquation'),
+            profitVaultBox: document.getElementById('profitVaultBox'),
+            vaultValueBadge: document.getElementById('vaultValueBadge'),
+            visualCanvas: document.getElementById('visualCanvas'),
+            pairProgressBadge: document.getElementById('pairProgressBadge'),
+            gridGroup: document.getElementById('gridGroup'),
+            trendGroup: document.getElementById('trendGroup'),
+            tradeGroup: document.getElementById('tradeGroup'),
+            ghostLayer: document.getElementById('ghostLayer'),
+            stockColumnsGrid: document.getElementById('stockColumnsGrid'),
+            bestTradeSummary: document.getElementById('bestTradeSummary'),
+            pairsStrip: document.getElementById('pairsStrip'),
+            ioStdin: document.getElementById('ioStdin'),
+            ioStdout: document.getElementById('ioStdout'),
+            stepNarration: document.getElementById('stepNarration'),
+            codeFooterNarration: document.getElementById('codeFooterNarration'),
+            activeFrameBadge: document.getElementById('activeFrameBadge'),
+            codeContainer: document.getElementById('codeContainer')
+        };
+
+        /* =========================================================================
+           5. WEB AUDIO SYNTHESIZER (No external URLs)
+           ========================================================================= */
+        function initAudio() {
+            if (!audioCtx) {
+                const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+                if (AudioContextClass) audioCtx = new AudioContextClass();
+            }
+            if (audioCtx && audioCtx.state === 'suspended') {
+                audioCtx.resume().catch(() => {});
+            }
+        }
+
+        function playTone(freq = 440, duration = 0.085, type = 'sine', gainPeak = 0.045) {
+            if (!audioEnabled) return;
+            try {
+                initAudio();
+                if (!audioCtx) return;
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = type;
+                osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+                gain.gain.setValueAtTime(0.0001, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(gainPeak, audioCtx.currentTime + 0.015);
+                gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + duration);
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start();
+                osc.stop(audioCtx.currentTime + duration + 0.01);
+            } catch (_) {}
+        }
+
+        /* =========================================================================
+           6. SYNTAX HIGHLIGHTER & CODE PANEL
+           ========================================================================= */
+        function escapeHtml(str) {
+            return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+        }
+
+        function highlightJavaLine(raw) {
+            const escaped = escapeHtml(raw);
+            if (escaped.trim().startsWith('//')) {
+                return `<span class="tok-cmt">${escaped}</span>`;
+            }
+            let temp = escaped;
+            temp = temp.replace(
+                /\b(import|public|class|static|void|int|for|new)\b/g,
+                '<span class="tok-kw">$1</span>'
+            );
+            temp = temp.replace(
+                /\b(Main|Scanner|String|System|Math)\b/g,
+                '<span class="tok-type">$1</span>'
+            );
+            temp = temp.replace(
+                /\b(main|nextInt|max|println)\b(?=\()/g,
+                '<span class="tok-fn">$1</span>'
+            );
+            temp = temp.replace(/\b(\d+)\b/g, '<span class="tok-num">$1</span>');
+            return temp;
+        }
+
+        function buildCodePanel() {
+            el.codeContainer.innerHTML = JAVA_CODE_LINES.map((line, i) => {
+                const ln = i + 1;
+                return `<div class="code-line" data-line="${ln}"><span class="code-ln">${ln}</span><span class="code-text">${highlightJavaLine(line) || ' '}</span></div>`;
+            }).join('');
+        }
+
+        function highlightSingleLine(lineNumber) {
+            const rows = el.codeContainer.querySelectorAll('.code-line');
+            rows.forEach((row) => row.classList.remove('active-line'));
+            const activeRow = el.codeContainer.querySelector(`.code-line[data-line="${lineNumber}"]`);
+            if (activeRow) {
+                activeRow.classList.add('active-line');
+                const container = el.codeContainer;
+                const rowTop = activeRow.offsetTop;
+                const rowBottom = rowTop + activeRow.offsetHeight;
+                const viewTop = container.scrollTop;
+                const viewBottom = viewTop + container.clientHeight;
+                if (rowTop < viewTop + 32 || rowBottom > viewBottom - 32) {
+                    container.scrollTo({
+                        top: Math.max(0, rowTop - container.clientHeight / 2 + activeRow.offsetHeight / 2),
+                        behavior: 'smooth'
+                    });
+                }
+            }
+        }
+
+        /* =========================================================================
+           7. STEP TRACE GENERATOR (Strictly ONE Java Line per Step)
+           ========================================================================= */
+        function generateSteps(inputPrices) {
+            const trace = [];
+            const n = inputPrices.length;
+            const totalPairs = Math.floor((n * (n - 1)) / 2);
+            let prices = new Array(n).fill(null);
+            let maxProfit = 0;
+            let bestBuy = null;
+            let bestSell = null;
+            let checkedPairs = [];
+            let stdoutVal = null;
+
+            function pushStep({
+                line,
+                phase = 'Setup',
+                narration,
+                buy = null,
+                sell = null,
+                candidateDiff = null,
+                newRecord = false,
+                isDone = false
+            }) {
+                trace.push({
+                    line,
+                    phase,
+                    narration,
+                    prices: [...prices],
+                    n,
+                    totalPairs,
+                    buy,
+                    sell,
+                    candidateDiff,
+                    maxProfit,
+                    bestBuy,
+                    bestSell,
+                    newRecord,
+                    checkedPairs: checkedPairs.map((p) => ({ ...p })),
+                    stdoutVal,
+                    isDone
+                });
+            }
+
+            // Input setup
+            pushStep({
+                line: 5,
+                phase: 'Input',
+                narration: 'Initialize Scanner sc to read the number of days n and daily stock prices.'
+            });
+
+            pushStep({
+                line: 7,
+                phase: 'Input',
+                narration: `Read n = ${n} trading days from input.`
+            });
+
+            prices = new Array(n).fill(0);
+            pushStep({
+                line: 8,
+                phase: 'Input',
+                narration: `Allocate int[] prices = new int[${n}].`
+            });
+
+            for (let i = 0; i < n; i++) {
+                pushStep({
+                    line: 10,
+                    phase: 'Input',
+                    narration: `Input loop check i = ${i} < ${n} → true.`
+                });
+                prices[i] = inputPrices[i];
+                pushStep({
+                    line: 11,
+                    phase: 'Input',
+                    narration: `Store Day ${i} price: prices[${i}] = ${inputPrices[i]}.`
+                });
+            }
+
+            pushStep({
+                line: 14,
+                phase: 'Init maxProfit',
+                narration: 'Initialize int maxProfit = 0 (minimum possible profit is 0 if we make no trade).'
+            });
+
+            // Nested Brute Force Loops
+            for (let buy = 0; buy < n; buy++) {
+                pushStep({
+                    line: 16,
+                    phase: `Buy Day ${buy}`,
+                    narration: `Outer loop: select buy = ${buy} (price $${prices[buy]}). Now test every later sell day.`,
+                    buy
+                });
+
+                for (let sell = buy + 1; sell < n; sell++) {
+                    pushStep({
+                        line: 17,
+                        phase: `Pair (${buy}→${sell})`,
+                        narration: `Inner loop: select sell = ${sell} (price $${prices[sell]}) after buy = ${buy}.`,
+                        buy,
+                        sell
+                    });
+
+                    const diff = prices[sell] - prices[buy];
+                    pushStep({
+                        line: 20,
+                        phase: `Evaluate Δ`,
+                        narration: `Compute candidate profit: prices[${sell}] - prices[${buy}] = ${prices[sell]} - ${prices[buy]} = ${diff >= 0 ? '+' + diff : diff}.`,
+                        buy,
+                        sell,
+                        candidateDiff: diff
+                    });
+
+                    const improved = diff > maxProfit;
+                    if (improved) {
+                        maxProfit = diff;
+                        bestBuy = buy;
+                        bestSell = sell;
+                    }
+                    checkedPairs.push({ buy, sell, diff, improved });
+
+                    pushStep({
+                        line: 18,
+                        phase: improved ? 'New Best ★' : 'Keep Best',
+                        narration: improved
+                            ? `New record! Math.max(${maxProfit - (diff - (maxProfit - diff))}, ${diff}) updates maxProfit → ${maxProfit} (Buy Day ${buy} @ $${prices[buy]}, Sell Day ${sell} @ $${prices[sell]}).`
+                            : `Math.max(${maxProfit}, ${diff}) = ${maxProfit}. Candidate (${diff}) does not beat current maxProfit (${maxProfit}).`,
+                        buy,
+                        sell,
+                        candidateDiff: diff,
+                        newRecord: improved
+                    });
+                }
+            }
+
+            // Print result
+            stdoutVal = maxProfit;
+            pushStep({
+                line: 25,
+                phase: 'Completed',
+                narration: maxProfit > 0
+                    ? `System.out.println(${maxProfit}) — Best single transaction: Buy Day ${bestBuy} ($${prices[bestBuy]}) → Sell Day ${bestSell} ($${prices[bestSell]}) = +$${maxProfit}.`
+                    : `System.out.println(0) — Prices never rose after any buy day, so maximum profit is 0.`,
+                buy: bestBuy,
+                sell: bestSell,
+                isDone: true
+            });
+
+            return trace;
+        }
+
+        /* =========================================================================
+           8. SVG CHART OVERLAY & LIFT-TO-VAULT ANIMATION
+           ========================================================================= */
+        function cancelActiveAnimations() {
+            activeAnimations.forEach((a) => {
+                try { a.cancel(); } catch (_) {}
+            });
+            activeAnimations = [];
+            el.ghostLayer.innerHTML = '';
+        }
+
+        function getRelRect(node) {
+            if (!node) return null;
+            const canvasRect = el.visualCanvas.getBoundingClientRect();
+            const r = node.getBoundingClientRect();
+            return {
+                left: r.left - canvasRect.left,
+                top: r.top - canvasRect.top,
+                right: r.right - canvasRect.left,
+                bottom: r.bottom - canvasRect.top,
+                width: r.width,
+                height: r.height,
+                cx: r.left - canvasRect.left + r.width / 2,
+                cy: r.top - canvasRect.top + r.height / 2
+            };
+        }
+
+        function svgEl(tag, attrs = {}) {
+            const node = document.createElementNS('http://www.w3.org/2000/svg', tag);
+            Object.entries(attrs).forEach(([k, v]) => node.setAttribute(k, v));
+            return node;
+        }
+
+        function drawChartOverlays(step) {
+            cancelActiveAnimations();
+            el.gridGroup.innerHTML = '';
+            el.trendGroup.innerHTML = '';
+            el.tradeGroup.innerHTML = '';
+
+            if (step.n === 0) return;
+
+            const canvasW = el.visualCanvas.clientWidth;
+            const cols = Array.from(el.stockColumnsGrid.querySelectorAll('[data-day-idx]'));
+            if (!cols.length) return;
+
+            const rects = cols.map((c) => getRelRect(c));
+            const baseBottom = Math.max(...rects.map((r) => r.bottom));
+            const topBound = Math.min(...rects.map((r) => r.top));
+
+            // 1) Subtle horizontal stock-chart gridlines
+            for (let g = 0; g < 4; g++) {
+                const y = Math.round(baseBottom - ((baseBottom - Math.max(44, topBound)) * g) / 3);
+                el.gridGroup.appendChild(svgEl('line', {
+                    x1: 14,
+                    y1: y,
+                    x2: canvasW - 14,
+                    y2: y,
+                    stroke: 'rgba(148, 163, 184, 0.12)',
+                    'stroke-width': 1,
+                    'stroke-dasharray': g === 0 ? '' : '4 6'
+                }));
+            }
+
+            // 2) Smooth Stock Price Trendline connecting loaded days
+            const loadedPoints = [];
+            step.prices.forEach((p, idx) => {
+                if (p !== null && rects[idx]) {
+                    loadedPoints.push({ x: rects[idx].cx, y: rects[idx].top, val: p, idx });
+                }
+            });
+
+            if (loadedPoints.length >= 2) {
+                const pathD = loadedPoints.map((pt, i) => `${i === 0 ? 'M' : 'L'} ${pt.x} ${pt.y}`).join(' ');
+                el.trendGroup.appendChild(svgEl('path', {
+                    d: pathD,
+                    fill: 'none',
+                    stroke: 'rgba(186, 230, 253, 0.45)',
+                    'stroke-width': 2,
+                    'stroke-linejoin': 'round'
+                }));
+            }
+
+            loadedPoints.forEach((pt) => {
+                el.trendGroup.appendChild(svgEl('circle', {
+                    cx: pt.x,
+                    cy: pt.y,
+                    r: 3.5,
+                    fill: '#e0f2fe',
+                    stroke: '#0f172a',
+                    'stroke-width': 1.5
+                }));
+            });
+
+            // 3) Persistent Best Trade Crown Arc (if a profitable trade has been found)
+            if (step.bestBuy !== null && step.bestSell !== null && rects[step.bestBuy] && rects[step.bestSell]) {
+                const rb = rects[step.bestBuy];
+                const rs = rects[step.bestSell];
+                const midX = (rb.cx + rs.cx) / 2;
+                const arcY = Math.max(26, Math.min(rb.top, rs.top) - 34);
+
+                el.tradeGroup.appendChild(svgEl('path', {
+                    d: `M ${rb.cx} ${rb.top - 5} Q ${midX} ${arcY} ${rs.cx} ${rs.top - 5}`,
+                    fill: 'none',
+                    stroke: 'rgba(251, 191, 36, 0.78)',
+                    'stroke-width': step.isDone ? 2.8 : 2,
+                    'stroke-dasharray': step.isDone ? '' : '5 4',
+                    'marker-end': 'url(#arrowAmber)'
+                }));
+            }
+
+            // 4) Active Buy Baseline + Active (buy → sell) Trade Arc & Profit/Loss Delta Zone
+            if (step.buy !== null && rects[step.buy] && !step.isDone) {
+                const rb = rects[step.buy];
+                // Horizontal dashed buy price baseline extending rightward
+                el.tradeGroup.appendChild(svgEl('line', {
+                    x1: rb.cx,
+                    y1: rb.top,
+                    x2: canvasW - 18,
+                    y2: rb.top,
+                    stroke: 'rgba(56, 189, 248, 0.65)',
+                    'stroke-width': 1.6,
+                    'stroke-dasharray': '5 4'
+                }));
+
+                if (step.sell !== null && rects[step.sell]) {
+                    const rs = rects[step.sell];
+                    const diff = step.prices[step.sell] - step.prices[step.buy];
+                    const isGain = diff > 0;
+                    const strokeColor = isGain ? '#34d399' : '#fb7185';
+                    const marker = isGain ? 'arrowGreen' : 'arrowRose';
+
+                    // Shaded vertical profit/loss delta bracket at the sell column
+                    const deltaTop = Math.min(rb.top, rs.top);
+                    const deltaH = Math.abs(rb.top - rs.top);
+                    if (deltaH > 2) {
+                        el.tradeGroup.appendChild(svgEl('rect', {
+                            x: rs.left - 3,
+                            y: deltaTop,
+                            width: rs.width + 6,
+                            height: deltaH,
+                            rx: 6,
+                            fill: isGain ? 'rgba(16, 185, 129, 0.22)' : 'rgba(244, 63, 94, 0.20)',
+                            stroke: strokeColor,
+                            'stroke-width': 1.2,
+                            'stroke-dasharray': '3 3'
+                        }));
+                    }
+
+                    // Active curved trade arc from buy top to sell top
+                    const midX = (rb.cx + rs.cx) / 2;
+                    const arcY = Math.max(24, Math.min(rb.top, rs.top) - 26);
+                    el.tradeGroup.appendChild(svgEl('path', {
+                        d: `M ${rb.cx} ${rb.top - 4} Q ${midX} ${arcY} ${rs.cx} ${rs.top - 4}`,
+                        fill: 'none',
+                        stroke: strokeColor,
+                        'stroke-width': 2.5,
+                        'stroke-linecap': 'round',
+                        'marker-end': `url(#${marker})`
+                    }));
+
+                    // Physical Lift-and-Arc Profit Token into the maxProfit Vault on a New Record!
+                    if (step.newRecord) {
+                        const durScale = 1 / Math.min(speedMultiplier, 2.5);
+                        const token = document.createElement('div');
+                        token.className = 'flying-token px-2.5 py-1 rounded-full font-mono-code text-xs font-bold text-slate-950 bg-gradient-to-r from-amber-300 via-emerald-300 to-cyan-200 border border-white shadow-lg shadow-emerald-400/40';
+                        token.textContent = `+${diff} ★`;
+                        token.style.left = `${rs.cx - 24}px`;
+                        token.style.top = `${rs.top - 14}px`;
+                        el.ghostLayer.appendChild(token);
+
+                        const targetX = canvasW - 86;
+                        const targetY = 8;
+                        const dx = targetX - (rs.cx - 24);
+                        const dy = targetY - (rs.top - 14);
+
+                        const wa = token.animate([
+                            { transform: 'translate(0px, 0px) scale(0.95)', opacity: 1 },
+                            { transform: `translate(${dx * 0.45}px, ${Math.min(dy, -36)}px) scale(1.16)`, opacity: 1, offset: 0.48 },
+                            { transform: `translate(${dx}px, ${dy}px) scale(0.92)`, opacity: 0.1 }
+                        ], {
+                            duration: Math.round(720 * durScale),
+                            easing: 'cubic-bezier(0.22, 1, 0.36, 1)',
+                            fill: 'forwards'
+                        });
+                        activeAnimations.push(wa);
+
+                        el.profitVaultBox.classList.remove('vault-flash');
+                        void el.profitVaultBox.offsetWidth;
+                        el.profitVaultBox.classList.add('vault-flash');
+                    }
+                }
+            }
+        }
+
+        /* =========================================================================
+           9. MAIN STEP RENDERER
+           ========================================================================= */
+        function renderStep(idx, playSound = false) {
+            if (!steps.length) return;
+            stepIndex = Math.max(0, Math.min(idx, steps.length - 1));
+            const s = steps[stepIndex];
+
+            // Top bar badges
+            el.badgeStep.textContent = `Step: ${stepIndex + 1} / ${steps.length}`;
+            el.phaseBadge.textContent = s.phase;
+            el.badgePairsTop.textContent = `Pairs: ${s.checkedPairs.length} / ${s.totalPairs}`;
+            el.badgeOutputTop.textContent = `maxProfit: ${s.maxProfit}`;
+            el.stepSlider.value = stepIndex;
+
+            el.btnPrev.disabled = stepIndex === 0;
+            el.btnNext.disabled = stepIndex === steps.length - 1;
+
+            // Narration & frame
+            el.activeFrameBadge.textContent = 'Frame: main()';
+            el.stepNarration.textContent = s.narration;
+            el.codeFooterNarration.textContent = s.narration;
+
+            // 5-Card KPI Telemetry Row
+            el.kpiBuy.textContent = s.buy !== null && s.prices[s.buy] !== null ? `Day ${s.buy} ($${s.prices[s.buy]})` : '—';
+            el.kpiBuySub.textContent = s.buy !== null ? `buy = ${s.buy}` : 'prices[buy]';
+
+            el.kpiSell.textContent = s.sell !== null && s.prices[s.sell] !== null ? `Day ${s.sell} ($${s.prices[s.sell]})` : '—';
+            el.kpiSellSub.textContent = s.sell !== null ? `sell = ${s.sell}` : 'prices[sell]';
+
+            if (s.candidateDiff !== null) {
+                el.kpiDiff.textContent = s.candidateDiff > 0 ? `+${s.candidateDiff}` : `${s.candidateDiff}`;
+                el.kpiDiff.className = `font-mono-code text-base font-bold mt-1 truncate ${
+                    s.candidateDiff > 0 ? 'text-emerald-300' : (s.candidateDiff < 0 ? 'text-rose-300' : 'text-slate-300')
+                }`;
+                el.kpiDiffSub.textContent = `${s.prices[s.sell]} - ${s.prices[s.buy]}`;
+            } else {
+                el.kpiDiff.textContent = '—';
+                el.kpiDiff.className = 'font-mono-code text-base font-bold text-slate-300 mt-1 truncate';
+                el.kpiDiffSub.textContent = 'sell - buy';
+            }
+
+            el.kpiMaxProfit.textContent = `${s.maxProfit}`;
+            el.kpiMaxSub.textContent = s.bestBuy !== null ? `Day ${s.bestBuy} → Day ${s.bestSell}` : 'No profit yet';
+
+            el.kpiStdout.textContent = s.stdoutVal !== null ? `${s.stdoutVal}` : 'pending';
+            el.kpiStdoutSub.textContent = `${s.checkedPairs.length}/${s.totalPairs} pairs`;
+
+            // Trade equation & vault
+            if (s.buy !== null && s.sell !== null && !s.isDone) {
+                const diff = s.prices[s.sell] - s.prices[s.buy];
+                const signStr = diff > 0 ? `+${diff}` : `${diff}`;
+                const colorCls = diff > 0 ? 'text-emerald-300' : (diff < 0 ? 'text-rose-300' : 'text-slate-300');
+                el.tradeEquation.innerHTML = `Day ${s.buy} (<span class="text-sky-300">$${s.prices[s.buy]}</span>) → Day ${s.sell} (<span class="text-purple-300">$${s.prices[s.sell]}</span>) = <span class="${colorCls} font-bold">${signStr}</span>`;
+            } else if (s.isDone) {
+                el.tradeEquation.innerHTML = s.maxProfit > 0
+                    ? `<span class="text-emerald-300">Best Trade: Buy Day ${s.bestBuy} ($${s.prices[s.bestBuy]}) → Sell Day ${s.bestSell} ($${s.prices[s.bestSell]}) = +$${s.maxProfit}</span>`
+                    : `<span class="text-amber-300">No profitable trade possible → maxProfit = 0</span>`;
+            } else {
+                el.tradeEquation.textContent = s.buy !== null ? `Buy Day ${s.buy} ($${s.prices[s.buy]}) locked — scanning future sell days...` : 'Reading daily stock prices...';
+            }
+            el.vaultValueBadge.textContent = `${s.maxProfit}`;
+            el.pairProgressBadge.textContent = `Pairs checked: ${s.checkedPairs.length} / ${s.totalPairs}`;
+            el.bestTradeSummary.textContent = s.bestBuy !== null
+                ? `Best: Day ${s.bestBuy} ($${s.prices[s.bestBuy]}) → Day ${s.bestSell} ($${s.prices[s.bestSell]}) = +${s.maxProfit}`
+                : 'Best: 0 (no gain yet)';
+
+            // Render Liquid-Glass Stock Price Day Columns
+            const maxPrice = Math.max(1, ...currentPrices.map((v) => Math.abs(v)));
+            el.stockColumnsGrid.innerHTML = s.prices.map((val, i) => {
+                const theme = LIQUID_PALETTE[i % LIQUID_PALETTE.length];
+                const isBuy = s.buy === i && !s.isDone;
+                const isSell = s.sell === i && !s.isDone;
+                const isBestPair = (s.bestBuy === i || s.bestSell === i) && s.maxProfit > 0;
+                const isPast = s.buy !== null && i < s.buy && !s.isDone;
+                const diff = isSell && s.buy !== null ? val - s.prices[s.buy] : 0;
+
+                const colH = val === null ? 24 : Math.max(30, Math.round((val / maxPrice) * 142));
+                let stateCls = '';
+                if (val === null) stateCls = 'is-unloaded';
+                else if (isBuy) stateCls = 'is-buy';
+                else if (isSell) stateCls = diff > 0 ? 'is-sell-gain' : 'is-sell-loss';
+                else if (isPast) stateCls = 'is-dimmed';
+                if (isBestPair && s.isDone) stateCls += ' is-best';
+
+                const styleStr = val === null
+                    ? `height: ${colH}px;`
+                    : `height: ${colH}px; background: ${theme.barBg}; border-color: ${theme.barBorder}; box-shadow: ${theme.barGlow};`;
+
+                const badges = [];
+                if (isBuy || (s.isDone && s.bestBuy === i && s.maxProfit > 0)) {
+                    badges.push('<span class="px-1.5 py-0.5 rounded bg-sky-500/25 border border-sky-300/65 text-[9px] font-bold text-sky-200">BUY</span>');
+                }
+                if (isSell || (s.isDone && s.bestSell === i && s.maxProfit > 0)) {
+                    const cls = (s.isDone || diff > 0)
+                        ? 'bg-emerald-500/25 border-emerald-300/65 text-emerald-200'
+                        : 'bg-rose-500/25 border-rose-300/65 text-rose-200';
+                    badges.push(`<span class="px-1.5 py-0.5 rounded border text-[9px] font-bold ${cls}">SELL</span>`);
+                }
+
+                return `
+                    <div class="flex flex-col items-center justify-end flex-1 max-w-[78px] h-full">
+                        <div data-day-idx="${i}"
+                             class="stock-col ${stateCls} w-full rounded-t-2xl rounded-b-lg flex flex-col items-center justify-start pt-1.5 font-mono-code text-xs sm:text-sm font-bold text-white"
+                             style="${styleStr}">
+                            <span class="relative z-10 drop-shadow">${val === null ? '·' : '$' + val}</span>
+                        </div>
+                        <span class="text-[10px] font-mono-code text-slate-400 mt-1.5">Day ${i}</span>
+                        <div class="h-5 flex items-center justify-center gap-1 mt-0.5">${badges.join('')}</div>
+                    </div>
+                `;
+            }).join('');
+
+            // Render O(n²) Evaluated Pairs Strip
+            if (!s.checkedPairs.length) {
+                el.pairsStrip.innerHTML = '<span class="text-slate-500">No (buy, sell) pairs evaluated yet...</span>';
+            } else {
+                el.pairsStrip.innerHTML = s.checkedPairs.map((p, idx) => {
+                    const isLatest = idx === s.checkedPairs.length - 1 && !s.isDone;
+                    const isBest = p.buy === s.bestBuy && p.sell === s.bestSell && s.maxProfit > 0;
+                    const sign = p.diff > 0 ? `+${p.diff}` : `${p.diff}`;
+                    let cls = 'bg-slate-800/70 border-white/10 text-slate-400';
+                    if (isBest) cls = 'bg-amber-400/20 border-amber-400/60 text-amber-200 font-bold';
+                    else if (isLatest) cls = p.diff > 0 ? 'bg-emerald-500/20 border-emerald-400/60 text-emerald-200 font-semibold' : 'bg-rose-500/20 border-rose-400/60 text-rose-200 font-semibold';
+                    else if (p.diff > 0) cls = 'bg-emerald-500/10 border-emerald-400/25 text-emerald-300/80';
+                    return `<span class="px-1.5 py-0.5 rounded-md border ${cls}">(${p.buy}→${p.sell}): ${sign}${isBest ? '★' : ''}</span>`;
+                }).join('');
+            }
+
+            // Standard I/O Console
+            el.ioStdin.textContent = `stdin: ${s.n} | ${currentPrices.join(' ')}`;
+            el.ioStdout.textContent = `stdout: ${s.stdoutVal !== null ? s.stdoutVal : '—'}`;
+
+            // Single-line Java code highlight
+            highlightSingleLine(s.line);
+
+            // Draw SVG trendline, buy baseline, delta zone & profit lift animation
+            requestAnimationFrame(() => drawChartOverlays(s));
+
+            // Audio cue
+            if (playSound) {
+                if (s.newRecord) playTone(780, 0.14, 'triangle', 0.06);
+                else if (s.isDone) playTone(880, 0.18, 'sine', 0.06);
+                else if (s.candidateDiff !== null && s.candidateDiff > 0) playTone(560, 0.07, 'sine', 0.035);
+                else if (s.candidateDiff !== null && s.candidateDiff < 0) playTone(310, 0.06, 'sine', 0.025);
+                else playTone(400, 0.045, 'sine', 0.02);
+            }
+        }
+
+        /* =========================================================================
+           10. PLAYBACK ENGINE
+           ========================================================================= */
+        function stopPlayback() {
+            isPlaying = false;
+            if (playTimer) {
+                clearTimeout(playTimer);
+                playTimer = null;
+            }
+            el.playIcon.textContent = '▶';
+            el.playLabel.textContent = 'Start';
+        }
+
+        function scheduleNextTick() {
+            if (!isPlaying) return;
+            if (stepIndex >= steps.length - 1) {
+                stopPlayback();
+                return;
+            }
+            const currStep = steps[stepIndex];
+            const baseDelay = currStep?.newRecord ? 980 : 540;
+            const delay = Math.max(150, Math.round(baseDelay / speedMultiplier));
+            playTimer = setTimeout(() => {
+                if (!isPlaying) return;
+                renderStep(stepIndex + 1, true);
+                scheduleNextTick();
+            }, delay);
+        }
+
+        function togglePlayback() {
+            if (isPlaying) {
+                stopPlayback();
+            } else {
+                if (stepIndex >= steps.length - 1) {
+                    renderStep(0, false);
+                }
+                isPlaying = true;
+                el.playIcon.textContent = '⏸';
+                el.playLabel.textContent = 'Stop';
+                scheduleNextTick();
+            }
+        }
+
+        /* =========================================================================
+           11. DATASET LOADER & VALIDATION
+           ========================================================================= */
+        function showError(msg) {
+            el.errorBanner.textContent = msg;
+            el.errorBanner.classList.remove('hidden');
+            setTimeout(() => el.errorBanner.classList.add('hidden'), 4200);
+        }
+
+        function loadDataset(pricesArr) {
+            stopPlayback();
+            cancelActiveAnimations();
+            currentPrices = [...pricesArr];
+            el.customPricesInput.value = currentPrices.join(', ');
+            steps = generateSteps(currentPrices);
+            el.stepSlider.max = Math.max(0, steps.length - 1);
+            renderStep(0, false);
+        }
+
+        /* =========================================================================
+           12. EVENT LISTENERS
+           ========================================================================= */
+        el.btnReset.addEventListener('click', () => {
+            stopPlayback();
+            renderStep(0, true);
+        });
+
+        el.btnPrev.addEventListener('click', () => {
+            stopPlayback();
+            if (stepIndex > 0) renderStep(stepIndex - 1, true);
+        });
+
+        el.btnNext.addEventListener('click', () => {
+            stopPlayback();
+            if (stepIndex < steps.length - 1) renderStep(stepIndex + 1, true);
+        });
+
+        el.btnPlayPause.addEventListener('click', togglePlayback);
+
+        el.stepSlider.addEventListener('input', (e) => {
+            stopPlayback();
+            renderStep(parseInt(e.target.value, 10), false);
+        });
+
+        document.querySelectorAll('.speed-btn').forEach((btn) => {
+            btn.addEventListener('click', () => {
+                speedMultiplier = parseFloat(btn.dataset.speed);
+                document.querySelectorAll('.speed-btn').forEach((b) => b.classList.remove('glass-btn-active'));
+                btn.classList.add('glass-btn-active');
+            });
+        });
+
+        el.btnAudio.addEventListener('click', () => {
+            audioEnabled = !audioEnabled;
+            el.audioIcon.textContent = audioEnabled ? '🔊' : '🔇';
+        });
+
+        el.presetSelect.addEventListener('change', (e) => {
+            const p = PRESETS[parseInt(e.target.value, 10)];
+            if (p) loadDataset(p);
+        });
+
+        el.btnLoadCustom.addEventListener('click', () => {
+            const raw = el.customPricesInput.value.trim();
+            if (!raw) {
+                showError('Please enter at least 1 non-negative stock price (e.g., 7, 1, 5, 3, 6, 4).');
+                return;
+            }
+            const tokens = raw.split(/[\s,]+/).filter(Boolean);
+            if (tokens.length > 10) {
+                showError('Please enter at most 10 days so the O(n²) pair scan and chart remain crisp.');
+                return;
+            }
+            const parsed = [];
+            for (const t of tokens) {
+                const num = Number(t);
+                if (!Number.isInteger(num) || num < 0 || num > 999) {
+                    showError(`Invalid price "${t}". Use integers between 0 and 999.`);
+                    return;
+                }
+                parsed.push(num);
+            }
+            loadDataset(parsed);
+        });
+
+        window.addEventListener('keydown', (e) => {
+            if (document.activeElement && ['INPUT', 'SELECT', 'TEXTAREA'].includes(document.activeElement.tagName)) {
+                return;
+            }
+            if (e.code === 'Space') {
+                e.preventDefault();
+                togglePlayback();
+            } else if (e.code === 'ArrowRight') {
+                e.preventDefault();
+                stopPlayback();
+                if (stepIndex < steps.length - 1) renderStep(stepIndex + 1, true);
+            } else if (e.code === 'ArrowLeft') {
+                e.preventDefault();
+                stopPlayback();
+                if (stepIndex > 0) renderStep(stepIndex - 1, true);
+            }
+        });
+
+        window.addEventListener('resize', () => {
+            if (steps.length) renderStep(stepIndex, false);
+        });
+
+        /* =========================================================================
+           13. BOOTSTRAP
+           ========================================================================= */
+        buildCodePanel();
+        loadDataset(PRESETS[0]);
+    </script>
+</body>
+</html>

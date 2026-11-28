@@ -1,0 +1,1779 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Best Time to Buy &amp; Sell Stock II (DP State Machine O(n)) — Glassmorphic Java Visualizer</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2064%2064%22%3E%3Cdefs%3E%3ClinearGradient%20id%3D%22bg%22%20x1%3D%220%22%20y1%3D%220%22%20x2%3D%221%22%20y2%3D%221%22%3E%3Cstop%20offset%3D%220%25%22%20stop-color%3D%22%230f172a%22%2F%3E%3Cstop%20offset%3D%22100%25%22%20stop-color%3D%22%23060913%22%2F%3E%3C%2FlinearGradient%3E%3ClinearGradient%20id%3D%22g%22%20x1%3D%220%22%20y1%3D%220%22%20x2%3D%221%22%20y2%3D%221%22%3E%3Cstop%20offset%3D%220%25%22%20stop-color%3D%22%2322d3ee%22%2F%3E%3Cstop%20offset%3D%2255%25%22%20stop-color%3D%22%236366f1%22%2F%3E%3Cstop%20offset%3D%22100%25%22%20stop-color%3D%22%23a855f7%22%2F%3E%3C%2FlinearGradient%3E%3C%2Fdefs%3E%3Crect%20x%3D%222%22%20y%3D%222%22%20width%3D%2260%22%20height%3D%2260%22%20rx%3D%2216%22%20fill%3D%22url(%23bg)%22%20stroke%3D%22url(%23g)%22%20stroke-width%3D%223.5%22%2F%3E%3Cpath%20d%3D%22M20%2042%20L32%2018%20L44%2042%22%20fill%3D%22none%22%20stroke%3D%22url(%23g)%22%20stroke-width%3D%224%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3Cline%20x1%3D%2220%22%20y1%3D%2242%22%20x2%3D%2244%22%20y2%3D%2242%22%20stroke%3D%22%2338bdf8%22%20stroke-width%3D%223%22%20stroke-linecap%3D%22round%22%20opacity%3D%220.55%22%2F%3E%3Ccircle%20cx%3D%2232%22%20cy%3D%2218%22%20r%3D%225.5%22%20fill%3D%22%2322d3ee%22%2F%3E%3Ccircle%20cx%3D%2220%22%20cy%3D%2242%22%20r%3D%225.5%22%20fill%3D%22%236366f1%22%2F%3E%3Ccircle%20cx%3D%2244%22%20cy%3D%2242%22%20r%3D%225.5%22%20fill%3D%22%23a855f7%22%2F%3E%3C%2Fsvg%3E" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <style>
+        :root {
+            --glass-bg: rgba(15, 23, 42, 0.56);
+            --glass-border: rgba(148, 163, 184, 0.22);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background:
+                radial-gradient(circle at 12% 10%, rgba(16, 185, 129, 0.14), transparent 34%),
+                radial-gradient(circle at 88% 12%, rgba(168, 85, 247, 0.15), transparent 36%),
+                radial-gradient(circle at 50% 92%, rgba(56, 189, 248, 0.13), transparent 40%),
+                linear-gradient(160deg, #050914 0%, #091122 50%, #050a16 100%);
+            color: #e2e8f0;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .font-mono-code {
+            font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+        }
+
+        /* Liquid transparent dark-glass panels & subcards */
+        .glass-panel {
+            background: linear-gradient(155deg, rgba(255, 255, 255, 0.085) 0%, rgba(15, 23, 42, 0.56) 45%, rgba(7, 13, 28, 0.72) 100%);
+            backdrop-filter: blur(22px) saturate(145%);
+            -webkit-backdrop-filter: blur(22px) saturate(145%);
+            border: 1px solid rgba(186, 230, 253, 0.18);
+            box-shadow:
+                0 14px 36px rgba(2, 6, 23, 0.52),
+                inset 0 1px 0 rgba(255, 255, 255, 0.22),
+                inset 0 -1px 0 rgba(56, 189, 248, 0.08);
+        }
+
+        .glass-subcard {
+            background: linear-gradient(165deg, rgba(255, 255, 255, 0.05) 0%, rgba(7, 13, 25, 0.58) 100%);
+            backdrop-filter: blur(14px) saturate(130%);
+            -webkit-backdrop-filter: blur(14px) saturate(130%);
+            border: 1px solid rgba(148, 163, 184, 0.18);
+            box-shadow:
+                inset 0 1px 0 rgba(255, 255, 255, 0.12),
+                0 6px 20px rgba(2, 6, 23, 0.32);
+        }
+
+        .glass-pill {
+            background: linear-gradient(160deg, rgba(255, 255, 255, 0.11), rgba(15, 23, 42, 0.48));
+            backdrop-filter: blur(14px) saturate(140%);
+            -webkit-backdrop-filter: blur(14px) saturate(140%);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.18);
+        }
+
+        .glass-btn {
+            background: linear-gradient(165deg, rgba(255, 255, 255, 0.14), rgba(15, 23, 42, 0.56));
+            backdrop-filter: blur(14px) saturate(140%);
+            -webkit-backdrop-filter: blur(14px) saturate(140%);
+            border: 1px solid rgba(255, 255, 255, 0.22);
+            box-shadow:
+                0 6px 16px rgba(2, 6, 23, 0.34),
+                inset 0 1px 0 rgba(255, 255, 255, 0.24);
+            transition: transform 0.15s ease, background 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
+        }
+
+        .glass-btn:hover:not(:disabled) {
+            background: linear-gradient(165deg, rgba(255, 255, 255, 0.22), rgba(30, 41, 59, 0.65));
+            border-color: rgba(125, 211, 252, 0.65);
+            transform: translateY(-1px);
+            box-shadow:
+                0 8px 22px rgba(14, 165, 233, 0.28),
+                inset 0 1px 0 rgba(255, 255, 255, 0.32);
+        }
+
+        .glass-btn:active:not(:disabled) {
+            transform: translateY(0px) scale(0.98);
+        }
+
+        .glass-btn:disabled {
+            opacity: 0.38;
+            cursor: not-allowed;
+        }
+
+        .glass-btn-primary {
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.45), rgba(139, 92, 246, 0.42));
+            border-color: rgba(167, 243, 208, 0.72);
+            box-shadow:
+                0 0 20px rgba(16, 185, 129, 0.28),
+                inset 0 1px 0 rgba(255, 255, 255, 0.34);
+        }
+
+        .glass-btn-primary:hover:not(:disabled) {
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.64), rgba(139, 92, 246, 0.58));
+            border-color: rgba(167, 243, 208, 0.92);
+        }
+
+        .glass-btn-active {
+            background: linear-gradient(135deg, rgba(56, 189, 248, 0.38), rgba(168, 85, 247, 0.28));
+            border: 1px solid rgba(125, 211, 252, 0.72);
+            color: #f0f9ff;
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.28);
+        }
+
+        /* Liquid-glass Stock Day Column */
+        .stock-col {
+            position: relative;
+            overflow: hidden;
+            backdrop-filter: blur(14px) saturate(175%);
+            -webkit-backdrop-filter: blur(14px) saturate(175%);
+            border: 1px solid rgba(255, 255, 255, 0.35);
+            border-top: 2px solid rgba(255, 255, 255, 0.85);
+            transition: height 0.28s cubic-bezier(0.22, 1, 0.36, 1), transform 0.22s ease, opacity 0.2s ease, box-shadow 0.22s ease;
+        }
+
+        .stock-col::before {
+            content: '';
+            position: absolute;
+            top: 3px;
+            left: 12%;
+            width: 22%;
+            bottom: 3px;
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.45) 0%, rgba(255, 255, 255, 0.04) 100%);
+            border-radius: 999px;
+            pointer-events: none;
+        }
+
+        .stock-col.is-active-day {
+            outline: 2px solid rgba(250, 204, 21, 0.96);
+            outline-offset: 2px;
+            transform: translateY(-3px);
+        }
+
+        .stock-col.is-day0 {
+            outline: 2px solid rgba(167, 139, 250, 0.92);
+            outline-offset: 2px;
+        }
+
+        .stock-col.is-unloaded {
+            opacity: 0.22;
+            border-style: dashed;
+        }
+
+        /* DP State Machine Liquid-Glass Nodes */
+        .dp-node-cash {
+            background: linear-gradient(155deg, rgba(52, 211, 153, 0.22) 0%, rgba(16, 185, 129, 0.08) 55%, rgba(6, 78, 59, 0.32) 100%);
+            backdrop-filter: blur(16px) saturate(160%);
+            -webkit-backdrop-filter: blur(16px) saturate(160%);
+            border: 1px solid rgba(110, 231, 183, 0.42);
+            box-shadow: 0 10px 26px rgba(16, 185, 129, 0.16), inset 0 1px 1px rgba(209, 250, 229, 0.35);
+            transition: transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease;
+        }
+
+        .dp-node-hold {
+            background: linear-gradient(155deg, rgba(167, 139, 250, 0.22) 0%, rgba(139, 92, 246, 0.08) 55%, rgba(46, 16, 101, 0.32) 100%);
+            backdrop-filter: blur(16px) saturate(160%);
+            -webkit-backdrop-filter: blur(16px) saturate(160%);
+            border: 1px solid rgba(196, 181, 253, 0.42);
+            box-shadow: 0 10px 26px rgba(139, 92, 246, 0.16), inset 0 1px 1px rgba(237, 233, 254, 0.35);
+            transition: transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease;
+        }
+
+        .dp-node-active-cash {
+            border-color: rgba(110, 231, 183, 0.92);
+            box-shadow: 0 0 28px rgba(52, 211, 153, 0.42), inset 0 1px 2px rgba(255, 255, 255, 0.55);
+            transform: translateY(-2px);
+        }
+
+        .dp-node-active-hold {
+            border-color: rgba(196, 181, 253, 0.92);
+            box-shadow: 0 0 28px rgba(167, 139, 250, 0.42), inset 0 1px 2px rgba(255, 255, 255, 0.55);
+            transform: translateY(-2px);
+        }
+
+        .flying-token {
+            position: absolute;
+            pointer-events: none;
+            z-index: 45;
+            will-change: transform, opacity;
+            backdrop-filter: blur(16px) saturate(180%);
+            -webkit-backdrop-filter: blur(16px) saturate(180%);
+        }
+
+        @keyframes pulseRing {
+            0% { transform: scale(1); }
+            45% { transform: scale(1.03); }
+            100% { transform: scale(1); }
+        }
+
+        .state-pulse {
+            animation: pulseRing 0.55s ease-out;
+        }
+
+        /* Code panel with exact 4-space indentation */
+        .code-scroll {
+            max-height: 520px;
+            overflow-y: auto;
+            overflow-x: auto;
+            scrollbar-width: thin;
+            scrollbar-color: rgba(125, 211, 252, 0.4) rgba(15, 23, 42, 0.35);
+        }
+
+        .code-scroll::-webkit-scrollbar {
+            width: 7px;
+            height: 7px;
+        }
+
+        .code-scroll::-webkit-scrollbar-track {
+            background: rgba(15, 23, 42, 0.35);
+            border-radius: 999px;
+        }
+
+        .code-scroll::-webkit-scrollbar-thumb {
+            background: rgba(125, 211, 252, 0.38);
+            border-radius: 999px;
+            border: 1px solid rgba(255, 255, 255, 0.12);
+        }
+
+        .code-scroll::-webkit-scrollbar-thumb:hover {
+            background: rgba(125, 211, 252, 0.62);
+        }
+
+        @media (min-width: 1280px) {
+            .code-scroll {
+                max-height: none;
+            }
+        }
+
+        .code-line {
+            display: flex;
+            align-items: baseline;
+            padding: 2px 12px;
+            border-left: 3px solid transparent;
+            transition: background-color 0.16s ease, border-color 0.16s ease;
+            white-space: pre;
+            font-size: 12.5px;
+            line-height: 1.62;
+        }
+
+        .code-line.active-line {
+            background: linear-gradient(90deg, rgba(56, 189, 248, 0.24), rgba(168, 85, 247, 0.1));
+            border-left-color: #38bdf8;
+            box-shadow: inset 0 0 14px rgba(56, 189, 248, 0.14);
+        }
+
+        .code-ln {
+            width: 32px;
+            flex-shrink: 0;
+            text-align: right;
+            padding-right: 12px;
+            color: rgba(148, 163, 184, 0.55);
+            user-select: none;
+        }
+
+        .code-line.active-line .code-ln {
+            color: #7dd3fc;
+            font-weight: 700;
+        }
+
+        .code-text {
+            white-space: pre;
+            tab-size: 4;
+        }
+
+        /* Syntax highlight tokens */
+        .tok-kw { color: #c084fc; font-weight: 600; }
+        .tok-type { color: #38bdf8; }
+        .tok-num { color: #fbbf24; }
+        .tok-str { color: #34d399; }
+        .tok-cmt { color: #64748b; font-style: italic; }
+        .tok-fn { color: #93c5fd; }
+
+        /* Range scrubber */
+        input[type="range"].glass-slider {
+            -webkit-appearance: none;
+            appearance: none;
+            background: rgba(148, 163, 184, 0.24);
+            height: 6px;
+            border-radius: 999px;
+            outline: none;
+        }
+
+        input[type="range"].glass-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 16px;
+            height: 16px;
+            border-radius: 999px;
+            background: linear-gradient(135deg, #34d399, #a78bfa);
+            border: 2px solid #ffffff;
+            box-shadow: 0 0 12px rgba(167, 139, 250, 0.6);
+            cursor: pointer;
+        }
+
+        input[type="range"].glass-slider::-moz-range-thumb {
+            width: 16px;
+            height: 16px;
+            border-radius: 999px;
+            background: linear-gradient(135deg, #34d399, #a78bfa);
+            border: 2px solid #ffffff;
+            box-shadow: 0 0 12px rgba(167, 139, 250, 0.6);
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body class="antialiased selection:bg-emerald-400/30 selection:text-emerald-100">
+    <div class="max-w-[1440px] mx-auto px-3 sm:px-5 py-3.5 space-y-3.5">
+
+        <!-- 1. TOP STICKY FROSTED-GLASS PLAYBACK DECK -->
+        <header class="glass-panel rounded-2xl px-4 py-3 space-y-2.5 sticky top-2 z-50">
+            <!-- Row 1: Title | Playback Controls | Speed & Audio -->
+            <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3">
+                <!-- Left: Icon + Title + Subtitle -->
+                <div class="flex items-center gap-3 min-w-0">
+                    <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-400 via-cyan-400 to-purple-500 flex items-center justify-center text-slate-950 font-extrabold text-lg shadow-lg shadow-purple-500/20 shrink-0">
+                        ⚡
+                    </div>
+                    <div class="min-w-0">
+                        <h1 class="text-base sm:text-lg font-bold tracking-tight bg-gradient-to-r from-white via-emerald-100 to-purple-200 bg-clip-text text-transparent truncate">
+                            Best Time to Buy &amp; Sell Stock II (DP State Machine)
+                        </h1>
+                        <p class="text-[11px] text-slate-400 flex items-center gap-1.5 truncate">
+                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 shrink-0"></span>
+                            <span>Dynamic Programming • cash &amp; hold States • O(n) Time • O(1) Extra Space</span>
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Center: Grouped Glass Playback Buttons -->
+                <div class="glass-pill rounded-xl p-1 flex flex-wrap items-center gap-1.5 self-start lg:self-auto">
+                    <button id="btnReset" class="glass-btn px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-200 flex items-center gap-1.5" title="Reset to Step 1">
+                        <span>↺</span><span>Reset</span>
+                    </button>
+                    <button id="btnPrev" class="glass-btn px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-200 flex items-center gap-1.5" title="Previous Step (Left Arrow)">
+                        <span>⏮</span><span>Previous</span>
+                    </button>
+                    <button id="btnPlayPause" class="glass-btn glass-btn-primary px-4 py-1.5 rounded-lg text-xs font-bold text-white flex items-center gap-1.5 min-w-[88px] justify-center" title="Start / Stop (Space)">
+                        <span id="playIcon">▶</span><span id="playLabel">Start</span>
+                    </button>
+                    <button id="btnNext" class="glass-btn px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-200 flex items-center gap-1.5" title="Next Step (Right Arrow)">
+                        <span>Next</span><span>⏭</span>
+                    </button>
+                </div>
+
+                <!-- Right: Speed Multipliers + Audio Toggle -->
+                <div class="flex items-center gap-2 self-start lg:self-auto">
+                    <div class="glass-pill rounded-xl px-2 py-1 flex items-center gap-1 text-xs">
+                        <span class="text-slate-400 text-[11px] mr-1">⏱ Speed</span>
+                        <button data-speed="0.5" class="speed-btn px-2 py-0.5 rounded-md font-mono-code text-slate-300 hover:text-white transition">0.5x</button>
+                        <button data-speed="1" class="speed-btn px-2 py-0.5 rounded-md font-mono-code transition glass-btn-active">1x</button>
+                        <button data-speed="2" class="speed-btn px-2 py-0.5 rounded-md font-mono-code text-slate-300 hover:text-white transition">2x</button>
+                        <button data-speed="4" class="speed-btn px-2 py-0.5 rounded-md font-mono-code text-slate-300 hover:text-white transition">4x</button>
+                    </div>
+                    <button id="btnAudio" class="glass-btn w-9 h-9 rounded-xl flex items-center justify-center text-sm text-slate-200" title="Toggle Audio Cues">
+                        <span id="audioIcon">🔊</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Row 2: Live Status Pills + Full-Width Timeline Scrubber -->
+            <div class="flex flex-wrap sm:flex-nowrap items-center gap-2 pt-2 border-t border-white/10">
+                <span id="badgeStep" class="px-2.5 py-1 rounded-lg text-[11px] font-mono-code font-semibold bg-sky-500/15 text-sky-300 border border-sky-400/30 shrink-0">
+                    Step: 1 / 1
+                </span>
+                <span id="phaseBadge" class="px-2.5 py-1 rounded-lg text-[11px] font-mono-code font-semibold bg-cyan-500/15 text-cyan-200 border border-cyan-400/30 shrink-0">
+                    main() Start
+                </span>
+                <span id="badgeCashTop" class="px-2.5 py-1 rounded-lg text-[11px] font-mono-code font-semibold bg-emerald-500/15 text-emerald-300 border border-emerald-400/30 shrink-0">
+                    cash: —
+                </span>
+                <span id="badgeHoldTop" class="px-2.5 py-1 rounded-lg text-[11px] font-mono-code font-semibold bg-purple-500/15 text-purple-300 border border-purple-400/30 shrink-0">
+                    hold: —
+                </span>
+                <div class="flex-1 min-w-[140px] flex items-center pl-1">
+                    <input id="stepSlider" type="range" min="0" max="0" value="0" class="glass-slider w-full" />
+                </div>
+            </div>
+        </header>
+
+        <!-- 2. COMPACT TEST CASES & CUSTOM INPUT BAR -->
+        <section class="glass-panel rounded-2xl px-4 py-2.5 space-y-2">
+            <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-2.5">
+                <div class="flex flex-wrap items-center gap-2.5">
+                    <span class="text-[11px] font-bold uppercase tracking-wider text-emerald-300 flex items-center gap-1.5 shrink-0">
+                        <span>🧪</span><span>TEST CASES:</span>
+                    </span>
+                    <select id="presetSelect" class="glass-pill rounded-xl px-3 py-1.5 text-xs text-slate-100 bg-slate-900/90 outline-none focus:border-emerald-400 min-w-[260px]">
+                        <option value="0">1: Sample Input ([7, 1, 5, 3, 6, 4] → Output 7)</option>
+                        <option value="1">2: Continuous Climb ([1, 2, 3, 4, 5] → Output 4)</option>
+                        <option value="2">3: Strictly Falling ([7, 6, 4, 3, 1] → Output 0)</option>
+                        <option value="3">4: Zig-Zag Volatility ([2, 8, 3, 9, 1, 7] → Output 18)</option>
+                        <option value="4">5: Empty Guard (n = 0): [] → Output 0</option>
+                        <option value="5">6: Single Day ([5] → Output 0)</option>
+                        <option value="6">7: Flat Market ([4, 4, 4, 4] → Output 0)</option>
+                        <option value="7">8: Two Days Gain ([3, 10] → Output 7)</option>
+                        <option value="8">9: Twin Peaks ([1, 6, 2, 7, 3, 8] → Output 15)</option>
+                        <option value="9">10: Dip &amp; Rally ([9, 4, 2, 5, 8, 6, 11] → Output 11)</option>
+                    </select>
+                </div>
+
+                <div class="flex flex-wrap items-center gap-2">
+                    <span class="text-xs font-mono-code text-slate-400">prices[]:</span>
+                    <input id="customPricesInput" type="text" placeholder="7, 1, 5, 3, 6, 4" class="glass-pill rounded-xl px-2.5 py-1.5 text-xs font-mono-code text-slate-100 w-44 sm:w-52 outline-none focus:border-emerald-400" />
+                    <button id="btnLoadCustom" class="glass-btn px-3.5 py-1.5 rounded-xl text-xs font-semibold text-emerald-200">
+                        Run DP Machine
+                    </button>
+                </div>
+            </div>
+            <div id="errorBanner" class="hidden rounded-xl px-3 py-1.5 text-xs font-medium bg-rose-500/20 border border-rose-400/40 text-rose-200"></div>
+        </section>
+
+        <!-- 3. MAIN WORKSPACE: LEFT (5 KPI CARDS + STOCK TIMELINE & DP STATE MACHINE) & RIGHT (HEIGHT-MATCHED CODE CARD) -->
+        <main class="grid grid-cols-1 xl:grid-cols-12 gap-4 items-stretch">
+
+            <!-- LEFT COLUMN -->
+            <section class="xl:col-span-7 flex flex-col gap-3.5">
+
+                <!-- 5-CARD LIVE DP TELEMETRY ROW -->
+                <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2.5">
+                    <div class="glass-panel rounded-xl p-3 flex flex-col justify-between border border-amber-400/25">
+                        <div class="flex items-center justify-between text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                            <span>ACTIVE DAY</span>
+                            <span class="w-2 h-2 rounded-full bg-amber-400"></span>
+                        </div>
+                        <div id="kpiDay" class="font-mono-code text-base font-bold text-amber-300 mt-1 truncate">—</div>
+                        <div id="kpiDaySub" class="text-[10px] font-mono-code text-slate-400 mt-0.5 truncate">prices[i]</div>
+                    </div>
+
+                    <div class="glass-panel rounded-xl p-3 flex flex-col justify-between border border-sky-400/25">
+                        <div class="flex items-center justify-between text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                            <span>PREV SNAPSHOT</span>
+                            <span class="text-sky-400 text-xs">📸</span>
+                        </div>
+                        <div id="kpiPrev" class="font-mono-code text-base font-bold text-sky-300 mt-1 truncate">— / —</div>
+                        <div id="kpiPrevSub" class="text-[10px] font-mono-code text-slate-400 mt-0.5 truncate">prevCash / prevHold</div>
+                    </div>
+
+                    <div class="glass-panel rounded-xl p-3 flex flex-col justify-between border border-emerald-400/30">
+                        <div class="flex items-center justify-between text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                            <span>CASH STATE</span>
+                            <span class="text-emerald-400 text-xs">💵</span>
+                        </div>
+                        <div id="kpiCash" class="font-mono-code text-base font-bold text-emerald-300 mt-1 truncate">—</div>
+                        <div id="kpiCashSub" class="text-[10px] font-mono-code text-slate-400 mt-0.5 truncate">Not holding stock</div>
+                    </div>
+
+                    <div class="glass-panel rounded-xl p-3 flex flex-col justify-between border border-purple-400/30">
+                        <div class="flex items-center justify-between text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                            <span>HOLD STATE</span>
+                            <span class="text-purple-400 text-xs">📦</span>
+                        </div>
+                        <div id="kpiHold" class="font-mono-code text-base font-bold text-purple-300 mt-1 truncate">—</div>
+                        <div id="kpiHoldSub" class="text-[10px] font-mono-code text-slate-400 mt-0.5 truncate">Holding 1 stock</div>
+                    </div>
+
+                    <div class="glass-panel rounded-xl p-3 flex flex-col justify-between border border-cyan-400/25 col-span-2 sm:col-span-1">
+                        <div class="flex items-center justify-between text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                            <span>SYSTEM.OUT</span>
+                            <span class="text-cyan-400 font-mono-code text-[11px]">&gt;_</span>
+                        </div>
+                        <div id="kpiStdout" class="font-mono-code text-sm font-bold text-slate-200 mt-1 truncate">pending</div>
+                        <div id="kpiStdoutSub" class="text-[10px] font-mono-code text-emerald-300/80 mt-0.5 truncate">O(n) DP O(1)</div>
+                    </div>
+                </div>
+
+                <!-- MAIN DOMAIN-RELEVANT DP STATE MACHINE & STOCK TIMELINE CARD -->
+                <div id="stageContainer" class="glass-panel rounded-2xl p-4 space-y-3 relative overflow-hidden">
+                    <!-- Header + Legend -->
+                    <div class="flex flex-wrap items-center justify-between gap-2">
+                        <div class="flex items-center gap-2">
+                            <span class="text-emerald-400 text-sm">⚡</span>
+                            <h2 class="text-xs font-bold uppercase tracking-wider text-slate-100">
+                                Stock Timeline &amp; 2-State DP State Machine (cash / hold)
+                            </h2>
+                        </div>
+                        <div class="flex flex-wrap items-center gap-2.5 text-[10px] text-slate-300">
+                            <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-sm bg-emerald-400"></span>cash (no stock)</span>
+                            <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-sm bg-purple-400"></span>hold (1 stock)</span>
+                            <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-sm bg-amber-400"></span>active day i</span>
+                        </div>
+                    </div>
+
+                    <!-- Empty Array Guard State -->
+                    <div id="emptyArrayState" class="hidden glass-subcard rounded-xl py-10 text-center">
+                        <div class="inline-flex flex-col items-center gap-1.5 glass-pill px-5 py-3.5 rounded-xl">
+                            <span class="text-xl">∅</span>
+                            <span class="font-mono-code text-xs text-amber-300 font-semibold">int[] prices = new int[0]</span>
+                            <span class="text-[11px] text-slate-300"><code class="text-sky-300">if (n == 0)</code> prints <code class="text-emerald-300">0</code> and returns safely without indexing <code class="text-rose-300">prices[0]</code>.</span>
+                        </div>
+                    </div>
+
+                    <!-- Part A: Compact Liquid-Glass Stock Price Timeline -->
+                    <div id="chartWrapper" class="glass-subcard rounded-xl relative pt-7 pb-2.5 px-3 select-none overflow-hidden">
+                        <div class="absolute top-1.5 left-3 right-3 flex items-center justify-between text-[10px] font-mono-code text-slate-400 z-20">
+                            <span>Daily Market Prices (prices[0 .. n-1])</span>
+                            <span id="priceDayBadge" class="px-2 py-0.5 rounded-full bg-amber-400/15 border border-amber-400/35 text-amber-200">
+                                Day: —
+                            </span>
+                        </div>
+                        <svg id="trendOverlay" class="absolute inset-0 w-full h-full pointer-events-none z-20" xmlns="http://www.w3.org/2000/svg">
+                            <g id="trendGroup"></g>
+                        </svg>
+                        <div id="stockColumnsGrid" class="relative z-10 flex items-end justify-center gap-2 sm:gap-3 h-36 pt-4 pb-0.5 px-1"></div>
+                    </div>
+
+                    <!-- Part B: Interactive 2-State DP State Machine Chamber -->
+                    <div id="dpChamber" class="glass-subcard rounded-xl p-3.5 relative overflow-hidden space-y-3">
+                        <!-- Snapshot Bar: previousCash & previousHold -->
+                        <div class="relative z-10 flex flex-wrap items-center justify-between gap-2 pb-2 border-b border-white/10">
+                            <span class="text-[10px] font-bold uppercase tracking-wider text-sky-300 flex items-center gap-1.5">
+                                <span>📸</span><span>Previous Day Snapshots (Prevents Same-Day Overwrite)</span>
+                            </span>
+                            <div class="flex items-center gap-2 font-mono-code text-[11px]">
+                                <span id="prevCashChip" class="px-2.5 py-0.5 rounded-lg bg-emerald-500/15 border border-emerald-400/35 text-emerald-200">
+                                    previousCash: —
+                                </span>
+                                <span id="prevHoldChip" class="px-2.5 py-0.5 rounded-lg bg-purple-500/15 border border-purple-400/35 text-purple-200">
+                                    previousHold: —
+                                </span>
+                            </div>
+                        </div>
+
+                        <!-- Two Side-by-Side Liquid-Glass DP State Nodes -->
+                        <div class="relative z-10 grid grid-cols-1 sm:grid-cols-2 gap-3.5 pt-5">
+                            <!-- CASH State Node -->
+                            <div id="cashStateCard" class="dp-node-cash rounded-2xl p-3.5 flex flex-col justify-between gap-2.5">
+                                <div class="flex items-center justify-between gap-2">
+                                    <div class="flex items-center gap-2">
+                                        <span class="w-7 h-7 rounded-lg bg-emerald-400/20 border border-emerald-300/45 flex items-center justify-center text-sm">💵</span>
+                                        <div>
+                                            <div class="text-xs font-bold text-emerald-200 tracking-wide">CASH STATE</div>
+                                            <div class="text-[10px] text-emerald-200/70">Max profit without stock</div>
+                                        </div>
+                                    </div>
+                                    <div id="cashBigValue" class="font-mono-code text-2xl font-extrabold text-white drop-shadow">—</div>
+                                </div>
+
+                                <!-- Transition Options for CASH -->
+                                <div class="space-y-1.5 font-mono-code text-[10.5px]">
+                                    <div id="cashOptRest" class="rounded-lg px-2.5 py-1.5 bg-slate-950/45 border border-white/10 flex items-center justify-between transition-all">
+                                        <span class="text-slate-300">Rest (keep cash)</span>
+                                        <span id="cashOptRestVal" class="text-slate-200 font-semibold">—</span>
+                                    </div>
+                                    <div id="cashOptSell" class="rounded-lg px-2.5 py-1.5 bg-slate-950/45 border border-white/10 flex items-center justify-between transition-all">
+                                        <span class="text-slate-300">Sell (prevHold + p[i])</span>
+                                        <span id="cashOptSellVal" class="text-slate-200 font-semibold">—</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- HOLD State Node -->
+                            <div id="holdStateCard" class="dp-node-hold rounded-2xl p-3.5 flex flex-col justify-between gap-2.5">
+                                <div class="flex items-center justify-between gap-2">
+                                    <div class="flex items-center gap-2">
+                                        <span class="w-7 h-7 rounded-lg bg-purple-400/20 border border-purple-300/45 flex items-center justify-center text-sm">📦</span>
+                                        <div>
+                                            <div class="text-xs font-bold text-purple-200 tracking-wide">HOLD STATE</div>
+                                            <div class="text-[10px] text-purple-200/70">Max profit holding 1 stock</div>
+                                        </div>
+                                    </div>
+                                    <div id="holdBigValue" class="font-mono-code text-2xl font-extrabold text-white drop-shadow">—</div>
+                                </div>
+
+                                <!-- Transition Options for HOLD -->
+                                <div class="space-y-1.5 font-mono-code text-[10.5px]">
+                                    <div id="holdOptKeep" class="rounded-lg px-2.5 py-1.5 bg-slate-950/45 border border-white/10 flex items-center justify-between transition-all">
+                                        <span class="text-slate-300">Keep (stay holding)</span>
+                                        <span id="holdOptKeepVal" class="text-slate-200 font-semibold">—</span>
+                                    </div>
+                                    <div id="holdOptBuy" class="rounded-lg px-2.5 py-1.5 bg-slate-950/45 border border-white/10 flex items-center justify-between transition-all">
+                                        <span class="text-slate-300">Buy (prevCash - p[i])</span>
+                                        <span id="holdOptBuyVal" class="text-slate-200 font-semibold">—</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- SVG Overlay for State Machine Transition Arcs (rendered above cards) -->
+                        <svg id="dpArcOverlay" class="absolute inset-0 w-full h-full pointer-events-none z-30" xmlns="http://www.w3.org/2000/svg">
+                            <defs>
+                                <marker id="arrowEmerald" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                                    <path d="M 0 1 L 10 5 L 0 9 z" fill="#34d399" />
+                                </marker>
+                                <marker id="arrowPurple" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                                    <path d="M 0 1 L 10 5 L 0 9 z" fill="#a78bfa" />
+                                </marker>
+                                <marker id="arrowAmber" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                                    <path d="M 0 1 L 10 5 L 0 9 z" fill="#fbbf24" />
+                                </marker>
+                            </defs>
+                            <g id="dpArcGroup"></g>
+                        </svg>
+
+                        <!-- Floating Animated Token Layer (topmost z-50 so it never goes under cards) -->
+                        <div id="dpGhostLayer" class="absolute inset-0 pointer-events-none z-50"></div>
+                    </div>
+
+                    <!-- Part C: Day-by-Day DP State History Ledger -->
+                    <div class="glass-subcard rounded-xl px-3 py-2.5 space-y-1.5">
+                        <div class="flex items-center justify-between text-[10px] font-mono-code">
+                            <span class="text-slate-300 font-semibold uppercase tracking-wider">DP State Progression Ledger (Day → cash / hold)</span>
+                            <span id="dpFinalSummary" class="text-emerald-300 font-semibold">cash = 0</span>
+                        </div>
+                        <div id="dpLedger" class="flex flex-wrap items-center gap-1.5 font-mono-code text-[10px]"></div>
+                    </div>
+
+                    <!-- Bottom Row Inside Stage Card: Console + Live Info Narration -->
+                    <div class="grid grid-cols-1 md:grid-cols-12 gap-3">
+                        <div class="md:col-span-5 glass-subcard rounded-xl p-3 space-y-1.5">
+                            <div class="flex items-center justify-between text-[11px] font-mono-code">
+                                <span class="text-amber-300 font-semibold flex items-center gap-1.5">
+                                    <span>▤</span><span>Standard I/O Console</span>
+                                </span>
+                                <span id="ioStdout" class="text-emerald-300 truncate max-w-[120px]">stdout: —</span>
+                            </div>
+                            <div id="ioStdin" class="text-[10px] font-mono-code text-slate-400 truncate">stdin: 6 | 7 1 5 3 6 4</div>
+                        </div>
+
+                        <div class="md:col-span-7 glass-subcard rounded-xl p-3 flex items-center gap-2.5">
+                            <span class="w-5 h-5 rounded-full bg-sky-400/20 border border-sky-400/40 text-sky-300 flex items-center justify-center text-[11px] font-bold shrink-0">i</span>
+                            <p id="stepNarration" class="text-xs font-mono-code text-sky-200 leading-relaxed">
+                                Press Start or Next to trace the 2-state Dynamic Programming transitions.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- RIGHT COLUMN: HEIGHT-LOCKED SCROLLABLE JAVA CODE CARD WITH FOOTER NARRATION -->
+            <div class="xl:col-span-5 xl:relative">
+                <aside class="xl:absolute xl:inset-0 glass-panel rounded-2xl overflow-hidden flex flex-col">
+                    <!-- Code Header -->
+                    <div class="px-4 py-2.5 border-b border-white/10 flex items-center justify-between gap-2 bg-slate-950/45 shrink-0">
+                        <div class="flex items-center gap-2">
+                            <span class="w-2.5 h-2.5 rounded-full bg-rose-400/90"></span>
+                            <span class="w-2.5 h-2.5 rounded-full bg-amber-400/90"></span>
+                            <span class="w-2.5 h-2.5 rounded-full bg-emerald-400/90"></span>
+                            <span class="font-mono-code text-xs font-semibold text-slate-200 ml-1">Main.java</span>
+                        </div>
+                        <span id="activeFrameBadge" class="px-2.5 py-0.5 rounded-lg font-mono-code text-[11px] bg-sky-500/15 text-sky-300 border border-sky-400/35">
+                            Frame: main()
+                        </span>
+                    </div>
+
+                    <!-- Scrollable Code Body -->
+                    <div id="codeContainer" class="code-scroll relative flex-1 min-h-0 py-2 font-mono-code bg-[#070d19]/80"></div>
+
+                    <!-- Code Card Footer Narration -->
+                    <div class="px-4 py-2.5 border-t border-white/10 bg-slate-950/55 flex items-center gap-2 shrink-0">
+                        <span class="w-4 h-4 rounded-full bg-sky-400/20 border border-sky-400/40 text-sky-300 flex items-center justify-center text-[10px] font-bold shrink-0">i</span>
+                        <span id="codeFooterNarration" class="text-[11px] font-mono-code text-sky-200 truncate">
+                            Entered main(String[] args).
+                        </span>
+                    </div>
+                </aside>
+            </div>
+        </main>
+
+        <!-- 4. BOTTOM DOSSIER: 2-COLUMN PROBLEM STATEMENT & COMPLEXITY ANALYSIS -->
+        <section class="grid grid-cols-1 lg:grid-cols-2 gap-4 pb-6">
+            <!-- Left: Complete Problem Statement -->
+            <article class="glass-panel rounded-2xl p-5 space-y-3.5">
+                <div class="flex flex-wrap items-center justify-between gap-2">
+                    <div class="flex items-center gap-2">
+                        <span class="text-amber-400 text-sm">📄</span>
+                        <h2 class="text-sm font-bold text-amber-300">Problem Statement</h2>
+                        <span class="px-2 py-0.5 rounded-md text-[10px] font-semibold bg-purple-500/15 text-purple-300 border border-purple-400/30">
+                            Dynamic Programming
+                        </span>
+                    </div>
+                    <span class="text-[11px] font-mono-code text-slate-400">LeetCode 122 • 2-State DP</span>
+                </div>
+
+                <p class="text-xs sm:text-sm text-slate-200 leading-relaxed">
+                    You are given an integer array <code class="font-mono-code text-sky-300">prices</code> of length <code class="font-mono-code text-sky-300">n</code>, where <code class="font-mono-code text-sky-300">prices[i]</code> is the price of a given stock on the <code class="font-mono-code text-amber-300">i<sup>th</sup></code> day. On each day, you may decide to <strong>buy</strong>, <strong>sell</strong>, or <strong>do nothing</strong>. Find and print the <strong>maximum total profit</strong> you can achieve across multiple transactions.
+                </p>
+
+                <!-- Trading Rules & Constraints -->
+                <div class="rounded-xl p-3.5 bg-amber-500/10 border border-amber-400/25 space-y-1.5">
+                    <div class="text-xs font-bold text-amber-300 flex items-center gap-1.5">
+                        <span>📌</span><span>Trading Rules &amp; Constraints</span>
+                    </div>
+                    <ul class="text-xs text-slate-200 space-y-1.5 leading-relaxed">
+                        <li>• <strong>At Most One Share:</strong> You may hold at most <strong>one</strong> stock at any time—you must sell your current stock before buying again.</li>
+                        <li>• <strong>Unlimited Transactions:</strong> You may buy and sell as many times as you want (even buying and selling on the same day if optimal).</li>
+                        <li>• <strong>State Definitions:</strong> Track <code class="font-mono-code text-emerald-300 font-bold">cash</code> (max profit when <em>not holding</em>) and <code class="font-mono-code text-purple-300 font-bold">hold</code> (max profit when <em>holding 1 stock</em>).</li>
+                        <li>• <strong>Edge Cases:</strong> If <code class="font-mono-code text-sky-300">n == 0</code> or prices only fall, no profitable trade exists and the answer is <code class="font-mono-code text-emerald-300 font-bold">0</code>.</li>
+                    </ul>
+                </div>
+
+                <!-- Input / Output Format -->
+                <div class="glass-subcard rounded-xl p-3 grid grid-cols-1 sm:grid-cols-2 gap-2.5 text-[11px] font-mono-code text-slate-300">
+                    <div class="space-y-1">
+                        <div class="text-[10px] font-bold uppercase tracking-wider text-sky-300">Input Format (Assumed)</div>
+                        <div>Line 1: <span class="text-white">n</span> (number of days)</div>
+                        <div>Line 2: <span class="text-white">prices[0] prices[1] ... prices[n-1]</span></div>
+                    </div>
+                    <div class="space-y-1">
+                        <div class="text-[10px] font-bold uppercase tracking-wider text-emerald-300">Output Format</div>
+                        <div>Single integer: maximum profit (<span class="text-emerald-300 font-bold">cash</span>)</div>
+                        <div>Base (Day 0): <span class="text-emerald-300">cash = 0</span>, <span class="text-purple-300">hold = -prices[0]</span></div>
+                    </div>
+                </div>
+
+                <!-- Worked Examples -->
+                <div class="glass-subcard rounded-xl p-3 space-y-2 text-[11px] font-mono-code text-slate-300">
+                    <div class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Worked Examples</div>
+                    <div class="space-y-1.5">
+                        <div>
+                            <span class="text-amber-300 font-semibold">Ex 1:</span> <span class="text-white">6 / 7 1 5 3 6 4</span> → <span class="text-emerald-300 font-bold">7</span>
+                            <span class="text-slate-400"> (Buy @ 1, Sell @ 5 [+4]; Buy @ 3, Sell @ 6 [+3] → 4 + 3 = 7)</span>
+                        </div>
+                        <div>
+                            <span class="text-amber-300 font-semibold">Ex 2:</span> <span class="text-white">5 / 1 2 3 4 5</span> → <span class="text-emerald-300 font-bold">4</span>
+                            <span class="text-slate-400"> (Buy @ 1, Sell @ 5 → profit 4)</span>
+                        </div>
+                        <div>
+                            <span class="text-amber-300 font-semibold">Ex 3:</span> <span class="text-white">5 / 7 6 4 3 1</span> → <span class="text-emerald-300 font-bold">0</span>
+                            <span class="text-slate-400"> (Prices strictly fall; never buy → profit 0)</span>
+                        </div>
+                    </div>
+                </div>
+            </article>
+
+            <!-- Right: Algorithm Summary & Complexity Analysis -->
+            <article class="glass-panel rounded-2xl p-5 space-y-3.5">
+                <div class="flex flex-wrap items-center justify-between gap-2">
+                    <div class="flex items-center gap-2">
+                        <span class="text-cyan-400 text-sm">🧠</span>
+                        <h2 class="text-sm font-bold text-cyan-300">Algorithm Summary &amp; Complexity Analysis</h2>
+                    </div>
+                    <span class="px-2.5 py-0.5 rounded-md text-[11px] font-mono-code bg-emerald-500/15 text-emerald-300 border border-emerald-400/30">
+                        O(n) Time • O(1) Space
+                    </span>
+                </div>
+
+                <!-- 1. Why We Use This Approach -->
+                <div class="rounded-xl p-3.5 bg-sky-500/10 border border-sky-400/25 space-y-1.5">
+                    <div class="text-xs font-bold text-sky-300 flex items-center gap-1.5">
+                        <span>🎯</span><span>1. Why Use a 2-State DP Machine?</span>
+                    </div>
+                    <p class="text-xs text-slate-200 leading-relaxed">
+                        Trying every possible combination of buy, sell, and skip across <code class="font-mono-code text-sky-300">n</code> days takes exponential <code class="font-mono-code text-rose-300">O(2<sup>n</sup>)</code> time. Instead of remembering the entire past history, notice that on any day your future options depend on only <strong>one question</strong>: <em>"Am I currently holding a stock or not?"</em> Modeling this as two states (<code class="font-mono-code text-emerald-300">cash</code> and <code class="font-mono-code text-purple-300">hold</code>) collapses all overlapping paths into <code class="font-mono-code text-emerald-300">O(n)</code> time and easily extends to harder variants (transaction fees, cooldowns, or at-most-K trades).
+                    </p>
+                </div>
+
+                <!-- 2. How It Works Step-by-Step -->
+                <div class="rounded-xl p-3.5 bg-purple-500/10 border border-purple-400/30 space-y-2">
+                    <div class="text-xs font-bold text-purple-300 flex items-center gap-1.5">
+                        <span>⚙️</span><span>2. How It Works Day-by-Day (State Transitions):</span>
+                    </div>
+                    <ul class="text-xs text-slate-200 space-y-2 leading-relaxed">
+                        <li>
+                            <strong class="text-amber-300">Day 0 Initialization:</strong> Start with <code class="font-mono-code text-emerald-300">cash = 0</code> (do nothing, $0 profit) and <code class="font-mono-code text-purple-300">hold = -prices[0]</code> (buy Day 0's stock, so your balance drops by <code class="font-mono-code">prices[0]</code>).
+                        </li>
+                        <li>
+                            <strong class="text-sky-300">Snapshot Safety (<code class="font-mono-code">previousCash</code>, <code class="font-mono-code">previousHold</code>):</strong> At the start of each day <code class="font-mono-code text-amber-300">i</code>, we save yesterday's values so both updates read strictly from day <code class="font-mono-code">i - 1</code> without today's new <code class="font-mono-code">cash</code> interfering with today's <code class="font-mono-code">hold</code>.
+                        </li>
+                        <li>
+                            <strong class="text-emerald-300">Update <code class="font-mono-code">cash = max(previousCash, previousHold + prices[i])</code>:</strong> To end day <code class="font-mono-code">i</code> with <em>no stock</em>, pick the better of: <strong>Rest</strong> (keep yesterday's <code class="font-mono-code">previousCash</code>) or <strong>Sell</strong> the stock you held yesterday and collect <code class="font-mono-code">+prices[i]</code>.
+                        </li>
+                        <li>
+                            <strong class="text-purple-300">Update <code class="font-mono-code">hold = max(previousHold, previousCash - prices[i])</code>:</strong> To end day <code class="font-mono-code">i</code> <em>holding 1 stock</em>, pick the better of: <strong>Keep</strong> yesterday's stock (<code class="font-mono-code">previousHold</code>) or <strong>Buy</strong> today using yesterday's cash (<code class="font-mono-code">-prices[i]</code>).
+                        </li>
+                        <li>
+                            <strong class="text-cyan-300">Final Answer (<code class="font-mono-code">System.out.println(cash)</code>):</strong> Holding an unsold stock on the last day can never give more profit than having sold it, so <code class="font-mono-code text-emerald-300">cash</code> always holds the maximum possible profit.
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Bottom 2 Complexity Subcards -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div class="glass-subcard rounded-xl p-3">
+                        <div class="text-[10px] font-bold uppercase tracking-wider text-slate-400">TIME COMPLEXITY</div>
+                        <div class="font-mono-code text-base font-bold text-emerald-400 mt-0.5">O(n)</div>
+                        <div class="text-[11px] text-slate-400 mt-0.5">
+                            Single linear pass over <code class="font-mono-code text-slate-300">n</code> days, performing two O(1) <code class="font-mono-code text-slate-300">Math.max</code> transitions per day.
+                        </div>
+                    </div>
+                    <div class="glass-subcard rounded-xl p-3">
+                        <div class="text-[10px] font-bold uppercase tracking-wider text-slate-400">AUXILIARY SPACE</div>
+                        <div class="font-mono-code text-base font-bold text-sky-400 mt-0.5">O(1)</div>
+                        <div class="text-[11px] text-slate-400 mt-0.5">
+                            Since day <code class="font-mono-code text-slate-300">i</code> only needs day <code class="font-mono-code text-slate-300">i - 1</code>, the full <code class="font-mono-code text-slate-300">dp[n][2]</code> table compresses to 4 scalar ints.
+                        </div>
+                    </div>
+                </div>
+            </article>
+        </section>
+    </div>
+
+    <script>
+        /* =========================================================================
+           1. EXACT JAVA SOURCE CODE (4-Space Indentation, Strict Line Numbers)
+           ========================================================================= */
+        const JAVA_CODE_LINES = [
+            'import java.util.*;',
+            '',
+            'public class Main {',
+            '    public static void main(String[] args) {',
+            '        Scanner sc = new Scanner(System.in);',
+            '',
+            '        int n = sc.nextInt();',
+            '        int[] prices = new int[n];',
+            '',
+            '        for (int i = 0; i < n; i++) {',
+            '            prices[i] = sc.nextInt();',
+            '        }',
+            '',
+            '        if (n == 0) {',
+            '            System.out.println(0);',
+            '            return;',
+            '        }',
+            '',
+            '        int cash = 0;',
+            '        int hold = -prices[0];',
+            '',
+            '        for (int i = 1; i < n; i++) {',
+            '            int previousCash = cash;',
+            '            int previousHold = hold;',
+            '',
+            '            cash = Math.max(previousCash, previousHold + prices[i]);',
+            '            hold = Math.max(previousHold, previousCash - prices[i]);',
+            '        }',
+            '',
+            '        System.out.println(cash);',
+            '    }',
+            '}'
+        ];
+
+        /* =========================================================================
+           2. UNIQUE LIQUID-GLASS COLOR PALETTE & CURATED TEST PRESETS
+           ========================================================================= */
+        const LIQUID_PALETTE = [
+            { // 0: Cyan
+                barBg: 'linear-gradient(180deg, rgba(125, 211, 252, 0.86) 0%, rgba(14, 165, 233, 0.48) 58%, rgba(3, 105, 161, 0.28) 100%)',
+                barBorder: 'rgba(186, 230, 253, 0.88)',
+                barGlow: '0 0 18px rgba(56, 189, 248, 0.42), inset 0 1px 2px rgba(255, 255, 255, 0.7)'
+            },
+            { // 1: Emerald
+                barBg: 'linear-gradient(180deg, rgba(110, 231, 183, 0.86) 0%, rgba(16, 185, 129, 0.48) 58%, rgba(4, 120, 87, 0.28) 100%)',
+                barBorder: 'rgba(167, 243, 208, 0.88)',
+                barGlow: '0 0 18px rgba(52, 211, 153, 0.42), inset 0 1px 2px rgba(255, 255, 255, 0.7)'
+            },
+            { // 2: Violet
+                barBg: 'linear-gradient(180deg, rgba(196, 181, 253, 0.86) 0%, rgba(139, 92, 246, 0.48) 58%, rgba(91, 33, 182, 0.28) 100%)',
+                barBorder: 'rgba(221, 214, 254, 0.88)',
+                barGlow: '0 0 18px rgba(167, 139, 250, 0.42), inset 0 1px 2px rgba(255, 255, 255, 0.7)'
+            },
+            { // 3: Amber
+                barBg: 'linear-gradient(180deg, rgba(253, 224, 71, 0.86) 0%, rgba(245, 158, 11, 0.48) 58%, rgba(180, 83, 9, 0.28) 100%)',
+                barBorder: 'rgba(254, 240, 138, 0.88)',
+                barGlow: '0 0 18px rgba(251, 191, 36, 0.42), inset 0 1px 2px rgba(255, 255, 255, 0.7)'
+            },
+            { // 4: Fuchsia
+                barBg: 'linear-gradient(180deg, rgba(240, 171, 252, 0.86) 0%, rgba(217, 70, 239, 0.48) 58%, rgba(134, 25, 143, 0.28) 100%)',
+                barBorder: 'rgba(245, 208, 254, 0.88)',
+                barGlow: '0 0 18px rgba(232, 121, 249, 0.42), inset 0 1px 2px rgba(255, 255, 255, 0.7)'
+            },
+            { // 5: Teal
+                barBg: 'linear-gradient(180deg, rgba(94, 234, 212, 0.86) 0%, rgba(20, 184, 166, 0.48) 58%, rgba(15, 118, 110, 0.28) 100%)',
+                barBorder: 'rgba(153, 246, 228, 0.88)',
+                barGlow: '0 0 18px rgba(45, 212, 191, 0.42), inset 0 1px 2px rgba(255, 255, 255, 0.7)'
+            },
+            { // 6: Rose
+                barBg: 'linear-gradient(180deg, rgba(253, 164, 175, 0.86) 0%, rgba(244, 63, 94, 0.48) 58%, rgba(159, 18, 57, 0.28) 100%)',
+                barBorder: 'rgba(254, 205, 211, 0.88)',
+                barGlow: '0 0 18px rgba(251, 113, 133, 0.42), inset 0 1px 2px rgba(255, 255, 255, 0.7)'
+            },
+            { // 7: Indigo
+                barBg: 'linear-gradient(180deg, rgba(165, 180, 252, 0.86) 0%, rgba(99, 102, 241, 0.48) 58%, rgba(67, 56, 202, 0.28) 100%)',
+                barBorder: 'rgba(199, 210, 254, 0.88)',
+                barGlow: '0 0 18px rgba(129, 140, 248, 0.42), inset 0 1px 2px rgba(255, 255, 255, 0.7)'
+            },
+            { // 8: Orange
+                barBg: 'linear-gradient(180deg, rgba(253, 186, 116, 0.86) 0%, rgba(249, 115, 22, 0.48) 58%, rgba(194, 65, 12, 0.28) 100%)',
+                barBorder: 'rgba(254, 215, 170, 0.88)',
+                barGlow: '0 0 18px rgba(251, 146, 60, 0.42), inset 0 1px 2px rgba(255, 255, 255, 0.7)'
+            },
+            { // 9: Lime
+                barBg: 'linear-gradient(180deg, rgba(190, 242, 100, 0.86) 0%, rgba(132, 204, 22, 0.48) 58%, rgba(77, 124, 15, 0.28) 100%)',
+                barBorder: 'rgba(217, 249, 157, 0.88)',
+                barGlow: '0 0 18px rgba(163, 230, 53, 0.42), inset 0 1px 2px rgba(255, 255, 255, 0.7)'
+            }
+        ];
+
+        const PRESETS = [
+            [7, 1, 5, 3, 6, 4],
+            [1, 2, 3, 4, 5],
+            [7, 6, 4, 3, 1],
+            [2, 8, 3, 9, 1, 7],
+            [],
+            [5],
+            [4, 4, 4, 4],
+            [3, 10],
+            [1, 6, 2, 7, 3, 8],
+            [9, 4, 2, 5, 8, 6, 11]
+        ];
+
+        /* =========================================================================
+           3. APPLICATION STATE
+           ========================================================================= */
+        let currentPrices = [...PRESETS[0]];
+        let steps = [];
+        let stepIndex = 0;
+        let isPlaying = false;
+        let playTimer = null;
+        let speedMultiplier = 1;
+        let audioEnabled = true;
+        let audioCtx = null;
+        let activeAnimations = [];
+
+        /* =========================================================================
+           4. DOM ELEMENT REFERENCES
+           ========================================================================= */
+        const el = {
+            badgeStep: document.getElementById('badgeStep'),
+            phaseBadge: document.getElementById('phaseBadge'),
+            badgeCashTop: document.getElementById('badgeCashTop'),
+            badgeHoldTop: document.getElementById('badgeHoldTop'),
+            btnReset: document.getElementById('btnReset'),
+            btnPrev: document.getElementById('btnPrev'),
+            btnPlayPause: document.getElementById('btnPlayPause'),
+            playIcon: document.getElementById('playIcon'),
+            playLabel: document.getElementById('playLabel'),
+            btnNext: document.getElementById('btnNext'),
+            btnAudio: document.getElementById('btnAudio'),
+            audioIcon: document.getElementById('audioIcon'),
+            stepSlider: document.getElementById('stepSlider'),
+            presetSelect: document.getElementById('presetSelect'),
+            customPricesInput: document.getElementById('customPricesInput'),
+            btnLoadCustom: document.getElementById('btnLoadCustom'),
+            errorBanner: document.getElementById('errorBanner'),
+            kpiDay: document.getElementById('kpiDay'),
+            kpiDaySub: document.getElementById('kpiDaySub'),
+            kpiPrev: document.getElementById('kpiPrev'),
+            kpiPrevSub: document.getElementById('kpiPrevSub'),
+            kpiCash: document.getElementById('kpiCash'),
+            kpiCashSub: document.getElementById('kpiCashSub'),
+            kpiHold: document.getElementById('kpiHold'),
+            kpiHoldSub: document.getElementById('kpiHoldSub'),
+            kpiStdout: document.getElementById('kpiStdout'),
+            kpiStdoutSub: document.getElementById('kpiStdoutSub'),
+            emptyArrayState: document.getElementById('emptyArrayState'),
+            chartWrapper: document.getElementById('chartWrapper'),
+            priceDayBadge: document.getElementById('priceDayBadge'),
+            trendGroup: document.getElementById('trendGroup'),
+            stockColumnsGrid: document.getElementById('stockColumnsGrid'),
+            dpChamber: document.getElementById('dpChamber'),
+            dpArcGroup: document.getElementById('dpArcGroup'),
+            dpGhostLayer: document.getElementById('dpGhostLayer'),
+            prevCashChip: document.getElementById('prevCashChip'),
+            prevHoldChip: document.getElementById('prevHoldChip'),
+            cashStateCard: document.getElementById('cashStateCard'),
+            holdStateCard: document.getElementById('holdStateCard'),
+            cashBigValue: document.getElementById('cashBigValue'),
+            holdBigValue: document.getElementById('holdBigValue'),
+            cashOptRest: document.getElementById('cashOptRest'),
+            cashOptRestVal: document.getElementById('cashOptRestVal'),
+            cashOptSell: document.getElementById('cashOptSell'),
+            cashOptSellVal: document.getElementById('cashOptSellVal'),
+            holdOptKeep: document.getElementById('holdOptKeep'),
+            holdOptKeepVal: document.getElementById('holdOptKeepVal'),
+            holdOptBuy: document.getElementById('holdOptBuy'),
+            holdOptBuyVal: document.getElementById('holdOptBuyVal'),
+            dpFinalSummary: document.getElementById('dpFinalSummary'),
+            dpLedger: document.getElementById('dpLedger'),
+            ioStdin: document.getElementById('ioStdin'),
+            ioStdout: document.getElementById('ioStdout'),
+            stepNarration: document.getElementById('stepNarration'),
+            codeFooterNarration: document.getElementById('codeFooterNarration'),
+            activeFrameBadge: document.getElementById('activeFrameBadge'),
+            codeContainer: document.getElementById('codeContainer')
+        };
+
+        /* =========================================================================
+           5. WEB AUDIO SYNTHESIZER (Zero external sound URLs)
+           ========================================================================= */
+        function initAudio() {
+            if (!audioCtx) {
+                const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+                if (AudioContextClass) audioCtx = new AudioContextClass();
+            }
+            if (audioCtx && audioCtx.state === 'suspended') {
+                audioCtx.resume().catch(() => {});
+            }
+        }
+
+        function playTone(freq = 440, duration = 0.085, type = 'sine', gainPeak = 0.045) {
+            if (!audioEnabled) return;
+            try {
+                initAudio();
+                if (!audioCtx) return;
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = type;
+                osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+                gain.gain.setValueAtTime(0.0001, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(gainPeak, audioCtx.currentTime + 0.015);
+                gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + duration);
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start();
+                osc.stop(audioCtx.currentTime + duration + 0.01);
+            } catch (_) {}
+        }
+
+        /* =========================================================================
+           6. SYNTAX HIGHLIGHTER & CODE PANEL
+           ========================================================================= */
+        function escapeHtml(str) {
+            return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+        }
+
+        function highlightJavaLine(raw) {
+            const escaped = escapeHtml(raw);
+            if (escaped.trim().startsWith('//')) {
+                return `<span class="tok-cmt">${escaped}</span>`;
+            }
+            let temp = escaped;
+            temp = temp.replace(
+                /\b(import|public|class|static|void|int|for|if|return|new)\b/g,
+                '<span class="tok-kw">$1</span>'
+            );
+            temp = temp.replace(
+                /\b(Main|Scanner|String|System|Math)\b/g,
+                '<span class="tok-type">$1</span>'
+            );
+            temp = temp.replace(
+                /\b(main|nextInt|max|println)\b(?=\()/g,
+                '<span class="tok-fn">$1</span>'
+            );
+            temp = temp.replace(/\b(\d+)\b/g, '<span class="tok-num">$1</span>');
+            return temp;
+        }
+
+        function buildCodePanel() {
+            el.codeContainer.innerHTML = JAVA_CODE_LINES.map((line, i) => {
+                const ln = i + 1;
+                return `<div class="code-line" data-line="${ln}"><span class="code-ln">${ln}</span><span class="code-text">${highlightJavaLine(line) || ' '}</span></div>`;
+            }).join('');
+        }
+
+        function highlightSingleLine(lineNumber) {
+            const rows = el.codeContainer.querySelectorAll('.code-line');
+            rows.forEach((row) => row.classList.remove('active-line'));
+            const activeRow = el.codeContainer.querySelector(`.code-line[data-line="${lineNumber}"]`);
+            if (activeRow) {
+                activeRow.classList.add('active-line');
+                const container = el.codeContainer;
+                const rowTop = activeRow.offsetTop;
+                const rowBottom = rowTop + activeRow.offsetHeight;
+                const viewTop = container.scrollTop;
+                const viewBottom = viewTop + container.clientHeight;
+                if (rowTop < viewTop + 32 || rowBottom > viewBottom - 32) {
+                    container.scrollTo({
+                        top: Math.max(0, rowTop - container.clientHeight / 2 + activeRow.offsetHeight / 2),
+                        behavior: 'smooth'
+                    });
+                }
+            }
+        }
+
+        /* =========================================================================
+           7. STEP TRACE GENERATOR (Strictly ONE Java Line per Step)
+           ========================================================================= */
+        function generateSteps(inputPrices) {
+            const trace = [];
+            const n = inputPrices.length;
+            let prices = new Array(n).fill(null);
+            let cash = null;
+            let hold = null;
+            let previousCash = null;
+            let previousHold = null;
+            let ledger = [];
+            let stdoutVal = null;
+
+            function pushStep({
+                line,
+                phase = 'Setup',
+                narration,
+                activeDay = null,
+                focusState = null,      // 'cash' | 'hold' | 'snapshot'
+                cashEval = null,        // { rest, sell, winner: 'rest'|'sell' }
+                holdEval = null,        // { keep, buy, winner: 'keep'|'buy' }
+                anim = null,            // { target: 'cash'|'hold', from: 'prevCash'|'prevHold', label, value }
+                isDone = false
+            }) {
+                trace.push({
+                    line,
+                    phase,
+                    narration,
+                    prices: [...prices],
+                    n,
+                    activeDay,
+                    cash,
+                    hold,
+                    previousCash,
+                    previousHold,
+                    focusState,
+                    cashEval: cashEval ? { ...cashEval } : null,
+                    holdEval: holdEval ? { ...holdEval } : null,
+                    anim: anim ? { ...anim } : null,
+                    ledger: ledger.map((item) => ({ ...item })),
+                    stdoutVal,
+                    isDone
+                });
+            }
+
+            // Input reading
+            pushStep({
+                line: 5,
+                phase: 'Input',
+                narration: 'Initialize Scanner sc to read n and the daily stock prices.'
+            });
+
+            pushStep({
+                line: 7,
+                phase: 'Input',
+                narration: `Read n = ${n} trading days from input.`
+            });
+
+            prices = new Array(n).fill(0);
+            pushStep({
+                line: 8,
+                phase: 'Input',
+                narration: `Allocate int[] prices = new int[${n}].`
+            });
+
+            for (let i = 0; i < n; i++) {
+                pushStep({
+                    line: 10,
+                    phase: 'Input',
+                    narration: `Input loop check i = ${i} < ${n} → true.`
+                });
+                prices[i] = inputPrices[i];
+                pushStep({
+                    line: 11,
+                    phase: 'Input',
+                    narration: `Store Day ${i} price: prices[${i}] = ${inputPrices[i]}.`
+                });
+            }
+
+            // Guard check if (n == 0)
+            pushStep({
+                line: 14,
+                phase: 'Guard Check',
+                narration: n === 0
+                    ? 'Check if (n == 0) → TRUE! Must print 0 and return before accessing prices[0].'
+                    : `Check if (n == 0) → ${n} == 0 is false. Proceed to DP initialization.`
+            });
+
+            if (n === 0) {
+                stdoutVal = 0;
+                pushStep({
+                    line: 15,
+                    phase: 'Empty Output',
+                    narration: 'System.out.println(0) — No days to trade, profit is 0.'
+                });
+                pushStep({
+                    line: 16,
+                    phase: 'Completed',
+                    narration: 'return; — Exit main() early.',
+                    isDone: true
+                });
+                return trace;
+            }
+
+            // Day 0 Base Cases
+            cash = 0;
+            pushStep({
+                line: 19,
+                phase: 'Base Case (Day 0)',
+                narration: 'Initialize cash = 0 (on Day 0, not holding a stock means $0 profit).',
+                activeDay: 0,
+                focusState: 'cash'
+            });
+
+            hold = -prices[0];
+            ledger.push({
+                day: 0,
+                price: prices[0],
+                cash,
+                hold,
+                action: `Init: Buy @ $${prices[0]}`
+            });
+            pushStep({
+                line: 20,
+                phase: 'Base Case (Day 0)',
+                narration: `Initialize hold = -prices[0] = -${prices[0]} (buying on Day 0 costs $${prices[0]}).`,
+                activeDay: 0,
+                focusState: 'hold'
+            });
+
+            // DP Loop: Day 1 .. n - 1
+            for (let i = 1; i < n; i++) {
+                pushStep({
+                    line: 22,
+                    phase: `Day ${i} ($${prices[i]})`,
+                    narration: `Loop i = ${i} < ${n} → process Day ${i} with stock price $${prices[i]}.`,
+                    activeDay: i
+                });
+
+                previousCash = cash;
+                pushStep({
+                    line: 23,
+                    phase: `Snapshot Day ${i - 1}`,
+                    narration: `Snapshot previousCash = ${previousCash} so today's buy decision uses yesterday's cash.`,
+                    activeDay: i,
+                    focusState: 'snapshot'
+                });
+
+                previousHold = hold;
+                pushStep({
+                    line: 24,
+                    phase: `Snapshot Day ${i - 1}`,
+                    narration: `Snapshot previousHold = ${previousHold} so today's sell decision uses yesterday's hold.`,
+                    activeDay: i,
+                    focusState: 'snapshot'
+                });
+
+                // Line 26: Update cash
+                const restVal = previousCash;
+                const sellVal = previousHold + prices[i];
+                const cashWinner = sellVal > restVal ? 'sell' : 'rest';
+                cash = Math.max(restVal, sellVal);
+
+                pushStep({
+                    line: 26,
+                    phase: cashWinner === 'sell' ? 'Update cash (SELL ★)' : 'Update cash (Rest)',
+                    narration: cashWinner === 'sell'
+                        ? `cash = Math.max(Rest ${restVal}, Sell ${previousHold} + ${prices[i]} = ${sellVal}) → SELL wins! cash becomes ${cash}.`
+                        : `cash = Math.max(Rest ${restVal}, Sell ${previousHold} + ${prices[i]} = ${sellVal}) → Rest wins! cash stays ${cash}.`,
+                    activeDay: i,
+                    focusState: 'cash',
+                    cashEval: { rest: restVal, sell: sellVal, winner: cashWinner },
+                    anim: {
+                        target: 'cash',
+                        from: cashWinner === 'sell' ? 'prevHold' : 'prevCash',
+                        label: cashWinner === 'sell' ? `Sell +$${prices[i]} → ${cash}` : `Rest → ${cash}`,
+                        value: cash
+                    }
+                });
+
+                // Line 27: Update hold
+                const keepVal = previousHold;
+                const buyVal = previousCash - prices[i];
+                const holdWinner = buyVal > keepVal ? 'buy' : 'keep';
+                hold = Math.max(keepVal, buyVal);
+
+                const dayActions = [];
+                if (cashWinner === 'sell') dayActions.push('Sell');
+                if (holdWinner === 'buy') dayActions.push('Buy');
+                if (!dayActions.length) dayActions.push('Rest/Keep');
+
+                ledger.push({
+                    day: i,
+                    price: prices[i],
+                    cash,
+                    hold,
+                    action: dayActions.join(' & ')
+                });
+
+                pushStep({
+                    line: 27,
+                    phase: holdWinner === 'buy' ? 'Update hold (BUY ★)' : 'Update hold (Keep)',
+                    narration: holdWinner === 'buy'
+                        ? `hold = Math.max(Keep ${keepVal}, Buy ${previousCash} - ${prices[i]} = ${buyVal}) → BUY wins! hold becomes ${hold}.`
+                        : `hold = Math.max(Keep ${keepVal}, Buy ${previousCash} - ${prices[i]} = ${buyVal}) → Keep wins! hold stays ${hold}.`,
+                    activeDay: i,
+                    focusState: 'hold',
+                    cashEval: { rest: restVal, sell: sellVal, winner: cashWinner },
+                    holdEval: { keep: keepVal, buy: buyVal, winner: holdWinner },
+                    anim: {
+                        target: 'hold',
+                        from: holdWinner === 'buy' ? 'prevCash' : 'prevHold',
+                        label: holdWinner === 'buy' ? `Buy -$${prices[i]} → ${hold}` : `Keep → ${hold}`,
+                        value: hold
+                    }
+                });
+            }
+
+            // Print final cash
+            stdoutVal = cash;
+            pushStep({
+                line: 30,
+                phase: 'Completed',
+                narration: `System.out.println(${cash}) — Final maximum profit (without holding any leftover stock) is $${cash}.`,
+                focusState: 'cash',
+                isDone: true
+            });
+
+            return trace;
+        }
+
+        /* =========================================================================
+           8. SVG TRENDLINE & DP STATE-TRANSITION ANIMATIONS
+           ========================================================================= */
+        function cancelActiveAnimations() {
+            activeAnimations.forEach((a) => {
+                try { a.cancel(); } catch (_) {}
+            });
+            activeAnimations = [];
+            el.dpGhostLayer.innerHTML = '';
+            el.dpArcGroup.innerHTML = '';
+        }
+
+        function getRelRect(node, container) {
+            if (!node || !container) return null;
+            const cRect = container.getBoundingClientRect();
+            const r = node.getBoundingClientRect();
+            return {
+                left: r.left - cRect.left,
+                top: r.top - cRect.top,
+                right: r.right - cRect.left,
+                bottom: r.bottom - cRect.top,
+                width: r.width,
+                height: r.height,
+                cx: r.left - cRect.left + r.width / 2,
+                cy: r.top - cRect.top + r.height / 2
+            };
+        }
+
+        function svgEl(tag, attrs = {}) {
+            const node = document.createElementNS('http://www.w3.org/2000/svg', tag);
+            Object.entries(attrs).forEach(([k, v]) => node.setAttribute(k, v));
+            return node;
+        }
+
+        function drawTrendline(step) {
+            el.trendGroup.innerHTML = '';
+            if (step.n === 0) return;
+
+            const cols = Array.from(el.stockColumnsGrid.querySelectorAll('[data-day-idx]'));
+            if (!cols.length) return;
+
+            const pts = [];
+            cols.forEach((col, idx) => {
+                if (step.prices[idx] !== null) {
+                    const r = getRelRect(col, el.chartWrapper);
+                    if (r) pts.push({ x: r.cx, y: r.top });
+                }
+            });
+
+            if (pts.length >= 2) {
+                const d = pts.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x} ${p.y}`).join(' ');
+                el.trendGroup.appendChild(svgEl('path', {
+                    d,
+                    fill: 'none',
+                    stroke: 'rgba(186, 230, 253, 0.42)',
+                    'stroke-width': 2,
+                    'stroke-linejoin': 'round'
+                }));
+            }
+
+            pts.forEach((p, idx) => {
+                const isAct = step.activeDay === idx;
+                el.trendGroup.appendChild(svgEl('circle', {
+                    cx: p.x,
+                    cy: p.y,
+                    r: isAct ? 4.5 : 3,
+                    fill: isAct ? '#fbbf24' : '#e0f2fe',
+                    stroke: '#0f172a',
+                    'stroke-width': 1.5
+                }));
+            });
+        }
+
+        function runDpTransitionAnimation(step) {
+            cancelActiveAnimations();
+            if (!step.anim || step.n === 0) return;
+
+            const anim = step.anim;
+            const isCashTarget = anim.target === 'cash';
+            const fromNode = anim.from === 'prevCash' ? el.prevCashChip : el.prevHoldChip;
+            const targetCard = isCashTarget ? el.cashStateCard : el.holdStateCard;
+            const rFrom = getRelRect(fromNode, el.dpChamber);
+            const rCard = getRelRect(targetCard, el.dpChamber);
+            if (!rFrom || !rCard) return;
+
+            const strokeColor = isCashTarget ? '#34d399' : '#a78bfa';
+            const markerId = isCashTarget ? 'arrowEmerald' : 'arrowPurple';
+
+            // Target dock point: cleanly centered on the top rim of the target state card
+            const destX = rCard.cx;
+            const destY = rCard.top - 10;
+
+            // Curved trajectory arc from snapshot chip to the target card's top rim
+            const midX = (rFrom.cx + destX) / 2;
+            const midY = Math.min(rFrom.bottom, destY) - 12;
+            el.dpArcGroup.appendChild(svgEl('path', {
+                d: `M ${rFrom.cx} ${rFrom.bottom + 2} Q ${midX} ${midY} ${destX} ${destY - 4}`,
+                fill: 'none',
+                stroke: strokeColor,
+                'stroke-width': 2.2,
+                'stroke-dasharray': '5 4',
+                'stroke-linecap': 'round',
+                'marker-end': `url(#${markerId})`
+            }));
+
+            // Physical lift-and-arc liquid-glass badge staying at full opacity: 1 above all cards
+            const durScale = 1 / Math.min(speedMultiplier, 2.5);
+            const token = document.createElement('div');
+            token.className = `flying-token px-3 py-1 rounded-full font-mono-code text-[11px] font-extrabold text-slate-950 border-2 border-white shadow-xl whitespace-nowrap ${
+                isCashTarget
+                    ? 'bg-gradient-to-r from-emerald-300 via-teal-200 to-cyan-200 shadow-emerald-400/50'
+                    : 'bg-gradient-to-r from-purple-300 via-violet-200 to-fuchsia-200 shadow-purple-400/50'
+            }`;
+            token.textContent = anim.label;
+            token.style.left = '0px';
+            token.style.top = '0px';
+            el.dpGhostLayer.appendChild(token);
+
+            const halfW = token.offsetWidth / 2;
+            const halfH = token.offsetHeight / 2;
+            const startX = rFrom.cx - halfW;
+            const startY = rFrom.bottom - halfH + 4;
+            const endX = destX - halfW;
+            const endY = destY - halfH;
+            const arcMidX = (startX + endX) / 2;
+            const arcMidY = Math.min(startY, endY) - 14;
+
+            const wa = token.animate([
+                { transform: `translate(${startX}px, ${startY}px) scale(0.92)`, opacity: 0.95 },
+                { transform: `translate(${arcMidX}px, ${arcMidY}px) scale(1.08)`, opacity: 1, offset: 0.5 },
+                { transform: `translate(${endX}px, ${endY}px) scale(1)`, opacity: 1 }
+            ], {
+                duration: Math.round(620 * durScale),
+                easing: 'cubic-bezier(0.22, 1, 0.36, 1)',
+                fill: 'forwards'
+            });
+            activeAnimations.push(wa);
+
+            targetCard.classList.remove('state-pulse');
+            void targetCard.offsetWidth;
+            targetCard.classList.add('state-pulse');
+        }
+
+        /* =========================================================================
+           9. MAIN STEP RENDERER
+           ========================================================================= */
+        function renderStep(idx, playSound = false) {
+            if (!steps.length) return;
+            stepIndex = Math.max(0, Math.min(idx, steps.length - 1));
+            const s = steps[stepIndex];
+
+            // Top bar badges
+            el.badgeStep.textContent = `Step: ${stepIndex + 1} / ${steps.length}`;
+            el.phaseBadge.textContent = s.phase;
+            el.badgeCashTop.textContent = `cash: ${s.cash === null ? '—' : s.cash}`;
+            el.badgeHoldTop.textContent = `hold: ${s.hold === null ? '—' : s.hold}`;
+            el.stepSlider.value = stepIndex;
+
+            el.btnPrev.disabled = stepIndex === 0;
+            el.btnNext.disabled = stepIndex === steps.length - 1;
+
+            // Narration & frame
+            el.activeFrameBadge.textContent = 'Frame: main()';
+            el.stepNarration.textContent = s.narration;
+            el.codeFooterNarration.textContent = s.narration;
+
+            // 5-Card KPI Telemetry Row
+            el.kpiDay.textContent = s.activeDay !== null && s.prices[s.activeDay] !== null
+                ? `Day ${s.activeDay} ($${s.prices[s.activeDay]})`
+                : '—';
+            el.kpiDaySub.textContent = s.activeDay !== null ? `i = ${s.activeDay}` : 'prices[i]';
+
+            el.kpiPrev.textContent = (s.previousCash === null && s.previousHold === null)
+                ? '— / —'
+                : `${s.previousCash ?? '—'} / ${s.previousHold ?? '—'}`;
+            el.kpiPrevSub.textContent = 'prevCash / prevHold';
+
+            el.kpiCash.textContent = s.cash === null ? '—' : `${s.cash}`;
+            el.kpiCashSub.textContent = s.cashEval
+                ? (s.cashEval.winner === 'sell' ? 'Action: SELL ★' : 'Action: Rest')
+                : 'Not holding stock';
+
+            el.kpiHold.textContent = s.hold === null ? '—' : `${s.hold}`;
+            el.kpiHoldSub.textContent = s.holdEval
+                ? (s.holdEval.winner === 'buy' ? 'Action: BUY ★' : 'Action: Keep')
+                : 'Holding 1 stock';
+
+            el.kpiStdout.textContent = s.stdoutVal !== null ? `${s.stdoutVal}` : 'pending';
+            el.kpiStdoutSub.textContent = s.n === 0 ? 'Empty guard' : `n = ${s.n} days`;
+
+            // Empty array visibility
+            const isEmpty = s.n === 0;
+            el.emptyArrayState.classList.toggle('hidden', !isEmpty);
+            el.chartWrapper.classList.toggle('hidden', isEmpty);
+            el.dpChamber.classList.toggle('hidden', isEmpty);
+
+            if (!isEmpty) {
+                el.priceDayBadge.textContent = s.activeDay !== null
+                    ? `Active Day ${s.activeDay}: $${s.prices[s.activeDay]}`
+                    : (s.isDone ? 'All Days Processed ✓' : 'Loading Prices...');
+
+                // Render Liquid-Glass Stock Price Columns
+                const maxPrice = Math.max(1, ...currentPrices.map((v) => Math.abs(v)));
+                el.stockColumnsGrid.innerHTML = s.prices.map((val, i) => {
+                    const theme = LIQUID_PALETTE[i % LIQUID_PALETTE.length];
+                    const isActive = s.activeDay === i;
+                    const colH = val === null ? 18 : Math.max(24, Math.round((val / maxPrice) * 86));
+
+                    let stateCls = '';
+                    if (val === null) stateCls = 'is-unloaded';
+                    else if (isActive) stateCls = i === 0 ? 'is-day0' : 'is-active-day';
+
+                    const styleStr = val === null
+                        ? `height: ${colH}px;`
+                        : `height: ${colH}px; background: ${theme.barBg}; border-color: ${theme.barBorder}; box-shadow: ${theme.barGlow};`;
+
+                    return `
+                        <div class="flex flex-col items-center justify-end flex-1 max-w-[76px] h-full">
+                            <div data-day-idx="${i}"
+                                 class="stock-col ${stateCls} w-full rounded-t-xl rounded-b-md flex flex-col items-center justify-start pt-1 font-mono-code text-xs font-bold text-white"
+                                 style="${styleStr}">
+                                <span class="relative z-10 drop-shadow">${val === null ? '·' : '$' + val}</span>
+                            </div>
+                            <span class="text-[10px] font-mono-code ${isActive ? 'text-amber-300 font-bold' : 'text-slate-400'} mt-1">
+                                D${i}
+                            </span>
+                        </div>
+                    `;
+                }).join('');
+
+                // Update DP State Machine Nodes
+                el.prevCashChip.textContent = `previousCash: ${s.previousCash === null ? '—' : s.previousCash}`;
+                el.prevHoldChip.textContent = `previousHold: ${s.previousHold === null ? '—' : s.previousHold}`;
+
+                el.cashBigValue.textContent = s.cash === null ? '—' : `${s.cash}`;
+                el.holdBigValue.textContent = s.hold === null ? '—' : `${s.hold}`;
+
+                el.cashStateCard.classList.toggle('dp-node-active-cash', s.focusState === 'cash');
+                el.holdStateCard.classList.toggle('dp-node-active-hold', s.focusState === 'hold');
+
+                // Cash transition options
+                if (s.cashEval) {
+                    const sellWin = s.cashEval.winner === 'sell';
+                    el.cashOptRestVal.textContent = `${s.cashEval.rest}${!sellWin ? ' ✓' : ''}`;
+                    el.cashOptSellVal.textContent = `${s.cashEval.sell}${sellWin ? ' ★' : ''}`;
+                    el.cashOptRest.className = `rounded-lg px-2.5 py-1.5 border flex items-center justify-between transition-all ${
+                        !sellWin ? 'bg-emerald-500/20 border-emerald-400/65 text-emerald-100' : 'bg-slate-950/45 border-white/10 opacity-60'
+                    }`;
+                    el.cashOptSell.className = `rounded-lg px-2.5 py-1.5 border flex items-center justify-between transition-all ${
+                        sellWin ? 'bg-emerald-500/25 border-emerald-300/80 text-emerald-100 font-bold' : 'bg-slate-950/45 border-white/10 opacity-60'
+                    }`;
+                } else {
+                    el.cashOptRestVal.textContent = s.cash === null ? '—' : `${s.cash}`;
+                    el.cashOptSellVal.textContent = '—';
+                    el.cashOptRest.className = 'rounded-lg px-2.5 py-1.5 bg-slate-950/45 border border-white/10 flex items-center justify-between';
+                    el.cashOptSell.className = 'rounded-lg px-2.5 py-1.5 bg-slate-950/45 border border-white/10 flex items-center justify-between';
+                }
+
+                // Hold transition options
+                if (s.holdEval) {
+                    const buyWin = s.holdEval.winner === 'buy';
+                    el.holdOptKeepVal.textContent = `${s.holdEval.keep}${!buyWin ? ' ✓' : ''}`;
+                    el.holdOptBuyVal.textContent = `${s.holdEval.buy}${buyWin ? ' ★' : ''}`;
+                    el.holdOptKeep.className = `rounded-lg px-2.5 py-1.5 border flex items-center justify-between transition-all ${
+                        !buyWin ? 'bg-purple-500/20 border-purple-400/65 text-purple-100' : 'bg-slate-950/45 border-white/10 opacity-60'
+                    }`;
+                    el.holdOptBuy.className = `rounded-lg px-2.5 py-1.5 border flex items-center justify-between transition-all ${
+                        buyWin ? 'bg-purple-500/25 border-purple-300/80 text-purple-100 font-bold' : 'bg-slate-950/45 border-white/10 opacity-60'
+                    }`;
+                } else {
+                    el.holdOptKeepVal.textContent = s.hold === null ? '—' : `${s.hold}`;
+                    el.holdOptBuyVal.textContent = '—';
+                    el.holdOptKeep.className = 'rounded-lg px-2.5 py-1.5 bg-slate-950/45 border border-white/10 flex items-center justify-between';
+                    el.holdOptBuy.className = 'rounded-lg px-2.5 py-1.5 bg-slate-950/45 border border-white/10 flex items-center justify-between';
+                }
+            }
+
+            // DP History Ledger
+            if (!s.ledger.length) {
+                el.dpLedger.innerHTML = '<span class="text-slate-500">Waiting for Day 0 base cases (cash = 0, hold = -prices[0])...</span>';
+                el.dpFinalSummary.textContent = `cash = ${s.cash ?? 0}`;
+            } else {
+                el.dpLedger.innerHTML = s.ledger.map((item, idx) => {
+                    const isLatest = idx === s.ledger.length - 1;
+                    const cls = isLatest
+                        ? 'bg-sky-500/20 border-sky-400/65 text-sky-100'
+                        : 'bg-slate-900/65 border-white/10 text-slate-300';
+                    return `<span class="px-2 py-0.5 rounded-md border ${cls}">D${item.day} ($${item.price}): <span class="text-emerald-300 font-bold">C=${item.cash}</span>, <span class="text-purple-300 font-bold">H=${item.hold}</span></span>`;
+                }).join('<span class="text-slate-600">→</span>');
+                el.dpFinalSummary.textContent = `Best cash = ${s.cash}`;
+            }
+
+            // Standard I/O Console
+            el.ioStdin.textContent = `stdin: ${s.n} | ${currentPrices.length ? currentPrices.join(' ') : '(empty)'}`;
+            el.ioStdout.textContent = `stdout: ${s.stdoutVal !== null ? s.stdoutVal : '—'}`;
+
+            // Single-line Java code highlight
+            highlightSingleLine(s.line);
+
+            // Draw trendline & trigger physical lift-and-arc DP state animations
+            requestAnimationFrame(() => {
+                drawTrendline(s);
+                runDpTransitionAnimation(s);
+            });
+
+            // Audio cue
+            if (playSound) {
+                if (s.anim?.target === 'cash' && s.cashEval?.winner === 'sell') playTone(780, 0.13, 'triangle', 0.055);
+                else if (s.anim?.target === 'hold' && s.holdEval?.winner === 'buy') playTone(620, 0.11, 'triangle', 0.05);
+                else if (s.isDone) playTone(880, 0.18, 'sine', 0.06);
+                else playTone(420, 0.045, 'sine', 0.025);
+            }
+        }
+
+        /* =========================================================================
+           10. PLAYBACK ENGINE
+           ========================================================================= */
+        function stopPlayback() {
+            isPlaying = false;
+            if (playTimer) {
+                clearTimeout(playTimer);
+                playTimer = null;
+            }
+            el.playIcon.textContent = '▶';
+            el.playLabel.textContent = 'Start';
+        }
+
+        function scheduleNextTick() {
+            if (!isPlaying) return;
+            if (stepIndex >= steps.length - 1) {
+                stopPlayback();
+                return;
+            }
+            const currStep = steps[stepIndex];
+            const baseDelay = currStep?.anim ? 980 : 580;
+            const delay = Math.max(160, Math.round(baseDelay / speedMultiplier));
+            playTimer = setTimeout(() => {
+                if (!isPlaying) return;
+                renderStep(stepIndex + 1, true);
+                scheduleNextTick();
+            }, delay);
+        }
+
+        function togglePlayback() {
+            if (isPlaying) {
+                stopPlayback();
+            } else {
+                if (stepIndex >= steps.length - 1) {
+                    renderStep(0, false);
+                }
+                isPlaying = true;
+                el.playIcon.textContent = '⏸';
+                el.playLabel.textContent = 'Stop';
+                scheduleNextTick();
+            }
+        }
+
+        /* =========================================================================
+           11. DATASET LOADER & VALIDATION
+           ========================================================================= */
+        function showError(msg) {
+            el.errorBanner.textContent = msg;
+            el.errorBanner.classList.remove('hidden');
+            setTimeout(() => el.errorBanner.classList.add('hidden'), 4200);
+        }
+
+        function loadDataset(pricesArr) {
+            stopPlayback();
+            cancelActiveAnimations();
+            currentPrices = [...pricesArr];
+            el.customPricesInput.value = currentPrices.join(', ');
+            steps = generateSteps(currentPrices);
+            el.stepSlider.max = Math.max(0, steps.length - 1);
+            renderStep(0, false);
+        }
+
+        /* =========================================================================
+           12. EVENT LISTENERS
+           ========================================================================= */
+        el.btnReset.addEventListener('click', () => {
+            stopPlayback();
+            renderStep(0, true);
+        });
+
+        el.btnPrev.addEventListener('click', () => {
+            stopPlayback();
+            if (stepIndex > 0) renderStep(stepIndex - 1, true);
+        });
+
+        el.btnNext.addEventListener('click', () => {
+            stopPlayback();
+            if (stepIndex < steps.length - 1) renderStep(stepIndex + 1, true);
+        });
+
+        el.btnPlayPause.addEventListener('click', togglePlayback);
+
+        el.stepSlider.addEventListener('input', (e) => {
+            stopPlayback();
+            renderStep(parseInt(e.target.value, 10), false);
+        });
+
+        document.querySelectorAll('.speed-btn').forEach((btn) => {
+            btn.addEventListener('click', () => {
+                speedMultiplier = parseFloat(btn.dataset.speed);
+                document.querySelectorAll('.speed-btn').forEach((b) => b.classList.remove('glass-btn-active'));
+                btn.classList.add('glass-btn-active');
+            });
+        });
+
+        el.btnAudio.addEventListener('click', () => {
+            audioEnabled = !audioEnabled;
+            el.audioIcon.textContent = audioEnabled ? '🔊' : '🔇';
+        });
+
+        el.presetSelect.addEventListener('change', (e) => {
+            const p = PRESETS[parseInt(e.target.value, 10)];
+            if (p) loadDataset(p);
+        });
+
+        el.btnLoadCustom.addEventListener('click', () => {
+            const raw = el.customPricesInput.value.trim();
+            if (!raw) {
+                loadDataset([]);
+                return;
+            }
+            const tokens = raw.split(/[\s,]+/).filter(Boolean);
+            if (tokens.length > 10) {
+                showError('Please enter at most 10 days so the stock timeline and DP ledger remain crisp.');
+                return;
+            }
+            const parsed = [];
+            for (const t of tokens) {
+                const num = Number(t);
+                if (!Number.isInteger(num) || num < 0 || num > 999) {
+                    showError(`Invalid price "${t}". Use integers between 0 and 999.`);
+                    return;
+                }
+                parsed.push(num);
+            }
+            loadDataset(parsed);
+        });
+
+        window.addEventListener('keydown', (e) => {
+            if (document.activeElement && ['INPUT', 'SELECT', 'TEXTAREA'].includes(document.activeElement.tagName)) {
+                return;
+            }
+            if (e.code === 'Space') {
+                e.preventDefault();
+                togglePlayback();
+            } else if (e.code === 'ArrowRight') {
+                e.preventDefault();
+                stopPlayback();
+                if (stepIndex < steps.length - 1) renderStep(stepIndex + 1, true);
+            } else if (e.code === 'ArrowLeft') {
+                e.preventDefault();
+                stopPlayback();
+                if (stepIndex > 0) renderStep(stepIndex - 1, true);
+            }
+        });
+
+        window.addEventListener('resize', () => {
+            if (steps.length) renderStep(stepIndex, false);
+        });
+
+        /* =========================================================================
+           13. BOOTSTRAP
+           ========================================================================= */
+        buildCodePanel();
+        loadDataset(PRESETS[0]);
+    </script>
+</body>
+</html>

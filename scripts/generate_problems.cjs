@@ -2462,6 +2462,33 @@ const problems = [
         "visualizerUrl": "/visualizers/array_rotation_playing_card_visualizer.html"
       },
       {
+        "id": "rotate-right-reversal",
+        "label": "Rotate Right (Reversal Algorithm)",
+        "badge": "LC 189 · O(1) Space",
+        "approach": "Normalize k = k % n, reverse [0..n-1], reverse [0..k-1], and reverse [k..n-1] to shift elements right by k.",
+        "timeComplexity": "O(n)",
+        "spaceComplexity": "O(1)",
+        "visualizerUrl": "/visualizers/rotate_array_right_reversal_visualizer.html"
+      },
+      {
+        "id": "rotate-left-reversal",
+        "label": "Rotate Left (Reversal Algorithm)",
+        "badge": "Left Shift · O(1) Space",
+        "approach": "Normalize k = k % n, reverse [0..k-1], reverse [k..n-1], and reverse [0..n-1] to shift elements left by k.",
+        "timeComplexity": "O(n)",
+        "spaceComplexity": "O(1)",
+        "visualizerUrl": "/visualizers/rotate_array_left_reversal_visualizer.html"
+      },
+      {
+        "id": "rotate-unified",
+        "label": "Unified Left / Right Rotation",
+        "badge": "Unified · O(1) Space",
+        "approach": "Single rotate(arr, k, right) helper that converts right rotation into left rotation via k = n - (k % n) and applies the 3-step reversal.",
+        "timeComplexity": "O(n)",
+        "spaceComplexity": "O(1)",
+        "visualizerUrl": "/visualizers/rotate_array_unified_visualizer.html"
+      },
+      {
         "id": "extra-array",
         "label": "Extra Array (Modulo Buffer)",
         "badge": "Approach 1 · O(n) Space",
@@ -4273,7 +4300,32 @@ const problems = [
       "Sorting the array, which destroys the chronological buy-before-sell invariant."
     ],
     "optimalApproach": "Single-Pass Greedy Running Minimum",
+    "solutions": [
+      {
+        "id": "one-pass",
+        "label": "Single-Pass Greedy",
+        "badge": "Optimal · O(n)",
+        "approach": "Track the lowest historical price minPrice as you scan left-to-right and update maxProfit = max(maxProfit, prices[i] - minPrice).",
+        "timeComplexity": "O(n)",
+        "spaceComplexity": "O(1)",
+        "visualizerUrl": "/visualizers/best_time_to_buy_and_sell_stock_visualizer.html"
+      },
+      {
+        "id": "brute-force",
+        "label": "Brute Force Nested Loop",
+        "badge": "Baseline · O(n²)",
+        "approach": "Check every chronological pair (buy, sell) with buy < sell via nested loops and track the maximum prices[sell] - prices[buy].",
+        "timeComplexity": "O(n²)",
+        "spaceComplexity": "O(1)",
+        "visualizerUrl": "/visualizers/best_time_stock_bruteforce_visualizer.html"
+      }
+    ],
     "relatedProblems": [
+      {
+        "number": 122,
+        "title": "Best Time to Buy and Sell Stock II",
+        "difficulty": "Medium"
+      },
       {
         "number": 53,
         "title": "Maximum Subarray (Max Inventory Increase)",
@@ -5902,6 +5954,140 @@ const problems = [
       }
     ],
     "leetcodeUrl": "https://leetcode.com/problems/fibonacci-number/"
+  },
+  {
+    "id": "best-time-to-buy-and-sell-stock-ii",
+    "number": 122,
+    "title": "Best Time to Buy and Sell Stock II",
+    "slug": "best-time-to-buy-and-sell-stock-ii",
+    "difficulty": "Medium",
+    "categories": [
+      "Arrays",
+      "Greedy",
+      "Dynamic Programming"
+    ],
+    "subPatterns": [
+      "Peak-Valley Greedy Accumulation",
+      "2-State DP Machine (Cash / Hold)"
+    ],
+    "tags": [
+      "Array",
+      "Greedy",
+      "Dynamic Programming",
+      "Infosys"
+    ],
+    "shortDescription": "Given an array prices where prices[i] is the price of a stock on day i, find the maximum profit you can achieve when you may complete as many buy/sell transactions as you like (holding at most one share at a time).",
+    "problemStatement": "You are given an integer array prices where prices[i] is the price of a given stock on the ith day.\n\nOn each day, you may decide to buy and/or sell the stock. You can only hold at most one share of the stock at any time. However, you can buy it then immediately sell it on the same day.\n\nFind and return the maximum profit you can achieve.",
+    "constraints": [
+      "1 <= prices.length <= 3 * 10^4",
+      "0 <= prices[i] <= 10^4"
+    ],
+    "examples": [
+      {
+        "exampleNumber": 1,
+        "type": "official",
+        "input": "prices = [7,1,5,3,6,4]",
+        "output": "7",
+        "explanation": "Buy on day 2 (price = 1) and sell on day 3 (price = 5), profit = 4. Then buy on day 4 (price = 3) and sell on day 5 (price = 6), profit = 3. Total profit = 4 + 3 = 7."
+      },
+      {
+        "exampleNumber": 2,
+        "type": "official",
+        "input": "prices = [1,2,3,4,5]",
+        "output": "4",
+        "explanation": "Buy on day 1 (price = 1) and sell on day 5 (price = 5), profit = 5 - 1 = 4 (equivalent to summing every positive daily uptick: 1 + 1 + 1 + 1 = 4)."
+      }
+    ],
+    "algorithmSteps": [
+      {
+        "step": 1,
+        "title": "Initialize Profit / States",
+        "description": "For Greedy: set totalProfit = 0. For DP State Machine: set cash = 0 and hold = -prices[0].",
+        "stateSnapshot": "profit = 0 | cash = 0, hold = -prices[0]",
+        "highlight": "Init"
+      },
+      {
+        "step": 2,
+        "title": "Capture Every Positive Delta",
+        "description": "Scan i from 1 to n - 1. Whenever prices[i] > prices[i - 1], add (prices[i] - prices[i - 1]) to totalProfit; or transition cash and hold.",
+        "stateSnapshot": "if (prices[i] > prices[i-1]) profit += prices[i] - prices[i-1]",
+        "highlight": "Uptick"
+      },
+      {
+        "step": 3,
+        "title": "Return Accumulated Profit",
+        "description": "After scanning all days, totalProfit (or final cash state) equals the maximum achievable profit.",
+        "stateSnapshot": "return totalProfit",
+        "highlight": "Result"
+      }
+    ],
+    "timeComplexity": "O(n)",
+    "timeComplexityExplanation": "Single linear scan across the prices array with O(1) work per day.",
+    "spaceComplexity": "O(1)",
+    "spaceComplexityExplanation": "Uses only scalar accumulators (totalProfit, or cash and hold) without any auxiliary array.",
+    "visualizerUrl": "/visualizers/best_time_stock_ii_greedy_visualizer.html",
+    "addedDate": "2026-11-28",
+    "keyObservations": [
+      "Every multi-day rise [a, b, c] where a < b < c telescopes: (c - a) == (b - a) + (c - b), so summing every positive adjacent difference captures the exact peak-minus-valley total.",
+      "The 2-state DP (cash = max(cash, hold + prices[i]), hold = max(hold, prevCash - prices[i])) generalizes cleanly to Stock problems with cooldowns or transaction fees."
+    ],
+    "importantPattern": "Greedy Adjacent Upticks / 2-State DP Machine",
+    "commonMistakes": [
+      "Trying to explicitly track local valleys and peaks with complex nested while loops when simple positive delta summation gives the exact same result.",
+      "Forgetting to save prevCash before updating cash when computing hold in the DP state machine."
+    ],
+    "optimalApproach": "Greedy Adjacent Uptick Summation",
+    "solutions": [
+      {
+        "id": "greedy-multiple-transactions",
+        "label": "Greedy Multiple Transactions",
+        "badge": "Optimal · O(n)",
+        "approach": "Sum every positive day-over-day increase (prices[i] - prices[i - 1]) in a single linear pass.",
+        "timeComplexity": "O(n)",
+        "spaceComplexity": "O(1)",
+        "visualizerUrl": "/visualizers/best_time_stock_ii_greedy_visualizer.html"
+      },
+      {
+        "id": "dp-state-machine",
+        "label": "DP State Machine (Cash / Hold)",
+        "badge": "DP · O(n) / O(1)",
+        "approach": "Maintain two states per day — cash (not holding stock) and hold (holding 1 share) — with O(1) rolling transitions.",
+        "timeComplexity": "O(n)",
+        "spaceComplexity": "O(1)",
+        "visualizerUrl": "/visualizers/best_time_stock_ii_dp_visualizer.html"
+      }
+    ],
+    "infosys": {
+      "roles": [
+        "SP",
+        "DSE"
+      ],
+      "frequency": "Medium",
+      "frequencyCount": 3,
+      "years": [
+        2024,
+        2025
+      ],
+      "sourceCount": 3
+    },
+    "relatedProblems": [
+      {
+        "number": 121,
+        "title": "Best Time to Buy and Sell Stock",
+        "difficulty": "Easy"
+      },
+      {
+        "number": 53,
+        "title": "Maximum Subarray (Max Inventory Increase)",
+        "difficulty": "Medium"
+      },
+      {
+        "number": 189,
+        "title": "Rotate Array",
+        "difficulty": "Medium"
+      }
+    ],
+    "leetcodeUrl": "https://leetcode.com/problems/best-time-to-buy-and-sell-stock-ii/"
   }
 ];
 

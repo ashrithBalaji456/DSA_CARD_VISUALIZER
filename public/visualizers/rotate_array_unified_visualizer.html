@@ -1,0 +1,2541 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Rotate Array Left or Right (Unified Method) — Glassmorphic Java Visualizer</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2064%2064%22%3E%3Cdefs%3E%3ClinearGradient%20id%3D%22bg%22%20x1%3D%220%22%20y1%3D%220%22%20x2%3D%221%22%20y2%3D%221%22%3E%3Cstop%20offset%3D%220%25%22%20stop-color%3D%22%230f172a%22%2F%3E%3Cstop%20offset%3D%22100%25%22%20stop-color%3D%22%23060913%22%2F%3E%3C%2FlinearGradient%3E%3ClinearGradient%20id%3D%22g%22%20x1%3D%220%22%20y1%3D%220%22%20x2%3D%221%22%20y2%3D%221%22%3E%3Cstop%20offset%3D%220%25%22%20stop-color%3D%22%2322d3ee%22%2F%3E%3Cstop%20offset%3D%2255%25%22%20stop-color%3D%22%236366f1%22%2F%3E%3Cstop%20offset%3D%22100%25%22%20stop-color%3D%22%23a855f7%22%2F%3E%3C%2FlinearGradient%3E%3C%2Fdefs%3E%3Crect%20x%3D%222%22%20y%3D%222%22%20width%3D%2260%22%20height%3D%2260%22%20rx%3D%2216%22%20fill%3D%22url(%23bg)%22%20stroke%3D%22url(%23g)%22%20stroke-width%3D%223.5%22%2F%3E%3Cpath%20d%3D%22M20%2042%20L32%2018%20L44%2042%22%20fill%3D%22none%22%20stroke%3D%22url(%23g)%22%20stroke-width%3D%224%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3Cline%20x1%3D%2220%22%20y1%3D%2242%22%20x2%3D%2244%22%20y2%3D%2242%22%20stroke%3D%22%2338bdf8%22%20stroke-width%3D%223%22%20stroke-linecap%3D%22round%22%20opacity%3D%220.55%22%2F%3E%3Ccircle%20cx%3D%2232%22%20cy%3D%2218%22%20r%3D%225.5%22%20fill%3D%22%2322d3ee%22%2F%3E%3Ccircle%20cx%3D%2220%22%20cy%3D%2242%22%20r%3D%225.5%22%20fill%3D%22%236366f1%22%2F%3E%3Ccircle%20cx%3D%2244%22%20cy%3D%2242%22%20r%3D%225.5%22%20fill%3D%22%23a855f7%22%2F%3E%3C%2Fsvg%3E" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <style>
+        :root {
+            --glass-bg: rgba(15, 23, 42, 0.56);
+            --glass-bg-strong: rgba(15, 23, 42, 0.74);
+            --glass-border: rgba(148, 163, 184, 0.22);
+            --glass-highlight: rgba(255, 255, 255, 0.08);
+            --accent-cyan: #38bdf8;
+            --accent-indigo: #818cf8;
+            --accent-emerald: #34d399;
+            --accent-amber: #fbbf24;
+            --accent-rose: #fb7185;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background:
+                radial-gradient(circle at 12% 10%, rgba(56, 189, 248, 0.14), transparent 34%),
+                radial-gradient(circle at 88% 12%, rgba(168, 85, 247, 0.14), transparent 36%),
+                radial-gradient(circle at 50% 92%, rgba(16, 185, 129, 0.10), transparent 40%),
+                linear-gradient(160deg, #050914 0%, #091122 50%, #050a16 100%);
+            color: #e2e8f0;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .font-mono-code {
+            font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+        }
+
+        /* Liquid transparent dark-glass panels & subcards */
+        .glass-panel {
+            background: linear-gradient(155deg, rgba(255, 255, 255, 0.085) 0%, rgba(15, 23, 42, 0.56) 45%, rgba(7, 13, 28, 0.72) 100%);
+            backdrop-filter: blur(22px) saturate(145%);
+            -webkit-backdrop-filter: blur(22px) saturate(145%);
+            border: 1px solid rgba(186, 230, 253, 0.18);
+            box-shadow:
+                0 14px 36px rgba(2, 6, 23, 0.52),
+                inset 0 1px 0 rgba(255, 255, 255, 0.22),
+                inset 0 -1px 0 rgba(56, 189, 248, 0.08);
+        }
+
+        .glass-subcard {
+            background: linear-gradient(165deg, rgba(255, 255, 255, 0.05) 0%, rgba(7, 13, 25, 0.58) 100%);
+            backdrop-filter: blur(14px) saturate(130%);
+            -webkit-backdrop-filter: blur(14px) saturate(130%);
+            border: 1px solid rgba(148, 163, 184, 0.18);
+            box-shadow:
+                inset 0 1px 0 rgba(255, 255, 255, 0.12),
+                0 6px 20px rgba(2, 6, 23, 0.32);
+        }
+
+        .glass-pill {
+            background: linear-gradient(160deg, rgba(255, 255, 255, 0.11), rgba(15, 23, 42, 0.48));
+            backdrop-filter: blur(14px) saturate(140%);
+            -webkit-backdrop-filter: blur(14px) saturate(140%);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.18);
+        }
+
+        .glass-btn {
+            background: linear-gradient(165deg, rgba(255, 255, 255, 0.14), rgba(15, 23, 42, 0.56));
+            backdrop-filter: blur(14px) saturate(140%);
+            -webkit-backdrop-filter: blur(14px) saturate(140%);
+            border: 1px solid rgba(255, 255, 255, 0.22);
+            box-shadow:
+                0 6px 16px rgba(2, 6, 23, 0.34),
+                inset 0 1px 0 rgba(255, 255, 255, 0.24);
+            transition: transform 0.15s ease, background 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
+        }
+
+        .glass-btn:hover:not(:disabled) {
+            background: linear-gradient(165deg, rgba(255, 255, 255, 0.22), rgba(30, 41, 59, 0.65));
+            border-color: rgba(125, 211, 252, 0.65);
+            transform: translateY(-1px);
+            box-shadow:
+                0 8px 22px rgba(14, 165, 233, 0.28),
+                inset 0 1px 0 rgba(255, 255, 255, 0.32);
+        }
+
+        .glass-btn:active:not(:disabled) {
+            transform: translateY(0px) scale(0.98);
+        }
+
+        .glass-btn:disabled {
+            opacity: 0.38;
+            cursor: not-allowed;
+        }
+
+        .glass-btn-primary {
+            background: linear-gradient(135deg, rgba(56, 189, 248, 0.42), rgba(99, 102, 241, 0.38));
+            border-color: rgba(125, 211, 252, 0.72);
+            box-shadow:
+                0 0 20px rgba(14, 165, 233, 0.3),
+                inset 0 1px 0 rgba(255, 255, 255, 0.34);
+        }
+
+        .glass-btn-primary:hover:not(:disabled) {
+            background: linear-gradient(135deg, rgba(56, 189, 248, 0.6), rgba(99, 102, 241, 0.52));
+            border-color: rgba(186, 230, 253, 0.92);
+        }
+
+        .glass-btn-active {
+            background: linear-gradient(135deg, rgba(56, 189, 248, 0.38), rgba(52, 211, 153, 0.26));
+            border: 1px solid rgba(125, 211, 252, 0.72);
+            color: #f0f9ff;
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.28);
+        }
+
+        /* Liquid transparent glass element box & combined bar-inside-box vessel */
+        .array-box {
+            position: relative;
+            overflow: hidden;
+            background: linear-gradient(155deg, rgba(255, 255, 255, 0.16) 0%, rgba(148, 163, 184, 0.06) 55%, rgba(15, 23, 42, 0.24) 100%);
+            backdrop-filter: blur(18px) saturate(165%);
+            -webkit-backdrop-filter: blur(18px) saturate(165%);
+            border: 1px solid rgba(255, 255, 255, 0.28);
+            box-shadow:
+                0 10px 26px rgba(2, 6, 23, 0.38),
+                inset 0 1px 1px rgba(255, 255, 255, 0.42),
+                inset 0 -10px 18px rgba(15, 23, 42, 0.22);
+            transition: transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease, opacity 0.2s ease, background 0.25s ease;
+        }
+
+        .array-box::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.28) 0%, rgba(255, 255, 255, 0.05) 38%, transparent 62%);
+            pointer-events: none;
+        }
+
+        .array-box.in-range {
+            box-shadow:
+                0 10px 26px rgba(99, 102, 241, 0.24),
+                inset 0 1px 1px rgba(255, 255, 255, 0.45);
+        }
+
+        .array-box.is-left {
+            outline: 2px solid rgba(56, 189, 248, 0.95);
+            outline-offset: 2px;
+            transform: translateY(-2px);
+        }
+
+        .array-box.is-right {
+            outline: 2px solid rgba(251, 113, 133, 0.95);
+            outline-offset: 2px;
+            transform: translateY(-2px);
+        }
+
+        .array-box.is-done {
+            outline: 1.5px solid rgba(52, 211, 153, 0.72);
+            outline-offset: 1px;
+        }
+
+        .array-box.is-empty-slot {
+            opacity: 0.34;
+            border-style: dashed;
+        }
+
+        /* Liquid transparent glass proportional bar */
+        .array-bar {
+            position: relative;
+            overflow: hidden;
+            background: linear-gradient(180deg, rgba(186, 230, 253, 0.56) 0%, rgba(56, 189, 248, 0.28) 55%, rgba(14, 116, 144, 0.16) 100%);
+            backdrop-filter: blur(12px) saturate(175%);
+            -webkit-backdrop-filter: blur(12px) saturate(175%);
+            border: 1px solid rgba(255, 255, 255, 0.45);
+            border-top: 2px solid rgba(255, 255, 255, 0.8);
+            box-shadow:
+                0 8px 20px rgba(2, 6, 23, 0.28),
+                inset 0 1px 2px rgba(255, 255, 255, 0.55);
+            transition: height 0.28s cubic-bezier(0.22, 1, 0.36, 1), background 0.25s ease, border-color 0.25s ease, opacity 0.2s ease, box-shadow 0.25s ease;
+        }
+
+        .array-bar::before {
+            content: '';
+            position: absolute;
+            top: 2px;
+            left: 10%;
+            width: 20%;
+            bottom: 2px;
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.46) 0%, rgba(255, 255, 255, 0.06) 100%);
+            border-radius: 999px;
+            pointer-events: none;
+        }
+
+        .array-bar.is-left {
+            outline: 2px solid rgba(56, 189, 248, 0.92);
+            outline-offset: 2px;
+        }
+
+        .array-bar.is-right {
+            outline: 2px solid rgba(251, 113, 133, 0.92);
+            outline-offset: 2px;
+        }
+
+        .array-bar.is-done {
+            outline: 1.5px solid rgba(52, 211, 153, 0.65);
+            outline-offset: 1px;
+        }
+
+        .array-bar.is-empty-slot {
+            opacity: 0.24;
+            border-style: dashed;
+        }
+
+        /* Floating animated liquid-glass ghosts */
+        .flying-ghost {
+            position: absolute;
+            pointer-events: none;
+            z-index: 40;
+            will-change: transform, opacity;
+            overflow: hidden;
+            backdrop-filter: blur(18px) saturate(180%);
+            -webkit-backdrop-filter: blur(18px) saturate(180%);
+        }
+
+        .ghost-temp-box {
+            border: 1.5px solid rgba(254, 240, 138, 0.95);
+            box-shadow:
+                0 18px 36px rgba(245, 158, 11, 0.42),
+                0 0 28px rgba(251, 191, 36, 0.52),
+                inset 0 1px 2px rgba(255, 255, 255, 0.65);
+        }
+
+        .ghost-move-box {
+            border: 1.5px solid rgba(255, 228, 230, 0.95);
+            box-shadow:
+                0 18px 36px rgba(244, 63, 94, 0.42),
+                0 0 28px rgba(251, 113, 133, 0.52),
+                inset 0 1px 2px rgba(255, 255, 255, 0.65);
+        }
+
+        .ghost-temp-bar {
+            border: 1.5px solid rgba(254, 249, 195, 0.95);
+            border-top: 2px solid #ffffff;
+            box-shadow: 0 14px 32px rgba(245, 158, 11, 0.46), 0 0 24px rgba(251, 191, 36, 0.48);
+        }
+
+        .ghost-move-bar {
+            border: 1.5px solid rgba(255, 228, 230, 0.95);
+            border-top: 2px solid #ffffff;
+            box-shadow: 0 14px 32px rgba(244, 63, 94, 0.46), 0 0 24px rgba(251, 113, 133, 0.48);
+        }
+
+        /* Code panel with exact 4-space indentation */
+        .code-scroll {
+            max-height: 520px;
+            overflow-y: auto;
+            overflow-x: auto;
+            scrollbar-width: thin;
+            scrollbar-color: rgba(125, 211, 252, 0.4) rgba(15, 23, 42, 0.35);
+        }
+
+        .code-scroll::-webkit-scrollbar {
+            width: 7px;
+            height: 7px;
+        }
+
+        .code-scroll::-webkit-scrollbar-track {
+            background: rgba(15, 23, 42, 0.35);
+            border-radius: 999px;
+        }
+
+        .code-scroll::-webkit-scrollbar-thumb {
+            background: rgba(125, 211, 252, 0.38);
+            border-radius: 999px;
+            border: 1px solid rgba(255, 255, 255, 0.12);
+        }
+
+        .code-scroll::-webkit-scrollbar-thumb:hover {
+            background: rgba(125, 211, 252, 0.62);
+        }
+
+        @media (min-width: 1280px) {
+            .code-scroll {
+                max-height: none;
+            }
+        }
+
+        .code-line {
+            display: flex;
+            align-items: baseline;
+            padding: 2px 12px;
+            border-left: 3px solid transparent;
+            transition: background-color 0.16s ease, border-color 0.16s ease;
+            white-space: pre;
+            font-size: 12.5px;
+            line-height: 1.62;
+        }
+
+        .code-line.active-line {
+            background: linear-gradient(90deg, rgba(56, 189, 248, 0.24), rgba(99, 102, 241, 0.08));
+            border-left-color: #38bdf8;
+            box-shadow: inset 0 0 14px rgba(56, 189, 248, 0.14);
+        }
+
+        .code-ln {
+            width: 32px;
+            flex-shrink: 0;
+            text-align: right;
+            padding-right: 12px;
+            color: rgba(148, 163, 184, 0.55);
+            user-select: none;
+        }
+
+        .code-line.active-line .code-ln {
+            color: #7dd3fc;
+            font-weight: 700;
+        }
+
+        .code-text {
+            white-space: pre;
+            tab-size: 4;
+        }
+
+        /* Syntax highlight tokens */
+        .tok-kw { color: #c084fc; font-weight: 600; }
+        .tok-type { color: #38bdf8; }
+        .tok-num { color: #fbbf24; }
+        .tok-str { color: #34d399; }
+        .tok-cmt { color: #64748b; font-style: italic; }
+        .tok-fn { color: #93c5fd; }
+
+        /* Range scrubber */
+        input[type="range"].glass-slider {
+            -webkit-appearance: none;
+            appearance: none;
+            background: rgba(148, 163, 184, 0.24);
+            height: 6px;
+            border-radius: 999px;
+            outline: none;
+        }
+
+        input[type="range"].glass-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 16px;
+            height: 16px;
+            border-radius: 999px;
+            background: linear-gradient(135deg, #7dd3fc, #818cf8);
+            border: 2px solid #ffffff;
+            box-shadow: 0 0 12px rgba(56, 189, 248, 0.6);
+            cursor: pointer;
+        }
+
+        input[type="range"].glass-slider::-moz-range-thumb {
+            width: 16px;
+            height: 16px;
+            border-radius: 999px;
+            background: linear-gradient(135deg, #7dd3fc, #818cf8);
+            border: 2px solid #ffffff;
+            box-shadow: 0 0 12px rgba(56, 189, 248, 0.6);
+            cursor: pointer;
+        }
+
+        @keyframes pulseGlow {
+            0%, 100% { box-shadow: 0 0 14px rgba(251, 191, 36, 0.35); }
+            50% { box-shadow: 0 0 26px rgba(251, 191, 36, 0.68); }
+        }
+
+        .temp-dock-active {
+            animation: pulseGlow 1.6s ease-in-out infinite;
+        }
+    </style>
+</head>
+<body class="antialiased selection:bg-sky-400/30 selection:text-sky-100">
+    <div class="max-w-[1440px] mx-auto px-3 sm:px-5 py-3.5 space-y-3.5">
+
+        <!-- 1. TOP STICKY FROSTED-GLASS PLAYBACK DECK -->
+        <header class="glass-panel rounded-2xl px-4 py-3 space-y-2.5 sticky top-2 z-50">
+            <!-- Row 1: Title | Playback Controls | Speed & Audio -->
+            <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3">
+                <!-- Left: Icon + Title + Subtitle -->
+                <div class="flex items-center gap-3 min-w-0">
+                    <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-cyan-400 via-indigo-500 to-fuchsia-500 flex items-center justify-center text-slate-950 font-extrabold text-lg shadow-lg shadow-sky-500/20 shrink-0">
+                        ⇄
+                    </div>
+                    <div class="min-w-0">
+                        <h1 class="text-base sm:text-lg font-bold tracking-tight bg-gradient-to-r from-white via-sky-100 to-fuchsia-200 bg-clip-text text-transparent truncate">
+                            Rotate Array Left or Right (Unified Method)
+                        </h1>
+                        <p class="text-[11px] text-slate-400 flex items-center gap-1.5 truncate">
+                            <span class="w-1.5 h-1.5 rounded-full bg-cyan-400 shrink-0"></span>
+                            <span>rotate(arr, k, boolean right) • Converts Right via k = n - k • O(N) Time • O(1) Space</span>
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Center: Grouped Glass Playback Buttons -->
+                <div class="glass-pill rounded-xl p-1 flex flex-wrap items-center gap-1.5 self-start lg:self-auto">
+                    <button id="btnReset" class="glass-btn px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-200 flex items-center gap-1.5" title="Reset to Step 1">
+                        <span>↺</span><span>Reset</span>
+                    </button>
+                    <button id="btnPrev" class="glass-btn px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-200 flex items-center gap-1.5" title="Previous Step (Left Arrow)">
+                        <span>⏮</span><span>Previous</span>
+                    </button>
+                    <button id="btnPlayPause" class="glass-btn glass-btn-primary px-4 py-1.5 rounded-lg text-xs font-bold text-white flex items-center gap-1.5 min-w-[88px] justify-center" title="Start / Stop (Space)">
+                        <span id="playIcon">▶</span><span id="playLabel">Start</span>
+                    </button>
+                    <button id="btnNext" class="glass-btn px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-200 flex items-center gap-1.5" title="Next Step (Right Arrow)">
+                        <span>Next</span><span>⏭</span>
+                    </button>
+                </div>
+
+                <!-- Right: Speed Multipliers + Audio Toggle -->
+                <div class="flex items-center gap-2 self-start lg:self-auto">
+                    <div class="glass-pill rounded-xl px-2 py-1 flex items-center gap-1 text-xs">
+                        <span class="text-slate-400 text-[11px] mr-1">⏱ Speed</span>
+                        <button data-speed="0.5" class="speed-btn px-2 py-0.5 rounded-md font-mono-code text-slate-300 hover:text-white transition">0.5x</button>
+                        <button data-speed="1" class="speed-btn px-2 py-0.5 rounded-md font-mono-code transition glass-btn-active">1x</button>
+                        <button data-speed="2" class="speed-btn px-2 py-0.5 rounded-md font-mono-code text-slate-300 hover:text-white transition">2x</button>
+                        <button data-speed="4" class="speed-btn px-2 py-0.5 rounded-md font-mono-code text-slate-300 hover:text-white transition">4x</button>
+                    </div>
+                    <button id="btnAudio" class="glass-btn w-9 h-9 rounded-xl flex items-center justify-center text-sm text-slate-200" title="Toggle Audio Cues">
+                        <span id="audioIcon">🔊</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Row 2: Live Status Pills + Full-Width Timeline Scrubber -->
+            <div class="flex flex-wrap sm:flex-nowrap items-center gap-2 pt-2 border-t border-white/10">
+                <span id="badgeStep" class="px-2.5 py-1 rounded-lg text-[11px] font-mono-code font-semibold bg-sky-500/15 text-sky-300 border border-sky-400/30 shrink-0">
+                    Step: 1 / 1
+                </span>
+                <span id="phaseBadge" class="px-2.5 py-1 rounded-lg text-[11px] font-mono-code font-semibold bg-cyan-500/15 text-cyan-200 border border-cyan-400/30 shrink-0">
+                    main() Start
+                </span>
+                <span id="badgeDirTop" class="px-2.5 py-1 rounded-lg text-[11px] font-mono-code font-semibold bg-purple-500/15 text-purple-300 border border-purple-400/30 shrink-0">
+                    right = true (k: —)
+                </span>
+                <span id="badgeOutputTop" class="px-2.5 py-1 rounded-lg text-[11px] font-mono-code font-semibold bg-slate-800/80 text-slate-300 border border-white/10 shrink-0">
+                    Output: Pending
+                </span>
+                <div class="flex-1 min-w-[140px] flex items-center pl-1">
+                    <input id="stepSlider" type="range" min="0" max="0" value="0" class="glass-slider w-full" />
+                </div>
+            </div>
+        </header>
+
+        <!-- 2. COMPACT TEST CASES & CUSTOM INPUT BAR (Includes boolean right selector) -->
+        <section class="glass-panel rounded-2xl px-4 py-2.5 space-y-2">
+            <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-2.5">
+                <div class="flex flex-wrap items-center gap-2.5">
+                    <span class="text-[11px] font-bold uppercase tracking-wider text-cyan-300 flex items-center gap-1.5 shrink-0">
+                        <span>🧪</span><span>TEST CASES:</span>
+                    </span>
+                    <select id="presetSelect" class="glass-pill rounded-xl px-3 py-1.5 text-xs text-slate-100 bg-slate-900/90 outline-none focus:border-sky-400 min-w-[240px]">
+                        <option value="0">1: Right by 2 (right = true): [1,2,3,4,5] → [4,5,1,2,3]</option>
+                        <option value="1">2: Left by 2 (right = false): [1,2,3,4,5] → [3,4,5,1,2]</option>
+                        <option value="2">3: Right by 3 (right = true): [1..7] → [5,6,7,1,2,3,4]</option>
+                        <option value="3">4: Left by 3 (right = false): [1..7] → [4,5,6,7,1,2,3]</option>
+                        <option value="4">5: Wrap k &gt; n Right: [10,20,30,40], k = 6, right = true</option>
+                        <option value="5">6: Wrap k &gt; n Left: [10,20,30,40], k = 6, right = false</option>
+                        <option value="6">7: Right k = 0 Edge Case: [5,8,2,9], k = 0, right = true</option>
+                        <option value="7">8: Empty Guard (n = 0): [], k = 3, right = true</option>
+                        <option value="8">9: Negatives Right: [-1,-100,3,99], k = 1, right = true</option>
+                        <option value="9">10: Six Elements Left: [-5,0,7,-2,4,9], k = 4, right = false</option>
+                    </select>
+                </div>
+
+                <div class="flex flex-wrap items-center gap-2">
+                    <span class="text-xs font-mono-code text-slate-400">arr:</span>
+                    <input id="customArrInput" type="text" placeholder="1, 2, 3, 4, 5" class="glass-pill rounded-xl px-2.5 py-1.5 text-xs font-mono-code text-slate-100 w-32 sm:w-40 outline-none focus:border-sky-400" />
+                    <span class="text-xs font-mono-code text-slate-400">k:</span>
+                    <input id="customKInput" type="number" min="0" max="999" value="2" class="glass-pill rounded-xl px-2 py-1.5 text-xs font-mono-code text-slate-100 w-14 outline-none focus:border-sky-400" />
+                    <span class="text-xs font-mono-code text-slate-400">right:</span>
+                    <select id="customRightInput" class="glass-pill rounded-xl px-2.5 py-1.5 text-xs font-mono-code text-slate-100 bg-slate-900/90 outline-none focus:border-sky-400">
+                        <option value="true">true (Right ↻)</option>
+                        <option value="false">false (Left ↺)</option>
+                    </select>
+                    <button id="btnLoadCustom" class="glass-btn px-3.5 py-1.5 rounded-xl text-xs font-semibold text-sky-200">
+                        Run rotate
+                    </button>
+                </div>
+            </div>
+            <div id="errorBanner" class="hidden rounded-xl px-3 py-1.5 text-xs font-medium bg-rose-500/20 border border-rose-400/40 text-rose-200"></div>
+        </section>
+
+        <!-- 3. MAIN WORKSPACE: LEFT (5 KPI CARDS + STAGE) & RIGHT (HEIGHT-MATCHED CODE CARD) -->
+        <main class="grid grid-cols-1 xl:grid-cols-12 gap-4 items-stretch">
+
+            <!-- LEFT COLUMN -->
+            <section class="xl:col-span-7 flex flex-col gap-3.5">
+
+                <!-- 5-CARD LIVE TELEMETRY ROW -->
+                <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2.5">
+                    <div class="glass-panel rounded-xl p-3 flex flex-col justify-between border border-amber-400/25">
+                        <div class="flex items-center justify-between text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                            <span>ACTIVE CALL</span>
+                            <span class="w-2 h-2 rounded-full bg-amber-400"></span>
+                        </div>
+                        <div id="kpiActiveCall" class="font-mono-code text-base font-bold text-amber-300 mt-1 truncate">main()</div>
+                        <div id="kpiActiveCallSub" class="text-[10px] font-mono-code text-slate-400 mt-0.5 truncate">Stack depth: 1</div>
+                    </div>
+
+                    <div class="glass-panel rounded-xl p-3 flex flex-col justify-between border border-sky-400/20">
+                        <div class="flex items-center justify-between text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                            <span>DIRECTION &amp; K</span>
+                            <span class="text-sky-400 text-xs">⇄</span>
+                        </div>
+                        <div id="kpiDirK" class="font-mono-code text-base font-bold text-sky-300 mt-1 truncate">Right · k=2</div>
+                        <div id="kpiDirKSub" class="text-[10px] font-mono-code text-slate-400 mt-0.5 truncate">right = true</div>
+                    </div>
+
+                    <div class="glass-panel rounded-xl p-3 flex flex-col justify-between border border-purple-400/20">
+                        <div class="flex items-center justify-between text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                            <span>POINTERS</span>
+                            <span class="text-purple-400 text-xs">⚡</span>
+                        </div>
+                        <div id="kpiPointers" class="font-mono-code text-base font-bold text-purple-300 mt-1">— / —</div>
+                        <div id="kpiPointersSub" class="text-[10px] font-mono-code text-slate-400 mt-0.5 truncate">left / right</div>
+                    </div>
+
+                    <div class="glass-panel rounded-xl p-3 flex flex-col justify-between border border-cyan-400/20">
+                        <div class="flex items-center justify-between text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                            <span>TEMP / SWAPS</span>
+                            <span class="text-cyan-400 text-xs">+</span>
+                        </div>
+                        <div id="kpiTemp" class="font-mono-code text-base font-bold text-cyan-200 mt-1">—</div>
+                        <div id="kpiTempSub" class="text-[10px] font-mono-code text-slate-400 mt-0.5 truncate">Swaps: 0</div>
+                    </div>
+
+                    <div class="glass-panel rounded-xl p-3 flex flex-col justify-between border border-emerald-400/20 col-span-2 sm:col-span-1">
+                        <div class="flex items-center justify-between text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                            <span>SYSTEM.OUT</span>
+                            <span class="text-emerald-400 font-mono-code text-[11px]">&gt;_</span>
+                        </div>
+                        <div id="kpiStdout" class="font-mono-code text-sm font-bold text-slate-200 mt-1 truncate">pending</div>
+                        <div id="kpiStdoutSub" class="text-[10px] font-mono-code text-emerald-300/80 mt-0.5 truncate">rotate(arr, 2, true)</div>
+                    </div>
+                </div>
+
+                <!-- MAIN UNIFIED VISUALIZATION CARD -->
+                <div id="stageContainer" class="glass-panel rounded-2xl p-4 space-y-3 relative overflow-hidden">
+                    <!-- Card Header + Compact Legend + View Mode Toggle -->
+                    <div class="flex flex-wrap items-center justify-between gap-2">
+                        <div class="flex items-center gap-2">
+                            <span class="text-cyan-400 text-sm">❖</span>
+                            <h2 class="text-xs font-bold uppercase tracking-wider text-slate-100">
+                                Unified Left / Right Reversal Stage
+                            </h2>
+                        </div>
+
+                        <div class="flex flex-wrap items-center gap-3">
+                            <div class="hidden sm:flex items-center gap-2.5 text-[10px] text-slate-300">
+                                <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-sm bg-sky-400"></span>left</span>
+                                <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-sm bg-rose-400"></span>right</span>
+                                <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-sm bg-amber-400"></span>temp</span>
+                                <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-sm bg-indigo-400"></span>range</span>
+                                <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-sm bg-emerald-400"></span>done</span>
+                            </div>
+                            <div class="glass-pill rounded-lg p-0.5 flex items-center gap-0.5 text-[11px]">
+                                <button data-view="both" class="view-btn px-2 py-0.5 rounded-md font-medium transition glass-btn-active">Bars + Boxes</button>
+                                <button data-view="boxes" class="view-btn px-2 py-0.5 rounded-md font-medium transition text-slate-300">Boxes</button>
+                                <button data-view="bars" class="view-btn px-2 py-0.5 rounded-md font-medium transition text-slate-300">Bars</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Direction Conversion Ribbon (Shows right=true k = n - k vs right=false) -->
+                    <div id="conversionBanner" class="glass-subcard rounded-xl px-3 py-2 flex flex-wrap items-center justify-between gap-2 text-[11px] font-mono-code">
+                        <div class="flex items-center gap-2">
+                            <span id="dirIconBadge" class="px-2 py-0.5 rounded-md bg-fuchsia-500/20 border border-fuchsia-400/40 text-fuchsia-200 font-bold">
+                                right = true (↻ Right)
+                            </span>
+                            <span id="conversionFormula" class="text-slate-300">
+                                Waiting for k %= n and direction check...
+                            </span>
+                        </div>
+                        <span id="effectiveKBadge" class="px-2 py-0.5 rounded-md bg-sky-500/15 border border-sky-400/35 text-sky-200">
+                            Effective left-k: —
+                        </span>
+                    </div>
+
+                    <!-- Compact 3-Stage Unified Reversal Strip -->
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                        <div id="stageCard1" class="rounded-xl px-3 py-2 border border-white/10 bg-white/5 transition-all">
+                            <div class="flex items-center justify-between text-[10px] font-semibold">
+                                <span class="text-sky-300">Step 1 · First k</span>
+                                <span id="stageStatus1" class="text-slate-400">Pending</span>
+                            </div>
+                            <div id="stageCall1" class="font-mono-code text-[11px] text-slate-200 mt-0.5">reverse(arr, 0, k - 1)</div>
+                        </div>
+                        <div id="stageCard2" class="rounded-xl px-3 py-2 border border-white/10 bg-white/5 transition-all">
+                            <div class="flex items-center justify-between text-[10px] font-semibold">
+                                <span class="text-indigo-300">Step 2 · Remaining</span>
+                                <span id="stageStatus2" class="text-slate-400">Pending</span>
+                            </div>
+                            <div id="stageCall2" class="font-mono-code text-[11px] text-slate-200 mt-0.5">reverse(arr, k, n - 1)</div>
+                        </div>
+                        <div id="stageCard3" class="rounded-xl px-3 py-2 border border-white/10 bg-white/5 transition-all">
+                            <div class="flex items-center justify-between text-[10px] font-semibold">
+                                <span class="text-emerald-300">Step 3 · Entire Array</span>
+                                <span id="stageStatus3" class="text-slate-400">Pending</span>
+                            </div>
+                            <div id="stageCall3" class="font-mono-code text-[11px] text-slate-200 mt-0.5">reverse(arr, 0, n - 1)</div>
+                        </div>
+                    </div>
+
+                    <!-- Inner Dark Stage Canvas (Overhead Swap Airspace + Bars Inside Boxes) -->
+                    <div id="visualCanvas" class="glass-subcard rounded-xl relative pt-16 pb-3.5 px-3 select-none overflow-hidden">
+                        <!-- SVG Overlay for Curved Trajectory Arcs -->
+                        <svg id="arcOverlay" class="absolute inset-0 w-full h-full pointer-events-none z-30" xmlns="http://www.w3.org/2000/svg">
+                            <defs>
+                                <marker id="arrowAmber" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                                    <path d="M 0 1 L 10 5 L 0 9 z" fill="#fbbf24" />
+                                </marker>
+                                <marker id="arrowRose" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                                    <path d="M 0 1 L 10 5 L 0 9 z" fill="#fb7185" />
+                                </marker>
+                                <marker id="arrowEmerald" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                                    <path d="M 0 1 L 10 5 L 0 9 z" fill="#34d399" />
+                                </marker>
+                            </defs>
+                            <g id="arcGroup"></g>
+                        </svg>
+
+                        <!-- Floating Ghost Layer -->
+                        <div id="ghostLayer" class="absolute inset-0 pointer-events-none z-40"></div>
+
+                        <!-- Overhead Temp Rail Label -->
+                        <div id="tempRailLabel" class="absolute top-2 left-3 right-3 flex items-center justify-between text-[10px] font-mono-code text-slate-400">
+                            <span>▲ Overhead Swap Airspace (temp &amp; over-the-top movement)</span>
+                            <span id="tempAirStatus" class="px-2 py-0.5 rounded-full bg-amber-400/15 border border-amber-400/35 text-amber-200 hidden">
+                                temp holding value
+                            </span>
+                        </div>
+
+                        <!-- Empty Array Guard State -->
+                        <div id="emptyArrayState" class="hidden py-10 text-center">
+                            <div class="inline-flex flex-col items-center gap-1.5 glass-pill px-5 py-3.5 rounded-xl">
+                                <span class="text-xl">∅</span>
+                                <span class="font-mono-code text-xs text-amber-300 font-semibold">int[] arr = new int[0]</span>
+                                <span class="text-[11px] text-slate-300">Empty array — <code class="text-sky-300">if (n == 0) return;</code> prevents division by zero.</span>
+                            </div>
+                        </div>
+
+                        <!-- Shared Track Header -->
+                        <div id="trackHeader" class="flex items-center justify-between text-[10px] text-slate-400 mb-2 px-1">
+                            <span id="trackModeLabel" class="font-semibold uppercase tracking-wider">int[] arr — Liquid Glass Bars Inside Boxes</span>
+                            <span id="activeRangeLabel" class="font-mono-code text-indigo-300">Active range: —</span>
+                        </div>
+
+                        <!-- COMBINED: PROPORTIONAL LIQUID BARS INSIDE TRANSPARENT GLASSY BOXES -->
+                        <div id="combinedSection">
+                            <div id="combinedGrid" class="flex items-stretch justify-center gap-2 sm:gap-3 px-2 py-3 rounded-xl bg-slate-950/45 border border-white/10"></div>
+                        </div>
+
+                        <!-- BARS ONLY TRACK -->
+                        <div id="barsSection" class="hidden">
+                            <div id="barsGrid" class="flex items-end justify-center gap-2 sm:gap-2.5 h-44 px-2 pt-3 pb-1 rounded-xl bg-slate-950/45 border border-white/10"></div>
+                        </div>
+
+                        <!-- BOXES ONLY TRACK -->
+                        <div id="boxesSection" class="hidden">
+                            <div id="boxesGrid" class="flex items-stretch justify-center gap-2 sm:gap-2.5 px-2 py-3 rounded-xl bg-slate-950/45 border border-white/10"></div>
+                        </div>
+                    </div>
+
+                    <!-- Bottom Row Inside Stage Card: Call Stack & Console + Live Info Narration -->
+                    <div class="grid grid-cols-1 md:grid-cols-12 gap-3">
+                        <div class="md:col-span-5 glass-subcard rounded-xl p-3 space-y-2">
+                            <div class="flex items-center justify-between text-[11px] font-mono-code">
+                                <span class="text-amber-300 font-semibold flex items-center gap-1.5">
+                                    <span>▤</span><span>Call Stack &amp; Console</span>
+                                </span>
+                                <span id="ioStdout" class="text-emerald-300 truncate max-w-[140px]">stdout: —</span>
+                            </div>
+                            <div id="callStackChips" class="flex flex-wrap items-center gap-1.5 font-mono-code text-[11px]"></div>
+                            <div id="ioStdin" class="text-[10px] font-mono-code text-slate-400 truncate">stdin: 5 2 true | 1 2 3 4 5</div>
+                        </div>
+
+                        <div class="md:col-span-7 glass-subcard rounded-xl p-3 flex items-center gap-2.5">
+                            <span class="w-5 h-5 rounded-full bg-sky-400/20 border border-sky-400/40 text-sky-300 flex items-center justify-center text-[11px] font-bold shrink-0">i</span>
+                            <p id="stepNarration" class="text-xs font-mono-code text-sky-200 leading-relaxed">
+                                Press Start or Next to trace Main.main() and rotate(arr, k, right).
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- RIGHT COLUMN: HEIGHT-LOCKED SCROLLABLE JAVA CODE CARD WITH FOOTER NARRATION -->
+            <div class="xl:col-span-5 xl:relative">
+                <aside class="xl:absolute xl:inset-0 glass-panel rounded-2xl overflow-hidden flex flex-col">
+                    <!-- Code Header -->
+                    <div class="px-4 py-2.5 border-b border-white/10 flex items-center justify-between gap-2 bg-slate-950/45 shrink-0">
+                        <div class="flex items-center gap-2">
+                            <span class="w-2.5 h-2.5 rounded-full bg-rose-400/90"></span>
+                            <span class="w-2.5 h-2.5 rounded-full bg-amber-400/90"></span>
+                            <span class="w-2.5 h-2.5 rounded-full bg-emerald-400/90"></span>
+                            <span class="font-mono-code text-xs font-semibold text-slate-200 ml-1">Main.java</span>
+                        </div>
+                        <span id="activeFrameBadge" class="px-2.5 py-0.5 rounded-lg font-mono-code text-[11px] bg-sky-500/15 text-sky-300 border border-sky-400/35">
+                            Frame: main()
+                        </span>
+                    </div>
+
+                    <!-- Scrollable Code Body -->
+                    <div id="codeContainer" class="code-scroll relative flex-1 min-h-0 py-2 font-mono-code bg-[#070d19]/80"></div>
+
+                    <!-- Code Card Footer Narration -->
+                    <div class="px-4 py-2.5 border-t border-white/10 bg-slate-950/55 flex items-center gap-2 shrink-0">
+                        <span class="w-4 h-4 rounded-full bg-sky-400/20 border border-sky-400/40 text-sky-300 flex items-center justify-center text-[10px] font-bold shrink-0">i</span>
+                        <span id="codeFooterNarration" class="text-[11px] font-mono-code text-sky-200 truncate">
+                            Entered main(String[] args).
+                        </span>
+                    </div>
+                </aside>
+            </div>
+        </main>
+
+        <!-- 4. BOTTOM DOSSIER: 2-COLUMN PROBLEM STATEMENT & COMPLEXITY ANALYSIS -->
+        <section class="grid grid-cols-1 lg:grid-cols-2 gap-4 pb-6">
+            <!-- Left: Problem Statement -->
+            <article class="glass-panel rounded-2xl p-5 space-y-3">
+                <div class="flex flex-wrap items-center justify-between gap-2">
+                    <div class="flex items-center gap-2">
+                        <span class="text-amber-400 text-sm">📄</span>
+                        <h2 class="text-sm font-bold text-amber-300">Problem Statement</h2>
+                        <span class="px-2 py-0.5 rounded-md text-[10px] font-semibold bg-emerald-500/15 text-emerald-300 border border-emerald-400/30">
+                            Unified Left / Right
+                        </span>
+                    </div>
+                    <span class="text-[11px] font-mono-code text-slate-400">Arrays • Two Pointers • Reversal</span>
+                </div>
+
+                <p class="text-xs sm:text-sm text-slate-200 leading-relaxed">
+                    Implement a <strong>single method</strong> <code class="font-mono-code text-sky-300">rotate(int[] arr, int k, boolean right)</code> that rotates an integer array either <strong>left</strong> (<code class="font-mono-code text-cyan-300">right = false</code>) or <strong>right</strong> (<code class="font-mono-code text-fuchsia-300">right = true</code>) by <code class="font-mono-code text-sky-300">k</code> positions in-place without duplicating the reversal logic.
+                </p>
+                <ul class="text-xs text-slate-300 space-y-1 font-mono-code">
+                    <li>• Normalize steps: k %= n</li>
+                    <li>• If right == true: convert via k = n - k</li>
+                    <li>• Execute left-rotation 3-step reversal: [0..k-1], [k..n-1], [0..n-1]</li>
+                </ul>
+
+                <div class="glass-subcard rounded-xl p-3 grid grid-cols-1 sm:grid-cols-2 gap-2 text-[11px] font-mono-code text-slate-300">
+                    <div>rotate([1,2,3,4,5], 2, <span class="text-cyan-300">false</span>)</div>
+                    <div>→ <span class="text-emerald-300">[3, 4, 5, 1, 2]</span> (Left by 2)</div>
+                    <div>rotate([1,2,3,4,5], 2, <span class="text-fuchsia-300">true</span>)</div>
+                    <div>→ <span class="text-emerald-300">[4, 5, 1, 2, 3]</span> (Right by 2 = Left by 3)</div>
+                </div>
+            </article>
+
+            <!-- Right: Algorithm Summary & Complexity Analysis -->
+            <article class="glass-panel rounded-2xl p-5 space-y-3">
+                <div class="flex flex-wrap items-center justify-between gap-2">
+                    <div class="flex items-center gap-2">
+                        <span class="text-cyan-400 text-sm">🧠</span>
+                        <h2 class="text-sm font-bold text-cyan-300">Algorithm Summary &amp; Complexity Analysis</h2>
+                    </div>
+                    <span class="px-2.5 py-0.5 rounded-md text-[11px] font-mono-code bg-sky-500/15 text-sky-300 border border-sky-400/30">
+                        O(N) Time • O(1) Space
+                    </span>
+                </div>
+
+                <!-- Purple Highlight Callout Box -->
+                <div class="rounded-xl p-3.5 bg-purple-500/10 border border-purple-400/30 space-y-1.5">
+                    <div class="text-xs font-bold text-purple-300 flex items-center gap-1.5">
+                        <span>✂</span><span>Why Converting Right Rotation by k to Left Rotation by (n - k) Works:</span>
+                    </div>
+                    <p class="text-xs text-slate-200 leading-relaxed">
+                        On a circular array of length <code class="font-mono-code text-purple-200">n</code>, shifting every element <strong>right by k</strong> lands each element at the exact same index as shifting <strong>left by (n - k)</strong>. After normalizing <code class="font-mono-code text-sky-300">k %= n</code> and applying <code class="font-mono-code text-fuchsia-300">if (right) k = n - k;</code>, the exact same 3 left-rotation reversals handle both directions cleanly!
+                    </p>
+                </div>
+
+                <!-- Bottom 2 Complexity Subcards -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div class="glass-subcard rounded-xl p-3">
+                        <div class="text-[10px] font-bold uppercase tracking-wider text-slate-400">TIME COMPLEXITY</div>
+                        <div class="font-mono-code text-base font-bold text-emerald-400 mt-0.5">O(N)</div>
+                        <div class="text-[11px] text-slate-400 mt-0.5">
+                            Direction conversion is O(1); each element is swapped at most twice across the 3 reversals.
+                        </div>
+                    </div>
+                    <div class="glass-subcard rounded-xl p-3">
+                        <div class="text-[10px] font-bold uppercase tracking-wider text-slate-400">AUXILIARY SPACE</div>
+                        <div class="font-mono-code text-base font-bold text-sky-400 mt-0.5">O(1)</div>
+                        <div class="text-[11px] text-slate-400 mt-0.5">
+                            In-place two-pointer swaps using only scalar variables (<code class="font-mono-code text-slate-300">left</code>, <code class="font-mono-code text-slate-300">right</code>, <code class="font-mono-code text-slate-300">temp</code>).
+                        </div>
+                    </div>
+                </div>
+            </article>
+        </section>
+    </div>
+
+    <script>
+        /* =========================================================================
+           1. EXACT JAVA SOURCE CODE (4-Space Indentation, Strict Line Numbers)
+           ========================================================================= */
+        const JAVA_CODE_LINES = [
+            'import java.util.*;',
+            '',
+            'public class Main {',
+            '',
+            '    static void reverse(int[] arr, int left, int right) {',
+            '',
+            '        while (left < right) {',
+            '            int temp = arr[left];',
+            '            arr[left] = arr[right];',
+            '            arr[right] = temp;',
+            '',
+            '            left++;',
+            '            right--;',
+            '        }',
+            '    }',
+            '',
+            '    static void rotate(int[] arr, int k, boolean right) {',
+            '',
+            '        int n = arr.length;',
+            '',
+            '        if (n == 0) {',
+            '            return;',
+            '        }',
+            '',
+            '        k %= n;',
+            '',
+            '        if (right) {',
+            '            k = n - k;',
+            '        }',
+            '',
+            '        reverse(arr, 0, k - 1);',
+            '        reverse(arr, k, n - 1);',
+            '        reverse(arr, 0, n - 1);',
+            '    }',
+            '',
+            '    public static void main(String[] args) {',
+            '',
+            '        Scanner sc = new Scanner(System.in);',
+            '',
+            '        int n = sc.nextInt();',
+            '        int k = sc.nextInt();',
+            '        boolean right = sc.nextBoolean();',
+            '',
+            '        int[] arr = new int[n];',
+            '',
+            '        for (int i = 0; i < n; i++) {',
+            '            arr[i] = sc.nextInt();',
+            '        }',
+            '',
+            '        rotate(arr, k, right);',
+            '',
+            '        for (int i = 0; i < n; i++) {',
+            '            System.out.print(arr[i] + " ");',
+            '        }',
+            '',
+            '        sc.close();',
+            '    }',
+            '}'
+        ];
+
+        /* =========================================================================
+           2. UNIQUE LIQUID-GLASS COLOR PALETTE & CURATED TEST PRESETS
+           ========================================================================= */
+        const LIQUID_PALETTE = [
+            { // 0: Liquid Cyan
+                boxBg: 'linear-gradient(160deg, rgba(56, 189, 248, 0.32) 0%, rgba(14, 165, 233, 0.14) 55%, rgba(8, 47, 73, 0.34) 100%)',
+                boxBorder: 'rgba(125, 211, 252, 0.65)',
+                boxGlow: '0 10px 26px rgba(14, 165, 233, 0.28), inset 0 1px 1px rgba(224, 242, 254, 0.55)',
+                barBg: 'linear-gradient(180deg, rgba(125, 211, 252, 0.88) 0%, rgba(14, 165, 233, 0.52) 55%, rgba(3, 105, 161, 0.32) 100%)',
+                barBorder: 'rgba(186, 230, 253, 0.9)',
+                barGlow: '0 0 18px rgba(56, 189, 248, 0.48), inset 0 1px 2px rgba(255, 255, 255, 0.7)'
+            },
+            { // 1: Liquid Violet
+                boxBg: 'linear-gradient(160deg, rgba(167, 139, 250, 0.32) 0%, rgba(139, 92, 246, 0.14) 55%, rgba(46, 16, 101, 0.34) 100%)',
+                boxBorder: 'rgba(196, 181, 253, 0.65)',
+                boxGlow: '0 10px 26px rgba(139, 92, 246, 0.28), inset 0 1px 1px rgba(237, 233, 254, 0.55)',
+                barBg: 'linear-gradient(180deg, rgba(196, 181, 253, 0.88) 0%, rgba(139, 92, 246, 0.52) 55%, rgba(91, 33, 182, 0.32) 100%)',
+                barBorder: 'rgba(221, 214, 254, 0.9)',
+                barGlow: '0 0 18px rgba(167, 139, 250, 0.48), inset 0 1px 2px rgba(255, 255, 255, 0.7)'
+            },
+            { // 2: Liquid Emerald
+                boxBg: 'linear-gradient(160deg, rgba(52, 211, 153, 0.32) 0%, rgba(16, 185, 129, 0.14) 55%, rgba(6, 78, 59, 0.34) 100%)',
+                boxBorder: 'rgba(110, 231, 183, 0.65)',
+                boxGlow: '0 10px 26px rgba(16, 185, 129, 0.28), inset 0 1px 1px rgba(209, 250, 229, 0.55)',
+                barBg: 'linear-gradient(180deg, rgba(110, 231, 183, 0.88) 0%, rgba(16, 185, 129, 0.52) 55%, rgba(4, 120, 87, 0.32) 100%)',
+                barBorder: 'rgba(167, 243, 208, 0.9)',
+                barGlow: '0 0 18px rgba(52, 211, 153, 0.48), inset 0 1px 2px rgba(255, 255, 255, 0.7)'
+            },
+            { // 3: Liquid Amber
+                boxBg: 'linear-gradient(160deg, rgba(251, 191, 36, 0.32) 0%, rgba(245, 158, 11, 0.14) 55%, rgba(69, 26, 3, 0.34) 100%)',
+                boxBorder: 'rgba(253, 224, 71, 0.65)',
+                boxGlow: '0 10px 26px rgba(245, 158, 11, 0.28), inset 0 1px 1px rgba(254, 243, 199, 0.55)',
+                barBg: 'linear-gradient(180deg, rgba(253, 224, 71, 0.88) 0%, rgba(245, 158, 11, 0.52) 55%, rgba(180, 83, 9, 0.32) 100%)',
+                barBorder: 'rgba(254, 240, 138, 0.9)',
+                barGlow: '0 0 18px rgba(251, 191, 36, 0.48), inset 0 1px 2px rgba(255, 255, 255, 0.7)'
+            },
+            { // 4: Liquid Rose
+                boxBg: 'linear-gradient(160deg, rgba(251, 113, 133, 0.32) 0%, rgba(244, 63, 94, 0.14) 55%, rgba(76, 5, 25, 0.34) 100%)',
+                boxBorder: 'rgba(253, 164, 175, 0.65)',
+                boxGlow: '0 10px 26px rgba(244, 63, 94, 0.28), inset 0 1px 1px rgba(255, 228, 230, 0.55)',
+                barBg: 'linear-gradient(180deg, rgba(253, 164, 175, 0.88) 0%, rgba(244, 63, 94, 0.52) 55%, rgba(159, 18, 57, 0.32) 100%)',
+                barBorder: 'rgba(254, 205, 211, 0.9)',
+                barGlow: '0 0 18px rgba(251, 113, 133, 0.48), inset 0 1px 2px rgba(255, 255, 255, 0.7)'
+            },
+            { // 5: Liquid Fuchsia
+                boxBg: 'linear-gradient(160deg, rgba(232, 121, 249, 0.32) 0%, rgba(217, 70, 239, 0.14) 55%, rgba(74, 4, 78, 0.34) 100%)',
+                boxBorder: 'rgba(240, 171, 252, 0.65)',
+                boxGlow: '0 10px 26px rgba(217, 70, 239, 0.28), inset 0 1px 1px rgba(250, 232, 255, 0.55)',
+                barBg: 'linear-gradient(180deg, rgba(240, 171, 252, 0.88) 0%, rgba(217, 70, 239, 0.52) 55%, rgba(134, 25, 143, 0.32) 100%)',
+                barBorder: 'rgba(245, 208, 254, 0.9)',
+                barGlow: '0 0 18px rgba(232, 121, 249, 0.48), inset 0 1px 2px rgba(255, 255, 255, 0.7)'
+            },
+            { // 6: Liquid Teal
+                boxBg: 'linear-gradient(160deg, rgba(45, 212, 191, 0.32) 0%, rgba(20, 184, 166, 0.14) 55%, rgba(4, 47, 46, 0.34) 100%)',
+                boxBorder: 'rgba(94, 234, 212, 0.65)',
+                boxGlow: '0 10px 26px rgba(20, 184, 166, 0.28), inset 0 1px 1px rgba(204, 251, 241, 0.55)',
+                barBg: 'linear-gradient(180deg, rgba(94, 234, 212, 0.88) 0%, rgba(20, 184, 166, 0.52) 55%, rgba(15, 118, 110, 0.32) 100%)',
+                barBorder: 'rgba(153, 246, 228, 0.9)',
+                barGlow: '0 0 18px rgba(45, 212, 191, 0.48), inset 0 1px 2px rgba(255, 255, 255, 0.7)'
+            },
+            { // 7: Liquid Orange
+                boxBg: 'linear-gradient(160deg, rgba(251, 146, 60, 0.32) 0%, rgba(249, 115, 22, 0.14) 55%, rgba(67, 20, 7, 0.34) 100%)',
+                boxBorder: 'rgba(253, 186, 116, 0.65)',
+                boxGlow: '0 10px 26px rgba(249, 115, 22, 0.28), inset 0 1px 1px rgba(255, 237, 213, 0.55)',
+                barBg: 'linear-gradient(180deg, rgba(253, 186, 116, 0.88) 0%, rgba(249, 115, 22, 0.52) 55%, rgba(194, 65, 12, 0.32) 100%)',
+                barBorder: 'rgba(254, 215, 170, 0.9)',
+                barGlow: '0 0 18px rgba(251, 146, 60, 0.48), inset 0 1px 2px rgba(255, 255, 255, 0.7)'
+            },
+            { // 8: Liquid Indigo
+                boxBg: 'linear-gradient(160deg, rgba(129, 140, 248, 0.32) 0%, rgba(99, 102, 241, 0.14) 55%, rgba(30, 27, 75, 0.34) 100%)',
+                boxBorder: 'rgba(165, 180, 252, 0.65)',
+                boxGlow: '0 10px 26px rgba(99, 102, 241, 0.28), inset 0 1px 1px rgba(224, 231, 255, 0.55)',
+                barBg: 'linear-gradient(180deg, rgba(165, 180, 252, 0.88) 0%, rgba(99, 102, 241, 0.52) 55%, rgba(67, 56, 202, 0.32) 100%)',
+                barBorder: 'rgba(199, 210, 254, 0.9)',
+                barGlow: '0 0 18px rgba(129, 140, 248, 0.48), inset 0 1px 2px rgba(255, 255, 255, 0.7)'
+            },
+            { // 9: Liquid Lime
+                boxBg: 'linear-gradient(160deg, rgba(163, 230, 53, 0.30) 0%, rgba(132, 204, 22, 0.14) 55%, rgba(26, 46, 5, 0.34) 100%)',
+                boxBorder: 'rgba(190, 242, 100, 0.65)',
+                boxGlow: '0 10px 26px rgba(132, 204, 22, 0.28), inset 0 1px 1px rgba(236, 252, 203, 0.55)',
+                barBg: 'linear-gradient(180deg, rgba(190, 242, 100, 0.88) 0%, rgba(132, 204, 22, 0.52) 55%, rgba(77, 124, 15, 0.32) 100%)',
+                barBorder: 'rgba(217, 249, 157, 0.9)',
+                barGlow: '0 0 18px rgba(163, 230, 53, 0.48), inset 0 1px 2px rgba(255, 255, 255, 0.7)'
+            },
+            { // 10: Liquid Pink
+                boxBg: 'linear-gradient(160deg, rgba(244, 114, 182, 0.32) 0%, rgba(236, 72, 153, 0.14) 55%, rgba(80, 7, 36, 0.34) 100%)',
+                boxBorder: 'rgba(249, 168, 212, 0.65)',
+                boxGlow: '0 10px 26px rgba(236, 72, 153, 0.28), inset 0 1px 1px rgba(252, 231, 243, 0.55)',
+                barBg: 'linear-gradient(180deg, rgba(249, 168, 212, 0.88) 0%, rgba(236, 72, 153, 0.52) 55%, rgba(157, 23, 77, 0.32) 100%)',
+                barBorder: 'rgba(251, 207, 232, 0.9)',
+                barGlow: '0 0 18px rgba(244, 114, 182, 0.48), inset 0 1px 2px rgba(255, 255, 255, 0.7)'
+            },
+            { // 11: Liquid Blue
+                boxBg: 'linear-gradient(160deg, rgba(96, 165, 250, 0.32) 0%, rgba(59, 130, 246, 0.14) 55%, rgba(23, 37, 84, 0.34) 100%)',
+                boxBorder: 'rgba(147, 197, 253, 0.65)',
+                boxGlow: '0 10px 26px rgba(59, 130, 246, 0.28), inset 0 1px 1px rgba(219, 234, 254, 0.55)',
+                barBg: 'linear-gradient(180deg, rgba(147, 197, 253, 0.88) 0%, rgba(59, 130, 246, 0.52) 55%, rgba(29, 78, 216, 0.32) 100%)',
+                barBorder: 'rgba(191, 219, 254, 0.9)',
+                barGlow: '0 0 18px rgba(96, 165, 250, 0.48), inset 0 1px 2px rgba(255, 255, 255, 0.7)'
+            }
+        ];
+
+        function getLiquidTheme(colorId) {
+            if (colorId === null || colorId === undefined) return null;
+            return LIQUID_PALETTE[Math.abs(colorId) % LIQUID_PALETTE.length];
+        }
+
+        const PRESETS = [
+            { arr: [1, 2, 3, 4, 5], k: 2, right: true },
+            { arr: [1, 2, 3, 4, 5], k: 2, right: false },
+            { arr: [1, 2, 3, 4, 5, 6, 7], k: 3, right: true },
+            { arr: [1, 2, 3, 4, 5, 6, 7], k: 3, right: false },
+            { arr: [10, 20, 30, 40], k: 6, right: true },
+            { arr: [10, 20, 30, 40], k: 6, right: false },
+            { arr: [5, 8, 2, 9], k: 0, right: true },
+            { arr: [], k: 3, right: true },
+            { arr: [-1, -100, 3, 99], k: 1, right: true },
+            { arr: [-5, 0, 7, -2, 4, 9], k: 4, right: false }
+        ];
+
+        /* =========================================================================
+           3. APPLICATION STATE
+           ========================================================================= */
+        let currentInputArr = [...PRESETS[0].arr];
+        let currentInputK = PRESETS[0].k;
+        let currentInputRight = PRESETS[0].right;
+        let steps = [];
+        let stepIndex = 0;
+        let isPlaying = false;
+        let playTimer = null;
+        let speedMultiplier = 1;
+        let viewMode = 'both'; // 'both' | 'boxes' | 'bars'
+        let audioEnabled = true;
+        let audioCtx = null;
+        let activeAnimations = [];
+
+        /* =========================================================================
+           4. DOM ELEMENT REFERENCES
+           ========================================================================= */
+        const el = {
+            badgeDirTop: document.getElementById('badgeDirTop'),
+            badgeStep: document.getElementById('badgeStep'),
+            badgeOutputTop: document.getElementById('badgeOutputTop'),
+            btnReset: document.getElementById('btnReset'),
+            btnPrev: document.getElementById('btnPrev'),
+            btnPlayPause: document.getElementById('btnPlayPause'),
+            playIcon: document.getElementById('playIcon'),
+            playLabel: document.getElementById('playLabel'),
+            btnNext: document.getElementById('btnNext'),
+            btnAudio: document.getElementById('btnAudio'),
+            audioIcon: document.getElementById('audioIcon'),
+            stepSlider: document.getElementById('stepSlider'),
+            presetSelect: document.getElementById('presetSelect'),
+            customArrInput: document.getElementById('customArrInput'),
+            customKInput: document.getElementById('customKInput'),
+            customRightInput: document.getElementById('customRightInput'),
+            btnLoadCustom: document.getElementById('btnLoadCustom'),
+            errorBanner: document.getElementById('errorBanner'),
+            phaseBadge: document.getElementById('phaseBadge'),
+            kpiActiveCall: document.getElementById('kpiActiveCall'),
+            kpiActiveCallSub: document.getElementById('kpiActiveCallSub'),
+            kpiDirK: document.getElementById('kpiDirK'),
+            kpiDirKSub: document.getElementById('kpiDirKSub'),
+            kpiPointers: document.getElementById('kpiPointers'),
+            kpiPointersSub: document.getElementById('kpiPointersSub'),
+            kpiTemp: document.getElementById('kpiTemp'),
+            kpiTempSub: document.getElementById('kpiTempSub'),
+            kpiStdout: document.getElementById('kpiStdout'),
+            kpiStdoutSub: document.getElementById('kpiStdoutSub'),
+            dirIconBadge: document.getElementById('dirIconBadge'),
+            conversionFormula: document.getElementById('conversionFormula'),
+            effectiveKBadge: document.getElementById('effectiveKBadge'),
+            stageCards: [
+                document.getElementById('stageCard1'),
+                document.getElementById('stageCard2'),
+                document.getElementById('stageCard3')
+            ],
+            stageStatuses: [
+                document.getElementById('stageStatus1'),
+                document.getElementById('stageStatus2'),
+                document.getElementById('stageStatus3')
+            ],
+            stageCalls: [
+                document.getElementById('stageCall1'),
+                document.getElementById('stageCall2'),
+                document.getElementById('stageCall3')
+            ],
+            stepNarration: document.getElementById('stepNarration'),
+            codeFooterNarration: document.getElementById('codeFooterNarration'),
+            visualCanvas: document.getElementById('visualCanvas'),
+            arcOverlay: document.getElementById('arcOverlay'),
+            arcGroup: document.getElementById('arcGroup'),
+            ghostLayer: document.getElementById('ghostLayer'),
+            tempAirStatus: document.getElementById('tempAirStatus'),
+            emptyArrayState: document.getElementById('emptyArrayState'),
+            trackHeader: document.getElementById('trackHeader'),
+            trackModeLabel: document.getElementById('trackModeLabel'),
+            combinedSection: document.getElementById('combinedSection'),
+            combinedGrid: document.getElementById('combinedGrid'),
+            barsSection: document.getElementById('barsSection'),
+            barsGrid: document.getElementById('barsGrid'),
+            boxesSection: document.getElementById('boxesSection'),
+            boxesGrid: document.getElementById('boxesGrid'),
+            activeRangeLabel: document.getElementById('activeRangeLabel'),
+            callStackChips: document.getElementById('callStackChips'),
+            ioStdin: document.getElementById('ioStdin'),
+            ioStdout: document.getElementById('ioStdout'),
+            activeFrameBadge: document.getElementById('activeFrameBadge'),
+            codeContainer: document.getElementById('codeContainer')
+        };
+
+        /* =========================================================================
+           5. WEB AUDIO SYNTHESIZER (Zero external sound URLs)
+           ========================================================================= */
+        function initAudio() {
+            if (!audioCtx) {
+                const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+                if (AudioContextClass) {
+                    audioCtx = new AudioContextClass();
+                }
+            }
+            if (audioCtx && audioCtx.state === 'suspended') {
+                audioCtx.resume().catch(() => {});
+            }
+        }
+
+        function playTone(freq = 440, duration = 0.09, type = 'sine', gainPeak = 0.05) {
+            if (!audioEnabled) return;
+            try {
+                initAudio();
+                if (!audioCtx) return;
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = type;
+                osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+                gain.gain.setValueAtTime(0.0001, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(gainPeak, audioCtx.currentTime + 0.015);
+                gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + duration);
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start();
+                osc.stop(audioCtx.currentTime + duration + 0.01);
+            } catch (_) {
+                // Ignore autoplay restrictions silently
+            }
+        }
+
+        /* =========================================================================
+           6. SYNTAX HIGHLIGHTER & CODE PANEL RENDERING
+           ========================================================================= */
+        function escapeHtml(str) {
+            return str
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;');
+        }
+
+        function highlightJavaLine(raw) {
+            const escaped = escapeHtml(raw);
+            if (escaped.trim().startsWith('//')) {
+                return `<span class="tok-cmt">${escaped}</span>`;
+            }
+            const strings = [];
+            let temp = escaped.replace(/"[^"]*"/g, (m) => {
+                const idx = strings.length;
+                strings.push(`<span class="tok-str">${m}</span>`);
+                return `__STR_${idx}__`;
+            });
+
+            temp = temp.replace(
+                /\b(import|public|class|static|void|int|boolean|while|if|return|for|new|true|false)\b/g,
+                '<span class="tok-kw">$1</span>'
+            );
+            temp = temp.replace(
+                /\b(Main|Scanner|String|System)\b/g,
+                '<span class="tok-type">$1</span>'
+            );
+            temp = temp.replace(
+                /\b(reverse|rotate|main|nextInt|nextBoolean|print|close)\b(?=\()/g,
+                '<span class="tok-fn">$1</span>'
+            );
+            temp = temp.replace(/\b(\d+)\b/g, '<span class="tok-num">$1</span>');
+
+            strings.forEach((s, idx) => {
+                temp = temp.replace(`__STR_${idx}__`, s);
+            });
+            return temp;
+        }
+
+        function buildCodePanel() {
+            el.codeContainer.innerHTML = JAVA_CODE_LINES.map((line, i) => {
+                const ln = i + 1;
+                return `<div class="code-line" data-line="${ln}"><span class="code-ln">${ln}</span><span class="code-text">${highlightJavaLine(line) || ' '}</span></div>`;
+            }).join('');
+        }
+
+        function highlightSingleLine(lineNumber) {
+            const rows = el.codeContainer.querySelectorAll('.code-line');
+            rows.forEach((row) => row.classList.remove('active-line'));
+            const activeRow = el.codeContainer.querySelector(`.code-line[data-line="${lineNumber}"]`);
+            if (activeRow) {
+                activeRow.classList.add('active-line');
+                const container = el.codeContainer;
+                const rowTop = activeRow.offsetTop;
+                const rowBottom = rowTop + activeRow.offsetHeight;
+                const viewTop = container.scrollTop;
+                const viewBottom = viewTop + container.clientHeight;
+                if (rowTop < viewTop + 32 || rowBottom > viewBottom - 32) {
+                    container.scrollTo({
+                        top: Math.max(0, rowTop - container.clientHeight / 2 + activeRow.offsetHeight / 2),
+                        behavior: 'smooth'
+                    });
+                }
+            }
+        }
+
+        /* =========================================================================
+           7. STEP TRACE GENERATOR (Strictly ONE Java Line Highlighted per Step)
+           ========================================================================= */
+        function generateSteps(inputArr, inputK, inputRight) {
+            const trace = [];
+            const n = inputArr.length;
+            let k = inputK;
+            let kAfterMod = null;
+            let kConverted = false;
+            let arr = new Array(n).fill(null);
+            let colorIds = new Array(n).fill(null);
+            let printed = [];
+            let stageStates = ['pending', 'pending', 'pending'];
+            let swapsCount = 0;
+
+            function getCallStack(frame) {
+                if (frame === 'main()') return ['main()'];
+                if (frame.startsWith('rotate(')) return ['main()', frame];
+                return ['main()', `rotate(arr, ${k}, ${inputRight})`, frame];
+            }
+
+            function pushStep({
+                line,
+                frame = 'main()',
+                phase = 'Setup',
+                title,
+                narration,
+                range = null,
+                left = null,
+                right = null,
+                temp = null,
+                tempColorId = null,
+                anim = null,
+                isDone = false
+            }) {
+                trace.push({
+                    line,
+                    frame,
+                    stack: getCallStack(frame),
+                    phase,
+                    title,
+                    narration,
+                    arr: [...arr],
+                    colorIds: [...colorIds],
+                    n,
+                    kRaw: inputK,
+                    kCurr: k,
+                    kAfterMod,
+                    kConverted,
+                    dirRight: inputRight,
+                    range: range ? [...range] : null,
+                    left,
+                    right,
+                    temp,
+                    tempColorId,
+                    swapsCount,
+                    anim,
+                    stageStates: [...stageStates],
+                    printed: [...printed],
+                    isDone
+                });
+            }
+
+            // main() — Scanner & reading inputs
+            pushStep({
+                line: 38,
+                frame: 'main()',
+                phase: 'Input',
+                title: 'Open Scanner',
+                narration: 'Initialize Scanner sc to read N, K, boolean right, and the array elements.'
+            });
+
+            pushStep({
+                line: 40,
+                frame: 'main()',
+                phase: 'Input',
+                title: 'Read Array Length n',
+                narration: `Read n = ${n} from input.`
+            });
+
+            pushStep({
+                line: 41,
+                frame: 'main()',
+                phase: 'Input',
+                title: 'Read Rotation Count k',
+                narration: `Read k = ${k} rotation steps from input.`
+            });
+
+            pushStep({
+                line: 42,
+                frame: 'main()',
+                phase: 'Input',
+                title: 'Read Direction Flag right',
+                narration: `Read boolean right = ${inputRight} (${inputRight ? 'Right rotation ↻' : 'Left rotation ↺'}).`
+            });
+
+            arr = new Array(n).fill(0);
+            pushStep({
+                line: 44,
+                frame: 'main()',
+                phase: 'Input',
+                title: 'Allocate int[] arr',
+                narration: `Allocate int[] arr = new int[${n}] initialized with default 0s.`
+            });
+
+            for (let i = 0; i < n; i++) {
+                pushStep({
+                    line: 46,
+                    frame: 'main()',
+                    phase: 'Input',
+                    title: `Input Loop Check (i = ${i})`,
+                    narration: `Check i < n (${i} < ${n}) → true. Ready to read arr[${i}].`
+                });
+                arr[i] = inputArr[i];
+                colorIds[i] = i;
+                pushStep({
+                    line: 47,
+                    frame: 'main()',
+                    phase: 'Input',
+                    title: `Store arr[${i}] = ${inputArr[i]}`,
+                    narration: `Read ${inputArr[i]} from Scanner and store it at arr[${i}].`
+                });
+            }
+
+            // Call rotate(arr, k, right)
+            pushStep({
+                line: 50,
+                frame: 'main()',
+                phase: 'Call rotate',
+                title: `Invoke rotate(arr, ${k}, ${inputRight})`,
+                narration: `Call unified rotate(arr, ${k}, ${inputRight}) for ${inputRight ? 'right' : 'left'} rotation.`
+            });
+
+            pushStep({
+                line: 17,
+                frame: `rotate(arr, ${k}, ${inputRight})`,
+                phase: 'rotate()',
+                title: 'Enter rotate()',
+                narration: `Entered rotate(arr, k = ${k}, right = ${inputRight}).`
+            });
+
+            pushStep({
+                line: 19,
+                frame: `rotate(arr, ${k}, ${inputRight})`,
+                phase: 'rotate()',
+                title: 'Capture Array Length',
+                narration: `int n = arr.length → n = ${n}.`
+            });
+
+            pushStep({
+                line: 21,
+                frame: `rotate(arr, ${k}, ${inputRight})`,
+                phase: 'Guard Check',
+                title: 'Empty Array Guard',
+                narration: n === 0
+                    ? 'n == 0 is true! Return immediately to prevent division by zero in k %= n.'
+                    : `Check if (n == 0) → ${n} == 0 is false. Continue.`
+            });
+
+            if (n === 0) {
+                pushStep({
+                    line: 22,
+                    frame: `rotate(arr, ${k}, ${inputRight})`,
+                    phase: 'Early Return',
+                    title: 'Return From rotate()',
+                    narration: 'Returning early because the array is empty.'
+                });
+            } else {
+                const oldK = k;
+                k = k % n;
+                kAfterMod = k;
+                pushStep({
+                    line: 25,
+                    frame: `rotate(arr, ${k}, ${inputRight})`,
+                    phase: 'Normalize k',
+                    title: 'Normalize k %= n',
+                    narration: `Compute k = ${oldK} % ${n} = ${k}.`
+                });
+
+                // Direction check: if (right)
+                pushStep({
+                    line: 27,
+                    frame: `rotate(arr, ${k}, ${inputRight})`,
+                    phase: 'Direction Check',
+                    title: `Check if (right) → ${inputRight}`,
+                    narration: inputRight
+                        ? `right is true! Convert right-rotation by ${k} into an equivalent left-rotation by n - k.`
+                        : `right is false! Keep k = ${k} directly for left rotation.`
+                });
+
+                if (inputRight) {
+                    const prevK = k;
+                    k = n - k;
+                    kConverted = true;
+                    pushStep({
+                        line: 28,
+                        frame: `rotate(arr, ${k}, ${inputRight})`,
+                        phase: 'Convert k = n - k',
+                        title: `Convert k = ${n} - ${prevK} = ${k}`,
+                        narration: `Right rotation by ${prevK} on length ${n} equals left rotation by k = ${n} - ${prevK} = ${k}!`
+                    });
+                }
+
+                function recordReverse(stageIdx, callLine, start, end, desc) {
+                    stageStates[stageIdx] = 'active';
+                    pushStep({
+                        line: callLine,
+                        frame: `rotate(arr, ${k}, ${inputRight})`,
+                        phase: `Step ${stageIdx + 1}`,
+                        title: `Step ${stageIdx + 1}: Call reverse(arr, ${start}, ${end})`,
+                        narration: `${desc} — invoke reverse(arr, left = ${start}, right = ${end}).`,
+                        range: [start, end]
+                    });
+
+                    let left = start;
+                    let right = end;
+                    const revFrame = `reverse(arr, ${start}, ${end})`;
+
+                    pushStep({
+                        line: 5,
+                        frame: revFrame,
+                        phase: `Step ${stageIdx + 1}`,
+                        title: `Enter reverse(arr, ${start}, ${end})`,
+                        narration: `Set pointers left = ${left}, right = ${right}.`,
+                        range: [start, end],
+                        left,
+                        right
+                    });
+
+                    while (left < right) {
+                        pushStep({
+                            line: 7,
+                            frame: revFrame,
+                            phase: `Step ${stageIdx + 1}`,
+                            title: `Loop Check: left < right (${left} < ${right})`,
+                            narration: `${left} < ${right} is true — prepare to swap arr[${left}] (${arr[left]}) and arr[${right}] (${arr[right]}).`,
+                            range: [start, end],
+                            left,
+                            right
+                        });
+
+                        // Line 8: int temp = arr[left];
+                        const tempVal = arr[left];
+                        const tempCol = colorIds[left];
+                        pushStep({
+                            line: 8,
+                            frame: revFrame,
+                            phase: `Step ${stageIdx + 1} · Swap`,
+                            title: `Lift temp = arr[${left}] (${tempVal})`,
+                            narration: `Lift arr[${left}] = ${tempVal} upward into suspended temp so arr[${left}] can safely receive arr[${right}].`,
+                            range: [start, end],
+                            left,
+                            right,
+                            temp: tempVal,
+                            tempColorId: tempCol,
+                            anim: {
+                                type: 'liftTemp',
+                                fromIdx: left,
+                                toIdx: right,
+                                value: tempVal,
+                                colorId: tempCol
+                            }
+                        });
+
+                        // Line 9: arr[left] = arr[right];
+                        const rightVal = arr[right];
+                        const rightCol = colorIds[right];
+                        arr[left] = rightVal;
+                        colorIds[left] = rightCol;
+                        pushStep({
+                            line: 9,
+                            frame: revFrame,
+                            phase: `Step ${stageIdx + 1} · Swap`,
+                            title: `Move arr[${left}] = arr[${right}] (${rightVal})`,
+                            narration: `Lift arr[${right}] = ${rightVal} and glide it over intermediate elements into arr[${left}]. Meanwhile, temp (${tempVal}) glides overhead above arr[${right}].`,
+                            range: [start, end],
+                            left,
+                            right,
+                            temp: tempVal,
+                            tempColorId: tempCol,
+                            anim: {
+                                type: 'moveRightToLeft',
+                                fromIdx: right,
+                                toIdx: left,
+                                movedVal: rightVal,
+                                movedColorId: rightCol,
+                                tempVal: tempVal,
+                                tempColorId: tempCol
+                            }
+                        });
+
+                        // Line 10: arr[right] = temp;
+                        arr[right] = tempVal;
+                        colorIds[right] = tempCol;
+                        swapsCount++;
+                        pushStep({
+                            line: 10,
+                            frame: revFrame,
+                            phase: `Step ${stageIdx + 1} · Swap`,
+                            title: `Place arr[${right}] = temp (${tempVal})`,
+                            narration: `Slowly lower suspended temp (${tempVal}) down from above and place it into arr[${right}]. Swap #${swapsCount} complete!`,
+                            range: [start, end],
+                            left,
+                            right,
+                            temp: tempVal,
+                            tempColorId: tempCol,
+                            anim: {
+                                type: 'placeTemp',
+                                targetIdx: right,
+                                value: tempVal,
+                                colorId: tempCol
+                            }
+                        });
+
+                        // Line 12: left++;
+                        left++;
+                        pushStep({
+                            line: 12,
+                            frame: revFrame,
+                            phase: `Step ${stageIdx + 1}`,
+                            title: `Advance left++ → ${left}`,
+                            narration: `Increment left pointer to ${left}.`,
+                            range: [start, end],
+                            left,
+                            right
+                        });
+
+                        // Line 13: right--;
+                        right--;
+                        pushStep({
+                            line: 13,
+                            frame: revFrame,
+                            phase: `Step ${stageIdx + 1}`,
+                            title: `Advance right-- → ${right}`,
+                            narration: `Decrement right pointer to ${right}.`,
+                            range: [start, end],
+                            left,
+                            right
+                        });
+                    }
+
+                    // Final while check (false)
+                    pushStep({
+                        line: 7,
+                        frame: revFrame,
+                        phase: `Step ${stageIdx + 1}`,
+                        title: `Loop Check: left < right (${left} < ${right})`,
+                        narration: `${left} < ${right} is false — segment [${start}..${end}] reversal complete.`,
+                        range: [start, end],
+                        left,
+                        right
+                    });
+
+                    stageStates[stageIdx] = 'done';
+                    pushStep({
+                        line: 15,
+                        frame: revFrame,
+                        phase: `Step ${stageIdx + 1} Done`,
+                        title: `Return from reverse(arr, ${start}, ${end})`,
+                        narration: `Finished Step ${stageIdx + 1}. Current array: [${arr.join(', ')}].`,
+                        range: [start, end]
+                    });
+                }
+
+                // Always runs the 3 left-rotation reversals using effective k
+                recordReverse(0, 31, 0, k - 1, `Reverse first k = ${k} elements`);
+                recordReverse(1, 32, k, n - 1, `Reverse remaining elements [${k}..${n - 1}]`);
+                recordReverse(2, 33, 0, n - 1, 'Reverse the entire array');
+
+                pushStep({
+                    line: 34,
+                    frame: `rotate(arr, ${k}, ${inputRight})`,
+                    phase: 'Rotation Complete',
+                    title: 'Return from rotate()',
+                    narration: `All 3 reversals finished! Array rotated ${inputRight ? 'right' : 'left'} by ${inputK}: [${arr.join(', ')}].`,
+                    isDone: true
+                });
+            }
+
+            // Output print loop in main()
+            for (let i = 0; i < n; i++) {
+                pushStep({
+                    line: 52,
+                    frame: 'main()',
+                    phase: 'Output',
+                    title: `Output Loop Check (i = ${i})`,
+                    narration: `Check i < n (${i} < ${n}) → true. Ready to print arr[${i}].`,
+                    isDone: true
+                });
+                printed.push(arr[i]);
+                pushStep({
+                    line: 53,
+                    frame: 'main()',
+                    phase: 'Output',
+                    title: `Print arr[${i}] = ${arr[i]}`,
+                    narration: `System.out.print("${arr[i]} ") appended to Standard Output.`,
+                    isDone: true
+                });
+            }
+
+            pushStep({
+                line: 56,
+                frame: 'main()',
+                phase: 'Completed',
+                title: 'Close Scanner & Finish',
+                narration: n === 0
+                    ? 'Scanner closed. Empty array handled safely.'
+                    : `Scanner closed. Final ${inputRight ? 'right' : 'left'}-rotated output: ${arr.join(' ')}`,
+                isDone: true
+            });
+
+            return trace;
+        }
+
+        /* =========================================================================
+           8. ANIMATION HELPERS (Lift Temp, Over-the-Top Glide, Slow Drop Place)
+           ========================================================================= */
+        function cancelActiveAnimations() {
+            activeAnimations.forEach((a) => {
+                try { a.cancel(); } catch (_) {}
+            });
+            activeAnimations = [];
+            el.ghostLayer.innerHTML = '';
+            el.arcGroup.innerHTML = '';
+        }
+
+        function getRelRect(node) {
+            if (!node) return null;
+            const canvasRect = el.visualCanvas.getBoundingClientRect();
+            const r = node.getBoundingClientRect();
+            return {
+                left: r.left - canvasRect.left,
+                top: r.top - canvasRect.top,
+                width: r.width,
+                height: r.height,
+                cx: r.left - canvasRect.left + r.width / 2,
+                cy: r.top - canvasRect.top + r.height / 2
+            };
+        }
+
+        function drawCurvedArc(x1, y1, cx, cy, x2, y2, strokeColor, markerId, dashed = false) {
+            const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+            path.setAttribute('d', `M ${x1} ${y1} Q ${cx} ${cy} ${x2} ${y2}`);
+            path.setAttribute('fill', 'none');
+            path.setAttribute('stroke', strokeColor);
+            path.setAttribute('stroke-width', '2.4');
+            path.setAttribute('stroke-linecap', 'round');
+            if (dashed) {
+                path.setAttribute('stroke-dasharray', '6 5');
+            }
+            if (markerId) {
+                path.setAttribute('marker-end', `url(#${markerId})`);
+            }
+            el.arcGroup.appendChild(path);
+        }
+
+        function createGhostBox(value, extraClass, labelText = '', colorId = null) {
+            const theme = getLiquidTheme(colorId);
+            const div = document.createElement('div');
+            div.className = `flying-ghost rounded-2xl flex flex-col items-center justify-center font-mono-code font-bold text-white ${extraClass}`;
+            if (theme) {
+                div.style.background = theme.boxBg;
+                div.style.borderColor = theme.boxBorder;
+                div.style.boxShadow = theme.boxGlow;
+            }
+            div.innerHTML = `
+                ${labelText ? `<span class="text-[9px] uppercase tracking-wider text-amber-100/95 leading-none mb-0.5">${labelText}</span>` : ''}
+                <span class="text-base sm:text-lg leading-none drop-shadow">${value}</span>
+            `;
+            el.ghostLayer.appendChild(div);
+            return div;
+        }
+
+        function createGhostBar(value, extraClass, labelText = '', colorId = null) {
+            const theme = getLiquidTheme(colorId);
+            const div = document.createElement('div');
+            div.className = `flying-ghost rounded-t-xl rounded-b-md flex flex-col items-center justify-start pt-1 font-mono-code text-[11px] font-bold text-white ${extraClass}`;
+            if (theme) {
+                div.style.background = theme.barBg;
+                div.style.borderColor = theme.barBorder;
+                div.style.boxShadow = theme.barGlow;
+            }
+            div.innerHTML = `
+                ${labelText ? `<span class="text-[9px] uppercase tracking-wider text-amber-100 leading-none">${labelText}</span>` : ''}
+                <span class="leading-tight drop-shadow">${value}</span>
+            `;
+            el.ghostLayer.appendChild(div);
+            return div;
+        }
+
+        function createGhostCombined(value, barHeight, boxClass, barClass, labelText = '', colorId = null) {
+            const theme = getLiquidTheme(colorId);
+            const div = document.createElement('div');
+            div.className = `flying-ghost rounded-2xl p-1.5 flex flex-col justify-between items-center font-mono-code text-white ${boxClass}`;
+            if (theme) {
+                div.style.background = theme.boxBg;
+                div.style.borderColor = theme.boxBorder;
+                div.style.boxShadow = theme.boxGlow;
+            }
+            const barStyle = theme
+                ? `height: ${barHeight}px; background: ${theme.barBg}; border-color: ${theme.barBorder}; box-shadow: ${theme.barGlow};`
+                : `height: ${barHeight}px;`;
+            div.innerHTML = `
+                <div class="w-full flex flex-col items-center leading-none pt-0.5">
+                    ${labelText ? `<span class="text-[9px] uppercase tracking-wider text-amber-100/95 mb-0.5">${labelText}</span>` : ''}
+                    <span class="text-sm font-bold drop-shadow">${value}</span>
+                </div>
+                <div class="w-full flex-1 flex items-end justify-center pt-1">
+                    <div class="array-bar w-full rounded-t-lg rounded-b-md ${barClass}" style="${barStyle}"></div>
+                </div>
+            `;
+            el.ghostLayer.appendChild(div);
+            return div;
+        }
+
+        function runSwapAnimation(step) {
+            cancelActiveAnimations();
+            const anim = step.anim;
+            if (!anim || step.n === 0) {
+                el.tempAirStatus.classList.add('hidden');
+                return;
+            }
+
+            const durScale = 1 / Math.min(speedMultiplier, 2.5);
+            const isCombined = viewMode === 'both';
+            const isBoxesOnly = viewMode === 'boxes';
+            const isBarsOnly = viewMode === 'bars';
+
+            const getCombined = (idx) => el.combinedGrid.querySelector(`[data-combined-idx="${idx}"]`);
+            const getBox = (idx) => el.boxesGrid.querySelector(`[data-box-idx="${idx}"]`);
+            const getBar = (idx) => el.barsGrid.querySelector(`[data-bar-idx="${idx}"]`);
+
+            const maxAbs = Math.max(1, ...step.arr.map((v) => Math.abs(v || 0)), Math.abs(step.temp || 0));
+            const calcCombinedBarH = (v) => Math.max(18, Math.round((Math.abs(v) / maxAbs) * 76));
+            const calcSoloBarH = (v) => Math.max(24, Math.round((Math.abs(v) / maxAbs) * 114));
+
+            if (anim.type === 'liftTemp') {
+                el.tempAirStatus.textContent = `temp = ${anim.value} (suspended above)`;
+                el.tempAirStatus.classList.remove('hidden');
+
+                if (isCombined) {
+                    const srcEl = getCombined(anim.fromIdx);
+                    const r = getRelRect(srcEl);
+                    if (r) {
+                        const targetTop = 10;
+                        const ghost = createGhostCombined(anim.value, calcCombinedBarH(anim.value), 'ghost-temp-box temp-dock-active', 'ghost-temp-bar', 'temp', anim.colorId);
+                        ghost.style.left = `${r.left}px`;
+                        ghost.style.top = `${r.top}px`;
+                        ghost.style.width = `${r.width}px`;
+                        ghost.style.height = `${Math.min(r.height, 92)}px`;
+
+                        drawCurvedArc(r.cx, r.top - 4, r.cx - 18, (r.top + targetTop) / 2, r.cx, targetTop + Math.min(r.height, 92) + 4, '#fbbf24', 'arrowAmber', true);
+
+                        const wa = ghost.animate([
+                            { transform: 'translate(0px, 0px) scale(1)', opacity: 0.92 },
+                            { transform: `translate(0px, ${targetTop - r.top}px) scale(1.04)`, opacity: 1 }
+                        ], {
+                            duration: Math.round(520 * durScale),
+                            easing: 'cubic-bezier(0.22, 1, 0.36, 1)',
+                            fill: 'forwards'
+                        });
+                        activeAnimations.push(wa);
+                    }
+                } else if (isBoxesOnly) {
+                    const srcBox = getBox(anim.fromIdx);
+                    const r = getRelRect(srcBox);
+                    if (r) {
+                        const targetTop = 18;
+                        const ghost = createGhostBox(anim.value, 'ghost-temp-box temp-dock-active', 'temp', anim.colorId);
+                        ghost.style.left = `${r.left}px`;
+                        ghost.style.top = `${r.top}px`;
+                        ghost.style.width = `${r.width}px`;
+                        ghost.style.height = `${r.height}px`;
+
+                        drawCurvedArc(r.cx, r.top - 4, r.cx - 18, (r.top + targetTop) / 2, r.cx, targetTop + r.height + 6, '#fbbf24', 'arrowAmber', true);
+
+                        const wa = ghost.animate([
+                            { transform: 'translate(0px, 0px) scale(1)', opacity: 0.9 },
+                            { transform: `translate(0px, ${targetTop - r.top}px) scale(1.06)`, opacity: 1 }
+                        ], {
+                            duration: Math.round(520 * durScale),
+                            easing: 'cubic-bezier(0.22, 1, 0.36, 1)',
+                            fill: 'forwards'
+                        });
+                        activeAnimations.push(wa);
+                    }
+                } else if (isBarsOnly) {
+                    const srcBar = getBar(anim.fromIdx);
+                    const r = getRelRect(srcBar);
+                    if (r) {
+                        const targetTop = 14;
+                        const ghost = createGhostBar(anim.value, 'ghost-temp-bar temp-dock-active', 'temp', anim.colorId);
+                        ghost.style.left = `${r.left}px`;
+                        ghost.style.top = `${r.top}px`;
+                        ghost.style.width = `${r.width}px`;
+                        ghost.style.height = `${Math.min(r.height, 64)}px`;
+
+                        drawCurvedArc(r.cx, r.top - 4, r.cx - 16, (r.top + targetTop) / 2, r.cx, targetTop + Math.min(r.height, 64) + 4, '#fbbf24', 'arrowAmber', true);
+
+                        const wa = ghost.animate([
+                            { transform: 'translate(0px, 0px)', opacity: 0.92 },
+                            { transform: `translate(0px, ${targetTop - r.top}px)`, opacity: 1 }
+                        ], {
+                            duration: Math.round(520 * durScale),
+                            easing: 'cubic-bezier(0.22, 1, 0.36, 1)',
+                            fill: 'forwards'
+                        });
+                        activeAnimations.push(wa);
+                    }
+                }
+            }
+
+            if (anim.type === 'moveRightToLeft') {
+                el.tempAirStatus.textContent = `temp = ${anim.tempVal} (hovering above arr[${anim.fromIdx}])`;
+                el.tempAirStatus.classList.remove('hidden');
+
+                if (isCombined) {
+                    const fromEl = getCombined(anim.fromIdx);
+                    const toEl = getCombined(anim.toIdx);
+                    const rFrom = getRelRect(fromEl);
+                    const rTo = getRelRect(toEl);
+
+                    if (rFrom && rTo) {
+                        toEl.style.opacity = '0.22';
+
+                        const tempTop = 10;
+                        const tempGhost = createGhostCombined(anim.tempVal, calcCombinedBarH(anim.tempVal), 'ghost-temp-box temp-dock-active', 'ghost-temp-bar', 'temp', anim.tempColorId);
+                        tempGhost.style.left = `${rTo.left}px`;
+                        tempGhost.style.top = `${tempTop}px`;
+                        tempGhost.style.width = `${rTo.width}px`;
+                        tempGhost.style.height = `${Math.min(rTo.height, 92)}px`;
+
+                        const waTemp = tempGhost.animate([
+                            { transform: 'translate(0px, 0px) scale(1.04)' },
+                            { transform: `translate(${rFrom.left - rTo.left}px, -2px) scale(1.04)` }
+                        ], {
+                            duration: Math.round(620 * durScale),
+                            easing: 'cubic-bezier(0.4, 0, 0.2, 1)',
+                            fill: 'forwards'
+                        });
+                        activeAnimations.push(waTemp);
+
+                        const moveGhost = createGhostCombined(anim.movedVal, calcCombinedBarH(anim.movedVal), 'ghost-move-box', 'ghost-move-bar', `arr[${anim.fromIdx}]`, anim.movedColorId);
+                        moveGhost.style.left = `${rFrom.left}px`;
+                        moveGhost.style.top = `${rFrom.top}px`;
+                        moveGhost.style.width = `${rFrom.width}px`;
+                        moveGhost.style.height = `${rFrom.height}px`;
+
+                        const dx = rTo.left - rFrom.left;
+                        const liftY = -Math.min(72, Math.max(48, Math.abs(dx) * 0.16));
+
+                        drawCurvedArc(
+                            rFrom.cx, rFrom.top - 4,
+                            (rFrom.cx + rTo.cx) / 2, rFrom.top + liftY - 22,
+                            rTo.cx, rTo.top - 6,
+                            '#fb7185', 'arrowRose', false
+                        );
+
+                        const waMove = moveGhost.animate([
+                            { transform: 'translate(0px, 0px) scale(1)', opacity: 1 },
+                            { transform: `translate(${dx * 0.22}px, ${liftY}px) scale(1.05)`, opacity: 1, offset: 0.28 },
+                            { transform: `translate(${dx * 0.78}px, ${liftY}px) scale(1.05)`, opacity: 1, offset: 0.72 },
+                            { transform: `translate(${dx}px, 0px) scale(1)`, opacity: 1 }
+                        ], {
+                            duration: Math.round(680 * durScale),
+                            easing: 'cubic-bezier(0.25, 0.8, 0.25, 1)',
+                            fill: 'forwards'
+                        });
+                        activeAnimations.push(waMove);
+                        waMove.onfinish = () => {
+                            toEl.style.opacity = '1';
+                            moveGhost.style.opacity = '0';
+                        };
+                    }
+                } else if (isBoxesOnly) {
+                    const fromBox = getBox(anim.fromIdx);
+                    const toBox = getBox(anim.toIdx);
+                    const rFrom = getRelRect(fromBox);
+                    const rTo = getRelRect(toBox);
+
+                    if (rFrom && rTo) {
+                        toBox.style.opacity = '0.22';
+
+                        const tempTop = 18;
+                        const tempGhost = createGhostBox(anim.tempVal, 'ghost-temp-box temp-dock-active', 'temp', anim.tempColorId);
+                        tempGhost.style.left = `${rTo.left}px`;
+                        tempGhost.style.top = `${tempTop}px`;
+                        tempGhost.style.width = `${rTo.width}px`;
+                        tempGhost.style.height = `${rTo.height}px`;
+
+                        const waTemp = tempGhost.animate([
+                            { transform: 'translate(0px, 0px) scale(1.06)' },
+                            { transform: `translate(${rFrom.left - rTo.left}px, -4px) scale(1.06)` }
+                        ], {
+                            duration: Math.round(620 * durScale),
+                            easing: 'cubic-bezier(0.4, 0, 0.2, 1)',
+                            fill: 'forwards'
+                        });
+                        activeAnimations.push(waTemp);
+
+                        const moveGhost = createGhostBox(anim.movedVal, 'ghost-move-box', `arr[${anim.fromIdx}]`, anim.movedColorId);
+                        moveGhost.style.left = `${rFrom.left}px`;
+                        moveGhost.style.top = `${rFrom.top}px`;
+                        moveGhost.style.width = `${rFrom.width}px`;
+                        moveGhost.style.height = `${rFrom.height}px`;
+
+                        const dx = rTo.left - rFrom.left;
+                        const liftY = -Math.min(72, Math.max(46, Math.abs(dx) * 0.16));
+
+                        drawCurvedArc(
+                            rFrom.cx, rFrom.top - 4,
+                            (rFrom.cx + rTo.cx) / 2, rFrom.top + liftY - 22,
+                            rTo.cx, rTo.top - 6,
+                            '#fb7185', 'arrowRose', false
+                        );
+
+                        const waMove = moveGhost.animate([
+                            { transform: 'translate(0px, 0px) scale(1)', opacity: 1 },
+                            { transform: `translate(${dx * 0.22}px, ${liftY}px) scale(1.06)`, opacity: 1, offset: 0.28 },
+                            { transform: `translate(${dx * 0.78}px, ${liftY}px) scale(1.06)`, opacity: 1, offset: 0.72 },
+                            { transform: `translate(${dx}px, 0px) scale(1)`, opacity: 1 }
+                        ], {
+                            duration: Math.round(680 * durScale),
+                            easing: 'cubic-bezier(0.25, 0.8, 0.25, 1)',
+                            fill: 'forwards'
+                        });
+                        activeAnimations.push(waMove);
+                        waMove.onfinish = () => {
+                            toBox.style.opacity = '1';
+                            moveGhost.style.opacity = '0';
+                        };
+                    }
+                } else if (isBarsOnly) {
+                    const fromBar = getBar(anim.fromIdx);
+                    const toBar = getBar(anim.toIdx);
+                    const rFrom = getRelRect(fromBar);
+                    const rTo = getRelRect(toBar);
+
+                    if (rFrom && rTo) {
+                        toBar.style.opacity = '0.2';
+
+                        const barH = calcSoloBarH(anim.movedVal);
+                        const moveBarGhost = createGhostBar(anim.movedVal, 'ghost-move-bar', '', anim.movedColorId);
+                        moveBarGhost.style.left = `${rFrom.left}px`;
+                        moveBarGhost.style.top = `${rTo.top + (rTo.height - barH)}px`;
+                        moveBarGhost.style.width = `${rFrom.width}px`;
+                        moveBarGhost.style.height = `${barH}px`;
+
+                        const dx = rTo.left - rFrom.left;
+                        const overTopY = -Math.max(54, barH * 0.55);
+
+                        const tempBarH = calcSoloBarH(anim.tempVal);
+                        const tempBarGhost = createGhostBar(anim.tempVal, 'ghost-temp-bar temp-dock-active', 'temp', anim.tempColorId);
+                        tempBarGhost.style.left = `${rTo.left}px`;
+                        tempBarGhost.style.top = `14px`;
+                        tempBarGhost.style.width = `${rTo.width}px`;
+                        tempBarGhost.style.height = `${Math.min(tempBarH, 60)}px`;
+                        const waTB = tempBarGhost.animate([
+                            { transform: 'translate(0px, 0px)' },
+                            { transform: `translate(${rFrom.left - rTo.left}px, 0px)` }
+                        ], {
+                            duration: Math.round(620 * durScale),
+                            easing: 'cubic-bezier(0.4, 0, 0.2, 1)',
+                            fill: 'forwards'
+                        });
+                        activeAnimations.push(waTB);
+
+                        drawCurvedArc(
+                            rFrom.cx, rFrom.top - 4,
+                            (rFrom.cx + rTo.cx) / 2, Math.min(rFrom.top, rTo.top) - 44,
+                            rTo.cx, rTo.top - 6,
+                            '#fb7185', 'arrowRose', false
+                        );
+
+                        const waBar = moveBarGhost.animate([
+                            { transform: 'translate(0px, 0px) scale(1)', opacity: 0.96 },
+                            { transform: `translate(${dx * 0.25}px, ${overTopY}px) scale(1.04)`, opacity: 1, offset: 0.3 },
+                            { transform: `translate(${dx * 0.75}px, ${overTopY}px) scale(1.04)`, opacity: 1, offset: 0.7 },
+                            { transform: `translate(${dx}px, 0px) scale(1)`, opacity: 1 }
+                        ], {
+                            duration: Math.round(680 * durScale),
+                            easing: 'cubic-bezier(0.25, 0.8, 0.25, 1)',
+                            fill: 'forwards'
+                        });
+                        activeAnimations.push(waBar);
+                        waBar.onfinish = () => {
+                            toBar.style.opacity = '1';
+                            moveBarGhost.style.opacity = '0';
+                        };
+                    }
+                }
+            }
+
+            if (anim.type === 'placeTemp') {
+                el.tempAirStatus.textContent = `Lowering temp = ${anim.value} into arr[${anim.targetIdx}]`;
+                el.tempAirStatus.classList.remove('hidden');
+
+                if (isCombined) {
+                    const targetEl = getCombined(anim.targetIdx);
+                    const rTarget = getRelRect(targetEl);
+                    if (rTarget) {
+                        targetEl.style.opacity = '0.22';
+                        const startTop = 10;
+                        const ghost = createGhostCombined(anim.value, calcCombinedBarH(anim.value), 'ghost-temp-box', 'ghost-temp-bar', 'temp ↓', anim.colorId);
+                        ghost.style.left = `${rTarget.left}px`;
+                        ghost.style.top = `${startTop}px`;
+                        ghost.style.width = `${rTarget.width}px`;
+                        ghost.style.height = `${rTarget.height}px`;
+
+                        drawCurvedArc(
+                            rTarget.cx, startTop + 68,
+                            rTarget.cx + 14, (startTop + rTarget.top) / 2,
+                            rTarget.cx, rTarget.top - 6,
+                            '#34d399', 'arrowEmerald', true
+                        );
+
+                        const dy = rTarget.top - startTop;
+                        const waDrop = ghost.animate([
+                            { transform: 'translate(0px, 0px) scale(1.04)', opacity: 1 },
+                            { transform: `translate(0px, ${dy * 0.55}px) scale(1.02)`, opacity: 1, offset: 0.55 },
+                            { transform: `translate(0px, ${dy}px) scale(1)`, opacity: 1 }
+                        ], {
+                            duration: Math.round(820 * durScale),
+                            easing: 'cubic-bezier(0.22, 1, 0.36, 1)',
+                            fill: 'forwards'
+                        });
+                        activeAnimations.push(waDrop);
+                        waDrop.onfinish = () => {
+                            targetEl.style.opacity = '1';
+                            ghost.style.opacity = '0';
+                            el.tempAirStatus.classList.add('hidden');
+                        };
+                    }
+                } else if (isBoxesOnly) {
+                    const targetBox = getBox(anim.targetIdx);
+                    const rTarget = getRelRect(targetBox);
+                    if (rTarget) {
+                        targetBox.style.opacity = '0.22';
+                        const startTop = 18;
+                        const ghost = createGhostBox(anim.value, 'ghost-temp-box', 'temp ↓', anim.colorId);
+                        ghost.style.left = `${rTarget.left}px`;
+                        ghost.style.top = `${startTop}px`;
+                        ghost.style.width = `${rTarget.width}px`;
+                        ghost.style.height = `${rTarget.height}px`;
+
+                        drawCurvedArc(
+                            rTarget.cx, startTop + rTarget.height + 4,
+                            rTarget.cx + 14, (startTop + rTarget.top) / 2,
+                            rTarget.cx, rTarget.top - 6,
+                            '#34d399', 'arrowEmerald', true
+                        );
+
+                        const dy = rTarget.top - startTop;
+                        const waDrop = ghost.animate([
+                            { transform: 'translate(0px, 0px) scale(1.06)', opacity: 1 },
+                            { transform: `translate(0px, ${dy * 0.55}px) scale(1.03)`, opacity: 1, offset: 0.55 },
+                            { transform: `translate(0px, ${dy}px) scale(1)`, opacity: 1 }
+                        ], {
+                            duration: Math.round(820 * durScale),
+                            easing: 'cubic-bezier(0.22, 1, 0.36, 1)',
+                            fill: 'forwards'
+                        });
+                        activeAnimations.push(waDrop);
+                        waDrop.onfinish = () => {
+                            targetBox.style.opacity = '1';
+                            ghost.style.opacity = '0';
+                            el.tempAirStatus.classList.add('hidden');
+                        };
+                    }
+                } else if (isBarsOnly) {
+                    const targetBar = getBar(anim.targetIdx);
+                    const rTarget = getRelRect(targetBar);
+                    if (rTarget) {
+                        targetBar.style.opacity = '0.22';
+                        const startTop = 14;
+                        const ghostBar = createGhostBar(anim.value, 'ghost-temp-bar', 'temp ↓', anim.colorId);
+                        ghostBar.style.left = `${rTarget.left}px`;
+                        ghostBar.style.top = `${startTop}px`;
+                        ghostBar.style.width = `${rTarget.width}px`;
+                        ghostBar.style.height = `${rTarget.height}px`;
+
+                        drawCurvedArc(
+                            rTarget.cx, startTop + Math.min(rTarget.height, 64) + 4,
+                            rTarget.cx + 14, (startTop + rTarget.top) / 2,
+                            rTarget.cx, rTarget.top - 6,
+                            '#34d399', 'arrowEmerald', true
+                        );
+
+                        const dy = rTarget.top - startTop;
+                        const waBarDrop = ghostBar.animate([
+                            { transform: 'translate(0px, 0px) scale(1.04)', opacity: 1 },
+                            { transform: `translate(0px, ${dy}px) scale(1)`, opacity: 1 }
+                        ], {
+                            duration: Math.round(820 * durScale),
+                            easing: 'cubic-bezier(0.22, 1, 0.36, 1)',
+                            fill: 'forwards'
+                        });
+                        activeAnimations.push(waBarDrop);
+                        waBarDrop.onfinish = () => {
+                            targetBar.style.opacity = '1';
+                            ghostBar.style.opacity = '0';
+                            el.tempAirStatus.classList.add('hidden');
+                        };
+                    }
+                }
+            }
+        }
+
+        /* =========================================================================
+           9. MAIN STEP RENDERER
+           ========================================================================= */
+        function renderStep(idx, playSound = false) {
+            if (!steps.length) return;
+            stepIndex = Math.max(0, Math.min(idx, steps.length - 1));
+            const s = steps[stepIndex];
+
+            // Top bar telemetry badges
+            el.badgeStep.textContent = `Step: ${stepIndex + 1} / ${steps.length}`;
+            el.phaseBadge.textContent = s.phase;
+            el.badgeDirTop.textContent = `${s.dirRight ? 'right=true ↻' : 'right=false ↺'} • k=${s.kCurr}`;
+            const outText = s.printed.length ? s.printed.join(' ') : 'Pending';
+            el.badgeOutputTop.textContent = `Output: ${outText}`;
+            el.stepSlider.value = stepIndex;
+
+            // Playback button states
+            el.btnPrev.disabled = stepIndex === 0;
+            el.btnNext.disabled = stepIndex === steps.length - 1;
+
+            // Frame & narration
+            el.activeFrameBadge.textContent = `Frame: ${s.frame}`;
+            el.stepNarration.textContent = s.narration;
+            el.codeFooterNarration.textContent = s.narration;
+
+            // 5-Card KPI Telemetry Row
+            el.kpiActiveCall.textContent = s.frame;
+            el.kpiActiveCallSub.textContent = `Stack depth: ${s.stack.length}`;
+            el.kpiDirK.textContent = `${s.dirRight ? 'Right ↻' : 'Left ↺'} · k=${s.kCurr}`;
+            el.kpiDirKSub.textContent = s.kConverted
+                ? `k = ${s.n} - ${s.kAfterMod} = ${s.kCurr}`
+                : (s.kAfterMod !== null ? `k %= ${s.n} → ${s.kAfterMod}` : `right = ${s.dirRight}`);
+            el.kpiPointers.textContent = (s.left === null || s.right === null) ? '— / —' : `${s.left} / ${s.right}`;
+            el.kpiPointersSub.textContent = s.range ? `Range [${s.range[0]}..${s.range[1]}]` : 'left / right';
+            el.kpiTemp.textContent = s.temp === null ? '—' : `${s.temp}`;
+            el.kpiTempSub.textContent = `Swaps made: ${s.swapsCount}`;
+            el.kpiStdout.textContent = s.printed.length ? s.printed.join(' ') : 'pending';
+            el.kpiStdoutSub.textContent = `rotate(arr, ${s.kRaw}, ${s.dirRight})`;
+
+            // Direction Conversion Ribbon
+            if (s.dirRight) {
+                el.dirIconBadge.className = 'px-2 py-0.5 rounded-md bg-fuchsia-500/20 border border-fuchsia-400/40 text-fuchsia-200 font-bold';
+                el.dirIconBadge.textContent = 'right = true (↻ Right)';
+                if (s.n === 0) {
+                    el.conversionFormula.textContent = 'n == 0 → early return guard';
+                    el.effectiveKBadge.textContent = 'Effective left-k: —';
+                } else if (s.kConverted) {
+                    el.conversionFormula.textContent = `k %= ${s.n} → ${s.kAfterMod}, then k = ${s.n} - ${s.kAfterMod} = ${s.kCurr}`;
+                    el.effectiveKBadge.textContent = `Effective left-k: ${s.kCurr}`;
+                } else if (s.kAfterMod !== null) {
+                    el.conversionFormula.textContent = `Normalized k %= ${s.n} → ${s.kAfterMod} (awaiting k = n - k)`;
+                    el.effectiveKBadge.textContent = `Pending n - k`;
+                } else {
+                    el.conversionFormula.textContent = `Will convert right by ${s.kRaw} → left by (n - k % n)`;
+                    el.effectiveKBadge.textContent = `Effective left-k: —`;
+                }
+            } else {
+                el.dirIconBadge.className = 'px-2 py-0.5 rounded-md bg-cyan-500/20 border border-cyan-400/40 text-cyan-200 font-bold';
+                el.dirIconBadge.textContent = 'right = false (↺ Left)';
+                if (s.n === 0) {
+                    el.conversionFormula.textContent = 'n == 0 → early return guard';
+                    el.effectiveKBadge.textContent = 'Effective left-k: —';
+                } else if (s.kAfterMod !== null) {
+                    el.conversionFormula.textContent = `Normalized k %= ${s.n} → ${s.kCurr} (no conversion needed)`;
+                    el.effectiveKBadge.textContent = `Effective left-k: ${s.kCurr}`;
+                } else {
+                    el.conversionFormula.textContent = `Direct left rotation by ${s.kRaw} % ${s.n}`;
+                    el.effectiveKBadge.textContent = `Effective left-k: —`;
+                }
+            }
+
+            // Dynamic reversal call signatures once effective k is known
+            const showK = s.kAfterMod !== null && (!s.dirRight || s.kConverted);
+            if (showK && s.n > 0) {
+                el.stageCalls[0].textContent = `reverse(arr, 0, ${s.kCurr - 1})`;
+                el.stageCalls[1].textContent = `reverse(arr, ${s.kCurr}, ${s.n - 1})`;
+                el.stageCalls[2].textContent = `reverse(arr, 0, ${s.n - 1})`;
+            } else {
+                el.stageCalls[0].textContent = 'reverse(arr, 0, k - 1)';
+                el.stageCalls[1].textContent = 'reverse(arr, k, n - 1)';
+                el.stageCalls[2].textContent = 'reverse(arr, 0, n - 1)';
+            }
+
+            // 3-Stage Reversal Pipeline strip
+            s.stageStates.forEach((st, i) => {
+                const card = el.stageCards[i];
+                const statusEl = el.stageStatuses[i];
+                card.className = 'rounded-xl px-3 py-2 border transition-all';
+                if (st === 'active') {
+                    card.classList.add('border-sky-400/70', 'bg-sky-400/15', 'shadow-lg', 'shadow-sky-500/10');
+                    statusEl.textContent = 'Running';
+                    statusEl.className = 'text-sky-300 font-bold';
+                } else if (st === 'done') {
+                    card.classList.add('border-emerald-400/50', 'bg-emerald-400/10');
+                    statusEl.textContent = 'Done ✓';
+                    statusEl.className = 'text-emerald-300 font-semibold';
+                } else {
+                    card.classList.add('border-white/10', 'bg-white/5');
+                    statusEl.textContent = 'Pending';
+                    statusEl.className = 'text-slate-400';
+                }
+            });
+
+            // Active range label
+            if (s.range && s.range[0] <= s.range[1]) {
+                el.activeRangeLabel.textContent = `Active range: [${s.range[0]} .. ${s.range[1]}]`;
+            } else if (s.range) {
+                el.activeRangeLabel.textContent = `Active range: empty (${s.range[0]} > ${s.range[1]})`;
+            } else {
+                el.activeRangeLabel.textContent = 'Active range: —';
+            }
+
+            // Empty array vs. active view mode visibility
+            const isEmpty = s.n === 0;
+            el.emptyArrayState.classList.toggle('hidden', !isEmpty);
+            el.trackHeader.classList.toggle('hidden', isEmpty);
+            el.combinedSection.classList.toggle('hidden', isEmpty || viewMode !== 'both');
+            el.barsSection.classList.toggle('hidden', isEmpty || viewMode !== 'bars');
+            el.boxesSection.classList.toggle('hidden', isEmpty || viewMode !== 'boxes');
+
+            if (viewMode === 'both') {
+                el.trackModeLabel.textContent = 'int[] arr — Liquid Glass Bars Inside Boxes';
+            } else if (viewMode === 'boxes') {
+                el.trackModeLabel.textContent = 'int[] arr — Transparent Liquid Glass Boxes';
+            } else {
+                el.trackModeLabel.textContent = 'int[] arr — Proportional Liquid Glass Bars';
+            }
+
+            // Render Bars-in-Boxes / Bars / Boxes with unique liquid-glass color per element
+            if (!isEmpty) {
+                const maxAbs = Math.max(1, ...s.arr.map((v) => Math.abs(v || 0)));
+
+                // 1) Combined: Proportional Liquid Glass Bars INSIDE Transparent Glassy Boxes
+                el.combinedGrid.innerHTML = s.arr.map((val, i) => {
+                    const inRange = s.range && i >= s.range[0] && i <= s.range[1];
+                    const isLeft = s.left === i;
+                    const isRight = s.right === i;
+                    const barHeight = val === null ? 14 : Math.max(18, Math.round((Math.abs(val) / maxAbs) * 80));
+                    const isNeg = val !== null && val < 0;
+                    const theme = getLiquidTheme(s.colorIds[i]);
+
+                    let stateCls = '';
+                    if (s.isDone) stateCls = 'is-done';
+                    else if (isLeft) stateCls = 'is-left';
+                    else if (isRight) stateCls = 'is-right';
+                    else if (inRange) stateCls = 'in-range';
+                    if (val === null) stateCls += ' is-empty-slot';
+
+                    const boxStyle = theme
+                        ? `background: ${theme.boxBg}; border-color: ${theme.boxBorder}; box-shadow: ${theme.boxGlow};`
+                        : '';
+                    const barStyle = theme
+                        ? `height: ${barHeight}px; background: ${theme.barBg}; border-color: ${theme.barBorder}; box-shadow: ${theme.barGlow};`
+                        : `height: ${barHeight}px;`;
+
+                    const ptrBadges = [];
+                    if (isLeft) ptrBadges.push('<span class="px-1.5 py-0.5 rounded bg-sky-400/25 border border-sky-300/60 text-[10px] font-bold text-sky-200">L</span>');
+                    if (isRight) ptrBadges.push('<span class="px-1.5 py-0.5 rounded bg-rose-400/25 border border-rose-300/60 text-[10px] font-bold text-rose-200">R</span>');
+
+                    return `
+                        <div class="flex flex-col items-center flex-1 max-w-[78px]">
+                            <div data-combined-idx="${i}"
+                                 class="array-box ${stateCls} w-full h-[134px] rounded-2xl p-1.5 flex flex-col justify-between items-center"
+                                 style="${boxStyle}">
+                                <div class="relative z-10 flex flex-col items-center leading-none pt-0.5">
+                                    <span class="font-mono-code text-sm sm:text-base font-bold text-white drop-shadow">${val === null ? '·' : val}</span>
+                                    ${isNeg ? '<span class="text-[8px] font-mono-code text-rose-200/90 mt-0.5">neg</span>' : ''}
+                                </div>
+                                <div class="w-full flex-1 flex items-end justify-center pt-1.5 relative z-10">
+                                    <div class="array-bar ${val === null ? 'is-empty-slot' : ''} w-full rounded-t-lg rounded-b-md"
+                                         style="${barStyle}"></div>
+                                </div>
+                            </div>
+                            <div class="text-[10px] font-mono-code text-slate-400 mt-1">idx ${i}</div>
+                            <div class="h-5 flex items-center justify-center gap-1 mt-0.5">${ptrBadges.join('')}</div>
+                        </div>
+                    `;
+                }).join('');
+
+                // 2) Proportional Bars Only
+                el.barsGrid.innerHTML = s.arr.map((val, i) => {
+                    const inRange = s.range && i >= s.range[0] && i <= s.range[1];
+                    const isLeft = s.left === i;
+                    const isRight = s.right === i;
+                    const barHeight = val === null ? 18 : Math.max(24, Math.round((Math.abs(val) / maxAbs) * 114));
+                    const isNeg = val !== null && val < 0;
+                    const theme = getLiquidTheme(s.colorIds[i]);
+
+                    let stateCls = '';
+                    if (s.isDone) stateCls = 'is-done';
+                    else if (isLeft) stateCls = 'is-left';
+                    else if (isRight) stateCls = 'is-right';
+                    else if (inRange) stateCls = 'in-range';
+                    if (val === null) stateCls += ' is-empty-slot';
+
+                    const barStyle = theme
+                        ? `height: ${barHeight}px; background: ${theme.barBg}; border-color: ${theme.barBorder}; box-shadow: ${theme.barGlow};`
+                        : `height: ${barHeight}px;`;
+
+                    return `
+                        <div class="flex flex-col items-center justify-end flex-1 max-w-[74px] h-full">
+                            <div data-bar-idx="${i}"
+                                 class="array-bar ${stateCls} w-full rounded-t-xl rounded-b-md flex flex-col items-center justify-start pt-1 font-mono-code text-xs font-bold text-white relative"
+                                 style="${barStyle}">
+                                <span class="relative z-10 drop-shadow">${val === null ? '·' : val}</span>
+                                ${isNeg ? '<span class="relative z-10 text-[9px] text-rose-200/90 leading-none">neg</span>' : ''}
+                            </div>
+                            <span class="text-[10px] font-mono-code text-slate-400 mt-1">[${i}]</span>
+                        </div>
+                    `;
+                }).join('');
+
+                // 3) Glassy Element Boxes Only
+                el.boxesGrid.innerHTML = s.arr.map((val, i) => {
+                    const inRange = s.range && i >= s.range[0] && i <= s.range[1];
+                    const isLeft = s.left === i;
+                    const isRight = s.right === i;
+                    const theme = getLiquidTheme(s.colorIds[i]);
+
+                    let stateCls = '';
+                    if (s.isDone) stateCls = 'is-done';
+                    else if (isLeft) stateCls = 'is-left';
+                    else if (isRight) stateCls = 'is-right';
+                    else if (inRange) stateCls = 'in-range';
+                    if (val === null) stateCls += ' is-empty-slot';
+
+                    const boxStyle = theme
+                        ? `background: ${theme.boxBg}; border-color: ${theme.boxBorder}; box-shadow: ${theme.boxGlow};`
+                        : '';
+
+                    const ptrBadges = [];
+                    if (isLeft) ptrBadges.push('<span class="px-1.5 py-0.5 rounded bg-sky-400/25 border border-sky-300/60 text-[10px] font-bold text-sky-200">L</span>');
+                    if (isRight) ptrBadges.push('<span class="px-1.5 py-0.5 rounded bg-rose-400/25 border border-rose-300/60 text-[10px] font-bold text-rose-200">R</span>');
+
+                    return `
+                        <div class="flex flex-col items-center flex-1 max-w-[74px]">
+                            <div data-box-idx="${i}"
+                                 class="array-box ${stateCls} w-full h-14 rounded-2xl flex items-center justify-center font-mono-code text-sm sm:text-base font-bold text-white"
+                                 style="${boxStyle}">
+                                <span class="relative z-10 drop-shadow">${val === null ? '·' : val}</span>
+                            </div>
+                            <div class="text-[10px] font-mono-code text-slate-400 mt-1">idx ${i}</div>
+                            <div class="h-5 flex items-center justify-center gap-1 mt-0.5">${ptrBadges.join('')}</div>
+                        </div>
+                    `;
+                }).join('');
+            }
+
+            // Call Stack Chips & Console
+            el.callStackChips.innerHTML = s.stack.map((fr, i) => {
+                const isTop = i === s.stack.length - 1;
+                return `<span class="px-2 py-0.5 rounded-md border ${isTop ? 'bg-sky-500/20 border-sky-400/45 text-sky-200 font-semibold' : 'bg-slate-800/70 border-white/10 text-slate-400'}">${fr}</span>`;
+            }).join('<span class="text-slate-600">→</span>');
+            el.ioStdin.textContent = `stdin: ${s.n} ${s.kRaw} ${s.dirRight} | ${currentInputArr.length ? currentInputArr.join(' ') : '(empty)'}`;
+            el.ioStdout.textContent = `stdout: ${s.printed.length ? s.printed.join(' ') : '—'}`;
+
+            // Strictly single-line Java highlight
+            highlightSingleLine(s.line);
+
+            // Trigger physical lift / over-the-top glide / slow temp placement animations
+            requestAnimationFrame(() => runSwapAnimation(s));
+
+            // Optional audio cue
+            if (playSound) {
+                if (s.anim?.type === 'liftTemp') playTone(520, 0.08, 'triangle', 0.045);
+                else if (s.anim?.type === 'moveRightToLeft') playTone(640, 0.1, 'sine', 0.05);
+                else if (s.anim?.type === 'placeTemp') playTone(760, 0.12, 'sine', 0.055);
+                else if (s.isDone && stepIndex === steps.length - 1) playTone(880, 0.16, 'triangle', 0.06);
+                else playTone(360, 0.045, 'sine', 0.025);
+            }
+        }
+
+        /* =========================================================================
+           10. PLAYBACK ENGINE
+           ========================================================================= */
+        function stopPlayback() {
+            isPlaying = false;
+            if (playTimer) {
+                clearTimeout(playTimer);
+                playTimer = null;
+            }
+            el.playIcon.textContent = '▶';
+            el.playLabel.textContent = 'Start';
+        }
+
+        function scheduleNextTick() {
+            if (!isPlaying) return;
+            if (stepIndex >= steps.length - 1) {
+                stopPlayback();
+                return;
+            }
+            const currStep = steps[stepIndex];
+            const baseDelay = currStep?.anim ? 1050 : 620;
+            const delay = Math.max(180, Math.round(baseDelay / speedMultiplier));
+            playTimer = setTimeout(() => {
+                if (!isPlaying) return;
+                renderStep(stepIndex + 1, true);
+                scheduleNextTick();
+            }, delay);
+        }
+
+        function togglePlayback() {
+            if (isPlaying) {
+                stopPlayback();
+            } else {
+                if (stepIndex >= steps.length - 1) {
+                    renderStep(0, false);
+                }
+                isPlaying = true;
+                el.playIcon.textContent = '⏸';
+                el.playLabel.textContent = 'Stop';
+                scheduleNextTick();
+            }
+        }
+
+        /* =========================================================================
+           11. DATASET LOADER & VALIDATION
+           ========================================================================= */
+        function showError(msg) {
+            el.errorBanner.textContent = msg;
+            el.errorBanner.classList.remove('hidden');
+            setTimeout(() => el.errorBanner.classList.add('hidden'), 4200);
+        }
+
+        function loadDataset(arr, k, rightFlag) {
+            stopPlayback();
+            cancelActiveAnimations();
+            currentInputArr = [...arr];
+            currentInputK = k;
+            currentInputRight = Boolean(rightFlag);
+            el.customArrInput.value = arr.join(', ');
+            el.customKInput.value = k;
+            el.customRightInput.value = String(currentInputRight);
+            steps = generateSteps(currentInputArr, currentInputK, currentInputRight);
+            el.stepSlider.max = Math.max(0, steps.length - 1);
+            renderStep(0, false);
+        }
+
+        /* =========================================================================
+           12. EVENT LISTENERS
+           ========================================================================= */
+        el.btnReset.addEventListener('click', () => {
+            stopPlayback();
+            renderStep(0, true);
+        });
+
+        el.btnPrev.addEventListener('click', () => {
+            stopPlayback();
+            if (stepIndex > 0) renderStep(stepIndex - 1, true);
+        });
+
+        el.btnNext.addEventListener('click', () => {
+            stopPlayback();
+            if (stepIndex < steps.length - 1) renderStep(stepIndex + 1, true);
+        });
+
+        el.btnPlayPause.addEventListener('click', togglePlayback);
+
+        el.stepSlider.addEventListener('input', (e) => {
+            stopPlayback();
+            renderStep(parseInt(e.target.value, 10), false);
+        });
+
+        document.querySelectorAll('.speed-btn').forEach((btn) => {
+            btn.addEventListener('click', () => {
+                speedMultiplier = parseFloat(btn.dataset.speed);
+                document.querySelectorAll('.speed-btn').forEach((b) => b.classList.remove('glass-btn-active'));
+                btn.classList.add('glass-btn-active');
+            });
+        });
+
+        document.querySelectorAll('.view-btn').forEach((btn) => {
+            btn.addEventListener('click', () => {
+                viewMode = btn.dataset.view;
+                document.querySelectorAll('.view-btn').forEach((b) => b.classList.remove('glass-btn-active'));
+                btn.classList.add('glass-btn-active');
+                renderStep(stepIndex, false);
+            });
+        });
+
+        el.btnAudio.addEventListener('click', () => {
+            audioEnabled = !audioEnabled;
+            el.audioIcon.textContent = audioEnabled ? '🔊' : '🔇';
+        });
+
+        el.presetSelect.addEventListener('change', (e) => {
+            const p = PRESETS[parseInt(e.target.value, 10)];
+            if (p) loadDataset(p.arr, p.k, p.right);
+        });
+
+        el.btnLoadCustom.addEventListener('click', () => {
+            const rawArr = el.customArrInput.value.trim();
+            const parsedK = parseInt(el.customKInput.value, 10);
+            const parsedRight = el.customRightInput.value === 'true';
+
+            if (Number.isNaN(parsedK) || parsedK < 0) {
+                showError('Please enter a valid non-negative integer for k (k >= 0).');
+                return;
+            }
+
+            let parsedArr = [];
+            if (rawArr.length > 0) {
+                const tokens = rawArr.split(/[\s,]+/).filter(Boolean);
+                if (tokens.length > 12) {
+                    showError('Please enter at most 12 array elements so the glassy boxes & bars remain clear.');
+                    return;
+                }
+                for (const t of tokens) {
+                    const num = Number(t);
+                    if (!Number.isInteger(num) || num < -999 || num > 999) {
+                        showError(`Invalid integer "${t}". Use integers between -999 and 999.`);
+                        return;
+                    }
+                    parsedArr.push(num);
+                }
+            }
+            loadDataset(parsedArr, parsedK, parsedRight);
+        });
+
+        window.addEventListener('keydown', (e) => {
+            if (document.activeElement && ['INPUT', 'SELECT', 'TEXTAREA'].includes(document.activeElement.tagName)) {
+                return;
+            }
+            if (e.code === 'Space') {
+                e.preventDefault();
+                togglePlayback();
+            } else if (e.code === 'ArrowRight') {
+                e.preventDefault();
+                stopPlayback();
+                if (stepIndex < steps.length - 1) renderStep(stepIndex + 1, true);
+            } else if (e.code === 'ArrowLeft') {
+                e.preventDefault();
+                stopPlayback();
+                if (stepIndex > 0) renderStep(stepIndex - 1, true);
+            }
+        });
+
+        window.addEventListener('resize', () => {
+            if (steps.length) renderStep(stepIndex, false);
+        });
+
+        /* =========================================================================
+           13. BOOTSTRAP
+           ========================================================================= */
+        buildCodePanel();
+        loadDataset(PRESETS[0].arr, PRESETS[0].k, PRESETS[0].right);
+    </script>
+</body>
+</html>
